@@ -57,13 +57,8 @@ class _MatchScreenState extends State<MatchScreen> {
 
   void _onPotAllRack() {
     setState(() {
-      final newSet = <int>{};
-      if (_activeRackBalls.contains(0)) {
-        newSet.add(0);
-      } else if (_activeRackBalls.isNotEmpty) {
-        newSet.add(_activeRackBalls.first);
-      }
-      _activeRackBalls = newSet;
+      // Always keep ball 1 (index 0 = break ball) for consistency
+      _activeRackBalls = {0};
     });
   }
 
