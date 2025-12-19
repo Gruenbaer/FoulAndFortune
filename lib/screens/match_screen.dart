@@ -28,6 +28,18 @@ class _MatchScreenState extends State<MatchScreen> {
     _resetRack(15);
   }
 
+  @override
+  void didUpdateWidget(MatchScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync ball state after provider updates (e.g., undo)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<GameProvider>(context, listen: false);
+      if (_activeRackBalls.length != provider.ballsOnTable && _pendingPoints == 0) {
+        _resetRack(provider.ballsOnTable);
+      }
+    });
+  }
+
   void _resetRack(int count) {
     setState(() {
       _activeRackBalls = Set.from(Iterable.generate(count));
@@ -76,6 +88,14 @@ class _MatchScreenState extends State<MatchScreen> {
     final diff = _rackStartCount - _activeRackBalls.length;
     final currentRun = _pendingPoints + diff;
 
+    // Check for break foul (foul on first shot of rack)
+    final isBreakFoul = _foulCount > 0 && provider.inningHistory.isEmpty;
+    
+    if (isBreakFoul) {
+      _showBreakFoulDialog(context, provider);
+      return;
+    }
+
     provider.processTurn141(
       points: currentRun > 0 ? currentRun : 0,
       foulPoints: _foulCount,
@@ -101,6 +121,76 @@ class _MatchScreenState extends State<MatchScreen> {
         _rackStartCount = _activeRackBalls.length;
       });
     }
+  }
+
+  void _showBreakFoulDialog(BuildContext context, GameProvider provider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF7F1D1D),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.red, width: 2),
+          ),
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.warning_amber, color: Colors.amber, size: 64),
+              const SizedBox(height: 16),
+              const Text(
+                "BREAK FOUL",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "-2",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  // Apply -2 penalty
+                  provider.processTurn141(
+                    points: 0,
+                    foulPoints: 2,
+                    isSafety: false,
+                    shouldSwitchTurn: true,
+                    newBallsOnTable: _activeRackBalls.length,
+                  );
+                  
+                  setState(() {
+                    _foulCount = 0;
+                    _pendingPoints = 0;
+                    _isSafety = false;
+                  });
+                  
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                ),
+                child: const Text("OK", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -282,7 +372,7 @@ class _MatchScreenState extends State<MatchScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                (reRackNeeded ? provider.t('rack') : provider.t('accept')).toUpperCase(), 
+                                (reRackNeeded ? "RE-RACK" : provider.t('accept')).toUpperCase(), 
                                 style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)
                               ),
                               Text(
