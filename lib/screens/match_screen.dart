@@ -114,15 +114,6 @@ class _MatchScreenState extends State<MatchScreen> {
     final currentRun = _pendingPoints + diff;
     final reRackNeeded = _activeRackBalls.length == 1;
 
-    // Sync local rack state if provider's ballsOnTable changed externally (e.g. Undo)
-    if (_activeRackBalls.length != provider.ballsOnTable && _pendingPoints == 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _resetRack(provider.ballsOnTable);
-        }
-      });
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: SingleChildScrollView(
