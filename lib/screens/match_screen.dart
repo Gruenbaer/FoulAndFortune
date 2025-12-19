@@ -30,12 +30,15 @@ class _MatchScreenState extends State<MatchScreen> {
 
   int? _lastKnownBallCount;
 
-  void _resetRack(int count) {
-    setState(() {
-      _activeRackBalls = Set.from(Iterable.generate(count));
-      _rackStartCount = count;
-      _lastKnownBallCount = count;
-    });
+  void _resetRack(int count, {bool isUndoReset = false}) {
+    // Only reset ball positions on undo - otherwise keep existing balls stable
+    if (isUndoReset) {
+      setState(() {
+        _activeRackBalls = Set.from(Iterable.generate(count));
+        _rackStartCount = count;
+        _lastKnownBallCount = count;
+      });
+    }
   }
 
   void _toggleRackBall(int idx) {
@@ -198,7 +201,7 @@ class _MatchScreenState extends State<MatchScreen> {
         provider.ballsOnTable != _activeRackBalls.length) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _resetRack(provider.ballsOnTable);
+          _resetRack(provider.ballsOnTable, isUndoReset: true);
         }
       });
     }
