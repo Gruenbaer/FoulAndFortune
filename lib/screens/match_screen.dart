@@ -28,22 +28,13 @@ class _MatchScreenState extends State<MatchScreen> {
     _resetRack(15);
   }
 
-  @override
-  void didUpdateWidget(MatchScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Sync ball state after provider updates (e.g., undo)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<GameProvider>(context, listen: false);
-      if (_activeRackBalls.length != provider.ballsOnTable && _pendingPoints == 0) {
-        _resetRack(provider.ballsOnTable);
-      }
-    });
-  }
+  int? _lastKnownBallCount;
 
   void _resetRack(int count) {
     setState(() {
       _activeRackBalls = Set.from(Iterable.generate(count));
       _rackStartCount = count;
+      _lastKnownBallCount = count;
     });
   }
 
@@ -199,6 +190,18 @@ class _MatchScreenState extends State<MatchScreen> {
     final p1 = provider.player1;
     final p2 = provider.player2;
     final turn = provider.turn;
+    
+    // Sync ball count on undo (when provider's ballsOnTable changes externally)
+    if (_pendingPoints == 0 && 
+        _lastKnownBallCount != null && 
+        provider.ballsOnTable != _lastKnownBallCount &&
+        provider.ballsOnTable != _activeRackBalls.length) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _resetRack(provider.ballsOnTable);
+        }
+      });
+    }
     
     final diff = _rackStartCount - _activeRackBalls.length;
     final currentRun = _pendingPoints + diff;
