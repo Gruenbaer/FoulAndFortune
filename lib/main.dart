@@ -58,7 +58,7 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'FORTUNE 142',
+              'FORTUNE 14/2',
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.w900,
