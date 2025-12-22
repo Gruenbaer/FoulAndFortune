@@ -1,16 +1,91 @@
-# fortune142
+# Fortune 14/2 - Pool Scoring App
 
-A new Flutter project.
+A Flutter-based pool scoring application for Fortune 14/2 billiards.
 
-## Getting Started
+## 🎱 About
 
-This project is a starting point for a Flutter application.
+Fortune 14/2 is a scoring app designed for tracking pool games with custom rules, player statistics, achievements, and game history.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Development Setup
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Prerequisites
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This project uses **Puro** (Flutter version manager) instead of standard Flutter installation.
+
+- **Flutter SDK**: Managed via Puro
+- **Required Flutter Version**: 3.38.5 (stable)
+- **Dart SDK**: 3.10.4
+
+### Quick Start
+
+1. **Install Puro** (if not already installed):
+   ```bash
+   # Windows (via WinGet)
+   winget install puro
+   ```
+
+2. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Gruenbaer/fortune142
+   cd fortune142
+   ```
+
+3. **Set up Flutter environment**:
+   ```bash
+   puro use stable
+   puro flutter pub get
+   ```
+
+4. **Run the app**:
+   ```bash
+   puro flutter run
+   ```
+
+### Important: Using Puro
+
+Since this project uses Puro, **always prefix Flutter commands with `puro`**:
+
+| Standard Flutter | With Puro |
+|-----------------|-----------|
+| `flutter run` | `puro flutter run` |
+| `flutter analyze` | `puro flutter analyze` |
+| `flutter doctor` | `puro flutter doctor` |
+| `flutter pub get` | `puro flutter pub get` |
+| `flutter build apk` | `puro flutter build apk` |
+
+### Build Commands
+
+```bash
+# Android APK
+puro flutter build apk --release
+
+# Check for issues
+puro flutter analyze
+puro flutter doctor
+```
+
+## 📦 Dependencies
+
+Key dependencies are managed in `pubspec.yaml`:
+- `provider` - State management
+- `shared_preferences` - Local storage
+- `google_fonts` - Custom typography
+- `confetti` - Achievement animations
+- `audioplayers` - Sound effects
+
+## 🤖 AI Development Note
+
+**For Antigravity AI**: This project uses **Puro** for Flutter version management. When running Flutter commands, use `puro flutter` instead of `flutter`. The Puro environment is configured with `puro use stable` in the project directory.
+
+## 📱 Platforms
+
+- Android
+- iOS  
+- Windows
+- macOS
+- Linux
+- Web
+
+## 📄 License
+
+This project is private and not published.

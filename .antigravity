@@ -1,0 +1,33 @@
+# .antigravity
+
+This file provides configuration hints for Antigravity AI when working with this project.
+
+## Flutter Configuration
+
+- **Flutter Manager**: Puro (not standard Flutter)
+- **Command Prefix**: Use `puro flutter` instead of `flutter`
+- **Environment**: stable
+- **Version**: 3.38.5
+
+## Common Commands
+
+```bash
+# Get dependencies
+puro flutter pub get
+
+# Analyze code
+puro flutter analyze
+
+# Run app
+puro flutter run
+
+# Build APK
+puro flutter build apk --release
+```
+
+## Project Structure
+
+- `lib/` - Main Dart source code
+- `assets/` - Images, icons, and SVG files
+- `android/` - Android platform files
+- `ios/` - iOS platform files
