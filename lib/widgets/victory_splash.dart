@@ -7,6 +7,7 @@ class VictorySplash extends StatefulWidget {
   final Player winner;
   final Player loser;
   final int raceToScore;
+  final List<String> matchLog;
   final VoidCallback onNewGame;
   final VoidCallback onExit;
 
@@ -15,6 +16,7 @@ class VictorySplash extends StatefulWidget {
     required this.winner,
     required this.loser,
     required this.raceToScore,
+    required this.matchLog,
     required this.onNewGame,
     required this.onExit,
   });
@@ -106,114 +108,159 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Trophy Icon
-                    const Icon(
-                      Icons.emoji_events,
-                      size: 80,
-                      color: SteampunkTheme.amberGlow,
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Victory Text
-                    Text(
-                      'VICTORY!',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: SteampunkTheme.brassBright,
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          const Shadow(
-                            blurRadius: 10,
-                            color: SteampunkTheme.amberGlow,
-                          ),
-                        ],
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Trophy Icon
+                      const Icon(
+                        Icons.emoji_events,
+                        size: 64, // Reduced size
+                        color: SteampunkTheme.amberGlow,
                       ),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Winner Name
-                    Text(
-                      widget.winner.name.toUpperCase(),
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        color: SteampunkTheme.brassPrimary,
-                        fontSize: 32,
+                      
+                      const SizedBox(height: 12),
+                      
+                      // Victory Text
+                      Text(
+                        'VICTORY!',
+                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                          color: SteampunkTheme.brassBright,
+                          fontSize: 40, // Reduced
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            const Shadow(
+                              blurRadius: 10,
+                              color: SteampunkTheme.amberGlow,
+                            ),
+                          ],
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Winner Name
+                      Text(
+                        widget.winner.name.toUpperCase(),
+                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                          color: SteampunkTheme.brassPrimary,
+                          fontSize: 28, // Reduced
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
                     // Scoresheet
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: SteampunkTheme.brassDark,
-                          width: 2,
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: SteampunkTheme.brassDark,
+                            width: 2,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'FINAL SCORE',
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: SteampunkTheme.brassPrimary,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildScoreLine(widget.winner.name, widget.winner.score, isWinner: true),
+                            const SizedBox(height: 8),
+                            _buildScoreLine(widget.loser.name, widget.loser.score, isWinner: false),
+                            const SizedBox(height: 16),
+                            Divider(color: SteampunkTheme.brassDark),
+                            const SizedBox(height: 8),
+                            _buildStatLine('Innings', widget.winner.currentInning.toString(), widget.loser.currentInning.toString()),
+                            _buildStatLine('Saves', widget.winner.saves.toString(), widget.loser.saves.toString()),
+                            
+                            const SizedBox(height: 16),
+                            Divider(color: SteampunkTheme.brassDark),
+                            const SizedBox(height: 8),
+                            
+                            // Match Log Section
+                            Text(
+                              'MATCH LOG',
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                color: SteampunkTheme.brassPrimary,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              height: 150, // Increased height for readability
+                              decoration: BoxDecoration(
+                                  color: Colors.white, // White Background
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: Colors.grey),
+                              ),
+                              child: widget.matchLog.isEmpty 
+                                  ? const Center(child: Text('No moves recorded', style: TextStyle(color: Colors.black54)))
+                                  : ListView.builder(
+                                      padding: const EdgeInsets.all(4),
+                                      itemCount: widget.matchLog.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 2),
+                                          child: Text(
+                                            widget.matchLog[index],
+                                            style: const TextStyle(
+                                              color: Colors.black, // Black Text
+                                              fontSize: 14, // Readable font
+                                              fontFamily: 'Arial', 
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Column(
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Buttons
+                      Row(
                         children: [
-                          Text(
-                            'FINAL SCORE',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: SteampunkTheme.brassPrimary,
-                              letterSpacing: 2,
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: widget.onNewGame,
+                              icon: const Icon(Icons.replay),
+                              label: const Text('NEW GAME'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: SteampunkTheme.verdigris,
+                                foregroundColor: SteampunkTheme.leatherDark,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          _buildScoreLine(widget.winner.name, widget.winner.score, isWinner: true),
-                          const SizedBox(height: 8),
-                          _buildScoreLine(widget.loser.name, widget.loser.score, isWinner: false),
-                          const SizedBox(height: 16),
-                          Divider(color: SteampunkTheme.brassDark),
-                          const SizedBox(height: 8),
-                          _buildStatLine('Innings', widget.winner.currentInning.toString(), widget.loser.currentInning.toString()),
-                          _buildStatLine('Saves', widget.winner.saves.toString(), widget.loser.saves.toString()),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: widget.onExit,
+                              icon: const Icon(Icons.exit_to_app),
+                              label: const Text('EXIT'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: SteampunkTheme.brassPrimary,
+                                foregroundColor: SteampunkTheme.leatherDark,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: widget.onNewGame,
-                            icon: const Icon(Icons.replay),
-                            label: const Text('NEW GAME'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: SteampunkTheme.verdigris,
-                              foregroundColor: SteampunkTheme.leatherDark,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: widget.onExit,
-                            icon: const Icon(Icons.exit_to_app),
-                            label: const Text('EXIT'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: SteampunkTheme.brassPrimary,
-                              foregroundColor: SteampunkTheme.leatherDark,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

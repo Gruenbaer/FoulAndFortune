@@ -6,12 +6,14 @@ import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
 import 'models/game_settings.dart';
 import 'l10n/app_localizations.dart';
-import 'l10n/app_localizations.dart';
 import 'theme/steampunk_theme.dart';
+
+import 'widgets/feedback_wrapper.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -88,7 +90,9 @@ class _MyAppState extends State<MyApp> {
             supportedLocales: AppLocalizations.supportedLocales,
             locale: Locale(settings.languageCode),
             
-            // Theme
+            // Global Overlay Wrapper (Feedback Chat)
+            builder: (context, child) => FeedbackWrapper(child: child),
+            
             // Theme
             theme: SteampunkTheme.themeData,
             darkTheme: SteampunkTheme.themeData,

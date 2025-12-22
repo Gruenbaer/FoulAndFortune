@@ -5,6 +5,8 @@ import '../models/achievement_manager.dart';
 import '../models/achievement.dart';
 import '../widgets/achievement_badge.dart';
 import '../l10n/app_localizations.dart';
+import '../services/game_history_service.dart';
+import '../models/game_record.dart';
 
 class PlayerProfileScreen extends StatefulWidget {
   final Player player;
@@ -21,11 +23,48 @@ class PlayerProfileScreen extends StatefulWidget {
 class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
   late Player _player;
   final PlayerService _playerService = PlayerService();
+  final GameHistoryService _historyService = GameHistoryService();
+  
+  // Rivalry Data: Opponent Name -> {games, wins, losses}
+  Map<String, Map<String, int>> _rivalryStats = {};
+  bool _isLoadingRivalry = true;
 
   @override
   void initState() {
     super.initState();
     _player = widget.player;
+    _loadRivalryStats();
+  }
+
+  Future<void> _loadRivalryStats() async {
+    final allGames = await _historyService.getCompletedGames();
+    final playerGames = allGames.where((g) => 
+      g.player1Name == _player.name || g.player2Name == _player.name
+    ).toList();
+
+    final stats = <String, Map<String, int>>{};
+
+    for (var game in playerGames) {
+      final isP1 = game.player1Name == _player.name;
+      final opponent = isP1 ? game.player2Name : game.player1Name;
+      final isWinner = game.winner == _player.name;
+
+      if (!stats.containsKey(opponent)) {
+        stats[opponent] = {'games': 0, 'wins': 0};
+      }
+      
+      stats[opponent]!['games'] = (stats[opponent]!['games'] ?? 0) + 1;
+      if (isWinner) {
+        stats[opponent]!['wins'] = (stats[opponent]!['wins'] ?? 0) + 1;
+      }
+    }
+    
+    if (mounted) {
+      setState(() {
+        _rivalryStats = stats;
+        _isLoadingRivalry = false;
+      });
+    }
   }
 
   Future<void> _editPlayerName() async {
@@ -237,7 +276,84 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
             ],
           ),
 
+          const SizedBox(height: 12),
+
+          // NEW STATS: Highest Run & General Average
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  l10n.translate('highestRun') ?? 'Highest Run (HR)',
+                  _player.highestRun.toString(),
+                  Icons.star,
+                  Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  l10n.translate('generalAverage') ?? 'Avg Pots (GD)',
+                  _player.generalAverage.toStringAsFixed(2),
+                  Icons.show_chart,
+                  Colors.purple,
+                ),
+              ),
+            ],
+          ),
+
           const SizedBox(height: 32),
+
+          // RIVALRY SECTION (Head-to-Head)
+          if (_rivalryStats.isNotEmpty) ...[
+            Text(
+              l10n.translate('rivalryHistory') ?? 'Head-to-Head',
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _rivalryStats.length,
+              itemBuilder: (context, index) {
+                final opponentName = _rivalryStats.keys.elementAt(index);
+                final stats = _rivalryStats[opponentName]!;
+                final games = stats['games'] ?? 0;
+                final wins = stats['wins'] ?? 0;
+                final winRate = games > 0 ? (wins / games * 100).toStringAsFixed(1) : '0.0';
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.blueGrey,
+                      child: Text(opponentName[0].toUpperCase(), style: const TextStyle(color: Colors.white)),
+                    ),
+                    title: Text('vs $opponentName'),
+                    subtitle: Text('${l10n.games}: $games  •  ${l10n.gamesWon}: $wins'),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$winRate%', 
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold, 
+                            color: (double.tryParse(winRate) ?? 0) > 50 ? Colors.green : Colors.red,
+                            fontSize: 16
+                          ),
+                        ),
+                        Text(l10n.winRate, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+          ],
 
           // Achievements Section
           Row(
@@ -312,6 +428,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         AchievementBadge(
+                          id: achievement.id,
                           emoji: achievement.emoji,
                           isUnlocked: true,
                           isEasterEgg: achievement.isEasterEgg,
@@ -379,6 +496,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             AchievementBadge(
+              id: achievement.id,
               emoji: achievement.emoji,
               isUnlocked: true,
               isEasterEgg: achievement.isEasterEgg,

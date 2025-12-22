@@ -105,7 +105,16 @@ class AppLocalizations {
       'howToUnlock': 'Wie man es freischaltet',
       'unlockedBy': 'Freigeschaltet von',
       'unlockedOn': 'Freigeschaltet am',
-      'secretAchievement': 'Dies ist ein geheimes Easter Egg! Finde heraus, wie man es freischaltet! 🤫',
+      'secretAchievement': 'Dies ist ein geheimes Easter Egg!',
+      
+      // Achievement Specifics (Easter Eggs)
+      'vinzend_title': 'Lord Vinzend the 13th',
+      'vinzend_locked': '13 ist die magische Zahl. Nur wo?', // Hint
+      'vinzend_desc': 'Du hast 13 Mal auf die 13 gedrückt, ohne auch nur eine Kugel gesenkt zu haben. Musst Du Zeit haben...',
+      
+      'lucky7_title': 'Glückszahl 7',
+      'lucky7_locked': 'Die Sieben scheint dich zu verfolgen...', // Hint
+      'lucky7_desc': 'Die 7 ist deine Lieblingskugel! Du hast sie in 7 aufeinanderfolgenden Aufnahmen versenkt.',
       
       // Game Screen
       'exitGame': 'Spiel beenden?',
@@ -244,7 +253,16 @@ class AppLocalizations {
       'howToUnlock': 'How to unlock',
       'unlockedBy': 'Unlocked by',
       'unlockedOn': 'Unlocked on',
-      'secretAchievement': 'This is a secret Easter Egg! Find out how to unlock it! 🤫',
+      'secretAchievement': 'This is a secret Easter Egg!',
+      
+      // Achievement Specifics (Easter Eggs)
+      'vinzend_title': 'Lord Vinzend the 13th',
+      'vinzend_locked': '13 is the magical number. Just where?', // Hint
+      'vinzend_desc': 'You tapped the 13 ball 13 times without sinking a single ball. You must have time...',
+      
+      'lucky7_title': 'Lucky Number 7',
+      'lucky7_locked': 'Seven seems to follow you...', // Hint
+      'lucky7_desc': 'The 7 is your favorite ball! You sank it in 7 consecutive innings.',
       
       // Game Screen
       'exitGame': 'Exit Game?',
@@ -382,6 +400,15 @@ class AppLocalizations {
   String get unlockedBy => translate('unlockedBy');
   String get unlockedOn => translate('unlockedOn');
   String get secretAchievement => translate('secretAchievement');
+  
+  // Achievement Getters
+  String get vinzendTitle => translate('vinzend_title');
+  String get vinzendLocked => translate('vinzend_locked');
+  String get vinzendDesc => translate('vinzend_desc');
+  
+  String get lucky7Title => translate('lucky7_title');
+  String get lucky7Locked => translate('lucky7_locked');
+  String get lucky7Desc => translate('lucky7_desc');
   
   String get exitGame => translate('exitGame');
   String get exitGameMessage => translate('exitGameMessage');

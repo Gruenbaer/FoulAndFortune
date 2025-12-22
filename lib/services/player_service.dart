@@ -79,6 +79,10 @@ class Player {
   // Calculated statistics
   double get averagePointsPerGame =>
       gamesPlayed > 0 ? totalPoints / gamesPlayed : 0.0;
+  
+  // General Average (GD) / Points Per Inning
+  double get generalAverage => 
+      totalInnings > 0 ? totalPoints / totalInnings : 0.0;
 
   double get averageInningsPerGame =>
       gamesPlayed > 0 ? totalInnings / gamesPlayed : 0.0;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game_state.dart';
+import '../models/player.dart'; // Explicit import needed after aliasing player_service
 import '../models/game_settings.dart';
 import '../models/achievement_manager.dart';
 import '../models/achievement.dart';
@@ -17,6 +18,8 @@ import 'details_screen.dart';
 import '../theme/steampunk_theme.dart';
 import '../widgets/steampunk_widgets.dart';
 import '../widgets/victory_splash.dart';
+import 'package:google_fonts/google_fonts.dart'; // For Arial alternative (Lato/Roboto) if Arial not available, but user said Arial.
+import '../services/player_service.dart' as stats; // For stats fetching
 
 class GameScreen extends StatefulWidget {
   final GameSettings settings;
@@ -41,6 +44,26 @@ class _GameScreenState extends State<GameScreen> {
   late String _gameId; // Unique ID for this game
   DateTime? _gameStartTime; // Track when game started
   bool _isCompletedSaved = false;
+  
+  // Historical stats for display
+  stats.Player? _p1Stats;
+  stats.Player? _p2Stats;
+
+  Future<void> _loadPlayerStats() async {
+    final gameState = Provider.of<GameState>(context, listen: false);
+    final service = stats.PlayerService();
+    // Fetch persistent data for P1 and P2
+    // We match by Name since that's what we have
+    final p1 = await service.getPlayerByName(gameState.players[0].name);
+    final p2 = await service.getPlayerByName(gameState.players[1].name);
+    
+    if (mounted) {
+      setState(() {
+        _p1Stats = p1;
+        _p2Stats = p2;
+      });
+    }
+  }
 
   Future<void> _saveInProgressGame(GameState gameState) async {
     // Check if game is completed (score >= raceToScore)
@@ -71,16 +94,20 @@ class _GameScreenState extends State<GameScreen> {
     
     await _historyService.saveGame(record);
   }
-
+  
+  // ... _saveCompletedGame restored:
   Future<void> _saveCompletedGame(GameState gameState) async {
-    if (_isCompletedSaved || _gameStartTime == null) return;
-    
+    // 1. Mark as saved immediately to prevent double-save
+    if (_isCompletedSaved) return;
+    _isCompletedSaved = true;
+
     final p1 = gameState.players[0];
     final p2 = gameState.players[1];
-    final winner = (p1.score >= gameState.raceToScore) ? p1 : (p2.score >= gameState.raceToScore ? p2 : null);
-    
-    // Only save if we actually have a winner
-    if (winner == null) return;
+    final winner = gameState.winner; 
+    // If winner is null for some reason, determine by score
+    final effectiveWinner = winner ?? ((p1.score >= gameState.raceToScore) ? p1 : (p2.score >= gameState.raceToScore ? p2 : null));
+
+    if (effectiveWinner == null) return; // Should not happen if game is over
 
     final record = GameRecord(
       id: _gameId,
@@ -88,19 +115,50 @@ class _GameScreenState extends State<GameScreen> {
       player2Name: p2.name,
       player1Score: p1.score,
       player2Score: p2.score,
-      startTime: _gameStartTime!,
+      startTime: _gameStartTime ?? DateTime.now(), // Fallback
       endTime: DateTime.now(),
       isCompleted: true,
-      winner: winner.name,
       raceToScore: gameState.raceToScore,
+      winner: effectiveWinner.name,
       player1Innings: p1.currentInning,
       player2Innings: p2.currentInning,
-      player1Fouls: 0, // Not exposed in Player model yet
-      player2Fouls: 0, // Not exposed in Player model yet, needs GameState method
+      player1Fouls: 0, 
+      player2Fouls: 0, 
+      activeBalls: [], // Cleared
+      player1IsActive: false,
+      snapshot: null, // Don't save snapshot for completed game
     );
-    
+
+    // Add matchLog if GameRecord supports it (it appeared missing in previous step view of GameRecord, let's omit if not there)
+    // Looking at GameRecord file view, there is NO matchLog field. Removing it.
+
     await _historyService.saveGame(record);
-    _isCompletedSaved = true;
+    
+    // 2. Update Persistent Player Stats
+    try {
+      final playerService = stats.PlayerService(); 
+      
+      // Helper to update a single player
+      Future<void> updatePlayerStats(Player gamePlayer, bool isWinner) async {
+        final existingPlayer = await playerService.getPlayerByName(gamePlayer.name);
+        if (existingPlayer != null) {
+          // Increment stats
+          existingPlayer.gamesPlayed += 1;
+          if (isWinner) existingPlayer.gamesWon += 1;
+          existingPlayer.totalPoints += gamePlayer.score;
+          existingPlayer.totalInnings += gamePlayer.currentInning;
+          existingPlayer.totalSaves += gamePlayer.saves;
+          
+          await playerService.updatePlayer(existingPlayer);
+        }
+      }
+
+      await updatePlayerStats(p1, p1 == effectiveWinner);
+      await updatePlayerStats(p2, p2 == effectiveWinner);
+      
+    } catch (e) {
+      print('Error updating player stats: $e');
+    }
   }
 
   @override
@@ -111,21 +169,25 @@ class _GameScreenState extends State<GameScreen> {
       _gameId = widget.resumeGame!.id;
       _gameStartTime = widget.resumeGame!.startTime;
       
-      // Load state after frame
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final gameState = Provider.of<GameState>(context, listen: false);
         if (widget.resumeGame!.snapshot != null) {
            gameState.loadFromJson(widget.resumeGame!.snapshot!);
         }
+        _loadPlayerStats();
       });
     } else {
       _gameId = DateTime.now().millisecondsSinceEpoch.toString();
       _gameStartTime = DateTime.now();
+      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+         _loadPlayerStats();
+      });
     }
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final achievementManager = Provider.of<AchievementManager>(context, listen: false);
-      achievementManager.onAchievementUnlocked = (achievement) {
+      achievementManager?.onAchievementUnlocked = (achievement) {
         setState(() {
           _achievementToShow = achievement;
         });
@@ -135,12 +197,18 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void deactivate() {
+    if (!mounted) return; // Guard
     // Save game on exit
-    final gameState = Provider.of<GameState>(context, listen: false);
-    if (!gameState.gameStarted) {
-       // Maybe delete empty game?
-    } else {
-       _saveInProgressGame(gameState);
+    // ... logic same ... 
+    try {
+      final gameState = Provider.of<GameState>(context, listen: false);
+        if (!gameState.gameStarted) {
+           // Maybe delete empty game?
+        } else {
+           _saveInProgressGame(gameState);
+        }
+    } catch (e) {
+      // Ignore provider issues on dispose
     }
     super.deactivate();
   }
@@ -240,11 +308,17 @@ class _GameScreenState extends State<GameScreen> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu),
-                  color: SteampunkTheme.brassPrimary,
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
+                builder: (context) {
+                  // Hide hamburger if keyboard is open to avoid overlay/clutter
+                  final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+                  if (isKeyboardOpen) return const SizedBox.shrink();
+                  
+                  return IconButton(
+                    icon: const Icon(Icons.menu),
+                    color: SteampunkTheme.brassPrimary,
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  );
+                }
               ),
               title: Text(
                 'Fortune 14/2',
@@ -345,67 +419,90 @@ class _GameScreenState extends State<GameScreen> {
 
                     return Column(
                       children: [
-                        // Top: Scoreboard Area
+                        // 1. Players & Scores Header
                         Container(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                          decoration: BoxDecoration(
-                            border: Border(bottom: BorderSide(color: SteampunkTheme.brassDark, width: 2)),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.black54, Colors.transparent],
-                            ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: const BoxDecoration(
+                            color: SteampunkTheme.mahoganyDark,
+                            border: Border(bottom: BorderSide(color: SteampunkTheme.brassPrimary, width: 2)),
                           ),
-                          child: Column(
+                          child: Row(
                             children: [
-                              Text(
-                                'RACE TO ${gameState.raceToScore}',
-                                style: SteampunkTheme.themeData.textTheme.labelLarge?.copyWith(
-                                  color: SteampunkTheme.brassPrimary,
-                                  letterSpacing: 2.0,
-                                ),
+                              Expanded(
+                                child: PlayerPlaque(player: gameState.players[0], raceToScore: gameState.raceToScore, isLeft: true),
                               ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: PlayerPlaque(
-                                      player: gameState.players[0],
-                                      raceToScore: gameState.raceToScore,
-                                      isLeft: true,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: PlayerPlaque(
-                                      player: gameState.players[1],
-                                      raceToScore: gameState.raceToScore,
-                                      isLeft: false,
-                                    ),
-                                  ),
-                                ],
+                              // Switch Button or Spacer
+                              if (!gameState.gameStarted && gameState.matchLog.isEmpty)
+                                IconButton(
+                                  icon: const Icon(Icons.swap_horiz, size: 28),
+                                  color: SteampunkTheme.amberGlow,
+                                  onPressed: gameState.swapStartingPlayer,
+                                  tooltip: 'Swap Sides',
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                )
+                              else
+                                const SizedBox(width: 12),
+                              Expanded(
+                                child: PlayerPlaque(player: gameState.players[1], raceToScore: gameState.raceToScore, isLeft: false),
                               ),
                             ],
                           ),
                         ),
 
-                        // Notification / Action Log
-                        if (gameState.lastAction != null)
+                        // 2. Historical Stats Row (Avg | Highest)
+                        if (_p1Stats != null && _p2Stats != null)
                           Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                            color: Colors.black38,
-                            child: Text(
-                              gameState.lastAction!.toUpperCase(),
-                              style: SteampunkTheme.themeData.textTheme.bodySmall?.copyWith(
-                                color: SteampunkTheme.brassBright,
-                                fontStyle: FontStyle.italic,
-                              ),
-                              textAlign: TextAlign.center,
+                            color: Colors.black87,
+                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                            child: Row(
+                              children: [
+                                // P1 Stats
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _buildStatItem('GD', _p1Stats!.generalAverage.toStringAsFixed(2)),
+                                      _buildStatItem('HR', '${_p1Stats!.highestRun}'),
+                                    ],
+                                  ),
+                                ),
+                                Container(width: 2, height: 24, color: SteampunkTheme.brassDark), // Divider
+                                // P2 Stats
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _buildStatItem('GD', _p2Stats!.generalAverage.toStringAsFixed(2)),
+                                      _buildStatItem('HR', '${_p2Stats!.highestRun}'),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 
-                        // Ball Rack
+                        // 3. Score Sheet (Match Log) - Removed per user request
+                        // It is now available in "Details" (Stats Icon) and Victory Screen.
+
+                        // 4. Notification / Last Action (Optional Overlay or smaller)
+                        if (gameState.lastAction != null)
+                           Container(
+                              width: double.infinity,
+                              color: SteampunkTheme.brassPrimary,
+                              padding: const EdgeInsets.all(4),
+                              child: Text(
+                                gameState.lastAction!.toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                           ),
+
+                        // 5. Ball Rack (Expanded to fill remaining space)
                         Expanded(
                           child: Stack(
                             alignment: Alignment.center,
@@ -418,7 +515,7 @@ class _GameScreenState extends State<GameScreen> {
                               // The Rack
                               Center(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(24.0),
+                                  padding: const EdgeInsets.all(16.0), // Reduced padding
                                   child: FittedBox(
                                     fit: BoxFit.contain,
                                     child: Column(
@@ -455,21 +552,34 @@ class _GameScreenState extends State<GameScreen> {
                                   onPressed: gameState.gameOver ? () {} : () {
                                      FoulMode next;
                                      switch (gameState.foulMode) {
-                                       case FoulMode.none: next = FoulMode.normal; break;
-                                       case FoulMode.normal: next = FoulMode.severe; break;
-                                       case FoulMode.severe: next = FoulMode.none; break;
+                                       case FoulMode.none: 
+                                         next = FoulMode.normal; 
+                                         break;
+                                       case FoulMode.normal: 
+                                         // severe (Break Foul) only allowed in Break Sequence
+                                         next = gameState.canBreakFoul ? FoulMode.severe : FoulMode.none; 
+                                         break;
+                                       case FoulMode.severe: 
+                                         next = FoulMode.none; 
+                                         break;
                                      }
                                      gameState.setFoulMode(next);
                                   },
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              // Safe Button
+                              // Safe Button (Toggle)
                               Expanded(
                                 child: SteampunkButton(
-                                  label: 'SAFE',
-                                  icon: Icons.shield,
+                                  label: gameState.isSafeMode ? 'CONFIRM SAFE' : 'SAFE',
+                                  icon: gameState.isSafeMode ? Icons.shield_moon : Icons.shield,
                                   onPressed: gameState.gameOver ? () {} : gameState.onSafe,
+                                  // Green gradient when Active (Safe Mode ON)
+                                  backgroundGradientColors: gameState.isSafeMode 
+                                    ? const [Color(0xFF66BB6A), Color(0xFF2E7D32)] // Green/Dark Green
+                                    : null,
+                                  // Icon/Text color changes too? Maybe white on green?
+                                  textColor: gameState.isSafeMode ? Colors.white : null,
                                 ),
                               ),
                             ],
@@ -503,6 +613,7 @@ class _GameScreenState extends State<GameScreen> {
             winner: gameState.winner!,
             loser: gameState.players.firstWhere((p) => p != gameState.winner),
             raceToScore: gameState.raceToScore,
+            matchLog: gameState.matchLog, // Pass the log
             onNewGame: () {
               gameState.resetGame();
             },
@@ -622,8 +733,6 @@ class _GameScreenState extends State<GameScreen> {
       }
     }
 
-    // A stack that contains ALL rack balls + Cue Ball
-
     // A stack that contains ALL rack balls + Cue Ball + Hint Layer
     Widget rackStack = SizedBox(
       width: rackWidth,
@@ -696,6 +805,33 @@ class _GameScreenState extends State<GameScreen> {
       const SizedBox(height: 120),
       rackStack,
     ];
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: SteampunkTheme.brassPrimary,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Courier', // Monospace for stats looks cool/techy
+          ),
+        ),
+      ],
+    );
   }
 
   void _show3FoulPopup(BuildContext context, GameState gameState) {

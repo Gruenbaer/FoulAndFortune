@@ -30,6 +30,7 @@ class SteampunkButton extends StatefulWidget {
   final VoidCallback onPressed;
   final IconData? icon;
   final Color? textColor;
+  final List<Color>? backgroundGradientColors;
 
   const SteampunkButton({
     super.key,
@@ -37,6 +38,7 @@ class SteampunkButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.textColor,
+    this.backgroundGradientColors,
   });
 
   @override
@@ -85,11 +87,11 @@ class _SteampunkButtonState extends State<SteampunkButton> with SingleTickerProv
               margin: const EdgeInsets.all(12), // Space for the brass border
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               decoration: BoxDecoration(
-                // Cream/beige background like reference
-                gradient: const LinearGradient(
+                // Cream/beige background like reference, or custom
+                gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: widget.backgroundGradientColors ?? const [
                     Color(0xFFF5E6D3), // Light cream
                     Color(0xFFE8D4B8), // Darker cream/beige
                   ],
@@ -112,38 +114,36 @@ class _SteampunkButtonState extends State<SteampunkButton> with SingleTickerProv
                   if (widget.icon != null) ...[
                     Icon(
                       widget.icon, 
-                      color: SteampunkTheme.leatherDark,
+                      color: widget.textColor ?? SteampunkTheme.leatherDark,
                       size: 24,
                     ),
                     const SizedBox(width: 12),
                   ],
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        widget.label.toUpperCase(),
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: widget.textColor ?? SteampunkTheme.leatherDark,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                          shadows: [
-                            // Embossed effect
-                            Shadow(
-                              color: Colors.white.withOpacity(0.5),
-                              offset: const Offset(0, 1),
-                              blurRadius: 1,
-                            ),
-                            Shadow(
-                              color: Colors.black.withOpacity(0.3),
-                              offset: const Offset(0, -1),
-                              blurRadius: 1,
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
+                  Expanded(
+                    child: Text(
+                      widget.label.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: widget.textColor ?? SteampunkTheme.leatherDark,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        shadows: [
+                          // Embossed effect
+                          Shadow(
+                            color: Colors.white.withOpacity(0.5),
+                            offset: const Offset(0, 1),
+                            blurRadius: 1,
+                          ),
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: const Offset(0, -1),
+                            blurRadius: 1,
+                          ),
+                        ],
                       ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

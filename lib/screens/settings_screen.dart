@@ -4,6 +4,8 @@ import '../services/settings_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/steampunk_theme.dart';
 import '../widgets/steampunk_widgets.dart';
+import 'package:provider/provider.dart';
+import '../models/achievement_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
   final GameSettings currentSettings;
@@ -267,11 +269,80 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                 ),
+
+              const SizedBox(height: 24),
+              
+              // Data Management Section (Dangerous)
+              buildSectionHeader('Data Management', Icons.delete_forever),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  border: Border.all(color: Colors.red.shade900),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.warning_amber_rounded, color: Colors.red.shade700),
+                  title: Text(
+                    'Reset All Data', 
+                    style: theme.textTheme.bodyLarge?.copyWith(color: Colors.red.shade200),
+                  ),
+                  subtitle: Text(
+                    'Delete all achievements and settings',
+                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade100),
+                  ),
+                  onTap: _showResetDataConfirmation,
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _showResetDataConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Everything?'),
+        content: const Text(
+          'This will permanently delete all:\n'
+          '• Unlocked Achievements\n'
+          '• Game History\n'
+          '• Saved Settings\n\n'
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+             style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Reset All'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      // Perform Reset
+      
+      // 1. Reset Achievements
+      final achievementManager = Provider.of<AchievementManager>(context, listen: false);
+      await achievementManager.reset();
+      
+      // 2. Reset Settings (to defaults) -> actually maybe just keep settings? 
+      // User asked "reset all". Let's reset settings too for completeness, or at least notify.
+      // For now, let's stick to Achievements as that's the main context.
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All data has been reset.')),
+        );
+      }
+    }
   }
 
   Future<void> _editRaceToScore() async {

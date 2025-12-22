@@ -70,30 +70,55 @@ class DetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
-                  color: Colors.blueGrey[50],
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  color: Colors.grey[300],
                   child: const Text(
-                    'Score Sheet (Log)',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    'SCORE SHEET',
+                    style: TextStyle(
+                      fontFamily: 'Arial', // Consistent with user request
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12, // Compact
+                      color: Colors.black87,
+                      letterSpacing: 1.2,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
                 Expanded(
                   child: gameState.matchLog.isEmpty
-                    ? const Center(child: Text('No history yet.'))
-                    : ListView.separated(
-                        itemCount: gameState.matchLog.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            dense: true,
-                            leading: Text(
-                              '#${gameState.matchLog.length - index}', 
-                              style: TextStyle(color: Colors.grey[600], fontSize: 12)
-                            ),
-                            title: Text(gameState.matchLog[index]),
-                          );
-                        },
+                    ? const Center(child: Text('No history yet.', style: TextStyle(fontFamily: 'Arial')))
+                    : Container(
+                        color: Colors.white, // Pure white background
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          itemCount: gameState.matchLog.length,
+                          separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.grey),
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '#${gameState.matchLog.length - index}', 
+                                    style: TextStyle(color: Colors.grey[600], fontSize: 12, fontFamily: 'Arial')
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      gameState.matchLog[index],
+                                      style: const TextStyle(
+                                        fontFamily: 'Arial',
+                                        fontSize: 14,
+                                        color: Colors.black, // High contrast
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                 ),
               ],
