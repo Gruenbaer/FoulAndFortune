@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import '../secrets.dart'; // Imports kGeminiApiKey
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import '../secrets.dart'; // Imports kGeminiApiKey and SMTP config
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION
@@ -28,18 +29,20 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
   bool _isTyping = false;
   bool _useFallback = true;
   String? _feedbackType; // Persists for email summary
+  String? _userName; // User's name for feedback tracking
+  String? _synopsis; // AI-generated synopsis of the discussion
 
   @override
   void initState() {
     super.initState();
     _initAI();
     
-    // Initial Greeting
+    // Initial Greeting - Ask for name first
     Future.delayed(const Duration(milliseconds: 500), () {
       if (_useFallback) {
-         _addBotMessage("Hello! I'm the Fortune QA Bot (Basic Mode). 🤖\n\nPlease add an API Key to enable my Brain!\n\nFor now, just tell me: Is this a **Bug** 🐞 or a **Feature** ✨?");
+         _addBotMessage("Hallo! Ich bin der Fortune QA Bot (Basis-Modus). 🤖\n\nBitte füge einen API-Schlüssel hinzu, um mein Gehirn zu aktivieren!\n\nZuerst: Wie heißt du?");
       } else {
-         _addBotMessage("Hello! I'm the Fortune QA Assistant. 🤖\n\nI can help you capture bugs or detail new features. What's on your mind?");
+         _addBotMessage("Hallo! Ich bin der Fortune QA-Assistent. 🤖\n\nIch kann dir helfen, Fehler zu melden oder neue Funktionen zu beschreiben.\n\nZuerst: Wie heißt du?");
       }
     });
   }
@@ -50,14 +53,19 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
         model: 'gemini-1.5-flash',
         apiKey: kGeminiApiKey,
         systemInstruction: Content.system(
-          "You are the QA Assistant for the 'Fortune 14/2' pool scoring app. "
-          "Your role is STRICTLY to help users report bugs or suggest features. "
-          "1. Ask clarifying questions to understand the issue or idea completely. "
-          "2. Do NOT engage in general conversation, storytelling, creative writing, or code generation. "
-          "3. If asked for code or unrelated topics, refuse politely. "
-          "4. Once you have enough info, summarize it and ask the user to 'Send Email'. "
-          "5. Format your summary as: 'Type: [Bug/Feature]\nSummary: [Details]'. "
-          "Be concise and professional."
+          "Du bist der QA-Assistent für die 'Fortune 14/2' Pool-Scoring-App. "
+          "Deine Rolle ist es AUSSCHLIESSLICH, Benutzern zu helfen, Fehler zu melden oder Funktionen vorzuschlagen. "
+          "1. DISKUTIERE das Problem oder die Feature-Anfrage gründlich mit dem Benutzer. Stelle klärende Fragen. "
+          "2. FINDE GEMEINSAM eine Lösung oder einen klaren Plan für die Umsetzung. "
+          "3. Führe KEINE allgemeinen Gespräche, Geschichtenerzählen, kreatives Schreiben oder Code-Generierung durch. "
+          "4. Wenn nach Code oder nicht verwandten Themen gefragt wird, lehne höflich ab. "
+          "5. Sobald ihr eine Lösung/einen Plan habt, erstelle eine ZUSAMMENFASSUNG im folgenden Format:\n"
+          "   ZUSAMMENFASSUNG:\n"
+          "   Typ: [Bug/Feature]\n"
+          "   Problem/Anfrage: [Kurze Beschreibung]\n"
+          "   Lösung/Plan: [Was wurde entschieden]\n\n"
+          "   Dann bitte den Benutzer, auf 'E-Mail senden' zu klicken. "
+          "Sei prägnant und professionell. Sprich immer auf Deutsch."
         ),
       );
       _chatSession = _model!.startChat();
@@ -102,6 +110,20 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
     _addUserMessage(text);
     setState(() => _isTyping = true);
 
+    // Check if we need to collect the user's name first
+    if (_userName == null) {
+      setState(() {
+        _userName = text.trim();
+        _isTyping = false;
+      });
+      if (_useFallback) {
+        _addBotMessage("Schön, dich kennenzulernen, $_userName! 👋\n\nIst dies ein **Bug** 🐞 oder eine **Feature-Anfrage** ✨?");
+      } else {
+        _addBotMessage("Schön, dich kennenzulernen, $_userName! 👋\n\nWas möchtest du melden?");
+      }
+      return;
+    }
+
     if (_useFallback) {
       // Fallback Logic (Old Implementation)
       await Future.delayed(const Duration(milliseconds: 600));
@@ -110,18 +132,23 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
       // LLM Logic
       try {
         final response = await _chatSession!.sendMessage(Content.text(text));
-        final responseText = response.text ?? "I'm having trouble thinking right now.";
+        final responseText = response.text ?? "Ich habe gerade Schwierigkeiten beim Denken.";
         
-        // Simple heuristic to detect if bot is ready to send
-        if (responseText.toLowerCase().contains("summary:") || responseText.toLowerCase().contains("send email")) {
-           // Extract type for subject line if possible
-           if (responseText.toLowerCase().contains("bug")) _feedbackType = "Bug Report";
-           else if (responseText.toLowerCase().contains("feature")) _feedbackType = "Feature Request";
+        // Check if bot provided a summary
+        if (responseText.toUpperCase().contains("ZUSAMMENFASSUNG:")) {
+           // Extract the synopsis
+           _synopsis = responseText;
+           // Extract type for subject line
+           if (responseText.toLowerCase().contains("typ: bug") || responseText.toLowerCase().contains("typ: fehler")) {
+             _feedbackType = "Bug";
+           } else if (responseText.toLowerCase().contains("typ: feature") || responseText.toLowerCase().contains("typ: funktion")) {
+             _feedbackType = "Feature";
+           }
         }
         
         _addBotMessage(responseText);
       } catch (e) {
-        _addBotMessage("Error connecting to AI brain. Please try again. ($e)");
+        _addBotMessage("Fehler beim Verbinden mit dem KI-Gehirn. Bitte versuche es erneut. ($e)");
       }
     }
   }
@@ -131,53 +158,82 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
   void _processFallbackLogic(String input) {
     final lower = input.toLowerCase();
     if (_fallbackStep == 0) {
-      if (lower.contains('bug')) { _feedbackType = 'Bug'; _fallbackStep = 1; _addBotMessage("Oh no! Describe the bug."); }
-      else if (lower.contains('feature')) { _feedbackType = 'Feature'; _fallbackStep = 1; _addBotMessage("Cool! Describe the feature."); }
-      else { _addBotMessage("Please say 'Bug' or 'Feature'."); }
+      if (lower.contains('bug') || lower.contains('fehler')) { 
+        _feedbackType = 'Bug'; 
+        _fallbackStep = 1; 
+        _addBotMessage("Oh nein! Beschreibe den Fehler."); 
+      }
+      else if (lower.contains('feature') || lower.contains('funktion')) { 
+        _feedbackType = 'Feature'; 
+        _fallbackStep = 1; 
+        _addBotMessage("Cool! Beschreibe die Funktion."); 
+      }
+      else { 
+        _addBotMessage("Bitte sage 'Bug' oder 'Feature'."); 
+      }
     } else {
       _fallbackStep = 2; // Ready
-      _addBotMessage("Got it. Click the button below to send this report via email!");
+      _addBotMessage("Verstanden. Klicke auf den Button unten, um diesen Bericht per E-Mail zu senden!");
     }
   }
 
   Future<void> _sendEmail() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-    final version = "${packageInfo.version}+${packageInfo.buildNumber}";
+    setState(() => _isTyping = true);
     
-    // Compile history
-    final history = _messages.map((m) => "${m.isUser ? 'User' : 'Assistant'}: ${m.text}").join("\n\n");
-    
-    final String subject = "Fortune 14/2 Feedback: ${_feedbackType ?? 'General'}";
-    final String body = 
-      "Generic User Feedback Report\n"
-      "---------------------------\n"
-      "App Version: $version\n\n"
-      "Transcript:\n"
-      "$history\n"
-      "---------------------------\n";
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final version = "${packageInfo.version}+${packageInfo.buildNumber}";
       
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: 'developer@example.com',
-      query: _encodeQueryParameters(<String, String>{
-        'subject': subject,
-        'body': body,
-      }),
-    );
-
-    if (await canLaunchUrl(emailLaunchUri)) {
-      await launchUrl(emailLaunchUri);
-      if (mounted) Navigator.of(context).pop();
-    } else {
-      _addBotMessage("⚠️ Could not open email client.");
+      // Compile history
+      final history = _messages.map((m) => "${m.isUser ? _userName ?? 'Benutzer' : 'Assistent'}: ${m.text}").join("\n\n");
+      
+      final String subject = "Fortune 14/2 Feedback von ${_userName ?? 'Unbekannt'}: ${_feedbackType ?? 'Allgemein'}";
+      final String body = 
+        "═══════════════════════════════════════════════════════════\n"
+        "FEEDBACK-BERICHT\n"
+        "═══════════════════════════════════════════════════════════\n\n"
+        "VON: ${_userName ?? 'Unbekannt'}\n"
+        "APP-VERSION: $version\n"
+        "DATUM: ${DateTime.now().toString().split('.')[0]}\n\n"
+        "${_synopsis != null ? '───────────────────────────────────────────────────────────\n$_synopsis\n───────────────────────────────────────────────────────────\n\n' : ''}"
+        "VOLLSTÄNDIGER GESPRÄCHSVERLAUF:\n"
+        "───────────────────────────────────────────────────────────\n"
+        "$history\n"
+        "═══════════════════════════════════════════════════════════\n";
+      
+      // Configure SMTP
+      final smtpServer = SmtpServer(
+        kSmtpHost,
+        port: kSmtpPort,
+        username: kSmtpUsername,
+        password: kSmtpPassword,
+        ignoreBadCertificate: false,
+        ssl: false,
+        allowInsecure: true,
+      );
+      
+      // Create message
+      final message = Message()
+        ..from = Address(kSmtpUsername, 'Fortune 14/2 App')
+        ..recipients.add(kFeedbackRecipient)
+        ..subject = subject
+        ..text = body;
+      
+      // Send email
+      await send(message, smtpServer);
+      
+      setState(() => _isTyping = false);
+      _addBotMessage("✅ Feedback erfolgreich gesendet! Vielen Dank, ${_userName ?? 'Unbekannt'}!");
+      
+      // Close dialog after 2 seconds
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) Navigator.of(context).pop();
+      });
+      
+    } catch (e) {
+      setState(() => _isTyping = false);
+      _addBotMessage("⚠️ Fehler beim Senden der E-Mail: $e\n\nBitte versuche es später erneut.");
     }
-  }
-  
-  String? _encodeQueryParameters(Map<String, String> params) {
-    return params.entries
-        .map((MapEntry<String, String> e) =>
-            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
-        .join('&');
   }
 
   @override
@@ -235,7 +291,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                   if (index == _messages.length) {
                     return const Align(
                       alignment: Alignment.centerLeft,
-                      child: Padding(padding: EdgeInsets.all(8), child: Text("Thinking...", style: TextStyle(color: Colors.grey))),
+                      child: Padding(padding: EdgeInsets.all(8), child: Text("Denke nach...", style: TextStyle(color: Colors.grey))),
                     );
                   }
                   final msg = _messages[index];
@@ -276,7 +332,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                   child: ElevatedButton.icon(
                     onPressed: _sendEmail,
                     icon: const Icon(Icons.email),
-                    label: const Text('Send Report via Email'),
+                    label: const Text('Bericht per E-Mail senden'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -298,7 +354,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                     child: TextField(
                       controller: _textController,
                       decoration: const InputDecoration(
-                        hintText: 'Type...',
+                        hintText: 'Schreiben...',
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       ),

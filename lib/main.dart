@@ -10,10 +10,11 @@ import 'theme/steampunk_theme.dart';
 
 import 'widgets/feedback_wrapper.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -77,6 +78,7 @@ class _MyAppState extends State<MyApp> {
             Provider<Function(GameSettings)>.value(value: _updateSettings),
           ],
           child: MaterialApp(
+            navigatorKey: navigatorKey, // CRITIAL: Key for overlays
             title: 'Fortune 14/2',
             debugShowCheckedModeBanner: false,
             
@@ -91,7 +93,10 @@ class _MyAppState extends State<MyApp> {
             locale: Locale(settings.languageCode),
             
             // Global Overlay Wrapper (Feedback Chat)
-            builder: (context, child) => FeedbackWrapper(child: child),
+            builder: (context, child) => FeedbackWrapper(
+              navigatorKey: navigatorKey, 
+              child: child
+            ),
             
             // Theme
             theme: SteampunkTheme.themeData,

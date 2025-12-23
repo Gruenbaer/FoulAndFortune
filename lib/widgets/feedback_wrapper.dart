@@ -3,8 +3,9 @@ import 'feedback_chat_dialog.dart';
 
 class FeedbackWrapper extends StatelessWidget {
   final Widget? child; // Nullable for builder
+  final GlobalKey<NavigatorState> navigatorKey;
   
-  const FeedbackWrapper({super.key, required this.child});
+  const FeedbackWrapper({super.key, required this.child, required this.navigatorKey});
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +24,12 @@ class FeedbackWrapper extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const FeedbackChatDialog(),
-                );
+                if (navigatorKey.currentState != null) {
+                  showDialog(
+                    context: navigatorKey.currentContext!,
+                    builder: (context) => const FeedbackChatDialog(),
+                  );
+                }
               },
               borderRadius: BorderRadius.circular(30),
               child: Container(

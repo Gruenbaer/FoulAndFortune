@@ -110,20 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 40), // Space for lamps
+                    const SizedBox(height: 40),
                     
-                    // LOGO SECTION (Banner)
+                    // LOGO SECTION
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.dst,
-                        ),
-                        child: Image.asset(
-                          'assets/images/ui/home_banner.png',
-                          fit: BoxFit.contain,
-                        ),
+                      child: Image.asset(
+                        'assets/images/app_logo.png',
+                        width: 250,
+                        height: 250,
+                        fit: BoxFit.contain,
                       ),
                     ),
                     
@@ -231,67 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           
-          // DECORATIVE LAMPS (Top corners)
-          Positioned(
-            top: 20,
-            left: 10,
-            child: Opacity(
-              opacity: 0.6,
-              child: Image.asset(
-                'assets/images/ui/lamp.png',
-                width: 60,
-                height: 80,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 20,
-            right: 10,
-            child: Opacity(
-              opacity: 0.6,
-              child: Transform.flip(
-                flipX: true,
-                child: Image.asset(
-                  'assets/images/ui/lamp.png',
-                  width: 60,
-                  height: 80,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-          
-          // DECORATIVE COGS (Bottom)
-          Positioned(
-            bottom: 20,
-            left: 20,
-            child: Opacity(
-              opacity: 0.4,
-              child: Image.asset(
-                'assets/images/ui/cogs.png',
-                width: 80,
-                height: 80,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 40,
-            right: 30,
-            child: Opacity(
-              opacity: 0.4,
-              child: Transform.rotate(
-                angle: 0.5,
-                child: Image.asset(
-                  'assets/images/ui/cogs.png',
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
+
         ],
       ),
     );
