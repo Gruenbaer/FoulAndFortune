@@ -308,12 +308,12 @@ class _GameScreenState extends State<GameScreen> {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              // App name in top-left
+              // Game type in top-left
               leading: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Center(
                   child: Text(
-                    '14.1 Fortune',
+                    'Straight Pool',
                     style: GoogleFonts.rye(
                       fontSize: 14,
                       color: SteampunkTheme.brassPrimary,
@@ -326,19 +326,6 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
               ),
-              // Race to XX in center
-              title: Text(
-                'Race to ${gameState.raceToScore}',
-                style: GoogleFonts.rye(
-                  fontSize: 18,
-                  color: SteampunkTheme.brassPrimary,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
-                  ],
-                ),
-              ),
-              centerTitle: true,
               actions: [
                 IconButton(
                   icon: const Icon(Icons.analytics_outlined),
@@ -466,6 +453,21 @@ class _GameScreenState extends State<GameScreen> {
 
                     return Column(
                       children: [
+                        // Race to XX indicator
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            'Race to ${gameState.raceToScore}',
+                            style: GoogleFonts.rye(
+                              fontSize: 16,
+                              color: SteampunkTheme.brassPrimary,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
+                              ],
+                            ),
+                          ),
+                        ),
                         // 1. Players & Scores Header
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
