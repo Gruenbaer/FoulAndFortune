@@ -26,8 +26,8 @@ This project uses **Puro** (Flutter version manager) instead of standard Flutter
 
 2. **Clone the repository**:
    ```bash
-   git clone https://github.com/Gruenbaer/fortune142
-   cd fortune142
+   git clone https://github.com/Gruenbaer/141fortune
+   cd 141fortune
    ```
 
 3. **Set up Flutter environment**:

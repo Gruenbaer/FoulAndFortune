@@ -5,11 +5,12 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
-import '../secrets.dart'; // Imports kGeminiApiKey and SMTP config
+import '../build_env.dart';
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION
-// kGeminiApiKey is now loaded from secrets.dart (gitignored)
+// Secrets are loaded from build-time environment variables (--dart-define)
+// This prevents accidental exposure through source code inspection
 // -----------------------------------------------------------------------------
 
 class FeedbackChatDialog extends StatefulWidget {
@@ -64,10 +65,10 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
   }
 
   void _initAI() {
-    if (kGeminiApiKey.isNotEmpty) {
+    if (BuildEnv.geminiApiKey.isNotEmpty) {
       _model = GenerativeModel(
         model: 'gemini-2.0-flash',
-        apiKey: kGeminiApiKey,
+        apiKey: BuildEnv.geminiApiKey,
         systemInstruction: Content.system(
           "Du bist der 14.1 QA-Assistent für die '14.1 Fortune' Straight Pool Scoring-App. "
           "STRIKTE REGELN:\n"
@@ -318,10 +319,10 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
         "═══════════════════════════════════════════════════════════\n";
       
       final smtpServer = SmtpServer(
-        kSmtpHost,
-        port: kSmtpPort,
-        username: kSmtpUsername,
-        password: kSmtpPassword.replaceAll(' ', ''),
+        BuildEnv.smtpHost,
+        port: BuildEnv.smtpPort,
+        username: BuildEnv.smtpUsername,
+        password: BuildEnv.smtpPassword.replaceAll(' ', ''),
         ignoreBadCertificate: false,
         ssl: true,
         allowInsecure: false, 
@@ -329,8 +330,8 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
       
       
       final message = Message()
-        ..from = Address(kFeedbackRecipient, '14.1 Fortune App')
-        ..recipients.add(kFeedbackRecipient)
+        ..from = Address(BuildEnv.feedbackRecipient, '14.1 Fortune App')
+        ..recipients.add(BuildEnv.feedbackRecipient)
         ..subject = subject
         ..text = body;
         

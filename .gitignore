@@ -43,9 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-build_*/
-build/
-build_WKL-22_Dez-22-073830-2025_conflict_current/
+/build/
+build_WKL*/
+
+# Build scripts - allow versioned scripts, block private ones
+!build_scripts/
+build_scripts/*_private.ps1
+
+# Compiled APKs - NEVER commit (contain embedded secrets)
+*.apk
+*.aab
+*.ipa
 
 # Secrets - DO NOT COMMIT
 lib/secrets.dart
+.env
+.env.local
