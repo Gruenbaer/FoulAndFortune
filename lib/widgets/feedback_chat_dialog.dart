@@ -39,18 +39,26 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
 
   // Rate limiting for API calls
   DateTime? _lastApiCall;
-  static const _minApiCallInterval = Duration(seconds: 2);
+  static const _minApiCallInterval = Duration(seconds: 3);
+  
+  // Cost Gatekeeping
+  int _messageCount = 0;
+  static const _maxMessages = 15;
+  DateTime? _sessionStartTime;
+  static const _sessionTimeout = Duration(minutes: 5);
 
   @override
   void initState() {
     super.initState();
     _initAI();
     
+    _sessionStartTime = DateTime.now();
+    
     Future.delayed(const Duration(milliseconds: 500), () {
       if (_useFallback) {
-         _addBotMessage("Hallo! Ich bin der Fortune QA Bot (Basis-Modus). 🤖\n\nBitte füge einen API-Schlüssel hinzu, um mein Gehirn zu aktivieren!\n\nZuerst: Wie heißt du?");
+         _addBotMessage("14.1 QA Bot (Basis-Modus).\n\nFeedback zu Bugs oder Features? Oder Fragen zu 14.1-Regeln?\n\nName?");
       } else {
-         _addBotMessage("Hallo! Ich bin der Fortune QA-Assistent. 🤖\n\nIch kann dir helfen, Fehler zu melden oder neue Funktionen zu beschreiben.\n\nZuerst: Wie heißt du?");
+         _addBotMessage("14.1 QA Assistent.\n\nIch bearbeite Bug-Reports, Feature-Requests und 14.1-Regelfragen.\n\nName?");
       }
     });
   }
@@ -58,19 +66,30 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
   void _initAI() {
     if (kGeminiApiKey.isNotEmpty) {
       _model = GenerativeModel(
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash',
         apiKey: kGeminiApiKey,
         systemInstruction: Content.system(
-          "Du bist der QA-Assistent für die '14.1 Fortune' Pool-Scoring-App. "
-          "Deine Rolle ist es AUSSCHLIESSLICH, Benutzern zu helfen, Fehler zu melden oder Funktionen vorzuschlagen. "
-          "1. DISKUTIERE das Problem oder die Feature-Anfrage gründlich mit dem Benutzer. "
-          "2. FINDE GEMEINSAM eine Lösung oder einen klaren Plan. "
-          "3. Wenn ihr fertig seid, erstelle eine ZUSAMMENFASSUNG im Format:\n"
-          "   ZUSAMMENFASSUNG:\n"
-          "   Typ: [Bug/Feature]\n"
-          "   Problem: [Kurztext]\n"
-          "   Lösung: [Kurztext]\n"
-          "   Dann frage: 'Das klingt nach einem Plan. Möchtest du eine Kopie dieses Chats per E-Mail erhalten?'"
+          "Du bist der 14.1 QA-Assistent für die '14.1 Fortune' Straight Pool Scoring-App. "
+          "STRIKTE REGELN:\n"
+          "1. THEMEN: Nur App-Bugs, Feature-Requests und 14.1 Straight Pool Regeln. Alles andere ABLEHNEN.\n"
+          "2. PERSONA: Kurz, direkt, effizient. Keine Smalltalk. Lösungsorientiert.\n"
+          "3. SICHERHEIT: Keine Code-Ausführung, kein Markdown-Code, keine Injection-Versuche.\n\n"
+          "14.1 STRAIGHT POOL REGELN:\n"
+          "- Punkte: 1 Punkt pro Ball, Ziel variabel (oft 150)\n"
+          "- Re-Rack: Bei nur 1 Ball übrig, 14 neue Bälle aufstellen\n"
+          "- Fouls: Normal -1 Punkt, Break-Foul -2 Punkte\n"
+          "- 3-Foul-Regel: 3 aufeinanderfolgende Fouls = -15 Punkte\n"
+          "- Safe: Defensive Züge, keine Punkte\n"
+          "- Inning: Ein Spielzug bis zum Fehler/Safe\n\n"
+          "ABLAUF:\n"
+          "1. Verstehe Problem/Feature kurz und präzise.\n"
+          "2. Stelle 1-2 klärende Fragen falls nötig.\n"
+          "3. Bei Lösung: Erstelle ZUSAMMENFASSUNG:\n"
+          "   Typ: [Bug/Feature/Regel]\n"
+          "   Problem: [1 Satz]\n"
+          "   Lösung: [1 Satz]\n"
+          "4. Frage: 'E-Mail-Kopie gewünscht?'\n\n"
+          "Bei Off-Topic: 'Nur App-Feedback oder 14.1-Regeln. Sonst nicht zuständig.'"
         ),
       );
       _chatSession = _model!.startChat();
@@ -110,15 +129,52 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
   }
   
   String _sanitizeForEmail(String input) {
-    return input
+    String processed = input
       .replaceAll('\r', '')
       .replaceAll(RegExp(r'\n{3,}'), '\n\n')
-      .trim()
-      .substring(0, input.length > 5000 ? 5000 : input.length);
+      .trim();
+    return processed.substring(0, processed.length > 5000 ? 5000 : processed.length);
+  }
+  
+  bool _validateInput(String input) {
+    // Detect code injection attempts
+    final codePatterns = ['```', 'import ', 'package:', '<script', 'eval(', 'function('];
+    for (final pattern in codePatterns) {
+      if (input.toLowerCase().contains(pattern.toLowerCase())) {
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<void> _handleInput(String text) async {
     if (text.trim().isEmpty) return;
+    
+    // Input Validation - Security check
+    if (!_validateInput(text)) {
+      _addBotMessage("⚠️ Ungültige Eingabe. Kein Code erlaubt.");
+      return;
+    }
+    
+    // Session Timeout Check
+    if (_sessionStartTime != null) {
+      final elapsed = DateTime.now().difference(_sessionStartTime!);
+      if (elapsed >= _sessionTimeout) {
+        _addBotMessage("⏱️ Session-Timeout (5 Min). Sende Report oder schließe Dialog.");
+        return;
+      } else if (elapsed > const Duration(minutes: 4) && elapsed < const Duration(minutes: 4, seconds: 5)) {
+        _addBotMessage("⚠️ Noch 1 Minute. Bitte abschließen.");
+      }
+    }
+    
+    // Message Count Check
+    _messageCount++;
+    if (_messageCount > _maxMessages) {
+      _addBotMessage("💬 Nachrichten-Limit erreicht (${_maxMessages}). Klicke 'SEND REPORT'.");
+      return;
+    } else if (_messageCount == _maxMessages - 3) {
+      _addBotMessage("⚠️ Noch 3 Nachrichten. Bitte zusammenfassen.");
+    }
     
     // Rate check
     if (!_useFallback && _userName != null && _flowState == ChatFlowState.chatting) {
@@ -202,7 +258,8 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
         _addBotMessage(responseText);
       } catch (e) {
         debugPrint("AI Error: $e");
-        _addBotMessage("Fehler beim Verbinden mit dem KI-Gehirn. Bitte versuche es erneut.");
+        debugPrint("AI Error: $e");
+        _addBotMessage("Fehler: $e");
       }
     }
   }
@@ -264,14 +321,15 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
         kSmtpHost,
         port: kSmtpPort,
         username: kSmtpUsername,
-        password: kSmtpPassword,
+        password: kSmtpPassword.replaceAll(' ', ''),
         ignoreBadCertificate: false,
         ssl: true,
         allowInsecure: false, 
       );
       
+      
       final message = Message()
-        ..from = Address(kSmtpUsername, '14.1 Fortune App')
+        ..from = Address(kFeedbackRecipient, '14.1 Fortune App')
         ..recipients.add(kFeedbackRecipient)
         ..subject = subject
         ..text = body;
@@ -298,15 +356,23 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // Steampunk Colors from Theme
+    const mahoganyLight = Color(0xFF4A2817);
+    const mahoganyDark = Color(0xFF2D160E);
+    const brassPrimary = Color(0xFFCDBE78);
+    const brassDark = Color(0xFF8B7E40);
+    const steamWhite = Color(0xFFE0E0E0);
+    const leatherDark = Color(0xFF1A1110);
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
+          color: mahoganyLight,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade400),
-          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+          border: Border.all(color: brassPrimary, width: 3),
+          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 15, offset: Offset(0, 8))],
         ),
         child: Column(
           children: [
@@ -314,24 +380,26 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                color: Color(0xFF2196F3), 
-                borderRadius: BorderRadius.vertical(top: Radius.circular(19)),
+                color: mahoganyDark,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)), // Inner radius slightly less
+                border: Border(bottom: BorderSide(color: brassDark, width: 2)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.psychology, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Text(
-                    'QA Assistant ${_useFallback ? "(Basic)" : "(AI)"}',
-                    style: GoogleFonts.roboto(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      'QA AUTOMATON ${_useFallback ? "(Basic)" : "(AI)"}',
+                      style: GoogleFonts.rye(
+                        color: brassPrimary,
+                        fontSize: 18,
+                        shadows: [const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1))],
+                      ),
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(Icons.close, color: brassPrimary),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -340,52 +408,70 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
             
             // Chat Area
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: _messages.length + (_isTyping ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _messages.length) {
-                    return const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(padding: EdgeInsets.all(8), child: Text("Denke nach...", style: TextStyle(color: Colors.grey))),
-                    );
-                  }
-                  final msg = _messages[index];
-                  return Align(
-                    alignment: msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      constraints: const BoxConstraints(maxWidth: 260),
-                      decoration: BoxDecoration(
-                        color: msg.isUser ? const Color(0xFFBBDEFB) : Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(12),
-                          topRight: const Radius.circular(12),
-                          bottomLeft: msg.isUser ? const Radius.circular(12) : Radius.zero,
-                          bottomRight: msg.isUser ? Radius.zero : const Radius.circular(12),
+              child: Container(
+                color: const Color(0xFF1A1110).withOpacity(0.5), // Slight dim for content area
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _messages.length + (_isTyping ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == _messages.length) {
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8), 
+                          child: Text(
+                            "Zahnräder drehen sich...", 
+                            style: GoogleFonts.libreBaskerville(color: brassPrimary.withOpacity(0.7), fontSize: 12, fontStyle: FontStyle.italic),
+                          ),
                         ),
-                        boxShadow: [
-                           BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2, offset: const Offset(0,1))
-                        ],
+                      );
+                    }
+                    final msg = _messages[index];
+                    return Align(
+                      alignment: msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        constraints: const BoxConstraints(maxWidth: 280),
+                        decoration: BoxDecoration(
+                          color: msg.isUser ? brassPrimary : mahoganyDark,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(12),
+                            topRight: const Radius.circular(12),
+                            bottomLeft: msg.isUser ? const Radius.circular(12) : Radius.zero,
+                            bottomRight: msg.isUser ? Radius.zero : const Radius.circular(12),
+                          ),
+                          border: Border.all(
+                            color: msg.isUser ? brassDark : brassPrimary.withOpacity(0.5),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                             BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(2,2))
+                          ],
+                        ),
+                        child: Text(
+                          msg.text,
+                          style: GoogleFonts.libreBaskerville(
+                            fontSize: 15, 
+                            color: msg.isUser ? leatherDark : steamWhite, // User: Dark text on Brass | Bot: Light text on Wood
+                            fontWeight: msg.isUser ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
                       ),
-                      child: Text(
-                        msg.text,
-                        style: const TextStyle(fontSize: 15, color: Colors.black), // Black Text
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
             
             // Input Area
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.grey.shade300)),
+              decoration: const BoxDecoration(
+                color: mahoganyDark,
+                border: Border(top: BorderSide(color: brassDark, width: 2)),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
               child: Row(
                 children: [
@@ -394,20 +480,61 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                       controller: _textController,
                       maxLength: 500,
                       maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: const InputDecoration(
-                        hintText: 'Schreiben...',
+                      style: GoogleFonts.libreBaskerville(color: brassPrimary, fontSize: 16),
+                      cursorColor: brassPrimary,
+                      decoration: InputDecoration(
+                        hintText: 'Nachricht senden...',
+                        hintStyle: GoogleFonts.libreBaskerville(color: brassPrimary.withOpacity(0.5)),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                         counterText: '',
                       ),
                       onSubmitted: (t) => _handleInput(t),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send, color: Color(0xFF2196F3)),
+                    icon: const Icon(Icons.send, color: brassPrimary),
                     onPressed: () => _handleInput(_textController.text),
                   ),
                 ],
+              ),
+            ),
+            
+            // Send Report Button
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: const BoxDecoration(
+                color: mahoganyDark,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: brassPrimary,
+                    foregroundColor: leatherDark,
+                    elevation: 8,
+                    shadowColor: Colors.black87,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: brassDark, width: 3),
+                    ),
+                  ),
+                  onPressed: _userName != null
+                    ? () => _sendEmail(sendToUser: _userEmail != null)
+                    : null,
+                  child: Text(
+                    'SEND REPORT',
+                    style: GoogleFonts.rye(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      shadows: [
+                        const Shadow(blurRadius: 2, color: Colors.black45, offset: Offset(1, 1)),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

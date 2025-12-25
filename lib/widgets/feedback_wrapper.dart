@@ -1,53 +1,62 @@
 import 'package:flutter/material.dart';
 import 'feedback_chat_dialog.dart';
 
-class FeedbackWrapper extends StatelessWidget {
-  final Widget? child; // Nullable for builder
+class FeedbackWrapper extends StatefulWidget {
+  final Widget? child;
   final GlobalKey<NavigatorState> navigatorKey;
   
   const FeedbackWrapper({super.key, required this.child, required this.navigatorKey});
 
   @override
+  State<FeedbackWrapper> createState() => _FeedbackWrapperState();
+}
+
+class _FeedbackWrapperState extends State<FeedbackWrapper> {
+  bool _isChatOpen = false;
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        if (child != null) child!,
+        if (widget.child != null) widget.child!,
         
-        // Floating Light Bulb (Top Right or Bottom Right?)
-        // User said "add a light bulb button on all screens"
-        // Let's put it in a non-obtrusive spot, maybe top right under AppBar area or floating bottom left?
-        // FAB is usually bottom right. Let's do a custom position.
-        Positioned(
-          right: 16,
-          bottom: 100, // Above FABs usually
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                if (navigatorKey.currentState != null) {
-                  showDialog(
-                    context: navigatorKey.currentContext!,
-                    builder: (context) => const FeedbackChatDialog(),
-                  );
-                }
-              },
-              borderRadius: BorderRadius.circular(30),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.yellow.shade700, // Light Bulb color
-                  shape: BoxShape.circle,
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2)),
-                  ],
-                  border: Border.all(color: Colors.white, width: 2),
+        // Floating Light Bulb (Hidden when chat is open)
+        if (!_isChatOpen)
+          Positioned(
+            right: 16,
+            bottom: 100, // Above FABs usually
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () async {
+                  if (widget.navigatorKey.currentState != null) {
+                    setState(() => _isChatOpen = true);
+                    await showDialog(
+                      context: widget.navigatorKey.currentContext!,
+                      builder: (context) => const FeedbackChatDialog(),
+                    );
+                    if (mounted) {
+                      setState(() => _isChatOpen = false);
+                    }
+                  }
+                },
+                borderRadius: BorderRadius.circular(30),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.yellow.shade700, // Light Bulb color
+                    shape: BoxShape.circle,
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2)),
+                    ],
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(Icons.lightbulb, color: Colors.white, size: 28),
                 ),
-                child: const Icon(Icons.lightbulb, color: Colors.white, size: 28),
               ),
             ),
           ),
-        ),
       ],
     );
   }

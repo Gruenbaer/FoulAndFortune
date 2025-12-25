@@ -308,11 +308,35 @@ class _GameScreenState extends State<GameScreen> {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              // Hamburger menu removed per user request
-              leading: const SizedBox.shrink(),
+              // App name in top-left
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Center(
+                  child: Text(
+                    '14.1 Fortune',
+                    style: GoogleFonts.rye(
+                      fontSize: 14,
+                      color: SteampunkTheme.brassPrimary,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        const Shadow(blurRadius: 3, color: Colors.black87, offset: Offset(1, 1)),
+                        const Shadow(blurRadius: 6, color: Colors.black54, offset: Offset(0, 0)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Race to XX in center
               title: Text(
-                '14.1 Fortune',
-                style: SteampunkTheme.themeData.textTheme.displaySmall,
+                'Race to ${gameState.raceToScore}',
+                style: GoogleFonts.rye(
+                  fontSize: 18,
+                  color: SteampunkTheme.brassPrimary,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
+                  ],
+                ),
               ),
               centerTitle: true,
               actions: [
@@ -649,10 +673,25 @@ class _GameScreenState extends State<GameScreen> {
     final rackWidth = 5 * diameter;
     final rackHeight = 4 * verticalOffset + diameter;
 
+    // Helper to check if ball can be tapped (rule enforcement)
+    bool canTapBall(int ballNumber) {
+      // Rule: Cannot play foul or safe leaving only 1 ball
+      if (gameState.activeBalls.length == 1) {
+        // Only 1 ball left - check if foul or safe mode is active
+        if (gameState.foulMode != FoulMode.none || gameState.isSafeMode) {
+          return false; // Disable the last ball
+        }
+      }
+      return true;
+    }
+
     // Helper to validate and handle taps
     void handleTap(int ballNumber) {
        // Disable all ball interactions if game is over
        if (gameState.gameOver) return;
+       
+       // Enforce rule: cannot tap last ball during foul/safe
+       if (!canTapBall(ballNumber)) return;
        
        if (gameState.foulMode == FoulMode.severe && ballNumber != 15) {
         // Trigger progressive hint
@@ -757,7 +796,9 @@ class _GameScreenState extends State<GameScreen> {
                   height: diameter,
                   child: BallButton(
                     ballNumber: rows[r][c],
-                    isActive: !gameState.gameOver && gameState.activeBalls.contains(rows[r][c]),
+                    isActive: !gameState.gameOver && 
+                              gameState.activeBalls.contains(rows[r][c]) &&
+                              canTapBall(rows[r][c]),
                     onTap: () => handleTap(rows[r][c]),
                   ),
                 ),
