@@ -434,17 +434,7 @@ class GameState extends ChangeNotifier {
       currentPlayer.addScore(penalty);
       foulText = ' (Break Foul)';
       
-      // SHOW BREAK FOUL RULES ONCE
-      if (!settings.hasSeenBreakFoulRules) {
-        settings = settings.copyWith(hasSeenBreakFoulRules: true); // Update in-memory settings
-        // Note: Persistence happens via UI callback usually, but since GameSettings is now in 
-        // GameState, we rely on the main update loop or when saving game to persist.
-        // Queue the Rules Dialog
-        eventQueue.add(WarningEvent(
-          "Important Break Foul Rules",
-          "• You CAN commit Break Foul again\n• The 3-Foul rule does NOT apply\n• Each Break Foul is -2 points\n• Only Ball 15 ends the turn"
-        ));
-      }
+      // Break Foul Rules dialog moved to 3rd error (see game_screen.dart)
 
       eventQueue.add(FoulEvent(currentPlayer, penalty, "Break Foul!")); // Usually -2
       

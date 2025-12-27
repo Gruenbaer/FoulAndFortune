@@ -85,28 +85,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       showZoomDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          backgroundColor: Colors.amber.shade900,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-               const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 32),
-               const SizedBox(width: 12),
-               Text(event.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-               const SizedBox(width: 12),
-               const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 32),
-            ],
-          ),
-          content: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: const TextStyle(color: Colors.white, fontSize: 18),
+        builder: (context) => SizedBox(
+          width: MediaQuery.of(context).size.width * 0.85,
+          child: AlertDialog(
+            backgroundColor: Colors.amber.shade900,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextSpan(text: event.message),
+                 const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 32),
+                 const SizedBox(width: 8),
+                 Flexible(
+                   child: Text(
+                     event.title, 
+                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                     textAlign: TextAlign.center,
+                     overflow: TextOverflow.ellipsis,
+                     maxLines: 2,
+                   ),
+                 ),
+                 const SizedBox(width: 8),
+                 const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 32),
               ],
             ),
-            ),
-          actions: [
+            content: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                children: [
+                  TextSpan(text: event.message),
+                ],
+              ),
+              ),
+            actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -121,6 +131,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
+      ),
       );
     } else if (event is DecisionEvent) {
        // Show Decision Dialog
@@ -803,25 +814,21 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                         if (gameState.foulMode == FoulMode.severe)
-                                           Expanded( // Ensure it takes available space without overflow
-                                             child: FittedBox(
-                                               fit: BoxFit.scaleDown,
-                                               child: Text(
-                                                 'BREAK FOUL',
-                                                 maxLines: 1,
-                                                  style: TextStyle(
-                                                   color: Colors.white, // Bright White
-                                                   fontWeight: FontWeight.w900,
-                                                   fontSize: 18, 
-                                                   letterSpacing: 0.5,
-                                                   fontFamily: 'Crimson Pro',
-                                                   shadows: colors.themeId == 'cyberpunk' ? [
-                                                     BoxShadow(color: colors.primary, blurRadius: 10, spreadRadius: 2),
-                                                     BoxShadow(color: colors.primary, blurRadius: 20, spreadRadius: 5),
-                                                   ] : [],
-                                                 ),
-                                               ),
+                                           Text(
+                                             'BREAK FOUL',
+                                             maxLines: 1,
+                                              style: TextStyle(
+                                               color: Colors.white, // Bright White
+                                               fontWeight: FontWeight.w900,
+                                               fontSize: 16, 
+                                               letterSpacing: 0.5,
+                                               fontFamily: 'Crimson Pro',
+                                               shadows: colors.themeId == 'cyberpunk' ? [
+                                                 BoxShadow(color: colors.primary, blurRadius: 10, spreadRadius: 2),
+                                                 BoxShadow(color: colors.primary, blurRadius: 20, spreadRadius: 5),
+                                               ] : [],
                                              ),
+                                             textAlign: TextAlign.center,
                                            )
                                         else
                                            Text(
@@ -988,68 +995,26 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
        if (gameState.foulMode == FoulMode.severe && ballNumber != 15 && ballNumber != 0) {
         // Trigger progressive hint
         gameState.reportBreakFoulError(ballNumber: ballNumber);
-        if (gameState.breakFoulErrorCount == 1) {
-             // 1st Error: Show Dialog ONLY if not seen before
+        if (gameState.breakFoulErrorCount == 3) {
+             // 3rd Error: Show Dialog via event queue (safe)
              gameState.setShowBreakFoulHint(false);
 
              if (!gameState.settings.hasSeenBreakFoulRules) {
                 // Update Setting immediately so it doesn't show again
                 final newSettings = gameState.settings.copyWith(hasSeenBreakFoulRules: true);
                 gameState.updateSettings(newSettings);
-                // Also update global settings if possible, but gameState.updateSettings 
-                // typically updates the in-memory state. 
-                // We need to ensure persistence. GameScreen `updateSettings` callback handles persistence.
-                // But we are deep in `handleTap`.
-                // We can just rely on `updateSettings` wrapper in GameScreen if available, 
-                // Check `updateSettings` method in `GameScreen`.
-                // Actually `GameScreen` has `updateSettings` method? No, it has `updateSettings` callback in SettingsScreen.
-                // The `game_screen.dart` has `void updateSettings(GameSettings newSettings)`? 
-                // Let's check. Yes, likely `Provider.of<GameState>`...
-                // Accessing `updateSettings` from here is tricky without passing check up.
-                // For now, update GameState. GameState typically doesn't persist to disk itself.
-                // The user asked for "show this only once". Implies persistence.
-                // We'll update GameState, and assume GameState might persist or we accept it resets on app restart.
-                // "Show only once" usually means "per install".
-                // Detailed Persistence requires `SharedPreferences` in `GameState` or `main`.
-                // For now, let's update GameState.
                 
-                showZoomDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Break Foul Rule'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                       // Visual Ball 15
-                       SizedBox(
-                         width: 80, 
-                         height: 80,
-                         child: BallButton(
-                           ballNumber: 15,
-                           isActive: true,
-                           onTap: () {},
-                         ),
-                       ),
-                       const SizedBox(height: 16),
-                       const Text(
-                        'Invalid Selection!\n\n'
-                        'When Break Foul is active (Severe):\n'
-                        '- NO ball was potted.\n'
-                        '- You MUST select Ball 15 (0 points).\n'
-                        '- Result is -2 points to score.',
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
-                    ),
-                  ],
-                ),
-             );
+                // Queue the dialog via event system (safe lifecycle)
+                gameState.eventQueue.add(WarningEvent(
+                  "Break Foul",
+                  "⚠️ Special Rules:\n\n"
+                  "• You CAN commit Break Foul again\n"
+                  "• The 3-Foul rule does NOT apply\n"
+                  "• Each Break Foul is -2 points\n"
+                  "• Only Ball 15 ends the turn"
+                ));
              }
-         }
+          }
         return;
       }
       
