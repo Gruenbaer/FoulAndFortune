@@ -24,22 +24,22 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
   void initState() {
     super.initState();
     _controller = AnimationController(
-       duration: const Duration(milliseconds: 2000), // 2 seconds total
+       duration: const Duration(milliseconds: 2750), // 2.75 seconds total (User Req: +0.75s)
        vsync: this,
     );
 
     // Zoom in, Pause, Zoom out
     _scaleAnimation = TweenSequence([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.2).chain(CurveTween(curve: Curves.elasticOut)), weight: 30),
-      TweenSequenceItem(tween: ConstantTween(1.2), weight: 40),
-      TweenSequenceItem(tween: Tween(begin: 1.2, end: 2.0), weight: 30), // Zoom out huge at end
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.2).chain(CurveTween(curve: Curves.elasticOut)), weight: 20),
+      TweenSequenceItem(tween: ConstantTween(1.2), weight: 60), // Longer hold
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 2.0), weight: 20), // Zoom out huge at end
     ]).animate(_controller);
 
     // Fade In, Hold, Fade Out
     _opacityAnimation = TweenSequence([
-       TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 20),
-       TweenSequenceItem(tween: ConstantTween(1.0), weight: 50),
-       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 30),
+       TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 10),
+       TweenSequenceItem(tween: ConstantTween(1.0), weight: 70), // Longer hold
+       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 20),
     ]).animate(_controller);
 
     _controller.forward().then((_) => widget.onFinish());
@@ -74,7 +74,7 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.grid_on, color: Colors.amber, size: 48), // Triangle/Rack Icon proxy
+                    // Icon removed per user request
                     const SizedBox(height: 12),
                     Text(
                       widget.type,

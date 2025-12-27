@@ -157,32 +157,39 @@ class _FoulPointsOverlayState extends State<FoulPointsOverlay> with SingleTicker
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        // Center the 200px container on the target, but clamp to screen edges
+        // Target is center of plaque.
+        // Ideal left = target.dx - 100.
+        // Min left = 0 (or safe area left). Max left = screenWidth - 200.
+        double left = widget.targetPosition.dx - 100;
+        left = left.clamp(0.0, screenWidth - 200.0);
+        
         return Positioned(
-          left: widget.targetPosition.dx - 40, // Centered
+          left: left, 
           top: widget.targetPosition.dy - 16, // Align with score
           child: IgnorePointer(
-            child: ClipRect(
-              child: Opacity(
-                opacity: _opacityAnimation.value,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: Text(
-                          '${widget.points >= 0 ? "+" : ""}${widget.points}',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            fontSize: 84, // Double size (was 42)
-                            fontWeight: FontWeight.w900,
-                            color: widget.points >= 0 ? Colors.greenAccent : Colors.redAccent,
-                            shadows: [
-                              const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
-                            ],
-                          ),
+            child: Opacity(
+              opacity: _opacityAnimation.value,
+              child: Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Container(
+                    width: 200, // Fixed width
+                    constraints: const BoxConstraints(maxHeight: 100),
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(
+                        '${widget.points >= 0 ? "+" : ""}${widget.points}',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          fontSize: 84, 
+                          fontWeight: FontWeight.w900,
+                          color: widget.points >= 0 ? Colors.greenAccent : Colors.redAccent,
+                          shadows: [
+                            const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
+                          ],
                         ),
                       ),
                     ),

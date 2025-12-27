@@ -29,6 +29,7 @@ class ReRackEvent extends GameEvent {
   ReRackEvent(this.type);
 }
 
+
 class DecisionEvent extends GameEvent {
   final String title;
   final String message;
@@ -37,6 +38,8 @@ class DecisionEvent extends GameEvent {
 
   DecisionEvent(this.title, this.message, this.options, this.onOptionSelected);
 }
+
+class SafeEvent extends GameEvent {}
 
 
 class GameState extends ChangeNotifier {
@@ -335,6 +338,7 @@ class GameState extends ChangeNotifier {
       isSafeMode = false; // Reset mode
       resetBreakFoulError();
       
+      eventQueue.add(SafeEvent()); // Queue animation
       _switchPlayer();
       notifyListeners();
     }
@@ -392,13 +396,13 @@ class GameState extends ChangeNotifier {
         currentPlayer.incrementSaves();
       }
 
-      // RE-RACK check for Safe Mode (since we return early)
       if (newBallCount == 1) {
         _updateRackCount(15);
         _logAction('${currentPlayer.name}: Re-rack (Auto/Safe)');
       }
 
       _checkWinCondition();
+      eventQueue.add(SafeEvent()); // Queue animation for Defensive Pocket too
       _switchPlayer(); 
       notifyListeners();
       return;

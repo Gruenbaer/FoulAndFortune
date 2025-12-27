@@ -57,6 +57,9 @@ class _GameScreenState extends State<GameScreen> {
   stats.Player? _p1Stats;
   stats.Player? _p2Stats;
 
+  // Rack Animation Controller
+  late AnimationController _rackAnimationController;
+
   // Keys for Player Plaques (to track position for Flying Penalty)
   final GlobalKey<PlayerPlaqueState> _p1PlaqueKey = GlobalKey<PlayerPlaqueState>();
   final GlobalKey<PlayerPlaqueState> _p2PlaqueKey = GlobalKey<PlayerPlaqueState>();
@@ -167,11 +170,25 @@ class _GameScreenState extends State<GameScreen> {
         ),
        );
     } else if (event is ReRackEvent) {
-      // Show Re-Rack Splash Animation
+      // Show Re-Rack Overlay
       _showReRackSplash(event.type, () {
+         // After overlay finishes, trigger Sequential Ball Fade-in
+         if (mounted) {
+           _rackAnimationController.forward(from: 0.0);
+         }
         _isProcessingEvent = false;
         _processNextEvent();
       });
+    } else if (event is SafeEvent) {
+       _showSafeShield();
+       // Safe Shield handles its own duration, but we should unblock queue
+       // Wait 1s? Or just unblock immediately? SafeShield is non-blocking visually?
+       // Usually _showSafeShield inserts overlay. We can wait a bit or direct.
+       // Let's assume non-blocking flow for now, or wait 1s.
+       Future.delayed(const Duration(milliseconds: 1000), () {
+          _isProcessingEvent = false;
+          _processNextEvent();
+       });
     } else {
        // Unknown?
        _isProcessingEvent = false;
@@ -320,12 +337,22 @@ class _GameScreenState extends State<GameScreen> {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final achievementManager = Provider.of<AchievementManager>(context, listen: false);
-      achievementManager?.onAchievementUnlocked = (achievement) {
-        setState(() {
-          _achievementToShow = achievement;
-        });
-      };
+      if (achievementManager != null) {
+        achievementManager.onAchievementUnlocked = (achievement) {
+          setState(() {
+            _achievementToShow = achievement;
+          });
+        };
+      }
     });
+
+
+    _rackAnimationController = AnimationController(
+       vsync: this,
+       duration: const Duration(milliseconds: 1500),
+    );
+     // Start visible by default
+    _rackAnimationController.value = 1.0;
   }
 
   @override
@@ -344,6 +371,12 @@ class _GameScreenState extends State<GameScreen> {
       // Ignore provider issues on dispose
     }
     super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _rackAnimationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -877,9 +910,8 @@ class _GameScreenState extends State<GameScreen> {
                                     ),
                                   ),
                                     onPressed: gameState.gameOver ? () {} : () {
-                                      if (!gameState.isSafeMode) {
-                                        _showSafeShield();
-                                      }
+                                      // Action logic now handled by GameState logic emitting SafeEvent
+                                      // We just commit the intent here
                                       gameState.onSafe();
                                     },
                                   // Green gradient when Active (Safe Mode ON)
@@ -1077,12 +1109,39 @@ class _GameScreenState extends State<GameScreen> {
                 child: SizedBox(
                   width: diameter,
                   height: diameter,
-                  child: BallButton(
-                    ballNumber: rows[r][c],
-                    isActive: !gameState.gameOver && 
-                              gameState.activeBalls.contains(rows[r][c]) &&
-                              canTapBall(rows[r][c]),
-                    onTap: () => handleTap(rows[r][c]),
+                  child: AnimatedBuilder(
+                    animation: _rackAnimationController,
+                    builder: (context, child) {
+                       // Sequential Fade In
+                       // Total 15 balls. Index count 0..14 roughly.
+                       // We need a stable index.
+                       int flatIndex = 0;
+                       for (int i=0; i<r; i++) flatIndex += rows[i].length;
+                       flatIndex += c;
+                       
+                       // Stagger: 0.0 to 1.0 range
+                       // Each ball takes 0.3 of duration.
+                       // Starts shift by index * 0.04 (15 * 0.04 = 0.6)
+                       // End = Start + 0.3. Max = 0.6 + 0.3 = 0.9. Fits in 1.0.
+                       final double start = flatIndex * 0.05;
+                       final double end = start + 0.3;
+                       
+                       final opacity = Curves.easeOut.transform(
+                         ((_rackAnimationController.value - start) / (end - start)).clamp(0.0, 1.0)
+                       );
+                       
+                       return Opacity(
+                          opacity: opacity,
+                          child: child,
+                       );
+                    },
+                    child: BallButton(
+                      ballNumber: rows[r][c],
+                      isActive: !gameState.gameOver && 
+                                gameState.activeBalls.contains(rows[r][c]) &&
+                                canTapBall(rows[r][c]),
+                      onTap: () => handleTap(rows[r][c]),
+                    ),
                   ),
                 ),
               ),
