@@ -485,6 +485,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           decoration: InputDecoration(
             labelText: l10n.points,
             hintText: 'Enter target score',
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
           ),
         ),
         actions: [
@@ -515,135 +518,122 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _editPlayerName(int playerNumber) async {
     final l10n = AppLocalizations.of(context);
     final currentName = playerNumber == 1 ? _settings.player1Name : _settings.player2Name;
-    
-    // We don't use a TextEditingController here for initial text because Autocomplete 
-    // handles its own text via option selection or manual input.
-    // However, we want to pre-fill it.
-    
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(playerNumber == 1 ? l10n.player1 : l10n.player2),
-        content: Autocomplete<String>(
-          initialValue: TextEditingValue(text: currentName),
-          optionsBuilder: (textEditingValue) {
-            if (textEditingValue.text.isEmpty) {
-              return const Iterable<String>.empty();
-            }
-            return _players
-                .map((p) => p.name)
-                .where((name) => name.toLowerCase().contains(
-                    textEditingValue.text.toLowerCase()));
-          },
-          onSelected: (name) {
-            // Auto-submit on select? Or just fill? Let's just let it fill.
-          },
-          fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
-            return TextField(
-              controller: controller,
-              focusNode: focusNode,
-              maxLength: 30,
-              maxLengthEnforcement: MaxLengthEnforcement.enforced,
-              textCapitalization: TextCapitalization.words,
-              contextMenuBuilder: (context, editableTextState) => const SizedBox.shrink(),
-              decoration: InputDecoration(
-                labelText: l10n.playerName,
-                hintText: 'Enter or select player',
-              ),
-              onSubmitted: (_) => Navigator.pop(context, controller.text.trim()),
-            );
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          // We need a way to get the text from the specific Autocomplete's internal controller
-          // or we can allow the user to type and press "Save".
-          // Since we can't easily access the inner controller of Autocomplete from the outside buttons 
-          // (without hoisting state), we rely on the onSubmitted of TextField or we need a trick.
-          // BUT, we can wrap this in a StatefulBuilder or just use a ValueNotifier if we really needed button access.
-          // Easier approach: The Autocomplete's TextField controller is local to the builder.
-          // We can use a variable captured in the closure if we construct it carefully,
-          // OR we can just instruct user to use keyboard Enter (onSubmitted).
-          // Better: Pass the controller out? No.
-          // Best: Simplest Autocomplete implementation often just updates a local variable `String selectedName`.
-        ],
-      ),
-    );
-
-    // Revised Implementation to Capture Value for "Save" Button:
-    // We need a widget or setup that allows the Save button to read the input.
-    // Let's create a small Stateful wrapper inside the dialog builder or use common state pattern.
+    final controller = TextEditingController(text: currentName);
+    Player? selectedPlayer;
     
     final finalName = await showDialog<String>(
       context: context,
-      builder: (context) {
-        String pendingName = currentName;
-        return AlertDialog(
-          title: Text(playerNumber == 1 ? l10n.player1 : l10n.player2),
-          content: Autocomplete<String>(
-            initialValue: TextEditingValue(text: currentName),
-            optionsBuilder: (textEditingValue) {
-               pendingName = textEditingValue.text; // track updates
-               if (textEditingValue.text.isEmpty) {
-                 return const Iterable<String>.empty();
-               }
-               return _players
-                   .map((p) => p.name)
-                   .where((name) => name.toLowerCase().contains(
-                       textEditingValue.text.toLowerCase()));
-            },
-            onSelected: (name) {
-              pendingName = name;
-            },
-            fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
-              // We need to attach a listener to track filtered text changes too if user doesn't select
-              if (!controller.hasListeners) {
-                 // Warning: This adds listener every rebuild if not careful. 
-                 // But FocusScope prevents this from rebuilding crazily.
-                 // Actually fieldViewBuilder receives the controller the Autocomplete created.
-                 // We can hook to it.
-                 controller.addListener(() {
-                   pendingName = controller.text;
-                 });
-              }
-              
-              return TextField(
-                controller: controller,
-                focusNode: focusNode,
-                maxLength: 30,
-                maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                textCapitalization: TextCapitalization.words,
-                contextMenuBuilder: (context, editableTextState) => const SizedBox.shrink(),
-                decoration: InputDecoration(
-                  labelText: l10n.playerName,
-                  hintText: 'Enter or select player',
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            // Check if current text matches a player
+            selectedPlayer = _players.cast<Player?>().firstWhere(
+              (p) =>  p?.name.toLowerCase() == controller.text.trim().toLowerCase(),
+              orElse: () => null,
+            );
+            
+            return AlertDialog(
+              title: Text(playerNumber == 1 ? l10n.player1 : l10n.player2),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Autocomplete<String>(
+                  initialValue: TextEditingValue(text: currentName),
+                  optionsBuilder: (textEditingValue) {
+                    if (textEditingValue.text.isEmpty) {
+                      return const Iterable<String>.empty();
+                    }
+                    return _players
+                        .map((p) => p.name)
+                        .where((name) => name.toLowerCase().contains(
+                            textEditingValue.text.toLowerCase()));
+                  },
+                  onSelected: (name) {
+                    controller.text = name;
+                    setDialogState(() {});
+                  },
+                  fieldViewBuilder: (context, fieldController, focusNode, onSubmitted) {
+                    // Sync our controller with the autocomplete's
+                    if (fieldController.text != controller.text) {
+                      fieldController.text = controller.text;
+                    }
+                    
+                    fieldController.addListener(() {
+                      controller.text = fieldController.text;
+                      setDialogState(() {});
+                    });
+                    
+                    return TextField(
+                      controller: fieldController,
+                      focusNode: focusNode,
+                      maxLength: 30,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      textCapitalization: TextCapitalization.words,
+                      contextMenuBuilder: (context, editableTextState) => const SizedBox.shrink(),
+                      decoration: InputDecoration(
+                        labelText: l10n.playerName,
+                        hintText: 'Enter or select player',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        counterText: '',
+                        suffixIcon: selectedPlayer != null
+                            ? const Icon(Icons.check_circle, color: Colors.green)
+                            : (fieldController.text.trim().isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.add_circle, color: Colors.blue),
+                                    tooltip: 'Create Player',
+                                    onPressed: () async {
+                                      final name = fieldController.text.trim();
+                                      if (name.isEmpty) return;
+                                      
+                                      try {
+                                        await _playerService.createPlayer(name);
+                                        await _loadPlayers();
+                                        
+                                        setDialogState(() {});
+                                        
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Player "$name" created ✓')),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                                          );
+                                        }
+                                      }
+                                    },
+                                  )
+                                : null),
+                      ),
+                      onSubmitted: (_) => Navigator.pop(dialogContext, controller.text.trim()),
+                    );
+                  },
                 ),
-                onSubmitted: (_) => Navigator.pop(context, pendingName.trim()),
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                 if (pendingName.trim().isNotEmpty) {
-                   Navigator.pop(context, pendingName.trim());
-                 }
-              },
-              child: const Text('Save'),
-            ),
-          ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (controller.text.trim().isNotEmpty) {
+                      Navigator.pop(dialogContext, controller.text.trim());
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
-      }
+      },
     );
 
-    if (finalName != null && finalName != currentName) {
+    if (finalName != null && finalName != currentName && finalName.isNotEmpty) {
       setState(() {
         if (playerNumber == 1) {
           _settings = _settings.copyWith(player1Name: finalName);
@@ -652,6 +642,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       });
     }
+    
+    controller.dispose();
   }
 
   Future<void> _saveSettings() async {

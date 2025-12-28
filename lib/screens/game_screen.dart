@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../models/game_state.dart';
 import '../models/player.dart'; // Explicit import needed after aliasing player_service
 import '../models/game_settings.dart';
@@ -322,6 +323,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
      // Start visible by default
     _rackAnimationController.value = 1.0;
+    
+    // Enable wakelock to keep screen awake during gameplay
+    WakelockPlus.enable();
   }
 
   @override
@@ -345,6 +349,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _rackAnimationController.dispose();
+    // Disable wakelock when leaving game screen
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -917,10 +923,30 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   List<Widget> _buildRackFormation(BuildContext context, GameState gameState) {
-    const ballSize = 60.0;
-    const diameter = ballSize;
+    // Calculate responsive ball size based on available screen space
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    
+    // Account for UI elements: AppBar, Stats, Clock, Controls, Padding
+    // AppBar ~56, Stats ~36, Clock ~32, Controls ~80, Padding ~50
+    final availableHeight = screenHeight - 254;
+    final availableWidth = screenWidth - 32; // 16px padding on each side
+    
+    // Calculate maximum ball size based on constraints
+    // Rack is 5 balls wide
+    final maxWidthBallSize = availableWidth / 5.2; // 5 balls + minimal spacing
+    
+    // Rack is 5 rows tall (with vertical offset = diameter * 0.866)
+    // Total height = 4 * verticalOffset + diameter = 4 * (d * 0.866) + d = 4.464d
+    final maxHeightBallSize = availableHeight / 4.6; // 4.464 + buffer for Double Sack label
+    
+    // Use the smaller of the two to ensure it fits - increased max to 200px
+    final ballSize = (maxWidthBallSize < maxHeightBallSize ? maxWidthBallSize : maxHeightBallSize).clamp(70.0, 200.0);
+    final diameter = ballSize;
+    
     // Tighter packing: Vertical distance = diameter * sin(60 degrees)
-    const verticalOffset = diameter * 0.866025; 
+    final verticalOffset = diameter * 0.866025; 
     
     final rows = [
       [1],
@@ -1069,8 +1095,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
 
     return [
-      // Add generous padding above rack for bubbles to prevent clipping
-      const SizedBox(height: 120),
+      // Minimal padding for hint bubbles - center balls vertically
+      const SizedBox(height: 40),
       rackStack,
     ];
   }

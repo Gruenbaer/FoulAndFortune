@@ -5,12 +5,13 @@
 /// eliminating the risk of accidental exposure through tool inspection or commits.
 class BuildEnv {
   // Gemini API Configuration
-  static const String geminiApiKey = String.fromEnvironment(
-    'GEMINI_API_KEY',
-    defaultValue: '',
-  );
+  static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
   
-  // SMTP Configuration for Email Feedback
+  // GitHub Integration
+  static const String githubToken = String.fromEnvironment('GITHUB_TOKEN');
+  static const String githubRepo = String.fromEnvironment('GITHUB_REPO', defaultValue: 'Gruenbaer/141fortune');
+  
+  // Email Configuration (Feedback)
   static const String smtpHost = String.fromEnvironment(
     'SMTP_HOST',
     defaultValue: 'w0208b4b.kasserver.com',

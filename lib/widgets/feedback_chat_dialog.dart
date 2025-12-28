@@ -245,7 +245,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                 _detectedIssue = BugData.fromJson(json);
               });
             } else if (json['type'] == 'feature') {
-              setState() {
+              setState(() {
                 _issueType = 'feature';
                 _detectedIssue = FeatureData.fromJson(json);
               });
@@ -445,7 +445,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                   throw Exception("Unknown issue type");
                 }
                 
-                _addBotMessage("✅ Issue created successfully!\nFile: $path");
+                _addBotMessage("✅ Issue created successfully!\nLocation: $path");
                 setState(() {
                   _detectedIssue = null;
                   _isCreatingIssue = false;
