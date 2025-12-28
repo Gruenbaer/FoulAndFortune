@@ -15,7 +15,10 @@ class FoulEvent extends GameEvent {
   final Player player;
   final int points;
   final String message;
-  FoulEvent(this.player, this.points, this.message);
+  final int? positivePoints; // Optional: balls pocketed for breakdown display
+  final int? penalty; // Optional: foul penalty for breakdown display
+  
+  FoulEvent(this.player, this.points, this.message, {this.positivePoints, this.penalty});
 }
 
 class WarningEvent extends GameEvent {
@@ -252,11 +255,8 @@ class GameState extends ChangeNotifier {
          breakFoulHintMessage = "ALEX...die 15!";
       } else {
          breakFoulHintMessage = EasterEggs.getRandomBreakFoulMessage();
-      }
-      
-      // Check for Vinzend achievement (13 clicks on 13)
-      if (ball13ErrorCount == 13) {
-        achievementManager?.unlock('vinzend');
+       
+       breakFoulHintMessage = EasterEggs.getRandomBreakFoulMessage();
       }
     } else {
       breakFoulHintMessage = EasterEggs.getRandomBreakFoulMessage();
@@ -413,6 +413,12 @@ class GameState extends ChangeNotifier {
 
     if (currentFoulMode == FoulMode.normal) {
       final penalty = foulTracker.applyNormalFoul(currentPlayer); // Use current Player
+      // Calculate scored points once if needed
+      int? scoredPoints;
+      if (points > 0) {
+        scoredPoints = (points * currentPlayer.handicapMultiplier).round();
+        currentPlayer.addScore(scoredPoints);
+      }
       currentPlayer.addScore(penalty);
       foulText = penalty == -15 ? ' (3-Foul!)' : ' (Foul)';
       
@@ -426,8 +432,12 @@ class GameState extends ChangeNotifier {
            "3 FOULS!", 
            "Three consecutive fouls.\nPenalty: -15 Points."
         ));
+      } else if (scoredPoints != null) {
+        // Show breakdown: positive points and foul penalty
+        eventQueue.add(FoulEvent(currentPlayer, scoredPoints + penalty, "Foul!", positivePoints: scoredPoints, penalty: penalty));
       } else {
-        eventQueue.add(FoulEvent(currentPlayer, penalty, "Foul!")); // Usually -1
+        // Just penalty, no positive points
+        eventQueue.add(FoulEvent(currentPlayer, penalty, "Foul!"));
       }
     } else if (currentFoulMode == FoulMode.severe) {
       final penalty = foulTracker.applySevereFoul(currentPlayer); // Use current Player
@@ -512,19 +522,9 @@ class GameState extends ChangeNotifier {
     if (newBallCount == 1) {
       _updateRackCount(15); // Reset to full rack (14 + 1)
       
-      // Determine Log Message
-      String reRackType;
-      if (points > 0 && currentFoulMode == FoulMode.none) {
-         reRackType = "14.1 Continuous";
-      } else if (currentFoulMode != FoulMode.none) {
-         reRackType = "After Foul";
-      } else {
-         reRackType = "Auto/Safe";
-      }
-      
-      _logAction('${currentPlayer.name}: Re-rack ($reRackType)');
+      _logAction('${currentPlayer.name}: Re-rack');
       // Queue re-rack animation event
-      eventQueue.add(ReRackEvent(reRackType));
+      eventQueue.add(ReRackEvent("Re-rack!"));
       isReRack = true;
     }
 
@@ -600,7 +600,9 @@ class GameState extends ChangeNotifier {
     foulMode = FoulMode.none;
     resetBreakFoulError();
 
-    int points = 15;
+    // Award points based on actual balls remaining on table
+    int ballsRemaining = activeBalls.length;
+    int points = ballsRemaining;
     String foulText = '';
 
     if (currentFoulMode == FoulMode.normal) {
@@ -615,30 +617,33 @@ class GameState extends ChangeNotifier {
       currentPlayer.consecutiveFouls = 0;
     }
 
-    // Apply multiplier to the POSITIVE portion (15).
+    // Apply multiplier to the POSITIVE portion (ballsRemaining).
     // Penalties were added to points above.
-    // Logic: Points = 15 + penalty. 
-    // If penalty is -2 (Break foul), total is 13?
-    // Or is it 15 * X + penalty?
-    // Usually Double Sack means "I cleared table (+15)".
-    // So +15 should be multiplied.
-    
-    // Recalculate based on components
-
-    
-    // Since previous logic block calculated 'points' as inclusive, let's override it
-    // But wait, the previous block called foulTracker which updates state (consecutive counts).
-    // We should keep that side effect.
-    
-    // Let's assume 'points' variable holds raw points (15 + penalty).
-    // We need to extract the 15, multiply it, and add penalty back.
-    // points = 15 + penalty.
-    // penalty = points - 15.
-    int penalty = points - 15;
-    int multipliedPoints = (15 * currentPlayer.handicapMultiplier).round() + penalty;
+    // Extract penalty, multiply the positive ball count, then add penalty back
+    int penalty = points - ballsRemaining;
+    int multipliedPoints = (ballsRemaining * currentPlayer.handicapMultiplier).round() + penalty;
     
     currentPlayer.addScore(multipliedPoints);
-    _logAction('${currentPlayer.name}: Double-Sack! +$multipliedPoints$foulText');
+    _logAction('${currentPlayer.name}: Double-sack! +$multipliedPoints$foulText');
+    
+    // Queue animation events - show breakdown if there's a penalty
+    if (penalty != 0) {
+      // Show breakdown: positive points (green) and penalty (red)
+      int multipliedBalls = (ballsRemaining * currentPlayer.handicapMultiplier).round();
+      eventQueue.add(FoulEvent(
+        currentPlayer, 
+        multipliedPoints, 
+        "",
+        positivePoints: multipliedBalls,
+        penalty: penalty,
+      ));
+    } else {
+      // No penalty - just show total
+      eventQueue.add(FoulEvent(currentPlayer, multipliedPoints, ""));
+    }
+    
+    // Queue rerack animation
+    eventQueue.add(ReRackEvent("Re-rack!"));
     
     _resetRack();
 

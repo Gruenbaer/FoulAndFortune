@@ -76,10 +76,17 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     if (event is FoulEvent) {
       // Play Animation
-       _showFlyingPenalty(event.points, event.message, event.player, () {
-          _isProcessingEvent = false;
-          _processNextEvent(); // Loop
-       });
+       _showFlyingPenalty(
+         event.points, 
+         event.message, 
+         event.player, 
+         () {
+           _isProcessingEvent = false;
+           _processNextEvent(); // Loop
+         },
+         positivePoints: event.positivePoints,
+         penalty: event.penalty,
+       );
     } else if (event is WarningEvent) {
       // Skip WarningEvent dialogs entirely - no more Break Foul info
       _isProcessingEvent = false;
@@ -954,34 +961,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         gameState.setShowBreakFoulHint(false);
       }
       
-      // Special handling for Ball 15 during Break Foul
-      if (gameState.foulMode == FoulMode.severe && ballNumber == 15) {
-        // Show info dialog BEFORE processing
-        showZoomDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Important Break Foul Rules'),
-            content: Text(
-              '⚠️ Special Rules:\n\n'
-              '• You CAN commit Break Foul again\n'
-              '• The 3-Foul rule does NOT apply\n'
-              '• Each Break Foul is -2 points\n'
-              '• Only Ball 15 ends the turn',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // THEN process the ball tap
-                  gameState.onBallTapped(ballNumber);
-                },
-                child: const Text('Got it!'),
-              ),
-            ],
-          ),
-        );
-        return;
-      }
+      // Ball 15 during Break Foul is processed normally, no special dialog needed
       
       if (ballNumber == 0) {
         gameState.onDoubleSack();
@@ -1162,7 +1142,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     Overlay.of(context, rootOverlay: true).insert(_reRackOverlayEntry!);
   }
 
-  void _showFlyingPenalty(int points, String message, Player player, VoidCallback onComplete) {
+  void _showFlyingPenalty(int points, String message, Player player, VoidCallback onComplete, {int? positivePoints, int? penalty}) {
      // 1. Identify Target Plaque Key based on player instance
      final isP1 = player == Provider.of<GameState>(context, listen: false).players[0];
      final targetKey = isP1 ? _p1PlaqueKey : _p2PlaqueKey;
@@ -1205,19 +1185,21 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
      );
      
      // 5. Create Points Overlay (above score, fades then updates)
-     _pointsOverlayEntry = OverlayEntry(
-       builder: (context) => FoulPointsOverlay(
-         points: points,
-         targetPosition: position,
-         onImpact: () {
-            // Trigger Shake on Plaque and update score
-            targetKey.currentState?.triggerPenaltyImpact();
-         },
-         onFinish: () {
-            _pointsOverlayEntry?.remove();
-            _pointsOverlayEntry = null;
-            onComplete();
-         },
+      _pointsOverlayEntry = OverlayEntry(
+        builder: (context) => FoulPointsOverlay(
+          points: points,
+          positivePoints: positivePoints,
+          penalty: penalty,
+          targetPosition: position,
+          onImpact: () {
+             // Trigger Shake on Plaque and update score
+             targetKey.currentState?.triggerPenaltyImpact();
+          },
+          onFinish: () {
+             _pointsOverlayEntry?.remove();
+             _pointsOverlayEntry = null;
+             onComplete();
+          },
        ),
      );
      
