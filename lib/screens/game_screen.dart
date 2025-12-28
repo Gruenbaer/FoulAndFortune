@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../models/game_state.dart';
@@ -810,69 +810,33 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         ),
 
                         // Controls
+                        // Controls (COMPACT)
                         Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           child: Row(
                             children: [
-                              // Foul Toggle
+                              // Foul Button - COMPACT
                               Expanded(
                                 child: SteampunkButton(
-                                    // 2. Wrap Custom Child in SizedBox for Exact Height Control (and consistency)
-                                    child: SizedBox(
-                                      // height removed to match Safe button natural sizing
-                                      width: double.infinity, // Force full width to prevent resizing jitter
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                        if (gameState.foulMode == FoulMode.severe)
-                                           Text(
-                                             'BREAK FOUL',
-                                             maxLines: 1,
-                                              style: TextStyle(
-                                               color: Colors.white, // Bright White
-                                               fontWeight: FontWeight.w900,
-                                               fontSize: 16, 
-                                               letterSpacing: 0.5,
-                                               fontFamily: 'Crimson Pro',
-                                               shadows: colors.themeId == 'cyberpunk' ? [
-                                                 BoxShadow(color: colors.primary, blurRadius: 10, spreadRadius: 2),
-                                                 BoxShadow(color: colors.primary, blurRadius: 20, spreadRadius: 5),
-                                               ] : [],
-                                             ),
-                                             textAlign: TextAlign.center,
-                                           )
-                                        else
-                                           Text(
-                                             gameState.foulMode == FoulMode.none ? 'NO\nFOUL' : 'FOUL',
-                                             style: TextStyle(
-                                               color: Colors.white, 
-                                               fontSize: 20, 
-                                               fontWeight: FontWeight.w900,
-                                               letterSpacing: 0.5,
-                                               fontFamily: 'Crimson Pro',
-                                               shadows: colors.themeId == 'cyberpunk' ? [
-                                                 BoxShadow(color: colors.primary, blurRadius: 10, spreadRadius: 2),
-                                               ] : [],
-                                             ),
-                                             textAlign: TextAlign.center,
-                                           ),
-                                           
-                                        if (gameState.foulMode != FoulMode.none)
-                                           Text(
-                                              gameState.foulMode == FoulMode.normal ? '-1' : '-2',
-                                              style: TextStyle(
-                                                color: Colors.white, // Bright White
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14, 
-                                                fontFamily: 'Crimson Pro',
-                                                shadows: colors.themeId == 'cyberpunk' ? [
-                                                   BoxShadow(color: colors.primary, blurRadius: 8),
-                                                ] : [],
-                                              ),
-                                              textAlign: TextAlign.center,
-                                           ),
-                                      ],
+                                  child: SizedBox(
+                                    height: 32, // Compact height
+                                    width: double.infinity,
+                                    child: Center(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          gameState.foulMode == FoulMode.none 
+                                            ? 'NO FOUL' 
+                                            : (gameState.foulMode == FoulMode.normal ? 'FOUL -1' : 'BREAK FOUL -2'),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.3,
+                                          ),
+                                          maxLines: 1,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   onPressed: gameState.gameOver ? () {} : () {
@@ -882,7 +846,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                          next = FoulMode.normal; 
                                          break;
                                        case FoulMode.normal: 
-                                         // severe (Break Foul) only allowed in Break Sequence
                                          next = gameState.canBreakFoul ? FoulMode.severe : FoulMode.none; 
                                          break;
                                        case FoulMode.severe: 
@@ -894,48 +857,33 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              // Safe Button (Toggle)
+                              // Safe Button - COMPACT (No Shield)
                               Expanded(
                                 child: SteampunkButton(
-                                  // Match Foul button structure: Column with fixed width
                                   child: SizedBox(
+                                    height: 32, // Compact height
                                     width: double.infinity,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.shield,
-                                          color: Colors.white, 
-                                          size: 24,
-                                          shadows: colors.themeId == 'cyberpunk' ? [
-                                             BoxShadow(color: colors.primary, blurRadius: 10),
-                                          ] : [],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
+                                    child: Center(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: const Text(
                                           'SAFE',
                                           style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w900,
-                                            fontFamily: 'Crimson Pro',
-                                            shadows: colors.themeId == 'cyberpunk' ? [
-                                               BoxShadow(color: colors.primary, blurRadius: 10, spreadRadius: 2),
-                                            ] : [],
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.3,
                                           ),
+                                          maxLines: 1,
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                    onPressed: gameState.gameOver ? () {} : () {
-                                      // Action logic now handled by GameState logic emitting SafeEvent
-                                      // We just commit the intent here
-                                      gameState.onSafe();
-                                    },
-                                  // Green gradient when Active (Safe Mode ON)
+                                  onPressed: gameState.gameOver ? () {} : () {
+                                    gameState.onSafe();
+                                  },
                                   backgroundGradientColors: gameState.isSafeMode 
-                                    ? const [Color(0xFF66BB6A), Color(0xFF2E7D32)] // Green/Dark Green
+                                    ? const [Color(0xFF66BB6A), Color(0xFF2E7D32)]
                                     : null,
                                 ),
                               ),

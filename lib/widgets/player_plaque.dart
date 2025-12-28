@@ -22,7 +22,6 @@ class PlayerPlaque extends StatefulWidget {
 
 class PlayerPlaqueState extends State<PlayerPlaque> with SingleTickerProviderStateMixin {
   late AnimationController _effectController;
-  // late Animation<Offset> _shakeAnimation; // REMOVED - causing overflow flashing
   late Animation<double> _scaleAnimation;
   
   // UI Logic: Visual Score (delayed update)
@@ -37,15 +36,6 @@ class PlayerPlaqueState extends State<PlayerPlaque> with SingleTickerProviderSta
     super.initState();
     _effectController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
-
-    // Shake: REMOVED - causing overflow flashing
-    // _shakeAnimation = TweenSequence<Offset>([
-    //   TweenSequenceItem(tween: Tween(begin: Offset.zero, end: const Offset(-5, 0)), weight: 1),
-    //   TweenSequenceItem(tween: Tween(begin: const Offset(-5, 0), end: const Offset(5, 0)), weight: 2),
-    //   TweenSequenceItem(tween: Tween(begin: const Offset(5, 0), end: const Offset(-5, 0)), weight: 2),
-    //   TweenSequenceItem(tween: Tween(begin: const Offset(-5, 0), end: const Offset(5, 0)), weight: 2),
-    //   TweenSequenceItem(tween: Tween(begin: const Offset(5, 0), end: Offset.zero), weight: 1),
-    // ]).animate(CurvedAnimation(parent: _effectController, curve: Curves.easeInOut));
     
     // Scale: Bump up
     _scaleAnimation = TweenSequence<double>([
@@ -83,8 +73,6 @@ class PlayerPlaqueState extends State<PlayerPlaque> with SingleTickerProviderSta
           setState(() {
             _visualScore = widget.player.score;
           });
-          // Visual Bump REMOVED - no plaque animations
-          // _effectController.forward(from: 0.0);
         }
       }
     }
@@ -98,8 +86,6 @@ class PlayerPlaqueState extends State<PlayerPlaque> with SingleTickerProviderSta
 
   // Exposed method to trigger effect AND update score
   void triggerPenaltyImpact() {
-    // _effectController.forward(from: 0.0); // REMOVED - no plaque animations
-    
     // Award the score (Sync visual to actual)
     if (_visualScore != widget.player.score) {
       setState(() {
@@ -119,7 +105,6 @@ class PlayerPlaqueState extends State<PlayerPlaque> with SingleTickerProviderSta
     final isCyberpunk = colors.themeId == 'cyberpunk';
     
     // Determine Text Color (Normal or Flash)
-    // We animate a custom color override.
     return AnimatedBuilder(
       animation: _effectController,
       builder: (context, child) {
@@ -160,7 +145,6 @@ class PlayerPlaqueState extends State<PlayerPlaque> with SingleTickerProviderSta
                         blurRadius: 12,
                         spreadRadius: 2,
                       ),
-                    // Penalty Glow removed (no flash)
                   ],
                   // Subtle gradient
                   gradient: LinearGradient(
@@ -251,24 +235,77 @@ class PlayerPlaqueState extends State<PlayerPlaque> with SingleTickerProviderSta
                   
                   const SizedBox(height: 4),
                   
-                  // Inning Counter
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.black38,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: colors.primaryDark.withOpacity(0.5)),
-                    ),
-                    child: Text(
-                      'INNING ${widget.player.currentInning}',
-                      style: GoogleFonts.nunito(
-                        textStyle: theme.textTheme.bodySmall,
-                        color: colors.textMain.withOpacity(0.7),
-                        fontSize: 10,
-                        letterSpacing: 1.2,
-                        fontStyle: FontStyle.italic,
+                  // Stats Row: Last Points | HR
+                  Row(
+                    mainAxisAlignment: widget.isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
+                    children: [
+                      // Last Points (Left)
+                      if (widget.player.lastPoints != null && widget.player.lastPoints! > 0) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black38,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: colors.accent.withOpacity(0.5)),
+                          ),
+                          child: Text(
+                            '+${widget.player.lastPoints}',
+                            style: GoogleFonts.nunito(
+                              textStyle: theme.textTheme.bodySmall,
+                              color: colors.accent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      // Spacer handled by mainAxisAlignment but we want pushing to edges if both present?
+                      // Actually user said: "Last points scored to the left. highest run HR and the number to the right."
+                      // And this is inside a Column.
+                      
+                      // Highest Run (Right)
+                      // If Last Points is not shown, we still want HR on right? Or just next to it?
+                      // "to the left" and "to the right" usually implies separation.
+                      if (widget.player.lastPoints == null || widget.player.lastPoints! <= 0)
+                        const Spacer(), // Push HR to right if alone
+                        
+                      if (widget.player.lastPoints != null && widget.player.lastPoints! > 0)
+                         const Spacer(), // Push apart if both
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: colors.primaryDark.withOpacity(0.5)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'HR ',
+                              style: GoogleFonts.nunito(
+                                textStyle: theme.textTheme.bodySmall,
+                                color: colors.textMain.withOpacity(0.6),
+                                fontSize: 9,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            Text(
+                              '${widget.player.highestRun}',
+                              style: GoogleFonts.nunito(
+                                textStyle: theme.textTheme.bodySmall,
+                                color: colors.primary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
