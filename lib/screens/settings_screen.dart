@@ -53,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final fortuneTheme = FortuneTheme.of(context);
+    final fortuneTheme = FortuneColors.of(context);
     
     // Helper to build a control panel section
     Widget buildSectionHeader(String title, IconData icon) {
@@ -62,16 +62,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         decoration: BoxDecoration(
           color: fortuneTheme.secondary.withOpacity(0.3),
-          border: Border(bottom: BorderSide(color: fortuneTheme.primaryAccent, width: 2)),
+          border: Border(bottom: BorderSide(color: fortuneTheme.primary, width: 2)),
         ),
         child: Row(
           children: [
-            Icon(icon, color: fortuneTheme.primaryAccent),
+            Icon(icon, color: fortuneTheme.primary),
             const SizedBox(width: 12),
             Text(
               title.toUpperCase(),
               style: theme.textTheme.labelLarge?.copyWith(
-                color: fortuneTheme.primaryAccent,
+                color: fortuneTheme.primary,
                 letterSpacing: 2.0,
               ),
             ),
@@ -103,14 +103,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: fortuneTheme.primaryAccent),
+        iconTheme: IconThemeData(color: fortuneTheme.primary),
         actions: [
           Stack(
             alignment: Alignment.center,
             children: [
               IconButton(
                 icon: const Icon(Icons.save),
-                color: fortuneTheme.primaryAccent,
+                color: fortuneTheme.primary,
                 onPressed: _saveSettings,
                 tooltip: 'Save Configuration',
               ),
@@ -151,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: ListTile(
                   title: Text(l10n.raceToScore, style: theme.textTheme.bodyLarge),
                   subtitle: Text('${_settings.raceToScore} ${l10n.points}', style: theme.textTheme.bodySmall),
-                  trailing: Icon(Icons.edit, color: fortuneTheme.primaryAccent),
+                  trailing: Icon(Icons.edit, color: fortuneTheme.primary),
                   onTap: () => _editRaceToScore(),
                 ),
               ),
@@ -161,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: ListTile(
                   title: Text(l10n.player1, style: theme.textTheme.bodyLarge),
                   subtitle: Text(_settings.player1Name, style: theme.textTheme.displaySmall?.copyWith(fontSize: 18)),
-                  trailing: Icon(Icons.edit, color: fortuneTheme.primaryAccent),
+                  trailing: Icon(Icons.edit, color: fortuneTheme.primary),
                   onTap: () => _editPlayerName(1),
                 ),
               ),
@@ -169,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: ListTile(
                   title: Text(l10n.player2, style: theme.textTheme.bodyLarge),
                   subtitle: Text(_settings.player2Name, style: theme.textTheme.displaySmall?.copyWith(fontSize: 18)),
-                  trailing: Icon(Icons.edit, color: fortuneTheme.primaryAccent),
+                  trailing: Icon(Icons.edit, color: fortuneTheme.primary),
                   onTap: () => _editPlayerName(2),
                 ),
               ),
@@ -204,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                    activeTrackColor: fortuneTheme.secondary,
                   secondary: Icon(
                     _settings.soundEnabled ? Icons.volume_up : Icons.volume_off,
-                    color: _settings.soundEnabled ? fortuneTheme.primaryAccent : Colors.grey,
+                    color: _settings.soundEnabled ? fortuneTheme.primary : Colors.grey,
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -242,7 +242,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       label: '${_settings.maxInnings}',
                       activeColor: fortuneTheme.accent,
                       inactiveColor: fortuneTheme.secondary.withOpacity(0.3),
-                      thumbColor: fortuneTheme.primaryAccent,
+                      thumbColor: fortuneTheme.primary,
                       onChanged: (value) {
                         setState(() {
                           _settings = _settings.copyWith(maxInnings: value.round());
@@ -383,11 +383,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.info_outline, color: fortuneTheme.primaryAccent, size: 20),
+                          Icon(Icons.info_outline, color: fortuneTheme.primary, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             '3-FOUL PROTOCOL',
-                            style: theme.textTheme.labelLarge?.copyWith(color: fortuneTheme.primaryAccent),
+                            style: theme.textTheme.labelLarge?.copyWith(color: fortuneTheme.primary),
                           ),
                         ],
                       ),
@@ -553,12 +553,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Navigator.pop(context);
     }
   }
-  Widget _buildMultiplierSelector(double current, Function(double) onChanged) {`r`n    final fortuneTheme = FortuneTheme.of(context);
+  Widget _buildMultiplierSelector(double current, Function(double) onChanged) {`r`n    final fortuneTheme = FortuneColors.of(context);
     return Container(
       decoration: BoxDecoration(
         color: fortuneTheme.secondary.withOpacity(0.5),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: fortuneTheme.primaryAccent.withOpacity(0.3)),
+        border: Border.all(color: fortuneTheme.primary.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -575,7 +575,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(
                 '${val.toInt()}x',
                 style: TextStyle(
-                  color: isSelected ? Colors.black : fortuneTheme.primaryAccent,
+                  color: isSelected ? Colors.black : fortuneTheme.primary,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
