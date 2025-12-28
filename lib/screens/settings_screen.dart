@@ -52,7 +52,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);`r`n    final fortuneTheme = FortuneTheme.of(context);
+    final theme = Theme.of(context);
+    final fortuneTheme = FortuneTheme.of(context);
     
     // Helper to build a control panel section
     Widget buildSectionHeader(String title, IconData icon) {
