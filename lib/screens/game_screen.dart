@@ -655,7 +655,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 ),
                                 // Center: Inning number (larger, prominent)
                                 Text(
-                                  '${gameState.currentInning}',
+                                  '${gameState.players.firstWhere((p) => p.isActive).currentInning}',
                                   style: theme.textTheme.titleLarge?.copyWith(
                                     color: colors.accent,
                                     fontWeight: FontWeight.w900,
