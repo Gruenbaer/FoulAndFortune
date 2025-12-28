@@ -553,7 +553,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Navigator.pop(context);
     }
   }
-  Widget _buildMultiplierSelector(double current, Function(double) onChanged) {
+  Widget _buildMultiplierSelector(double current, Function(double) onChanged) {`r`n    final fortuneTheme = FortuneTheme.of(context);
     return Container(
       decoration: BoxDecoration(
         color: fortuneTheme.secondary.withOpacity(0.5),
