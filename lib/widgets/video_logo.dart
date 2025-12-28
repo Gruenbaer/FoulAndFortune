@@ -33,7 +33,7 @@ class _VideoLogoState extends State<VideoLogo> {
           
           // Only play sound on first cold start AND if sound is enabled
           if (!_hasPlayedSound && widget.soundEnabled) {
-            _controller.setVolume(1.0); // Start with full volume
+            _controller.setVolume(0.0); // // Start with full volume
             _hasPlayedSound = true; // Mark as played
             
             // Add listener to fade out sound after first play
