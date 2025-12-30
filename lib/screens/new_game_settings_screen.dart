@@ -289,7 +289,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                   _buildPlayerAutocomplete(
                     label: l10n.player1,
                     initialValue: _settings.player1Name,
-                    key: Key('player1_auto_$_initialSettingsLoaded'),
+                    key: const ValueKey('player1_autocomplete'),
                     onChanged: (name) {
                       _settings = _settings.copyWith(player1Name: name);
                     },
@@ -326,7 +326,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                   _buildPlayerAutocomplete(
                     label: l10n.player2,
                     initialValue: _settings.player2Name,
-                    key: Key('player2_auto_$_initialSettingsLoaded'),
+                    key: const ValueKey('player2_autocomplete'),
                     onChanged: (name) {
                       _settings = _settings.copyWith(player2Name: name);
                     },
@@ -461,7 +461,12 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   }) {
     return Autocomplete<String>(
       key: key, 
-      initialValue: TextEditingValue(text: initialValue, selection: TextSelection.collapsed(offset: initialValue.length)),
+      initialValue: TextEditingValue(
+        text: initialValue,
+        selection: TextSelection.collapsed(
+          offset: initialValue.length.clamp(0, initialValue.length),
+        ),
+      ),
       optionsBuilder: (textEditingValue) {
         if (textEditingValue.text.isEmpty) {
           return const Iterable<String>.empty();
