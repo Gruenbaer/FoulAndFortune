@@ -189,19 +189,19 @@ class _FoulPointsOverlayState extends State<FoulPointsOverlay> with SingleTicker
                   child: Container(
                     width: 200, // Fixed width
                     constraints: const BoxConstraints(maxHeight: 100),
-                    width: 200, // Fixed width
-                    constraints: const BoxConstraints(maxHeight: 100),
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Text(
-                        // Logic Update: User wants ONLY the penalty shown in animation, not the +X
-                        // If penalty is provided, show it (e.g. -1). Else show points.
-                        '${widget.penalty ?? (widget.points >= 0 ? "+" : "")}${widget.penalty ?? widget.points}',
+                        // Logic Update: Show ONLY penalty if present (e.g. "-1")
+                        widget.penalty != null 
+                            ? '${widget.penalty}' 
+                            : '${widget.points >= 0 ? "+" : ""}${widget.points}',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.nunito(
                           fontSize: singleFontSize,
                           fontWeight: FontWeight.w900,
-                          color: (widget.penalty ?? widget.points) >= 0 ? Colors.greenAccent : Colors.redAccent,
+                          // Use penalty color if penalty exists, otherwise based on points
+                          color: (widget.penalty != null || widget.points < 0) ? Colors.redAccent : Colors.greenAccent,
                           shadows: [
                             const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
                           ],
