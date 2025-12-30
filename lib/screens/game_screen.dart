@@ -728,31 +728,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
 
-                        // 2. Historical Stats Row (Avg | Highest)
+                        // 2. Historical Stats Row (Themed)
                         if (_p1Stats != null && _p2Stats != null)
                           Container(
-                            color: Colors.black87,
-                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                            margin: const EdgeInsets.symmetric(vertical: 4), 
+                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: colors.primaryDark.withOpacity(0.4),
+                              border: Border(
+                                top: BorderSide(color: colors.primary.withOpacity(0.2)),
+                                bottom: BorderSide(color: colors.primary.withOpacity(0.2)),
+                              ),
+                            ),
                             child: Row(
                               children: [
                                 // P1 Stats
                                 Expanded(
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      _buildStatItem('GD', _p1Stats!.generalAverage.toStringAsFixed(2)),
-                                      _buildStatItem('HR', '${_p1Stats!.highestRun}'),
+                                      _buildStatItem('AVG', _p1Stats!.generalAverage.toStringAsFixed(2)),
+                                      _buildStatItem('HIGH', '${_p1Stats!.highestRun}'),
                                     ],
                                   ),
                                 ),
-                                Container(width: 2, height: 24, color: SteampunkTheme.brassDark), // Divider
+                                Container(width: 1, height: 20, color: colors.primary.withOpacity(0.5)), // Themed Divider
                                 // P2 Stats
                                 Expanded(
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      _buildStatItem('GD', _p2Stats!.generalAverage.toStringAsFixed(2)),
-                                      _buildStatItem('HR', '${_p2Stats!.highestRun}'),
+                                      _buildStatItem('AVG', _p2Stats!.generalAverage.toStringAsFixed(2)),
+                                      _buildStatItem('HIGH', '${_p2Stats!.highestRun}'),
                                     ],
                                   ),
                                 ),
