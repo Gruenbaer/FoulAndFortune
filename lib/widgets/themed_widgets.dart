@@ -389,36 +389,75 @@ class GhibliFramePainter extends CustomPainter {
     _drawLeaves(canvas, size, borderPaint, fillPaint);
   }
   
-  void _drawLeaves(Canvas canvas, Size size, Paint borderPaint, Paint fillPaint) {
-    // Top Left Leaves - Overlapping the border slightly
+  void _drawLeaves(Canvas canvas, Size size, Paint borderPaint, Paint baseFillPaint) {
+    // Leaf Paint (Vibrant Natural Green)
+    final leafFillPaint = Paint()
+      ..color = const Color(0xFF8CD47E) // Lighter/Brighter than the button base
+      ..style = PaintingStyle.fill;
+      
+    // 1. LEFT SPROUT (Double Leaf) -- Growing from the left vertical edge
     canvas.save();
-    // Position at the visual "corner" of the wobbly shape
-    canvas.translate(size.height * 0.2, size.height * 0.2); 
-    canvas.rotate(-0.4);
+    // Move to roughly where the visual "start" of the left curve is 
+    // The path starts at (0, h/2) and curves up. 
+    // We want to sprout around (0, h*0.3).
+    canvas.translate(-2, size.height * 0.35); 
+    canvas.rotate(-0.5); // Tilt outwards
     
-    final leafPaint = Paint()..style = PaintingStyle.fill;
+    // Scale up significantly
+    const double scale = 1.8;
+    canvas.scale(scale);
 
-    // Leaf 1 (Berry Red)
-    leafPaint.color = colors.secondary; 
+    // Stem (merging with border)
+    final stemPath = Path();
+    stemPath.moveTo(0, 0); 
+    stemPath.quadraticBezierTo(-5, -5, -8, -15); // Main stem up
     
-    final l1 = Path();
-    l1.moveTo(0, 0);
-    l1.quadraticBezierTo(-10, -8, -14, 0); // Wider
-    l1.quadraticBezierTo(-6, 12, 0, 0);
+    // Leaf A (Top)
+    final leafA = Path();
+    leafA.moveTo(-8, -15);
+    leafA.quadraticBezierTo(-15, -25, -5, -35); // Left curve
+    leafA.quadraticBezierTo(5, -20, -8, -15);   // Right curve
     
-    canvas.drawPath(l1, leafPaint); 
-    canvas.drawPath(l1, borderPaint); // Border
+    // Leaf B (Side)
+    final leafB = Path();
+    leafB.moveTo(-6, -10); // Branch off stem
+    leafB.quadraticBezierTo(-15, -5, -20, 5); 
+    leafB.quadraticBezierTo(-10, 8, -6, -10);
     
-    // Leaf 2 (Sun Yellow)
-    leafPaint.color = colors.accent;
+    // Draw Leaf Fills
+    canvas.drawPath(leafA, leafFillPaint);
+    canvas.drawPath(leafB, leafFillPaint);
     
-    final l2 = Path();
-    l2.moveTo(0, 0);
-    l2.quadraticBezierTo(2, -10, 8, -14);
-    l2.quadraticBezierTo(10, -4, 0, 0);
+    // Draw Leaf Borders (Sketchy)
+    canvas.drawPath(leafA, borderPaint);
+    canvas.drawPath(leafB, borderPaint);
     
-    canvas.drawPath(l2, leafPaint);
-    canvas.drawPath(l2, borderPaint);
+    // Draw Stem (Thicker connection)
+    canvas.drawPath(stemPath, borderPaint..strokeWidth = 2);
+    
+    // Little vein details
+    canvas.drawPath(Path()..moveTo(-8, -15)..lineTo(-6, -25), borderPaint..strokeWidth = 1);
+    canvas.drawPath(Path()..moveTo(-6, -10)..lineTo(-15, 0), borderPaint..strokeWidth = 1);
+
+    canvas.restore();
+    
+    
+    // 2. RIGHT ACCENT (Single Leaf) -- Wrapping onto the bottom right
+    canvas.save();
+    canvas.translate(size.width - 5, size.height * 0.7); // Bottom right edge
+    canvas.rotate(1.0); // Pointing down/out
+    canvas.scale(1.5);
+    
+    final leafC = Path();
+    leafC.moveTo(0, 0); // Sprout point
+    leafC.quadraticBezierTo(10, 0, 15, 10);
+    leafC.quadraticBezierTo(0, 15, 0, 0);
+    
+    canvas.drawPath(leafC, leafFillPaint);
+    canvas.drawPath(leafC, borderPaint..strokeWidth = 1.5);
+    
+    // Stem connection
+    canvas.drawPath(Path()..moveTo(0, 0)..lineTo(-5, 0), borderPaint..strokeWidth = 2);
     
     canvas.restore();
   }
