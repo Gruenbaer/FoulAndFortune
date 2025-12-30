@@ -8,6 +8,7 @@ class Player {
   double handicapMultiplier; // Points multiplier (1.0, 2.0, 3.0)
   int? lastPoints; // Points from the very last action
   int highestRun; // Highest run in the current match
+  int lastRun; // Run from the previous inning (for display)
   int currentRun; // Run in current inning
   int updateCount; // For detecting changes (animations)
 
@@ -22,6 +23,7 @@ class Player {
     this.lastPoints,
     this.highestRun = 0,
     this.currentRun = 0,
+    this.lastRun = 0,
     this.updateCount = 0,
   }) : handicapMultiplier = handicapMultiplier.clamp(0.1, 10.0);
 
@@ -41,12 +43,14 @@ class Player {
   }
 
   void incrementInning() {
+    lastRun = currentRun; // Capture run before reset for display
     currentInning++;
     currentRun = 0; // Reset run for new inning
   }
 
   void incrementSaves() {
     saves++;
+    updateCount++; // Trigger animation for +0/Safe
   }
 
   Player copyWith({
@@ -70,9 +74,10 @@ class Player {
       saves: saves ?? this.saves,
       consecutiveFouls: consecutiveFouls ?? this.consecutiveFouls,
       handicapMultiplier: (handicapMultiplier ?? this.handicapMultiplier).clamp(0.1, 10.0),
-      lastPoints: lastPoints ?? this.lastPoints,
+    lastPoints: lastPoints ?? this.lastPoints,
       highestRun: highestRun ?? this.highestRun,
       currentRun: currentRun ?? this.currentRun,
+      lastRun: lastRun ?? this.lastRun,
       updateCount: updateCount ?? this.updateCount,
     );
   }
@@ -87,6 +92,7 @@ class Player {
     'lastPoints': lastPoints,
     'highestRun': highestRun,
     'currentRun': currentRun,
+    'lastRun': lastRun,
   };
 
   factory Player.fromJson(Map<String, dynamic> json) => Player(
@@ -100,5 +106,6 @@ class Player {
     lastPoints: json['lastPoints'] as int?,
     highestRun: json['highestRun'] as int? ?? 0,
     currentRun: json['currentRun'] as int? ?? 0,
+    lastRun: json['lastRun'] as int? ?? 0,
   );
 }

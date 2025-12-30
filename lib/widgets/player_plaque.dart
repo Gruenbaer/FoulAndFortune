@@ -289,36 +289,45 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                     mainAxisAlignment: widget.isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
                     children: [
                       // Last Points (Left) - Always shown, animated via listener
-                      Transform.scale(
-                        scale: _lastPointsPulse.value,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.black38,
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: (widget.player.lastPoints ?? 0) == 0
-                                ? Colors.grey.withOpacity(0.3)
-                                : ((widget.player.lastPoints ?? 0) < 0 
-                                    ? Colors.red.withOpacity(0.5) 
-                                    : colors.accent.withOpacity(0.5)),
+                      // Last Points / Run Indicator
+                      // Shows Cumulative Run
+                      Builder(
+                        builder: (context) {
+                          // Logic: Active -> currentRun, Inactive -> lastRun
+                          final int runValue = widget.player.isActive 
+                              ? widget.player.currentRun 
+                              : widget.player.lastRun;
+                          
+                          // Always show sign (+0, +5, -1)
+                          final String runText = runValue >= 0 ? '+$runValue' : '$runValue';
+                          
+                          // Color logic: 0 is Accent (for visibility), Negative Red
+                          final Color valColor = runValue < 0 ? Colors.red : colors.accent;
+
+                          return Transform.scale(
+                            scale: _lastPointsPulse.value,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.black38,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: valColor.withOpacity(0.5),
+                                ),
+                              ),
+                              child: Text(
+                                runText,
+                                style: GoogleFonts.nunito(
+                                  textStyle: theme.textTheme.bodySmall,
+                                  color: valColor,
+                                  fontSize: 16, 
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            (widget.player.lastPoints ?? 0) > 0 
-                              ? '+${widget.player.lastPoints}' 
-                              : '${widget.player.lastPoints ?? 0}',
-                            style: GoogleFonts.nunito(
-                              textStyle: theme.textTheme.bodySmall,
-                              color: (widget.player.lastPoints ?? 0) == 0 
-                                ? Colors.grey 
-                                : ((widget.player.lastPoints ?? 0) < 0 ? Colors.red : colors.accent),
-                              fontSize: 16, // Increased from 10
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
+                          );
+                        }
                       ),
                       const SizedBox(width: 8),
                       const Spacer(), // Push HR to right

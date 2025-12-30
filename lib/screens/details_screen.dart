@@ -231,13 +231,13 @@ class DetailsScreen extends StatelessWidget {
                     children: [
                       _buildStatRow(
                         colors, 
-                        'Avg', 
+                        'Ø', // Was 'Avg' 
                         _calculateAverage(gameState.players[0]), 
                         _calculateAverage(gameState.players[1])
                       ),
                       _buildStatRow(
                         colors, 
-                        'High Run', 
+                        'HR', // Was 'High Run' 
                         _calculateHighestRun(gameState.players[0]), 
                         _calculateHighestRun(gameState.players[1])
                       ),
@@ -309,7 +309,11 @@ class DetailsScreen extends StatelessWidget {
         Text(
           label.toUpperCase(),
           textAlign: TextAlign.center,
-          style: TextStyle(color: colors.primaryDark, fontSize: 10, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: colors.primaryBright, // Brighter for contrast
+            fontSize: 11, 
+            fontWeight: FontWeight.bold
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
