@@ -556,6 +556,9 @@ class GameState extends ChangeNotifier {
         turnEnded = true; 
         _logAction('${currentPlayer.name}: Miss/Safe (0 pts)');
         currentPlayer.incrementSaves(); 
+        if (points == 0) {
+           eventQueue.add(FoulEvent(currentPlayer, 0, ""));
+        } 
       }
     } else {
       if (currentFoulMode == FoulMode.severe) {
@@ -694,6 +697,7 @@ class GameState extends ChangeNotifier {
     currentPlayerIndex = 1 - currentPlayerIndex;
     
     currentPlayer.isActive = true;
+    currentPlayer.lastPoints = null; // Clear old lastPoints for new turn
 
     // Check for 2-Foul Warning upon entering turn
     if (foulTracker.threeFoulRuleEnabled && currentPlayer.consecutiveFouls == 2) {

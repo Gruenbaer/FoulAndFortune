@@ -9,6 +9,7 @@ class Player {
   int? lastPoints; // Points from the very last action
   int highestRun; // Highest run in the current match
   int currentRun; // Run in current inning
+  int updateCount; // For detecting changes (animations)
 
   Player({
     required this.name,
@@ -21,11 +22,13 @@ class Player {
     this.lastPoints,
     this.highestRun = 0,
     this.currentRun = 0,
+    this.updateCount = 0,
   }) : handicapMultiplier = handicapMultiplier.clamp(0.1, 10.0);
 
   void addScore(int points) {
     score += points;
     lastPoints = points;
+    updateCount++;
     
     if (points > 0) {
       currentRun += points;
@@ -40,7 +43,6 @@ class Player {
   void incrementInning() {
     currentInning++;
     currentRun = 0; // Reset run for new inning
-    lastPoints = null; // Reset last points visual
   }
 
   void incrementSaves() {
@@ -58,6 +60,7 @@ class Player {
     int? lastPoints,
     int? highestRun,
     int? currentRun,
+    int? updateCount,
   }) {
     return Player(
       name: name ?? this.name,
@@ -70,6 +73,7 @@ class Player {
       lastPoints: lastPoints ?? this.lastPoints,
       highestRun: highestRun ?? this.highestRun,
       currentRun: currentRun ?? this.currentRun,
+      updateCount: updateCount ?? this.updateCount,
     );
   }
   Map<String, dynamic> toJson() => {

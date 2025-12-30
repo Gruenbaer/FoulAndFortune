@@ -32,8 +32,8 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
   late int _visualScore;
   Timer? _safetyTimer;
   
-  // Track lastPoints for animation trigger
-  int? _previousLastPoints;
+  // Track last update for animation trigger
+  int _lastUpdateCount = -1;
   
   // Key for Animation Targeting
   final GlobalKey scoreKey = GlobalKey();
@@ -75,7 +75,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
     });
     
     _visualScore = widget.player.score; // Init with current
-    _previousLastPoints = widget.player.lastPoints;
+    _lastUpdateCount = widget.player.updateCount;
   }
 
   @override
@@ -83,8 +83,9 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
     super.didUpdateWidget(oldWidget);
     
     // Trigger animation when lastPoints changes
-    if (widget.player.lastPoints != oldWidget.player.lastPoints) {
-      _previousLastPoints = oldWidget.player.lastPoints;
+    // Trigger animation when score/points updated (tracked by updateCount)
+    if (widget.player.updateCount != _lastUpdateCount) {
+      _lastUpdateCount = widget.player.updateCount;
       _lastPointsController.forward(from: 0.0); // Trigger pulse animation
     }
     
