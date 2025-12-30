@@ -100,7 +100,9 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               alignment: Alignment.center, // Strictly center the child content
-              decoration: BoxDecoration(
+              decoration: colors.themeId == 'ghibli' 
+                  ? null // Hand-painted by GhibliFramePainter!
+                  : BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -112,7 +114,7 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                 // Cyberpunk uses cut corners (Beveled), Steampunk uses Rounded
                 borderRadius: colors.themeId == 'cyberpunk' 
                     ? BorderRadius.zero 
-                    : (colors.themeId == 'ghibli' ? BorderRadius.circular(30) : BorderRadius.circular(12)),
+                    : BorderRadius.circular(12),
                 
                 // For Cyberpunk, we might want a clipPath for cut corners, but for now simple box
                 border: colors.themeId == 'cyberpunk' 
@@ -325,34 +327,93 @@ class GhibliFramePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Whimsical Leaf Accent
-    final paint = Paint()
-      ..color = colors.primary // Lush Green
-      ..style = PaintingStyle.fill;
-      
-    // Draw leaf at top-left corner
-    canvas.save();
-    canvas.translate(10, 5); 
-    canvas.rotate(-0.6);
+    final charcoal = const Color(0xFF4A4844);
     
-    // Leaf shape
+    // 1. Organic Shape (Slightly irregular Pill)
+    // To look hand-drawn, we use a Path rather than perfect RRect
     final path = Path();
-    path.moveTo(0, 0);
-    path.quadraticBezierTo(10, -5, 15, 5);
-    path.quadraticBezierTo(5, 10, 0, 0);
+    final h = size.height;
+    final w = size.width;
+    
+    // Start Left Center
+    path.moveTo(0, h / 2);
+    
+    // Top Left Corner (Slightly bulging)
+    path.cubicTo(0, h * 0.1, h * 0.1, 0, h/2, 0);
+    
+    // Top Line (Slightly dip)
+    path.cubicTo(w * 0.3, h * 0.05, w * 0.7, -h * 0.02, w - h/2, 0);
+    
+    // Top Right Corner
+    path.cubicTo(w - h * 0.1, 0, w, h * 0.1, w, h/2);
+    
+    // Bottom Line (Slightly curve up)
+    path.cubicTo(w, h * 0.9, w - h * 0.1, h, w - h/2, h);
+    path.cubicTo(w * 0.7, h * 0.98, w * 0.3, h * 1.02, h/2, h);
+    
+    // Bottom Left Corner
+    path.cubicTo(h * 0.1, h, 0, h * 0.9, 0, h/2);
     path.close();
+
+    // 2. Fill (Watercolor style)
+    final fillPaint = Paint()
+      ..color = colors.primary
+      ..style = PaintingStyle.fill;
     
-    canvas.drawPath(path, paint);
+    // Drop shadow (Sketchy - Offset)
+    canvas.drawPath(path.shift(const Offset(3, 4)), Paint()..color = charcoal.withOpacity(0.15)); // Soft shadow
     
-    // Stem
-    canvas.drawPath(
-      Path()..moveTo(0, 0)..lineTo(-4, 4),
-      Paint()..color = colors.primaryDark..style = PaintingStyle.stroke..strokeWidth = 2,
-    );
+    // Main Body
+    canvas.drawPath(path, fillPaint);
+    
+    // Watercolor Highlight (Soft Blobs)
+    canvas.save();
+    canvas.clipPath(path);
+    final highlightPaint = Paint()..color = Colors.white.withOpacity(0.15)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(Offset(w * 0.2, h * 0.3), h * 0.8, highlightPaint);
+    canvas.drawCircle(Offset(w * 0.8, h * 0.6), h * 0.6, highlightPaint);
+    canvas.restore();
+
+
+    // 3. Sketchy Border (Charcoal)
+    final borderPaint = Paint()
+      ..color = charcoal.withOpacity(0.9)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+      
+    canvas.drawPath(path, borderPaint);
+    
+    // 4. Leaves (Hand drawn accent)
+    _drawLeaves(canvas, size, borderPaint, fillPaint);
+  }
+  
+  void _drawLeaves(Canvas canvas, Size size, Paint borderPaint, Paint fillPaint) {
+    // Top Left Leaves
+    canvas.save();
+    canvas.translate(4, 4); 
+    canvas.rotate(-0.2);
+    
+    // Leaf 1
+    final l1 = Path();
+    l1.moveTo(0, 0);
+    l1.quadraticBezierTo(-8, -5, -12, 2);
+    l1.quadraticBezierTo(-4, 8, 0, 0);
+    
+    canvas.drawPath(l1, fillPaint); // Fill same color
+    canvas.drawPath(l1, borderPaint); // Border
+    
+    // Leaf 2 (Smaller)
+    final l2 = Path();
+    l2.moveTo(0, 0);
+    l2.quadraticBezierTo(-2, -8, 2, -12);
+    l2.quadraticBezierTo(6, -6, 0, 0);
+    
+    canvas.drawPath(l2, fillPaint);
+    canvas.drawPath(l2, borderPaint);
     
     canvas.restore();
-    
-    // Maybe another small one?
   }
 
   @override
