@@ -459,8 +459,6 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     required Function(String) onChanged,
     required Key key, // Use key to force rebuild when initialization completes
   }) {
-    final l10n = AppLocalizations.of(context);
-    
     return Autocomplete<String>(
       key: key, 
       initialValue: TextEditingValue(text: initialValue, selection: TextSelection.collapsed(offset: initialValue.length)),
@@ -477,6 +475,9 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
         onChanged(name);
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+        // Get l10n from the fieldViewBuilder's context, not the outer context
+        final l10n = AppLocalizations.of(context);
+        
         return ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
           builder: (context, value, child) {
@@ -495,7 +496,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                 labelText: label,
                 hintText: l10n.enterOrSelectPlayer,
                 counterText: '',
-                suffixIcon: isExistingPlayer
+               suffixIcon: isExistingPlayer
                     ? const Icon(Icons.check_circle, color: Colors.green)
                     : (value.text.trim().isNotEmpty
                         ? IconButton(
