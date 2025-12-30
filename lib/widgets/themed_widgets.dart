@@ -327,8 +327,6 @@ class CyberpunkFramePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-
-
 class GhibliFramePainter extends CustomPainter {
   final FortuneColors colors;
   final int seed;
@@ -337,17 +335,17 @@ class GhibliFramePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // SEEDED RANDOM: Ensure consistent look for this specific button instance
+    // SEEDED RANDOM
     final random = math.Random(seed);
     
     final charcoal = const Color(0xFF4A4844);
     
-    // 1. Organic Shape (Slightly irregular Pill)
+    // 1. Organic Shape
     final path = Path();
     final h = size.height;
     final w = size.width;
     
-    // Add subtle wobble to the shape based on seed
+    // Wobble
     final wobble1 = (random.nextDouble() - 0.5) * h * 0.1;
     final wobble2 = (random.nextDouble() - 0.5) * h * 0.1;
 
@@ -360,12 +358,12 @@ class GhibliFramePainter extends CustomPainter {
     path.cubicTo(h * 0.1, h, 0, h * 0.9, 0, h/2);
     path.close();
 
-    // 2. Fill (Watercolor style)
+    // 2. Fill
     final fillPaint = Paint()
       ..color = colors.primary
       ..style = PaintingStyle.fill;
     
-    // Drop shadow
+    // Shadow
     canvas.drawPath(path.shift(const Offset(3, 4)), Paint()..color = charcoal.withOpacity(0.15));
     canvas.drawPath(path, fillPaint);
     
@@ -388,69 +386,84 @@ class GhibliFramePainter extends CustomPainter {
     canvas.drawPath(path, borderPaint);
     
     // 4. RANDOMIZED LEAVES
-    final leafPaint = Paint()..color = const Color(0xFF8CD47E)..style = PaintingStyle.fill;
-    
-    // Decide configurations (bias towards having leaves)
     final config = random.nextInt(5);
     
-    if (config == 0 || config == 2 || config == 4) _drawCluster(canvas, size, 0, random, leafPaint, borderPaint); // TL
-    if (config == 1 || config == 4) _drawCluster(canvas, size, 1, random, leafPaint, borderPaint); // TR
-    if (config == 2) _drawCluster(canvas, size, 2, random, leafPaint, borderPaint); // BR
-    if (config == 3) _drawCluster(canvas, size, 3, random, leafPaint, borderPaint); // BL
+    // Pass colors to cluster for variety
+    if (config == 0 || config == 2 || config == 4) _drawCluster(canvas, size, 0, random, borderPaint); // TL
+    if (config == 1 || config == 4) _drawCluster(canvas, size, 1, random, borderPaint); // TR
+    if (config == 2) _drawCluster(canvas, size, 2, random, borderPaint); // BR
+    if (config == 3) _drawCluster(canvas, size, 3, random, borderPaint); // BL
   }
   
   // position: 0=TL, 1=TR, 2=BR, 3=BL
-  void _drawCluster(Canvas canvas, Size size, int position, math.Random random, Paint fillPaint, Paint borderPaint) {
+  void _drawCluster(Canvas canvas, Size size, int position, math.Random random, Paint borderPaint) {
     canvas.save();
     
     double dx = 0, dy = 0;
     double rotation = 0;
     
-    // Base positions slightly adjusted to sit ON the border
-    if (position == 0) { dx = 4; dy = 4; rotation = -0.5; }
-    if (position == 1) { dx = size.width - 4; dy = 4; rotation = 0.5; }
-    if (position == 2) { dx = size.width - 4; dy = size.height - 4; rotation = 2.5; }
-    if (position == 3) { dx = 4; dy = size.height - 4; rotation = 3.5; }
+    // POINT INWARDS Logic:
+    if (position == 0) { dx = 4; dy = 4; rotation = math.pi / 4; }
+    if (position == 1) { dx = size.width - 4; dy = 4; rotation = 3 * math.pi / 4; }
+    if (position == 2) { dx = size.width - 4; dy = size.height - 4; rotation = 5 * math.pi / 4; }
+    if (position == 3) { dx = 4; dy = size.height - 4; rotation = 7 * math.pi / 4; }
     
     canvas.translate(dx, dy);
-    // Enhance wobble
+    // Randomize angle slightly
     canvas.rotate(rotation + (random.nextDouble() * 0.6 - 0.3));
     
-    // Cluster Type: 0=Single, 1=Double, 2=Triple
+    // SCALING: Much Bigger
+    final scale = 2.2 + random.nextDouble() * 0.8; 
+    canvas.scale(scale);
+    
     final type = random.nextInt(3);
     
     if (type == 0) {
       // Single Big Leaf
-      canvas.scale(1.2);
-      _drawLeaf(canvas, random, 0, 0, 16, 8, fillPaint, borderPaint);
+      _drawLeaf(canvas, random, 0, 0, 14, 0, borderPaint);
     } else if (type == 1) {
       // Double
-      _drawLeaf(canvas, random, 0, 0, 14, -10, fillPaint, borderPaint); // Left tilt
-      _drawLeaf(canvas, random, 0, 0, 12, 10, fillPaint, borderPaint);  // Right tilt
+      _drawLeaf(canvas, random, 0, 0, 12, -15, borderPaint); 
+      _drawLeaf(canvas, random, 0, 0, 10, 15, borderPaint);
     } else {
-      // Triple (Bushy)
-      _drawLeaf(canvas, random, 0, 0, 10, -15, fillPaint, borderPaint);
-      _drawLeaf(canvas, random, 0, 0, 14, 0, fillPaint, borderPaint);
-      _drawLeaf(canvas, random, 0, 0, 10, 15, fillPaint, borderPaint);
+      // Triple
+      _drawLeaf(canvas, random, 0, 0, 10, -25, borderPaint);
+      _drawLeaf(canvas, random, 0, 0, 12, 0, borderPaint);
+      _drawLeaf(canvas, random, 0, 0, 10, 25, borderPaint);
     }
     
     canvas.restore();
   }
   
-  void _drawLeaf(Canvas canvas, math.Random random, double cx, double cy, double length, double angleDeg, Paint fill, Paint border) {
+  void _drawLeaf(Canvas canvas, math.Random random, double cx, double cy, double length, double angleDeg, Paint border) {
     canvas.save();
     canvas.translate(cx, cy);
     canvas.rotate(angleDeg * math.pi / 180);
     
-    // Vary shape
-    final widthFactor = 0.6 + random.nextDouble() * 0.6; // 0.6 to 1.2
-    final curveBend = (random.nextDouble() - 0.5) * 5; 
-    final lenVar = length * (0.9 + random.nextDouble() * 0.2); 
+    // Random Color
+    Color leafColor;
+    final roll = random.nextDouble();
+    if (roll < 0.7) {
+        // Variant of Green
+        leafColor = Color.fromARGB(255, 100 + random.nextInt(60), 180 + random.nextInt(50), 100 + random.nextInt(60));
+    } else if (roll < 0.9) {
+        // Yellowish
+        leafColor = Color.fromARGB(255, 220 + random.nextInt(35), 200 + random.nextInt(55), 80);
+    } else {
+        // Reddish/Berry
+        leafColor = Color.fromARGB(255, 200 + random.nextInt(55), 100 + random.nextInt(50), 100 + random.nextInt(50));
+    }
+    
+    final fill = Paint()..color = leafColor..style = PaintingStyle.fill;
+    
+    final widthFactor = 0.5 + random.nextDouble() * 0.7; 
+    final lenVar = length * (0.8 + random.nextDouble() * 0.4); 
     
     final path = Path();
     path.moveTo(0, 0);
-    path.quadraticBezierTo(lenVar/2, -lenVar/2 * widthFactor + curveBend, lenVar, 0);
-    path.quadraticBezierTo(lenVar/2, lenVar/2 * widthFactor + curveBend, 0, 0);
+    // Leaf shape growing OUT from (0,0) which is closest to border
+    path.quadraticBezierTo(lenVar/2, -lenVar/2 * widthFactor, lenVar, 0);
+    path.quadraticBezierTo(lenVar/2, lenVar/2 * widthFactor, 0, 0);
     
     canvas.drawPath(path, fill);
     canvas.drawPath(path, border);
@@ -465,4 +478,6 @@ class GhibliFramePainter extends CustomPainter {
     return oldDelegate.seed != seed || oldDelegate.colors != colors;
   }
 }
+
+
 
