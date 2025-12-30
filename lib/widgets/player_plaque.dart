@@ -113,6 +113,16 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
         }
       }
     }
+    
+    // Safety Sync: Ensure visual score catches up if desynced and valid
+    if (widget.player.score > _visualScore && _safetyTimer == null) {
+       // Force update if we drifted logic
+        if (_visualScore != widget.player.score) {
+          setState(() {
+            _visualScore = widget.player.score;
+          });
+        }
+    }
   }
 
   @override
