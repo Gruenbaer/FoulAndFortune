@@ -89,9 +89,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
          penalty: event.penalty,
        );
     } else if (event is WarningEvent) {
-      // Skip WarningEvent dialogs entirely - no more Break Foul info
-      _isProcessingEvent = false;
-      _processNextEvent();
+      // Restore Warning Dialog (Needed for 2-Foul Warning)
+       showZoomDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: SteampunkTheme.mahoganyDark,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Colors.redAccent, width: 2) // Red border for warning
+          ),
+          title: Text(
+              event.title, 
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)
+          ),
+          content: Text(
+              event.message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: SteampunkTheme.steamWhite, fontSize: 16)
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ThemedButton(
+               onPressed: () {
+                  Navigator.of(context).pop();
+                  _isProcessingEvent = false;
+                  _processNextEvent();
+               },
+               label: "Got it",
+            ),
+          ],
+        ),
+       );
     } else if (event is DecisionEvent) {
        // Show Decision Dialog
        showZoomDialog(
