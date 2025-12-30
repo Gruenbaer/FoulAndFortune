@@ -92,7 +92,9 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
           child: CustomPaint(
             painter: colors.themeId == 'cyberpunk' 
                 ? CyberpunkFramePainter(colors) 
-                : BrassFramePainter(colors),
+                : (colors.themeId == 'ghibli' 
+                    ? GhibliFramePainter(colors) 
+                    : BrassFramePainter(colors)),
             child: Container(
               // Inner content area
               margin: const EdgeInsets.all(12),
@@ -110,7 +112,7 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                 // Cyberpunk uses cut corners (Beveled), Steampunk uses Rounded
                 borderRadius: colors.themeId == 'cyberpunk' 
                     ? BorderRadius.zero 
-                    : BorderRadius.circular(12),
+                    : (colors.themeId == 'ghibli' ? BorderRadius.circular(30) : BorderRadius.circular(12)),
                 
                 // For Cyberpunk, we might want a clipPath for cut corners, but for now simple box
                 border: colors.themeId == 'cyberpunk' 
@@ -311,6 +313,46 @@ class CyberpunkFramePainter extends CustomPainter {
     // Small rects
     canvas.drawRect(Rect.fromLTWH(size.width / 2 - 20, size.height - 4, 40, 2), decorPaint);
     canvas.drawRect(Rect.fromLTWH(size.width / 2 - 20, 2, 40, 2), decorPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class GhibliFramePainter extends CustomPainter {
+  final FortuneColors colors;
+  GhibliFramePainter(this.colors);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Whimsical Leaf Accent
+    final paint = Paint()
+      ..color = colors.primary // Lush Green
+      ..style = PaintingStyle.fill;
+      
+    // Draw leaf at top-left corner
+    canvas.save();
+    canvas.translate(10, 5); 
+    canvas.rotate(-0.6);
+    
+    // Leaf shape
+    final path = Path();
+    path.moveTo(0, 0);
+    path.quadraticBezierTo(10, -5, 15, 5);
+    path.quadraticBezierTo(5, 10, 0, 0);
+    path.close();
+    
+    canvas.drawPath(path, paint);
+    
+    // Stem
+    canvas.drawPath(
+      Path()..moveTo(0, 0)..lineTo(-4, 4),
+      Paint()..color = colors.primaryDark..style = PaintingStyle.stroke..strokeWidth = 2,
+    );
+    
+    canvas.restore();
+    
+    // Maybe another small one?
   }
 
   @override

@@ -351,6 +351,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         });
                       },
                     ),
+                    RadioListTile<String>(
+                      title: Text('Whimsy & Wonder', style: theme.textTheme.bodyMedium),
+                      subtitle: const Text('Nature & Magic'),
+                      secondary: const Icon(Icons.nature_people, color: Color(0xFF6B8C6E)),
+                      value: 'ghibli',
+                      groupValue: _settings.themeId,
+                      activeColor: const Color(0xFFC57C7E),
+                      onChanged: (value) {
+                        setState(() {
+                          _settings = _settings.copyWith(themeId: value);
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),

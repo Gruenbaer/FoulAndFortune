@@ -9,6 +9,7 @@ import 'l10n/app_localizations.dart';
 import 'theme/steampunk_theme.dart';
 
 import 'theme/fortune_theme.dart';
+import 'theme/ghibli_theme.dart';
 
 import 'widgets/feedback_wrapper.dart';
 
@@ -101,14 +102,25 @@ class _MyAppState extends State<MyApp> {
             ),
             
             // Theme
-            theme: settings.themeId == 'cyberpunk' ? CyberpunkTheme.themeData : SteampunkTheme.themeData,
-            darkTheme: settings.themeId == 'cyberpunk' ? CyberpunkTheme.themeData : SteampunkTheme.themeData,
-            themeMode: ThemeMode.dark,
+            theme: _getTheme(settings.themeId),
+            darkTheme: _getTheme(settings.themeId),
+            themeMode: settings.themeId == 'ghibli' ? ThemeMode.light : ThemeMode.dark,
             
             home: const HomeScreen(),
           ),
         );
       },
     );
+  }
+  ThemeData _getTheme(String themeId) {
+    switch (themeId) {
+      case 'cyberpunk':
+        return CyberpunkTheme.themeData;
+      case 'ghibli':
+        return GhibliTheme.themeData;
+      case 'steampunk':
+      default:
+        return SteampunkTheme.themeData;
+    }
   }
 }
