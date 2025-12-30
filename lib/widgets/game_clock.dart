@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/game_state.dart';
 import '../theme/fortune_theme.dart';
-import '../theme/steampunk_theme.dart';
 
 class GameClock extends StatelessWidget {
   const GameClock({super.key});
@@ -32,9 +31,9 @@ class GameClock extends StatelessWidget {
 
         // Steampunk: Brass/Parchment feel
         final steampunkDecor = BoxDecoration(
-          color: SteampunkTheme.leatherDark,
+          color: colors.textContrast,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: SteampunkTheme.brassDark, width: 2),
+          border: Border.all(color: colors.primaryDark, width: 2),
           boxShadow: [
             const BoxShadow(
               color: Colors.black54,
@@ -46,7 +45,7 @@ class GameClock extends StatelessWidget {
 
         final steampunkTextStyle = GoogleFonts.rye(
           fontSize: 24,
-          color: SteampunkTheme.brassBright,
+          color: colors.primaryBright,
           shadows: [
             const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
           ],

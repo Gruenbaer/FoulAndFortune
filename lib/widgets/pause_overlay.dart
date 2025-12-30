@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/game_state.dart';
 import '../theme/fortune_theme.dart';
-import '../theme/steampunk_theme.dart';
 
 class PauseOverlay extends StatelessWidget {
   const PauseOverlay({super.key});
@@ -44,9 +43,9 @@ class PauseOverlay extends StatelessWidget {
                       // Cut corners?
                     )
                   : BoxDecoration(
-                      color: SteampunkTheme.mahoganyLight,
+                      color: colors.backgroundCard,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: SteampunkTheme.brassPrimary, width: 3),
+                      border: Border.all(color: colors.primary, width: 3),
                       boxShadow: [
                         const BoxShadow(color: Colors.black, blurRadius: 10, offset: Offset(0, 4)),
                       ],
@@ -66,7 +65,7 @@ class PauseOverlay extends StatelessWidget {
                             )
                           : GoogleFonts.rye(
                               fontSize: 32,
-                              color: SteampunkTheme.brassPrimary,
+                              color: colors.primary,
                               letterSpacing: 2,
                               shadows: [const Shadow(color: Colors.black, blurRadius: 2, offset: Offset(2, 2))],
                             ),
@@ -80,13 +79,13 @@ class PauseOverlay extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isCyberpunk ? colors.secondary : SteampunkTheme.brassDark,
+                            color: isCyberpunk ? colors.secondary : colors.primaryDark,
                             width: 2,
                           ),
                         ),
                         child: Icon(
                           Icons.close,
-                          color: isCyberpunk ? colors.secondary : SteampunkTheme.brassPrimary,
+                          color: isCyberpunk ? colors.secondary : colors.primary,
                           size: 24,
                         ),
                       ),
