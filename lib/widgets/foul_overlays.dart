@@ -189,59 +189,25 @@ class _FoulPointsOverlayState extends State<FoulPointsOverlay> with SingleTicker
                   child: Container(
                     width: 200, // Fixed width
                     constraints: const BoxConstraints(maxHeight: 100),
-                    child: widget.positivePoints != null && widget.penalty != null
-                        ? // Show breakdown: "+4 -1" with colors
-                        Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  '+${widget.positivePoints}',
-                                  style: GoogleFonts.nunito(
-                                    fontSize: baseFontSize,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.greenAccent,
-                                    shadows: [
-                                      const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
-                                    ],
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  '${widget.penalty}', // Already has minus sign
-                                  style: GoogleFonts.nunito(
-                                    fontSize: baseFontSize,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.redAccent,
-                                    shadows: [
-                                      const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
-                                    ],
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          )
-                        : // Show single value
-                        FittedBox(
-                            fit: BoxFit.contain,
-                            child: Text(
-                              '${widget.points >= 0 ? "+" : ""}${widget.points}',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.nunito(
-                                fontSize: singleFontSize,
-                                fontWeight: FontWeight.w900,
-                                color: widget.points >= 0 ? Colors.greenAccent : Colors.redAccent,
-                                shadows: [
-                                  const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
-                                ],
-                              ),
-                            ),
-                          ),
+                    width: 200, // Fixed width
+                    constraints: const BoxConstraints(maxHeight: 100),
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(
+                        // Logic Update: User wants ONLY the penalty shown in animation, not the +X
+                        // If penalty is provided, show it (e.g. -1). Else show points.
+                        '${widget.penalty ?? (widget.points >= 0 ? "+" : "")}${widget.penalty ?? widget.points}',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          fontSize: singleFontSize,
+                          fontWeight: FontWeight.w900,
+                          color: (widget.penalty ?? widget.points) >= 0 ? Colors.greenAccent : Colors.redAccent,
+                          shadows: [
+                            const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
