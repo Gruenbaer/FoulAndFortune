@@ -343,7 +343,6 @@ class GhibliFramePainter extends CustomPainter {
     final charcoal = const Color(0xFF4A4844);
     
     // 1. Organic Shape (Slightly irregular Pill)
-    // To look hand-drawn, we use a Path rather than perfect RRect
     final path = Path();
     final h = size.height;
     final w = size.width;
@@ -352,23 +351,12 @@ class GhibliFramePainter extends CustomPainter {
     final wobble1 = (random.nextDouble() - 0.5) * h * 0.1;
     final wobble2 = (random.nextDouble() - 0.5) * h * 0.1;
 
-    // Start Left Center
     path.moveTo(0, h / 2);
-    
-    // Top Left Corner (Slightly bulging)
-    path.cubicTo(0, h * 0.1, h * 0.1, 0, h/2, 0);
-    
-    // Top Line (Slightly dip)
-    path.cubicTo(w * 0.3, h * 0.05, w * 0.7, -h * 0.02, w - h/2, 0);
-    
-    // Top Right Corner
+    path.cubicTo(0, h * 0.1, h * 0.1 + wobble1, 0, h/2, 0);
+    path.cubicTo(w * 0.3, h * 0.05, w * 0.7, -h * 0.02 + wobble2, w - h/2, 0);
     path.cubicTo(w - h * 0.1, 0, w, h * 0.1, w, h/2);
-    
-    // Bottom Line (Slightly curve up)
     path.cubicTo(w, h * 0.9, w - h * 0.1, h, w - h/2, h);
     path.cubicTo(w * 0.7, h * 0.98, w * 0.3, h * 1.02, h/2, h);
-    
-    // Bottom Left Corner
     path.cubicTo(h * 0.1, h, 0, h * 0.9, 0, h/2);
     path.close();
 
@@ -377,13 +365,11 @@ class GhibliFramePainter extends CustomPainter {
       ..color = colors.primary
       ..style = PaintingStyle.fill;
     
-    // Drop shadow (Sketchy - Offset)
-    canvas.drawPath(path.shift(const Offset(3, 4)), Paint()..color = charcoal.withOpacity(0.15)); // Soft shadow
-    
-    // Main Body
+    // Drop shadow
+    canvas.drawPath(path.shift(const Offset(3, 4)), Paint()..color = charcoal.withOpacity(0.15));
     canvas.drawPath(path, fillPaint);
     
-    // Watercolor Highlight (Soft Blobs)
+    // Highlight
     canvas.save();
     canvas.clipPath(path);
     final highlightPaint = Paint()..color = Colors.white.withOpacity(0.15)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
@@ -391,8 +377,7 @@ class GhibliFramePainter extends CustomPainter {
     canvas.drawCircle(Offset(w * 0.8, h * 0.6), h * 0.6, highlightPaint);
     canvas.restore();
 
-
-    // 3. Sketchy Border (Charcoal)
+    // 3. Border
     final borderPaint = Paint()
       ..color = charcoal.withOpacity(0.9)
       ..style = PaintingStyle.stroke
@@ -402,83 +387,219 @@ class GhibliFramePainter extends CustomPainter {
       
     canvas.drawPath(path, borderPaint);
     
-    // 4. Leaves (Hand drawn accent)
-    _drawLeaves(canvas, size, borderPaint, fillPaint);
+    // 4. RANDOMIZED LEAVES
+    final leafPaint = Paint()..color = const Color(0xFF8CD47E)..style = PaintingStyle.fill;
+    
+    // Decide configurations (bias towards having leaves)
+    final config = random.nextInt(5);
+    
+    if (config == 0 || config == 2 || config == 4) _drawCluster(canvas, size, 0, random, leafPaint, borderPaint); // TL
+    if (config == 1 || config == 4) _drawCluster(canvas, size, 1, random, leafPaint, borderPaint); // TR
+    if (config == 2) _drawCluster(canvas, size, 2, random, leafPaint, borderPaint); // BR
+    if (config == 3) _drawCluster(canvas, size, 3, random, leafPaint, borderPaint); // BL
   }
   
-  void _drawLeaves(Canvas canvas, Size size, Paint borderPaint, Paint baseFillPaint) {
-    // Leaf Paint (Vibrant Natural Green)
-    final leafFillPaint = Paint()
-      ..color = const Color(0xFF8CD47E) // Lighter/Brighter than the button base
-      ..style = PaintingStyle.fill;
-      
-    // 1. LEFT SPROUT (Double Leaf) -- Growing from the left vertical edge
+  // position: 0=TL, 1=TR, 2=BR, 3=BL
+  void _drawCluster(Canvas canvas, Size size, int position, math.Random random, Paint fillPaint, Paint borderPaint) {
     canvas.save();
-    // Move to roughly where the visual "start" of the left curve is 
-    // The path starts at (0, h/2) and curves up. 
-    // We want to sprout around (0, h*0.3).
-    canvas.translate(-2, size.height * 0.35); 
-    canvas.rotate(-0.5); // Tilt outwards
     
-    // Scale up significantly
-    const double scale = 1.8;
-    canvas.scale(scale);
-
-    // Stem (merging with border)
-    final stemPath = Path();
-    stemPath.moveTo(0, 0); 
-    stemPath.quadraticBezierTo(-5, -5, -8, -15); // Main stem up
+    double dx = 0, dy = 0;
+    double rotation = 0;
     
-    // Leaf A (Top)
-    final leafA = Path();
-    leafA.moveTo(-8, -15);
-    leafA.quadraticBezierTo(-15, -25, -5, -35); // Left curve
-    leafA.quadraticBezierTo(5, -20, -8, -15);   // Right curve
+    // Base positions slightly adjusted to sit ON the border
+    if (position == 0) { dx = 4; dy = 4; rotation = -0.5; }
+    if (position == 1) { dx = size.width - 4; dy = 4; rotation = 0.5; }
+    if (position == 2) { dx = size.width - 4; dy = size.height - 4; rotation = 2.5; }
+    if (position == 3) { dx = 4; dy = size.height - 4; rotation = 3.5; }
     
-    // Leaf B (Side)
-    final leafB = Path();
-    leafB.moveTo(-6, -10); // Branch off stem
-    leafB.quadraticBezierTo(-15, -5, -20, 5); 
-    leafB.quadraticBezierTo(-10, 8, -6, -10);
+    canvas.translate(dx, dy);
+    // Enhance wobble
+    canvas.rotate(rotation + (random.nextDouble() * 0.6 - 0.3));
     
-    // Draw Leaf Fills
-    canvas.drawPath(leafA, leafFillPaint);
-    canvas.drawPath(leafB, leafFillPaint);
+    // Cluster Type: 0=Single, 1=Double, 2=Triple
+    final type = random.nextInt(3);
     
-    // Draw Leaf Borders (Sketchy)
-    canvas.drawPath(leafA, borderPaint);
-    canvas.drawPath(leafB, borderPaint);
+    if (type == 0) {
+      // Single Big Leaf
+      canvas.scale(1.2);
+      _drawLeaf(canvas, random, 0, 0, 16, 8, fillPaint, borderPaint);
+    } else if (type == 1) {
+      // Double
+      _drawLeaf(canvas, random, 0, 0, 14, -10, fillPaint, borderPaint); // Left tilt
+      _drawLeaf(canvas, random, 0, 0, 12, 10, fillPaint, borderPaint);  // Right tilt
+    } else {
+      // Triple (Bushy)
+      _drawLeaf(canvas, random, 0, 0, 10, -15, fillPaint, borderPaint);
+      _drawLeaf(canvas, random, 0, 0, 14, 0, fillPaint, borderPaint);
+      _drawLeaf(canvas, random, 0, 0, 10, 15, fillPaint, borderPaint);
+    }
     
-    // Draw Stem (Thicker connection)
-    canvas.drawPath(stemPath, borderPaint..strokeWidth = 2);
-    
-    // Little vein details
-    canvas.drawPath(Path()..moveTo(-8, -15)..lineTo(-6, -25), borderPaint..strokeWidth = 1);
-    canvas.drawPath(Path()..moveTo(-6, -10)..lineTo(-15, 0), borderPaint..strokeWidth = 1);
-
     canvas.restore();
-    
-    
-    // 2. RIGHT ACCENT (Single Leaf) -- Wrapping onto the bottom right
+  }
+  
+  void _drawLeaf(Canvas canvas, math.Random random, double cx, double cy, double length, double angleDeg, Paint fill, Paint border) {
     canvas.save();
-    canvas.translate(size.width - 5, size.height * 0.7); // Bottom right edge
-    canvas.rotate(1.0); // Pointing down/out
-    canvas.scale(1.5);
+    canvas.translate(cx, cy);
+    canvas.rotate(angleDeg * math.pi / 180);
     
-    final leafC = Path();
-    leafC.moveTo(0, 0); // Sprout point
-    leafC.quadraticBezierTo(10, 0, 15, 10);
-    leafC.quadraticBezierTo(0, 15, 0, 0);
+    // Vary shape
+    final widthFactor = 0.6 + random.nextDouble() * 0.6; // 0.6 to 1.2
+    final curveBend = (random.nextDouble() - 0.5) * 5; 
+    final lenVar = length * (0.9 + random.nextDouble() * 0.2); 
     
-    canvas.drawPath(leafC, leafFillPaint);
-    canvas.drawPath(leafC, borderPaint..strokeWidth = 1.5);
+    final path = Path();
+    path.moveTo(0, 0);
+    path.quadraticBezierTo(lenVar/2, -lenVar/2 * widthFactor + curveBend, lenVar, 0);
+    path.quadraticBezierTo(lenVar/2, lenVar/2 * widthFactor + curveBend, 0, 0);
     
-    // Stem connection
-    canvas.drawPath(Path()..moveTo(0, 0)..lineTo(-5, 0), borderPaint..strokeWidth = 2);
+    canvas.drawPath(path, fill);
+    canvas.drawPath(path, border);
+    // Vein
+    canvas.drawPath(Path()..moveTo(0,0)..lineTo(lenVar*0.7, 0), border..strokeWidth = 1);
     
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant GhibliFramePainter oldDelegate) {
+    return oldDelegate.seed != seed || oldDelegate.colors != colors;
+  }
 }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // SEEDED RANDOM: Ensure consistent look for this specific button instance
+    final random = math.Random(seed);
+    
+    final charcoal = const Color(0xFF4E4C47);
+    
+    // 1. Organic Shape (Slightly irregular Pill)
+    final path = Path();
+    final h = size.height;
+    final w = size.width;
+    
+    // Add subtle wobble to the shape based on seed
+    final wobble1 = (random.nextDouble() - 0.5) * h * 0.1;
+    final wobble2 = (random.nextDouble() - 0.5) * h * 0.1;
+
+    path.moveTo(0, h / 2);
+    path.cubicTo(0, h * 0.1, h * 0.1 + wobble1, 0, h/2, 0);
+    path.cubicTo(w * 0.3, h * 0.05, w * 0.7, -h * 0.02 + wobble2, w - h/2, 0);
+    path.cubicTo(w - h * 0.1, 0, w, h * 0.1, w, h/2);
+    path.cubicTo(w, h * 0.9, w - h * 0.1, h, w - h/2, h);
+    path.cubicTo(w * 0.7, h * 0.98, w * 0.3, h * 1.02, h/2, h);
+    path.cubicTo(h * 0.1, h, 0, h * 0.9, 0, h/2);
+    path.close();
+
+    // 2. Fill (Watercolor style)
+    final fillPaint = Paint()
+      ..color = colors.primary
+      ..style = PaintingStyle.fill;
+    
+    // Drop shadow
+    canvas.drawPath(path.shift(const Offset(3, 4)), Paint()..color = charcoal.withOpacity(0.15));
+    canvas.drawPath(path, fillPaint);
+    
+    // Highlight
+    canvas.save();
+    canvas.clipPath(path);
+    final highlightPaint = Paint()..color = Colors.white.withOpacity(0.15)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(Offset(w * 0.2, h * 0.3), h * 0.8, highlightPaint);
+    canvas.drawCircle(Offset(w * 0.8, h * 0.6), h * 0.6, highlightPaint);
+    canvas.restore();
+
+    // 3. Border
+    final borderPaint = Paint()
+      ..color = charcoal.withOpacity(0.9)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+      
+    canvas.drawPath(path, borderPaint);
+    
+    // 4. RANDOMIZED LEAVES
+    // Leaf color: Vibrant Green 
+    final leafPaint = Paint()..color = const Color(0xFF8CD47E)..style = PaintingStyle.fill;
+    
+    // Decide configurations (bias towards having leaves)
+    // 0: TL
+    // 1: TR
+    // 2: TL + BR
+    // 3: TR + BL
+    // 4: TL + TR
+    final config = random.nextInt(5);
+    
+    if (config == 0 || config == 2 || config == 4) _drawCluster(canvas, size, 0, random, leafPaint, borderPaint); // TL
+    if (config == 1 || config == 4) _drawCluster(canvas, size, 1, random, leafPaint, borderPaint); // TR
+    if (config == 2) _drawCluster(canvas, size, 2, random, leafPaint, borderPaint); // BR
+    if (config == 3) _drawCluster(canvas, size, 3, random, leafPaint, borderPaint); // BL
+  }
+  
+  // position: 0=TL, 1=TR, 2=BR, 3=BL
+  void _drawCluster(Canvas canvas, Size size, int position, math.Random random, Paint fillPaint, Paint borderPaint) {
+    canvas.save();
+    
+    double dx = 0, dy = 0;
+    double rotation = 0;
+    
+    // Position logic to sit ON the border
+    if (position == 0) { dx = 4; dy = 4; rotation = -0.5; } // TL
+    if (position == 1) { dx = size.width - 4; dy = 4; rotation = 0.5; } // TR
+    if (position == 2) { dx = size.width - 4; dy = size.height - 4; rotation = 2.5; } // BR
+    if (position == 3) { dx = 4; dy = size.height - 4; rotation = 3.5; } // BL
+    
+    canvas.translate(dx, dy);
+    // Wobble rotation
+    canvas.rotate(rotation + (random.nextDouble() * 0.6 - 0.3));
+    
+    // Cluster Type: 0=Single, 1=Double, 2=Triple
+    final type = random.nextInt(3);
+    
+    if (type == 0) {
+      // Single Big Leaf
+      canvas.scale(1.2);
+      _drawLeaf(canvas, random, 0, 0, 16, 8, fillPaint, borderPaint);
+    } else if (type == 1) {
+      // Double
+      _drawLeaf(canvas, random, 0, 0, 14, -10, fillPaint, borderPaint); // Left
+      _drawLeaf(canvas, random, 0, 0, 12, 10, fillPaint, borderPaint);  // Right
+    } else {
+      // Triple (Bushy)
+      _drawLeaf(canvas, random, 0, 0, 10, -15, fillPaint, borderPaint);
+      _drawLeaf(canvas, random, 0, 0, 14, 0, fillPaint, borderPaint);
+      _drawLeaf(canvas, random, 0, 0, 10, 15, fillPaint, borderPaint);
+    }
+    
+    canvas.restore();
+  }
+  
+  void _drawLeaf(Canvas canvas, math.Random random, double cx, double cy, double length, double angleDeg, Paint fill, Paint border) {
+    canvas.save();
+    canvas.translate(cx, cy);
+    canvas.rotate(angleDeg * math.pi / 180);
+    
+    // Vary shape
+    final widthFactor = 0.6 + random.nextDouble() * 0.6; // 0.6 to 1.2
+    final curveBend = (random.nextDouble() - 0.5) * 5; 
+    final lenVar = length * (0.9 + random.nextDouble() * 0.2); 
+    
+    final path = Path();
+    path.moveTo(0, 0);
+    path.quadraticBezierTo(lenVar/2, -lenVar/2 * widthFactor + curveBend, lenVar, 0);
+    path.quadraticBezierTo(lenVar/2, lenVar/2 * widthFactor + curveBend, 0, 0);
+    
+    canvas.drawPath(path, fill);
+    canvas.drawPath(path, border);
+    // Vein
+    canvas.drawPath(Path()..moveTo(0,0)..lineTo(lenVar*0.7, 0), border..strokeWidth = 1);
+    
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant GhibliFramePainter oldDelegate) {
+    return oldDelegate.seed != seed || oldDelegate.colors != colors;
+  }
+}
+
