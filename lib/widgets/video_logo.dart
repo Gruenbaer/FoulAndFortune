@@ -14,11 +14,12 @@ class VideoLogo extends StatefulWidget {
 class _VideoLogoState extends State<VideoLogo> {
   late VideoPlayerController _controller;
   bool _initialized = false;
+  
   @override
   void initState() {
     super.initState();
     // Initialize video from assets
-    _controller = VideoPlayerController.asset('assets/images/ani_logo_Fortune141_01.mp4')
+    _controller = VideoPlayerController.asset('assets/images/FoulAndFortuneAnimated.mp4')
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized
         if (mounted) {
@@ -27,13 +28,10 @@ class _VideoLogoState extends State<VideoLogo> {
           });
           _controller.play();
           _controller.setLooping(true); // Loop video
-          _controller.setVolume(0.0); // Enforce mute
+          _controller.setVolume(0.0); // Enforce mute as requested
         }
       });
   }
-
-  // Dropped _handleVideoProgress and fadeOutSound as they are no longer needed
-
 
   @override
   void dispose() {
@@ -44,25 +42,28 @@ class _VideoLogoState extends State<VideoLogo> {
   @override
   Widget build(BuildContext context) {
     if (!_initialized) {
-      // Fallback or Loading while initializing (using app_logo as placeholder to prevent jump)
-      return Image.asset(
-        'assets/images/app_logo.png',
-        width: 250,
-        height: 250,
-        fit: BoxFit.contain,
+      // Fallback or Loading
+      return const SizedBox(
+        width: 200,
+        height: 200,
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
     return Center(
       child: Container(
-        width: 250,
-        height: 250,
+        width: 200, // Reduced from 250 (-20%)
+        height: 200,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          // Transparent background, effectively just the clip
+          color: Colors.transparent,
           boxShadow: [
-             BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 15, offset: const Offset(0, 5)),
+             BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
           ],
-          border: Border.all(color: const Color(0xFFB8860B), width: 4), // Brass Ring
+          // Border can be kept or removed. "Rest transparent" might imply strictly the video?
+          // I'll keep a thin border to define the 'Round' shape clearly against backgrounds
+          border: Border.all(color: const Color(0xFFB8860B).withOpacity(0.5), width: 2), 
         ),
         child: ClipOval(
           child: FittedBox(
@@ -70,11 +71,7 @@ class _VideoLogoState extends State<VideoLogo> {
             child: SizedBox(
               width: _controller.value.size.width,
               height: _controller.value.size.height,
-              // Scale up by 15% to crop out white borders (zooming in)
-              child: Transform.scale(
-                scale: 1.15, 
-                child: VideoPlayer(_controller),
-              ),
+              child: VideoPlayer(_controller),
             ),
           ),
         ),
