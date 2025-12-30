@@ -7,7 +7,7 @@ import '../models/game_record.dart';
 import '../services/game_history_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/steampunk_theme.dart';
-import '../widgets/steampunk_widgets.dart';
+import '../widgets/themed_widgets.dart';
 import 'game_screen.dart';
 import 'details_screen.dart';
 

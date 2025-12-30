@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/game_settings.dart';
 import '../l10n/app_localizations.dart';
-import '../widgets/steampunk_widgets.dart';
+import '../widgets/themed_widgets.dart';
 import '../widgets/player_name_field.dart';
 import '../services/player_service.dart';
 

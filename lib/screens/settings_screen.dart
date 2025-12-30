@@ -4,7 +4,7 @@ import '../models/game_settings.dart' hide Player;
 import '../services/settings_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/fortune_theme.dart';
-import '../widgets/steampunk_widgets.dart';
+import '../widgets/themed_widgets.dart';
 import '../widgets/player_name_input_dialog.dart';
 import 'package:provider/provider.dart';
 import '../models/achievement_manager.dart';

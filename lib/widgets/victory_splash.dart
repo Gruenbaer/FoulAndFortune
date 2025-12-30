@@ -3,7 +3,7 @@ import 'package:confetti/confetti.dart';
 import '../models/player.dart';
 import '../theme/steampunk_theme.dart';
 import '../theme/fortune_theme.dart';
-import 'steampunk_widgets.dart';
+import 'themed_widgets.dart';
 import 'score_card.dart';
 
 class VictorySplash extends StatefulWidget {

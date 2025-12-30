@@ -12,7 +12,7 @@ import '../screens/statistics_screen.dart';
 import '../screens/achievements_gallery_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/game_history_screen.dart';
-import '../widgets/steampunk_widgets.dart';
+import '../widgets/themed_widgets.dart';
 import '../theme/steampunk_theme.dart';
 import '../services/game_history_service.dart';
 import '../widgets/video_logo.dart';

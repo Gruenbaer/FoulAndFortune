@@ -18,7 +18,7 @@ import 'settings_screen.dart';
 import 'details_screen.dart';
 import '../theme/steampunk_theme.dart';
 import '../theme/fortune_theme.dart';
-import '../widgets/steampunk_widgets.dart';
+import '../widgets/themed_widgets.dart';
 import '../widgets/victory_splash.dart';
 import '../widgets/game_clock.dart';
 import '../widgets/pause_overlay.dart';

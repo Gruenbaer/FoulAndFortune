@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/player_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/steampunk_theme.dart';
-import '../widgets/steampunk_widgets.dart';
+import '../widgets/themed_widgets.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});

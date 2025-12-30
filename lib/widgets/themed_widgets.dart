@@ -30,7 +30,7 @@ class ThemedBackground extends StatelessWidget {
 class ThemedButton extends StatefulWidget {
   final String? label;
   final Widget? child;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final IconData? icon;
   final Color? textColor;
   final List<Color>? backgroundGradientColors;
@@ -39,7 +39,7 @@ class ThemedButton extends StatefulWidget {
     super.key,
     this.label,
     this.child,
-    required this.onPressed,
+    this.onPressed,
     this.icon,
     this.textColor,
     this.backgroundGradientColors,
@@ -72,17 +72,20 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
+    final isEnabled = widget.onPressed != null;
     
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
+      onTapDown: isEnabled ? (_) => _controller.forward() : null,
+      onTapUp: isEnabled ? (_) {
         _controller.reverse();
-        widget.onPressed();
-      },
-      onTapCancel: () => _controller.reverse(),
+        widget.onPressed?.call();
+      } : null,
+      onTapCancel: isEnabled ? () => _controller.reverse() : null,
       child: ScaleTransition(
         scale: _scaleAnimation,
-        child: Container(
+        child: Opacity(
+          opacity: isEnabled ? 1.0 : 0.5,
+          child: Container(
           width: double.infinity,
           margin: const EdgeInsets.symmetric(vertical: 8),
           constraints: const BoxConstraints(maxWidth: 400, minHeight: 60), // Reduced minHeight, removed maxHeight
@@ -157,10 +160,11 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                     ),
                   ),
                 ],
-              ),
             ),
           ),
         ),
+      ),
+      ),
       ),
     );
   }
