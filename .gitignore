@@ -47,5 +47,10 @@ build_*/
 build/
 build_WKL-22_Dez-22-073830-2025_conflict_current/
 
+# APK files - distribute via GitHub Releases instead
+*.apk
+build/app/outputs/flutter-apk/*.apk
+build/app/outputs/apk/**/*.apk
+
 # Secrets - DO NOT COMMIT
 lib/secrets.dart
