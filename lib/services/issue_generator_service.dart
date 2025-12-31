@@ -8,7 +8,7 @@ import '../build_env.dart';
 
 class IssueGeneratorService {
   static const String _issuesDir = '.github/ISSUES';
-  
+
   /// Create a bug report (GitHub API or Local File Fallback)
   Future<String> createBugReport(BugData data) async {
     // Try GitHub API first
@@ -23,7 +23,7 @@ class IssueGeneratorService {
         print("GitHub API failed: $e. Falling back to local file.");
       }
     }
-    
+
     // Fallback: Local File
     return await _createLocalFile(
       type: 'bug',
@@ -31,7 +31,7 @@ class IssueGeneratorService {
       content: _formatBugFileContent(data),
     );
   }
-  
+
   /// Create a feature request (GitHub API or Local File Fallback)
   Future<String> createFeatureRequest(FeatureData data) async {
     // Try GitHub API first
@@ -46,7 +46,7 @@ class IssueGeneratorService {
         print("GitHub API failed: $e. Falling back to local file.");
       }
     }
-    
+
     // Fallback: Local File
     return await _createLocalFile(
       type: 'feature',
@@ -62,8 +62,9 @@ class IssueGeneratorService {
     required String body,
     required List<String> labels,
   }) async {
-    final uri = Uri.parse('https://api.github.com/repos/${BuildEnv.githubRepo}/issues');
-    
+    final uri =
+        Uri.parse('https://api.github.com/repos/${BuildEnv.githubRepo}/issues');
+
     final response = await http.post(
       uri,
       headers: {
@@ -82,7 +83,8 @@ class IssueGeneratorService {
       final json = jsonDecode(response.body);
       return json['html_url'] as String; // Return URL to the issue
     } else {
-      throw Exception('Failed to create issue: ${response.statusCode} ${response.body}');
+      throw Exception(
+          'Failed to create issue: ${response.statusCode} ${response.body}');
     }
   }
 
@@ -123,38 +125,46 @@ ${data.acceptanceCriteria.map((c) => '- [ ] $c').join('\n')}
 
   // --- Local File Fallback Logic (Legacy) ---
 
-  Future<String> _createLocalFile({required String type, required String title, required String content}) async {
-      final projectRoot = await _getProjectRoot();
-      final issueNum = await _getNextIssueNumber(type);
-      
-      final sanitized = title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final filename = '${type}_${issueNum.toString().padLeft(3, '0')}_${timestamp}_$sanitized.md';
-      final filepath = '$projectRoot/$_issuesDir/$filename';
-      
-      final file = File(filepath);
-      await file.parent.create(recursive: true);
-      await file.writeAsString(content);
-      
-      return "Local File: $filepath";
+  Future<String> _createLocalFile(
+      {required String type,
+      required String title,
+      required String content}) async {
+    final projectRoot = await _getProjectRoot();
+    final issueNum = await _getNextIssueNumber(type);
+
+    final sanitized =
+        title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final filename =
+        '${type}_${issueNum.toString().padLeft(3, '0')}_${timestamp}_$sanitized.md';
+    final filepath = '$projectRoot/$_issuesDir/$filename';
+
+    final file = File(filepath);
+    await file.parent.create(recursive: true);
+    await file.writeAsString(content);
+
+    return "Local File: $filepath";
   }
 
-  String _formatBugFileContent(BugData data) => "# Bug: ${data.title}\n\n${_formatBugBody(data)}";
-  String _formatFeatureFileContent(FeatureData data) => "# Feature: ${data.title}\n\n${_formatFeatureBody(data)}";
+  String _formatBugFileContent(BugData data) =>
+      "# Bug: ${data.title}\n\n${_formatBugBody(data)}";
+  String _formatFeatureFileContent(FeatureData data) =>
+      "# Feature: ${data.title}\n\n${_formatFeatureBody(data)}";
 
   Future<String> _getProjectRoot() async {
     final currentDir = Directory.current.path;
     if (await File('$currentDir/pubspec.yaml').exists()) return currentDir;
     final appDir = await getApplicationDocumentsDirectory();
-    return '${appDir.path}/fortune141_issues';
+    return '${appDir.path}/foulandfortune_issues';
   }
-  
+
   Future<int> _getNextIssueNumber(String type) async {
     try {
       final projectRoot = await _getProjectRoot();
       final dir = Directory('$projectRoot/$_issuesDir');
       if (!await dir.exists()) return 1;
-      final files = await dir.list().where((f) => f.path.contains('${type}_')).toList();
+      final files =
+          await dir.list().where((f) => f.path.contains('${type}_')).toList();
       if (files.isEmpty) return 1;
       return files.length + 1;
     } catch (e) {
