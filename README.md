@@ -1,51 +1,51 @@
-# 14.1 Fortune - Professional Straight Pool Scoring App
+# FoulAndFortune - Professionelle 14.1 Straight Pool Scoring App
 
-A professional Flutter-based scoring application for 14.1 Straight Pool (14.1 Continuous).
+Eine professionelle Flutter-basierte Scoring-Anwendung für 14.1 Straight Pool (14.1 Continuous).
 
-## 🎱 About
+## 🎱 Über
 
-14.1 Fortune is a professional scoring app for 14.1 Straight Pool, featuring accurate rule enforcement, player statistics, achievements, and comprehensive game history.
+FoulAndFortune ist eine professionelle Scoring-App für 14.1 Straight Pool mit präziser Regelüberwachung, Spielerstatistiken, Erfolgen und umfassender Spielhistorie.
 
-## 🛠️ Development Setup
+## 🛠️ Entwicklungs-Setup
 
-### Prerequisites
+### Voraussetzungen
 
-This project uses **Puro** (Flutter version manager) instead of standard Flutter installation.
+Dieses Projekt verwendet **Puro** (Flutter Versionsmanager) anstelle der standardmäßigen Flutter-Installation.
 
-- **Flutter SDK**: Managed via Puro
-- **Required Flutter Version**: 3.38.5 (stable)
+- **Flutter SDK**: Verwaltet über Puro
+- **Erforderliche Flutter-Version**: 3.38.5 (stable)
 - **Dart SDK**: 3.10.4
 
-### Quick Start
+### Schnellstart
 
-1. **Install Puro** (if not already installed):
-   ```bash
-   # Windows (via WinGet)
-   winget install puro
-   ```
+1. **Puro installieren** (falls noch nicht installiert):
+    ```bash
+    # Windows (via WinGet)
+    winget install puro
+    ```
 
-2. **Clone the repository**:
-   ```bash
-   git clone https://github.com/Gruenbaer/141fortune
-   cd 141fortune
-   ```
+2. **Repository klonen**:
+    ```bash
+    git clone https://github.com/Gruenbaer/FoulAndFortune
+    cd FoulAndFortune
+    ```
 
-3. **Set up Flutter environment**:
-   ```bash
-   puro use stable
-   puro flutter pub get
-   ```
+3. **Flutter-Umgebung einrichten**:
+    ```bash
+    puro use stable
+    puro flutter pub get
+    ```
 
-4. **Run the app**:
-   ```bash
-   puro flutter run
-   ```
+4. **App starten**:
+    ```bash
+    puro flutter run
+    ```
 
-### Important: Using Puro
+### Wichtig: Puro verwenden
 
-Since this project uses Puro, **always prefix Flutter commands with `puro`**:
+Da dieses Projekt Puro verwendet, **immer Flutter-Befehle mit `puro` prefixen**:
 
-| Standard Flutter | With Puro |
+| Standard Flutter | Mit Puro |
 |-----------------|-----------|
 | `flutter run` | `puro flutter run` |
 | `flutter analyze` | `puro flutter analyze` |
@@ -53,39 +53,45 @@ Since this project uses Puro, **always prefix Flutter commands with `puro`**:
 | `flutter pub get` | `puro flutter pub get` |
 | `flutter build apk` | `puro flutter build apk` |
 
-### Build Commands
+### Build-Befehle
 
 ```bash
 # Android APK
 puro flutter build apk --release
 
-# Check for issues
+# Auf Probleme prüfen
 puro flutter analyze
 puro flutter doctor
 ```
 
-## 📦 Dependencies
+## 📦 Abhängigkeiten
 
-Key dependencies are managed in `pubspec.yaml`:
-- `provider` - State management
-- `shared_preferences` - Local storage
-- `google_fonts` - Custom typography
-- `confetti` - Achievement animations
-- `audioplayers` - Sound effects
+Die wichtigsten Abhängigkeiten werden in `pubspec.yaml` verwaltet:
+- `provider` - Zustandsverwaltung
+- `shared_preferences` - Lokaler Speicher
+- `google_fonts` - Individuelle Typografie
+- `confetti` - Erfolgsanimationen
+- `audioplayers` - Soundeffekte
 
-## 🤖 AI Development Note
+## 🤖 AI-Entwicklungsnotiz
 
-**For Antigravity AI**: This project uses **Puro** for Flutter version management. When running Flutter commands, use `puro flutter` instead of `flutter`. The Puro environment is configured with `puro use stable` in the project directory.
+**Für Antigravity AI**: Dieses Projekt verwendet **Puro** für die Flutter-Versionsverwaltung. Bei der Ausführung von Flutter-Befehlen `puro flutter` anstelle von `flutter` verwenden. Die Puro-Umgebung ist mit `puro use stable` im Projektverzeichnis konfiguriert.
 
-## 📱 Platforms
+## 📱 Plattformen
 
 - Android
-- iOS  
+- iOS
 - Windows
 - macOS
 - Linux
 - Web
 
-## 📄 License
+## 📥 Download
 
-This project is private and not published.
+**Neueste Version:** [v3.7.6](https://github.com/Gruenbaer/FoulAndFortune/releases/tag/v3.7.6)
+
+📱 [APK herunterladen](https://github.com/Gruenbaer/FoulAndFortune/releases/download/v3.7.6/FoulAndFortune-v3.7.6.apk)
+
+## 📄 Lizenz
+
+Dieses Projekt ist privat und nicht veröffentlicht.
