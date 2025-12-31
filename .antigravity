@@ -2,6 +2,14 @@
 
 This file provides configuration hints for Antigravity AI when working with this project.
 
+## Language Preference
+
+- **Documentation Language**: German (de)
+- **README Language**: German (de)
+- **Comments Language**: German preferred, English acceptable
+
+All documentation, READMEs, and user-facing text should be written in German.
+
 ## Flutter Configuration
 
 - **Flutter Manager**: Puro (not standard Flutter)
