@@ -1,4 +1,4 @@
-ï»¿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../models/game_state.dart';
@@ -800,7 +800,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    _buildStatItem('Ã˜', (gameState.players[0].score / (gameState.players[0].currentInning > 0 ? gameState.players[0].currentInning : 1)).toStringAsFixed(2)),
+                                    _buildStatItem('Ø', (gameState.players[0].score / (gameState.players[0].currentInning > 0 ? gameState.players[0].currentInning : 1)).toStringAsFixed(2)),
                                     _buildStatItem('HR', '${gameState.players[0].highestRun}'),
                                   ],
                                 ),
@@ -811,7 +811,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    _buildStatItem('Ã˜', (gameState.players[1].score / (gameState.players[1].currentInning > 0 ? gameState.players[1].currentInning : 1)).toStringAsFixed(2)),
+                                    _buildStatItem('Ø', (gameState.players[1].score / (gameState.players[1].currentInning > 0 ? gameState.players[1].currentInning : 1)).toStringAsFixed(2)),
                                     _buildStatItem('HR', '${gameState.players[1].highestRun}'),
                                   ],
                                 ),

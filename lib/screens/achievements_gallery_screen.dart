@@ -151,11 +151,11 @@ class AchievementsGalleryScreen extends StatelessWidget {
     // Dynamic Logic for Easter Eggs (Lucky 7)
     if (achievement.id == 'lucky_7') {
       if (!achievement.isUnlocked) {
-         title = l10n.lucky7Title;
-         description = l10n.lucky7Locked;
+         title = l10n.luckySevenTitle;
+         description = l10n.luckySevenLocked;
       } else {
-         title = l10n.lucky7Title;
-         description = l10n.lucky7Desc;
+         title = l10n.luckySevenTitle;
+         description = l10n.luckySevenDesc;
       }
     }
 

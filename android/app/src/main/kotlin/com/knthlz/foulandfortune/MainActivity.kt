@@ -1,4 +1,4 @@
-package com.knthlz.fortune141
+package com.knthlz.foulandfortune
 
 import io.flutter.embedding.android.FlutterActivity
 

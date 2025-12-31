@@ -1,467 +1,1003 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class AppLocalizations {
-  final Locale locale;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
 
-  AppLocalizations(this.locale);
+import 'app_localizations_de.dart';
+import 'app_localizations_en.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
 
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
-  static const List<Locale> supportedLocales = [
-    Locale('de'), // German (default)
-    Locale('en'), // English
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
   ];
 
-  static final Map<String, Map<String, String>> _localizedValues = {
-    'de': {
-      // App
-      'appTitle': '14.1 Fortune',
-      
-      // Home Screen
-      'newGame': 'Neues Spiel',
-      'new141Game': 'Neues 14.1 Spiel',
-      'resume': 'Spiel fortsetzen',
-      'players': 'Spieler',
-      'statistics': 'Statistiken',
-      'achievements': 'Erfolge',
-      'settings': 'Einstellungen',
-      'version': 'Version',
-      
-      // Game Setup
-      'newGameSetup': 'Neues Spiel einrichten',
-      'gameType': 'Spieltyp',
-      'leagueGame': 'Ligaspiel',
-      'leagueGameSubtitle': 'Für Statistiken und Ranglisten erfassen',
-      'raceTo': 'Rennen bis',
-      'custom': 'Benutzerdefiniert',
-      'maxInnings': 'Max. Aufnahmen',
-      'unlimited': 'Unbegrenzt',
-      'playersTitle': 'Spieler',
-      'player1': 'Spieler 1',
-      'player2': 'Spieler 2',
-      'enterOrSelectPlayer': 'Name eingeben oder auswählen',
-      'createPlayer': 'Spieler erstellen',
-      'handicap': 'Handicap',
-      'additionalRules': 'Zusätzliche Regeln',
-      'threeFoulRule': '3-Foul-Regel',
-      'threeFoulRuleSubtitle': '3 aufeinanderfolgende Fouls = -15 Punkte',
-      'startGame': 'Spiel starten',
-      'noPlayerSelected': 'Kein Spieler ausgewählt',
-      'pleaseSelectBothPlayers': 'Bitte wählen Sie beide Spieler aus, bevor Sie das Spiel starten',
-      
-      // Settings
-      'soundEffects': 'Soundeffekte',
-      'enableGameSounds': 'Spielsounds aktivieren',
-      'language': 'Sprache',
-      'german': 'Deutsch',
-      'english': 'Englisch',
-      'theme': 'Design',
-      'lightTheme': 'Hell',
-      'darkTheme': 'Dunkel',
-      'raceToScore': 'Rennen bis',
-      'points': 'Punkte',
-      'save': 'Speichern',
-      'settingsSaved': 'Einstellungen gespeichert!',
-      
-      // Player Management
-      'playerCreated': 'Spieler erstellt ✓',
-      'noPlayersYet': 'Noch keine Spieler',
-      'tapToCreate': 'Tippen Sie auf +, um einen Spieler zu erstellen',
-      'deletePlayer': 'Spieler löschen',
-      'confirmDelete': 'Möchten Sie wirklich löschen',
-      'playerName': 'Spielername',
-      'gamesPlayed': 'Gespielte Spiele',
-      'gamesWon': 'Gewonnene Spiele',
-      'gamesLost': 'Verlorene Spiele',
-      'editPlayer': 'Spieler bearbeiten',
-      'playerUpdated': 'Spieler aktualisiert',
-      'noAchievementsYet': 'Noch keine Erfolge freigeschaltet',
-      
-      // Statistics
-      'overallStatistics': 'Gesamtstatistik',
-      'games': 'Spiele',
-      'fouls': 'Fouls',
-      'bestRun': 'Beste Serie',
-      'playerRankings': 'Spieler-Rangliste',
-      'noStatistics': 'Noch keine Statistiken',
-      'playGamesToSee': 'Spielen Sie Spiele, um Statistiken zu sehen',
-      'sortBy': 'Sortieren nach',
-      'rank': 'Rang',
-      'winRate': 'Siegrate',
-      'avgPoints': 'Ø Punkte',
-      'highestRun': 'Höchste Serie',
-      'totalPoints': 'Gesamt Punkte',
-      'totalFouls': 'Gesamt Fouls',
-      'totalInnings': 'Gesamt Aufnahmen',
-      'totalSaves': 'Gesamt Safety-Shots',
-      'avgInnings': 'Ø Aufnahmen',
-      'avgFouls': 'Ø Fouls',
-      
-      // Achievements  
-      'achievementsUnlocked': 'Erfolge freigeschaltet',
-      'unlocked': 'Freigeschaltet',
-      'howToUnlock': 'Wie man es freischaltet',
-      'unlockedBy': 'Freigeschaltet von',
-      'unlockedOn': 'Freigeschaltet am',
-      'secretAchievement': 'Dies ist ein geheimes Easter Egg!',
-      
-      // Achievement Specifics (Easter Eggs)
-      'vinzend_title': 'Lord Vinzend the 13th',
-      'vinzend_locked': '13 ist die magische Zahl. Nur wo?', // Hint
-      'vinzend_desc': 'Du hast 13 Mal auf die 13 gedrückt, ohne auch nur eine Kugel gesenkt zu haben. Musst Du Zeit haben...',
-      
-      'lucky7_title': 'Glückszahl 7',
-      'lucky7_locked': 'Die Sieben scheint dich zu verfolgen...', // Hint
-      'lucky7_desc': 'Die 7 ist deine Lieblingskugel! Du hast sie in 7 aufeinanderfolgenden Aufnahmen versenkt.',
-      
-      // Game Screen
-      'exitGame': 'Spiel beenden?',
-      'exitGameMessage': 'Spielfortschritt geht verloren. Sind Sie sicher?',
-      'restartGame': 'Spiel neustarten?',
-      'restartGameMessage': 'Dies setzt alle Punkte und Verlauf zurück. Sind Sie sicher?',
-      'gameRules': 'Spielregeln',
-      'details': 'Details',
-      'undo': 'Rückgängig',
-      'redo': 'Wiederholen',
-      
-      // Common
-      'cancel': 'Abbrechen',
-      'close': 'Schließen',
-      'delete': 'Löschen',
-      'create': 'Erstellen',
-      'edit': 'Bearbeiten',
-      'back': 'Zurück',
-      'yes': 'Ja',
-      'no': 'Nein',
-      'ok': 'OK',
-      
-      // Game Dialogs
-      'exit': 'Beenden',
-      'exitGameTitle': 'Spiel beenden?',
-      'gameRulesContent': '14.1 Fortune (Modifiziert)\\n\\n1. Spielziel\\nDas Ziel ist es, die festgelegte Punktzahl zu erreichen (Rennen bis X).\\n\\n2. Punktevergabe\\nEine versenkte Kugel bringt Punkte gleich (15 - Kugelnummer).\\nBeispiel: Kugel 14 = 1 Punkt. Kugel 1 = 14 Punkte.\\n\\n3. Spezielle Kugeln\\n- Kugel 1: Bringt 14 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\\n- Doppel-Sack (Spielball): Bringt 15 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\\n\\n4. Fouls\\n- Normales Foul: -1 Punkt. 3 aufeinanderfolgende Fouls = -15 Punkte.\\n- Schweres Foul: -2 Punkte.',
-      'threeFoulPenalty': '3-Foul-Strafe!',
-      'threeFoulMessage': 'Spieler hat 3 aufeinanderfolgende Fouls begangen.\\n\\nStrafe: -15 Punkte\\n\\nDer Foulzähler wurde zurückgesetzt.',
-      'resetGame': 'Spiel zurücksetzen',
-      'resetGameMessage': 'Möchten Sie das Spiel wirklich zurücksetzen?',
-      'reset': 'Zurücksetzen',
-      'resetEverything': 'Alles zurücksetzen?',
-      'resetAll': 'Alles zurücksetzen',
-      'resetDataMessage': 'Dies wird dauerhaft löschen:\n• Freigeschaltete Erfolge\n• Spielverlauf\n• Gespeicherte Einstellungen\n\nDiese Aktion kann nicht rückgängig gemacht werden.',
-      'allDataReset': 'Alle Daten wurden zurückgesetzt.',
-      
-      // Game History
-      'gameHistory': 'Spielverlauf',
-      'allGames': 'Alle Spiele',
-      'inProgress': 'Laufend',
-      'completed': 'Abgeschlossen',
-      'noGamesYet': 'Noch keine Spiele',
-      'playGameToSeeHistory': 'Spielen Sie ein Spiel, um den Verlauf zu sehen',
-      'resumeGame': 'Spiel fortsetzen',
-      'viewStats': 'Statistiken ansehen',
-      'deleteGame': 'Spiel löschen',
-      'deleteAllGames': 'Alle Spiele löschen',
-      'confirmDeleteGame': 'Möchten Sie dieses Spiel wirklich löschen?',
-      'confirmDeleteAll': 'Möchten Sie wirklich alle Spiele löschen?',
-      'gameDetails': 'Spieldetails',
-      'duration': 'Dauer',
-      'vs': 'vs',
-      'score': 'Punkte',
-    },
-    'en': {
-      // App
-      'appTitle': '14.1 Fortune',
-      
-      // Home Screen
-      'newGame': 'New Game',
-      'new141Game': 'New 14.1 Game',
-      'resume': 'Resume Game',
-      'players': 'Players',
-      'statistics': 'Statistics',
-      'achievements': 'Achievements',
-      'settings': 'Settings',
-      'version': 'Version',
-      
-      // Game Setup
-      'newGameSetup': 'New Game Setup',
-      'gameType': 'Game Type',
-      'leagueGame': 'League Game',
-      'leagueGameSubtitle': 'Track for statistics and rankings',
-      'raceTo': 'Race to',
-      'custom': 'Custom',
-      'maxInnings': 'Max Innings',
-      'unlimited': 'Unlimited',
-      'playersTitle': 'Players',
-      'player1': 'Player 1',
-      'player2': 'Player 2',
-      'enterOrSelectPlayer': 'Enter or select player',
-      'createPlayer': 'Create Player',
-      'handicap': 'Handicap',
-      'additionalRules': 'Additional Rules',
-      'threeFoulRule': '3-Foul Rule',
-      'threeFoulRuleSubtitle': '3 consecutive fouls = -15 points',
-      'startGame': 'Start Game',
-      'noPlayerSelected': 'No player selected',
-      'pleaseSelectBothPlayers': 'Please select both players before starting the game',
-      
-      // Settings
-      'soundEffects': 'Sound Effects',
-      'enableGameSounds': 'Enable game sounds',
-      'language': 'Language',
-      'german': 'German',
-      'english': 'English',
-      'theme': 'Theme',
-      'lightTheme': 'Light',
-      'darkTheme': 'Dark',
-      'raceToScore': 'Race to Score',
-      'points': 'Points',
-      'save': 'Save',
-      'settingsSaved': 'Settings saved!',
-      
-      // Player Management
-      'playerCreated': 'Player created ✓',
-      'noPlayersYet': 'No players yet',
-      'tapToCreate': 'Tap + to create your first player',
-      'deletePlayer': 'Delete Player',
-      'confirmDelete': 'Are you sure you want to delete',
-      'playerName': 'Player Name',
-      'gamesPlayed': 'Games Played',
-      'gamesWon': 'Games Won',
-      'gamesLost': 'Games Lost',
-      'editPlayer': 'Edit Player',
-      'playerUpdated': 'Player updated',
-      'noAchievementsYet': 'No achievements unlocked yet',
-      
-      // Statistics
-      'overallStatistics': 'Overall Statistics',
-      'games': 'Games',
-      'fouls': 'Fouls',
-      'bestRun': 'Best Run',
-      'playerRankings': 'Player Rankings',
-      'noStatistics': 'No statistics yet',
-      'playGamesToSee': 'Play some games to see statistics',
-      'sortBy': 'Sort by',
-      'rank': 'Rank',
-      'winRate': 'Win Rate',
-      'avgPoints': 'Avg Points',
-      'highestRun': 'Highest Run',
-      'totalPoints': 'Total Points',
-      'totalFouls': 'Total Fouls',
-      'totalInnings': 'Total Innings',
-      'totalSaves': 'Total Saves',
-      'avgInnings': 'Avg Innings',
-      'avgFouls': 'Avg Fouls',
-      
-      // Achievements
-      'achievementsUnlocked': 'Achievements Unlocked',
-      'unlocked': 'Unlocked',
-      'howToUnlock': 'How to unlock',
-      'unlockedBy': 'Unlocked by',
-      'unlockedOn': 'Unlocked on',
-      'secretAchievement': 'This is a secret Easter Egg!',
-      
-      // Achievement Specifics (Easter Eggs)
-      'vinzend_title': 'Lord Vinzend the 13th',
-      'vinzend_locked': '13 is the magical number. Just where?', // Hint
-      'vinzend_desc': 'You tapped the 13 ball 13 times without sinking a single ball. You must have time...',
-      
-      'lucky7_title': 'Lucky Number 7',
-      'lucky7_locked': 'Seven seems to follow you...', // Hint
-      'lucky7_desc': 'The 7 is your favorite ball! You sank it in 7 consecutive innings.',
-      
-      // Game Screen
-      'exitGame': 'Exit Game?',
-      'exitGameMessage': 'Game progress will be lost. Are you sure?',
-      'restartGame': 'Restart Game?',
-      'restartGameMessage': 'This will reset all scores and history. Are you sure?',
-      'gameRules': 'Game Rules',
-      'details': 'Details',
-      'undo': 'Undo',
-      'redo': 'Redo',
-      
-      // Common
-      'cancel': 'Cancel',
-      'close': 'Close',
-      'delete': 'Delete',
-      'create': 'Create',
-      'edit': 'Edit',
-      'back': 'Back',
-      'yes': 'Yes',
-      'no': 'No',
-      'ok': 'OK',
-      
-      // Game Dialogs
-      'exit': 'Exit',
-      'exitGameTitle': 'Exit Game?',
-      'gameRulesContent': '14.1 Fortune (Modified)\\n\\n1. Object of the Game\\nThe goal is to reach the set score (Race to X).\\n\\n2. Scoring\\nPocketing a ball scores points equal to (15 - Ball Number).\\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\\n\\n3. Special Balls\\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\\n\\n4. Fouls\\n- Normal Foul: -1 point. 3 consecutive fouls = -15 points.\\n- Severe Foul: -2 points.',
-      'threeFoulPenalty': '3-Foul Penalty!',
-      'threeFoulMessage': 'Player committed 3 consecutive fouls.\\n\\nPenalty: -15 points\\n\\nThe foul counter has been reset.',
-      'resetGame': 'Reset Game',
-      'resetGameMessage': 'Are you sure you want to reset the game?',
-      'reset': 'Reset',
-      'resetEverything': 'Reset Everything?',
-      'resetAll': 'Reset All',
-      'resetDataMessage': 'This will permanently delete all:\n• Unlocked Achievements\n• Game History\n• Saved Settings\n\nThis action cannot be undone.',
-      'allDataReset': 'All data has been reset.',
-      
-      // Game History
-      'gameHistory': 'Game History',
-      'allGames': 'All Games',
-      'inProgress': 'In Progress',
-      'completed': 'Completed',
-      'noGamesYet': 'No games yet',
-      'playGameToSeeHistory': 'Play a game to see history',
-      'resumeGame': 'Resume Game',
-      'viewStats': 'View Stats',
-      'deleteGame': 'Delete Game',
-      'deleteAllGames': 'Delete All Games',
-      'confirmDeleteGame': 'Are you sure you want to delete this game?',
-      'confirmDeleteAll': 'Are you sure you want to delete all games?',
-      'gameDetails': 'Game Details',
-      'duration': 'Duration',
-      'vs': 'vs',
-      'score': 'Score',
-    },
-  };
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en')
+  ];
 
-  String translate(String key) {
-    return _localizedValues[locale.languageCode]?[key] ?? key;
-  }
+  /// No description provided for @appTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'14.1 Fortune'**
+  String get appTitle;
 
-  // Convenience getters for all translations
-  String get appTitle => translate('appTitle');
-  String get newGame => translate('newGame');
-  String get new141Game => translate('new141Game');
-  String get resume => translate('resume');
-  String get players => translate('players');
-  String get statistics => translate('statistics');
-  String get achievements => translate('achievements');
-  String get settings => translate('settings');
-  String get version => translate('version');
-  
-  String get newGameSetup => translate('newGameSetup');
-  String get gameType => translate('gameType');
-  String get leagueGame => translate('leagueGame');
-  String get leagueGameSubtitle => translate('leagueGameSubtitle');
-  String get raceTo => translate('raceTo');
-  String get custom => translate('custom');
-  String get maxInnings => translate('maxInnings');
-  String get unlimited => translate('unlimited');
-  String get playersTitle => translate('playersTitle');
-  String get player1 => translate('player1');
-  String get player2 => translate('player2');
-  String get enterOrSelectPlayer => translate('enterOrSelectPlayer');
-  String get createPlayer => translate('createPlayer');
-  String get handicap => translate('handicap');
-  String get additionalRules => translate('additionalRules');
-  String get threeFoulRule => translate('threeFoulRule');
-  String get threeFoulRuleSubtitle => translate('threeFoulRuleSubtitle');
-  String get startGame => translate('startGame');
-  String get noPlayerSelected => translate('noPlayerSelected');
-  String get pleaseSelectBothPlayers => translate('pleaseSelectBothPlayers');
-  
-  String get soundEffects => translate('soundEffects');
-  String get enableGameSounds => translate('enableGameSounds');
-  String get language => translate('language');
-  String get german => translate('german');
-  String get english => translate('english');
-  String get theme => translate('theme');
-  String get lightTheme => translate('lightTheme');
-  String get darkTheme => translate('darkTheme');
-  String get raceToScore => translate('raceToScore');
-  String get points => translate('points');
-  String get save => translate('save');
-  String get settingsSaved => translate('settingsSaved');
-  
-  String get playerCreated => translate('playerCreated');
-  String get noPlayersYet => translate('noPlayersYet');
-  String get tapToCreate => translate('tapToCreate');
-  String get deletePlayer => translate('deletePlayer');
-  String get confirmDelete => translate('confirmDelete');
-  String get playerName => translate('playerName');
-  String get gamesPlayed => translate('gamesPlayed');
-  String get gamesWon => translate('gamesWon');
-  String get gamesLost => translate('gamesLost');
-  String get editPlayer => translate('editPlayer');
-  String get playerUpdated => translate('playerUpdated');
-  String get noAchievementsYet => translate('noAchievementsYet');
-  
-  String get overallStatistics => translate('overallStatistics');
-  String get games => translate('games');
-  String get fouls => translate('fouls');
-  String get bestRun => translate('bestRun');
-  String get playerRankings => translate('playerRankings');
-  String get noStatistics => translate('noStatistics');
-  String get playGamesToSee => translate('playGamesToSee');
-  String get sortBy => translate('sortBy');
-  String get rank => translate('rank');
-  String get winRate => translate('winRate');
-  String get avgPoints => translate('avgPoints');
-  String get highestRun => translate('highestRun');
-  String get totalPoints => translate('totalPoints');
-  String get totalFouls => translate('totalFouls');
-  String get totalInnings => translate('totalInnings');
-  String get totalSaves => translate('totalSaves');
-  String get avgInnings => translate('avgInnings');
-  String get avgFouls => translate('avgFouls');
-  
-  String get achievementsUnlocked => translate('achievementsUnlocked');
-  String get unlocked => translate('unlocked');
-  String get howToUnlock => translate('howToUnlock');
-  String get unlockedBy => translate('unlockedBy');
-  String get unlockedOn => translate('unlockedOn');
-  String get secretAchievement => translate('secretAchievement');
-  
-  // Achievement Getters
-  String get vinzendTitle => translate('vinzend_title');
-  String get vinzendLocked => translate('vinzend_locked');
-  String get vinzendDesc => translate('vinzend_desc');
-  
-  String get lucky7Title => translate('lucky7_title');
-  String get lucky7Locked => translate('lucky7_locked');
-  String get lucky7Desc => translate('lucky7_desc');
-  
-  String get exitGame => translate('exitGame');
-  String get exitGameMessage => translate('exitGameMessage');
-  String get restartGame => translate('restartGame');
-  String get restartGameMessage => translate('restartGameMessage');
-  String get gameRules => translate('gameRules');
-  String get details => translate('details');
-  String get undo => translate('undo');
-  String get redo => translate('redo');
-  
-  String get cancel => translate('cancel');
-  String get close => translate('close');
-  String get delete => translate('delete');
-  String get create => translate('create');
-  String get edit => translate('edit');
-  String get back => translate('back');
-  String get yes => translate('yes');
-  String get no => translate('no');
-  String get ok => translate('ok');
-  
-  String get exit => translate('exit');
-  String get exitGameTitle => translate('exitGameTitle');
-  String get resetEverything => translate('resetEverything');
-  String get resetAll => translate('resetAll');
-  String get resetDataMessage => translate('resetDataMessage');
-  String get allDataReset => translate('allDataReset');
+  /// No description provided for @newGame.
+  ///
+  /// In en, this message translates to:
+  /// **'New Game'**
+  String get newGame;
+
+  /// No description provided for @new141Game.
+  ///
+  /// In en, this message translates to:
+  /// **'New 14.1 Game'**
+  String get new141Game;
+
+  /// No description provided for @resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Game'**
+  String get resume;
+
+  /// No description provided for @players.
+  ///
+  /// In en, this message translates to:
+  /// **'Players'**
+  String get players;
+
+  /// No description provided for @statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statistics;
+
+  /// No description provided for @achievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievements;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @newGameSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'New Game Setup'**
+  String get newGameSetup;
+
+  /// No description provided for @gameType.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Type'**
+  String get gameType;
+
+  /// No description provided for @leagueGame.
+  ///
+  /// In en, this message translates to:
+  /// **'League Game'**
+  String get leagueGame;
+
+  /// No description provided for @leagueGameSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track for statistics and rankings'**
+  String get leagueGameSubtitle;
+
+  /// No description provided for @twoFoulsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'2 FOULS!'**
+  String get twoFoulsWarning;
+
+  /// No description provided for @iUnderstand.
+  ///
+  /// In en, this message translates to:
+  /// **'I UNDERSTAND'**
+  String get iUnderstand;
+
+  /// No description provided for @threeFoulsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3 FOULS!'**
+  String get threeFoulsTitle;
+
+  /// No description provided for @raceTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Race to'**
+  String get raceTo;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @maxInnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Innings'**
+  String get maxInnings;
+
+  /// No description provided for @pointMultiplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Point Multiplier'**
+  String get pointMultiplier;
+
+  /// No description provided for @unlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get unlimited;
+
+  /// No description provided for @playersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Players'**
+  String get playersTitle;
+
+  /// No description provided for @player1.
+  ///
+  /// In en, this message translates to:
+  /// **'Player 1'**
+  String get player1;
+
+  /// No description provided for @player2.
+  ///
+  /// In en, this message translates to:
+  /// **'Player 2'**
+  String get player2;
+
+  /// No description provided for @enterOrSelectPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter or select player'**
+  String get enterOrSelectPlayer;
+
+  /// No description provided for @createPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Player'**
+  String get createPlayer;
+
+  /// No description provided for @handicap.
+  ///
+  /// In en, this message translates to:
+  /// **'Handicap'**
+  String get handicap;
+
+  /// No description provided for @additionalRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Rules'**
+  String get additionalRules;
+
+  /// No description provided for @threeFoulRule.
+  ///
+  /// In en, this message translates to:
+  /// **'3-Foul Rule'**
+  String get threeFoulRule;
+
+  /// No description provided for @threeFoulRuleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3 consecutive fouls = -15 points'**
+  String get threeFoulRuleSubtitle;
+
+  /// No description provided for @startGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Game'**
+  String get startGame;
+
+  /// No description provided for @noPlayerSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No player selected'**
+  String get noPlayerSelected;
+
+  /// No description provided for @pleaseSelectBothPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select both players before starting the game'**
+  String get pleaseSelectBothPlayers;
+
+  /// No description provided for @soundEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound Effects'**
+  String get soundEffects;
+
+  /// No description provided for @enableGameSounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable game sounds'**
+  String get enableGameSounds;
+
+  /// No description provided for @haptics.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic Feedback'**
+  String get haptics;
+
+  /// No description provided for @enableHaptics.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable vibration'**
+  String get enableHaptics;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @german.
+  ///
+  /// In en, this message translates to:
+  /// **'German'**
+  String get german;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @steampunkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Steampunk'**
+  String get steampunkTheme;
+
+  /// No description provided for @steampunkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic Brass & Wood'**
+  String get steampunkDesc;
+
+  /// No description provided for @cyberpunkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Cyberpunk'**
+  String get cyberpunkTheme;
+
+  /// No description provided for @cyberpunkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Neon & Glitch'**
+  String get cyberpunkDesc;
+
+  /// No description provided for @ghibliTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Ghibli Style'**
+  String get ghibliTheme;
+
+  /// No description provided for @ghibliDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature & Magic'**
+  String get ghibliDesc;
+
+  /// No description provided for @lightTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightTheme;
+
+  /// No description provided for @darkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkTheme;
+
+  /// No description provided for @raceToScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Race to Score'**
+  String get raceToScore;
+
+  /// No description provided for @points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get points;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved!'**
+  String get settingsSaved;
+
+  /// No description provided for @playerCreatedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Player \"{name}\" created'**
+  String playerCreatedSnackbar(String name);
+
+  /// No description provided for @playerDeletedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Player \"{name}\" deleted'**
+  String playerDeletedSnackbar(String name);
+
+  /// No description provided for @confirmDeletePlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"?'**
+  String confirmDeletePlayer(String name);
+
+  /// No description provided for @noPlayersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No players yet'**
+  String get noPlayersYet;
+
+  /// No description provided for @tapToCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to create your first player'**
+  String get tapToCreate;
+
+  /// No description provided for @deletePlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Player'**
+  String get deletePlayer;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete'**
+  String get confirmDelete;
+
+  /// No description provided for @playerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Player Name'**
+  String get playerName;
+
+  /// No description provided for @gamesPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Games Played'**
+  String get gamesPlayed;
+
+  /// No description provided for @gamesWon.
+  ///
+  /// In en, this message translates to:
+  /// **'Games Won'**
+  String get gamesWon;
+
+  /// No description provided for @gamesLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Games Lost'**
+  String get gamesLost;
+
+  /// No description provided for @editPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Player'**
+  String get editPlayer;
+
+  /// No description provided for @playerUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Player updated'**
+  String get playerUpdated;
+
+  /// No description provided for @noAchievementsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No achievements unlocked yet'**
+  String get noAchievementsYet;
+
+  /// No description provided for @overallStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Statistics'**
+  String get overallStatistics;
+
+  /// No description provided for @games.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get games;
+
+  /// No description provided for @fouls.
+  ///
+  /// In en, this message translates to:
+  /// **'Fouls'**
+  String get fouls;
+
+  /// No description provided for @bestRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Run'**
+  String get bestRun;
+
+  /// No description provided for @playerRankings.
+  ///
+  /// In en, this message translates to:
+  /// **'Player Rankings'**
+  String get playerRankings;
+
+  /// No description provided for @noStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'No statistics yet'**
+  String get noStatistics;
+
+  /// No description provided for @playGamesToSee.
+  ///
+  /// In en, this message translates to:
+  /// **'Play some games to see statistics'**
+  String get playGamesToSee;
+
+  /// No description provided for @sortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get sortBy;
+
+  /// No description provided for @rank.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank'**
+  String get rank;
+
+  /// No description provided for @winRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Win Rate'**
+  String get winRate;
+
+  /// No description provided for @avgPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Points'**
+  String get avgPoints;
+
+  /// No description provided for @highestRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest Run'**
+  String get highestRun;
+
+  /// No description provided for @totalPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Points'**
+  String get totalPoints;
+
+  /// No description provided for @totalFouls.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Fouls'**
+  String get totalFouls;
+
+  /// No description provided for @totalInnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Innings'**
+  String get totalInnings;
+
+  /// No description provided for @totalSaves.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Saves'**
+  String get totalSaves;
+
+  /// No description provided for @avgInnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Innings'**
+  String get avgInnings;
+
+  /// No description provided for @avgFouls.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Fouls'**
+  String get avgFouls;
+
+  /// No description provided for @achievementsUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements Unlocked'**
+  String get achievementsUnlocked;
+
+  /// No description provided for @unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get unlocked;
+
+  /// No description provided for @howToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'How to unlock'**
+  String get howToUnlock;
+
+  /// No description provided for @unlockedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked by'**
+  String get unlockedBy;
+
+  /// No description provided for @unlockedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked on'**
+  String get unlockedOn;
+
+  /// No description provided for @secretAchievement.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a secret Easter Egg!'**
+  String get secretAchievement;
+
+  /// No description provided for @vinzend_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Lord Vinzend the 13th'**
+  String get vinzend_title;
+
+  /// No description provided for @vinzend_locked.
+  ///
+  /// In en, this message translates to:
+  /// **'13 is the magical number. Just where?'**
+  String get vinzend_locked;
+
+  /// No description provided for @vinzend_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'You tapped the 13 ball 13 times without sinking a single ball. You must have time...'**
+  String get vinzend_desc;
+
+  /// No description provided for @luckySevenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lucky Number 7'**
+  String get luckySevenTitle;
+
+  /// No description provided for @luckySevenLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Seven seems to follow you...'**
+  String get luckySevenLocked;
+
+  /// No description provided for @luckySevenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The 7 is your favorite ball! You sank it in 7 consecutive innings.'**
+  String get luckySevenDesc;
+
+  /// No description provided for @winner.
+  ///
+  /// In en, this message translates to:
+  /// **'Winner'**
+  String get winner;
+
+  /// No description provided for @exitGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit Game?'**
+  String get exitGame;
+
+  /// No description provided for @exitGameMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Game progress will be lost. Are you sure?'**
+  String get exitGameMessage;
+
+  /// No description provided for @restartGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart Game?'**
+  String get restartGame;
+
+  /// No description provided for @restartGameMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will reset all scores and history. Are you sure?'**
+  String get restartGameMessage;
+
+  /// No description provided for @gameRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Rules'**
+  String get gameRules;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @redo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get redo;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exit;
+
+  /// No description provided for @exitGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit Game?'**
+  String get exitGameTitle;
+
+  /// No description provided for @gameRulesContent.
+  ///
+  /// In en, this message translates to:
+  /// **'14.1 Fortune (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -15 points.\n- Severe Foul: -2 points.'**
+  String get gameRulesContent;
+
+  /// No description provided for @threeFoulPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'3-Foul Penalty!'**
+  String get threeFoulPenalty;
+
+  /// No description provided for @threeFoulMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Player committed 3 consecutive fouls.\n\nPenalty: -15 points\n\nThe foul counter has been reset.'**
+  String get threeFoulMessage;
+
+  /// No description provided for @resetGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Game'**
+  String get resetGame;
+
+  /// No description provided for @resetGameMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reset the game?'**
+  String get resetGameMessage;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @resetEverything.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Everything?'**
+  String get resetEverything;
+
+  /// No description provided for @resetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All'**
+  String get resetAll;
+
+  /// No description provided for @resetDataMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete all:\n• Unlocked Achievements\n• Game History\n• Saved Settings\n\nThis action cannot be undone.'**
+  String get resetDataMessage;
+
+  /// No description provided for @allDataReset.
+  ///
+  /// In en, this message translates to:
+  /// **'All data has been reset.'**
+  String get allDataReset;
+
+  /// No description provided for @gameHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Game History'**
+  String get gameHistory;
+
+  /// No description provided for @allGames.
+  ///
+  /// In en, this message translates to:
+  /// **'All Games'**
+  String get allGames;
+
+  /// No description provided for @inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get inProgress;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @noGamesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No games yet'**
+  String get noGamesYet;
+
+  /// No description provided for @playGameToSeeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Play a game to see history'**
+  String get playGameToSeeHistory;
+
+  /// No description provided for @resumeGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Game'**
+  String get resumeGame;
+
+  /// No description provided for @viewStats.
+  ///
+  /// In en, this message translates to:
+  /// **'View Stats'**
+  String get viewStats;
+
+  /// No description provided for @deleteGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Game'**
+  String get deleteGame;
+
+  /// No description provided for @deleteAllGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All Games'**
+  String get deleteAllGames;
+
+  /// No description provided for @confirmDeleteGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this game?'**
+  String get confirmDeleteGame;
+
+  /// No description provided for @confirmDeleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all games?'**
+  String get confirmDeleteAll;
+
+  /// No description provided for @gameDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Details'**
+  String get gameDetails;
+
+  /// No description provided for @duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get duration;
+
+  /// No description provided for @vs.
+  ///
+  /// In en, this message translates to:
+  /// **'vs'**
+  String get vs;
+
+  /// No description provided for @score.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get score;
+
+  /// No description provided for @generalAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'General Average'**
+  String get generalAverage;
+
+  /// No description provided for @rivalryHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Rivalry History'**
+  String get rivalryHistory;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['de', 'en'].contains(locale.languageCode);
-
-  @override
-  Future<AppLocalizations> load(Locale locale) async {
-    return AppLocalizations(locale);
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
   }
 
   @override
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en'].contains(locale.languageCode);
+
+  @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+  }
+
+  throw FlutterError(
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

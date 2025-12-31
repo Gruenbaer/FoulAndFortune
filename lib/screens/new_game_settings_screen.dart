@@ -95,7 +95,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context).playerCreated}')),
+          SnackBar(content: Text(AppLocalizations.of(context).playerCreatedSnackbar(name.trim()))),
         );
       }
     } catch (e) {

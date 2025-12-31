@@ -1,4 +1,4 @@
-name: fortune141
+name: foulandfortune
 description: 14.1 Fortune Pool Scoring App
 publish_to: 'none'
 version: 3.7.4+9
@@ -50,6 +50,7 @@ flutter_native_splash:
     icon_background_color: "#2A1B0E"
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/svg/

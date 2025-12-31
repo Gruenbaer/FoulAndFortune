@@ -262,7 +262,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                  l10n.translate('highestRun') ?? 'Highest Run (HR)',
+                  l10n.highestRun,
                   _player.highestRun.toString(),
                   Icons.star,
                   Colors.orange,
@@ -271,7 +271,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildStatCard(
-                  l10n.translate('generalAverage') ?? 'Avg Pots (GD)',
+                  l10n.generalAverage,
                   _player.generalAverage.toStringAsFixed(2),
                   Icons.show_chart,
                   Colors.purple,
@@ -285,7 +285,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
           // RIVALRY SECTION (Head-to-Head)
           if (_rivalryStats.isNotEmpty) ...[
             Text(
-              l10n.translate('rivalryHistory') ?? 'Head-to-Head',
+              l10n.rivalryHistory,
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

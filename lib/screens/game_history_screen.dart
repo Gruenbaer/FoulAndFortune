@@ -8,7 +8,7 @@ import '../services/game_history_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/steampunk_theme.dart';
 import '../widgets/themed_widgets.dart';
-import 'game_screen.dart';
+import 'package:foulandfortune/screens/game_play_screen.dart';
 import 'details_screen.dart';
 
 class GameHistoryScreen extends StatefulWidget {
@@ -61,8 +61,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.translate('deleteAllGames')),
-        content: Text(l10n.translate('confirmDeleteAll')),
+        title: Text(l10n.deleteAllGames),
+        content: Text(l10n.confirmDeleteAll),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -90,7 +90,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(l10n.translate('gameHistory'), style: theme.textTheme.displayMedium),
+        title: Text(l10n.gameHistory, style: theme.textTheme.displayMedium),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -100,7 +100,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             IconButton(
               icon: Icon(Icons.delete_sweep, color: SteampunkTheme.brassBright),
               onPressed: _clearAllHistory,
-              tooltip: l10n.translate('deleteAllGames'),
+              tooltip: l10n.deleteAllGames,
             ),
         ],
       ),
@@ -119,21 +119,21 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   children: [
                     Expanded(
                       child: _buildFilterChip(
-                        label: l10n.translate('allGames'),
+                        label: l10n.allGames,
                         value: 'all',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _buildFilterChip(
-                        label: l10n.translate('inProgress'),
+                        label: l10n.inProgress,
                         value: 'active',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _buildFilterChip(
-                        label: l10n.translate('completed'),
+                        label: l10n.completed,
                         value: 'completed',
                       ),
                     ),
@@ -207,12 +207,12 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            l10n.translate('noGamesYet'),
+            l10n.noGamesYet,
             style: theme.textTheme.displaySmall,
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.translate('playGameToSeeHistory'),
+            l10n.playGameToSeeHistory,
             style: theme.textTheme.bodyMedium,
           ),
         ],
@@ -252,8 +252,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           return await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text(l10n.translate('deleteGame')),
-              content: Text(l10n.translate('confirmDeleteGame')),
+              title: Text(l10n.deleteGame),
+              content: Text(l10n.confirmDeleteGame),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
@@ -328,7 +328,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             children: [
               const SizedBox(height: 8),
               Text(
-                '${l10n.translate('score')}: ${game.player1Score} - ${game.player2Score}',
+                '${l10n.score}: ${game.player1Score} - ${game.player2Score}',
                 style: stTheme.textTheme.bodyLarge?.copyWith(color: SteampunkTheme.amberGlow),
               ),
               const SizedBox(height: 4),
@@ -346,7 +346,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    '${l10n.translate('winner')}: ${game.winner}',
+                    '${l10n.winner}: ${game.winner}',
                     style: stTheme.textTheme.labelLarge?.copyWith(color: SteampunkTheme.verdigris, fontSize: 14),
                   ),
                 ),
@@ -360,7 +360,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    l10n.translate('inProgress'),
+                    l10n.inProgress,
                     style: stTheme.textTheme.labelLarge?.copyWith(color: SteampunkTheme.amberGlow, fontSize: 14),
                   ),
                 ),

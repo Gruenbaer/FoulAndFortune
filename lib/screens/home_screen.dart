@@ -5,7 +5,7 @@ import '../models/game_state.dart';
 import '../models/achievement_manager.dart';
 import '../models/game_record.dart';
 import '../l10n/app_localizations.dart';
-import '../screens/game_screen.dart';
+import 'package:foulandfortune/screens/game_play_screen.dart';
 import '../screens/new_game_settings_screen.dart';
 import '../screens/players_screen.dart';
 import '../screens/statistics_screen.dart';
@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           
                           ThemedButton(
-                            label: l10n.translate('gameHistory'),
+                            label: l10n.gameHistory,
                             icon: Icons.history,
                             onPressed: () {
                               Navigator.push(
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           
                           // ACHIEVEMENTS BUTTON
                           ThemedButton(
-                            label: l10n.translate('achievements'),
+                            label: l10n.achievements,
                             icon: Icons.emoji_events,
                             onPressed: () {
                               Navigator.push(

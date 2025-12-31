@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fortune141/main.dart'; // Adjust if package name differs
-import 'package:fortune141/screens/home_screen.dart';
+import 'package:foulandfortune/main.dart'; // Adjust if package name differs
+import 'package:foulandfortune/screens/home_screen.dart';
 
 void main() {
   testWidgets('Diagnostic App Launch Test', (WidgetTester tester) async {

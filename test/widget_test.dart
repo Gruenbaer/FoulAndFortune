@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fortune141/models/game_state.dart';
-import 'package:fortune141/models/game_settings.dart';
-import 'package:fortune141/models/achievement_manager.dart';
+import 'package:foulandfortune/models/game_state.dart';
+import 'package:foulandfortune/models/game_settings.dart';
+import 'package:foulandfortune/models/achievement_manager.dart';
 
 void main() {
   testWidgets('App compiles without errors', (WidgetTester tester) async {
