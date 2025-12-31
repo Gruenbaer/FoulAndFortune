@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../models/game_settings.dart';
+import '../models/game_settings.dart' hide Player;
 import '../l10n/app_localizations.dart';
 import '../widgets/themed_widgets.dart';
 import '../widgets/player_name_field.dart';
@@ -24,7 +24,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   double _raceSliderValue = 100;
   bool _hasLoadedPlayerNames = false;
   bool _initialSettingsLoaded = false;
-  
+
   final PlayerService _playerService = PlayerService();
   List<Player> _players = [];
   bool _isLoadingPlayers = true;
@@ -36,7 +36,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     _settings = GameSettings();
     _raceSliderValue = _settings.raceToScore.toDouble();
     _loadPlayers();
-    
+
     // Defer loading initial values from provider until after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialSettingsFromProvider();
@@ -47,27 +47,31 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   void dispose() {
     super.dispose();
   }
-  
+
   void _loadInitialSettingsFromProvider() {
     if (!mounted) return;
-    
+
     try {
       final currentSettings = Provider.of<GameSettings>(context, listen: false);
-      
+
       // Only load last used names if current settings are empty (they will be initially)
       // and provider has non-empty names
-      if (_settings.player1Name.isEmpty && currentSettings.player1Name.isNotEmpty) {
+      if (_settings.player1Name.isEmpty &&
+          currentSettings.player1Name.isNotEmpty) {
         setState(() {
-          _settings = _settings.copyWith(player1Name: currentSettings.player1Name);
+          _settings =
+              _settings.copyWith(player1Name: currentSettings.player1Name);
         });
       }
-      
-      if (_settings.player2Name.isEmpty && currentSettings.player2Name.isNotEmpty) {
+
+      if (_settings.player2Name.isEmpty &&
+          currentSettings.player2Name.isNotEmpty) {
         setState(() {
-          _settings = _settings.copyWith(player2Name: currentSettings.player2Name);
+          _settings =
+              _settings.copyWith(player2Name: currentSettings.player2Name);
         });
       }
-      
+
       setState(() {
         _initialSettingsLoaded = true;
       });
@@ -85,17 +89,19 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
       });
     }
   }
-  
+
   Future<void> _createPlayerInline(String name) async {
     if (name.trim().isEmpty) return;
-    
+
     try {
       await _playerService.createPlayer(name.trim());
       await _loadPlayers();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).playerCreatedSnackbar(name.trim()))),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)
+                  .playerCreatedSnackbar(name.trim()))),
         );
       }
     } catch (e) {
@@ -110,11 +116,10 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.newGameSetup),
@@ -132,7 +137,8 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                 children: [
                   Text(
                     l10n.gameType,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
@@ -161,10 +167,11 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                 children: [
                   Text(
                     l10n.raceTo,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Quick buttons
                   Row(
                     children: [
@@ -175,9 +182,9 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                       _buildRaceButton(100),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Slider
                   Row(
                     children: [
@@ -192,14 +199,16 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                           onChanged: (value) {
                             setState(() {
                               _raceSliderValue = value;
-                              _settings = _settings.copyWith(raceToScore: value.round());
+                              _settings = _settings.copyWith(
+                                  raceToScore: value.round());
                             });
                           },
                         ),
                       ),
                       Text(
                         '${_raceSliderValue.round()}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -219,10 +228,11 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                 children: [
                   Text(
                     l10n.maxInnings,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Quick buttons
                   Row(
                     children: [
@@ -233,9 +243,9 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                       _buildInningsButton(100),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Slider (always visible)
                   Row(
                     children: [
@@ -246,12 +256,13 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                           min: 0,
                           max: 200,
                           divisions: 40,
-                          label: _settings.maxInnings == 0 
-                              ? 'Unlimited' 
+                          label: _settings.maxInnings == 0
+                              ? 'Unlimited'
                               : _settings.maxInnings.toString(),
                           onChanged: (value) {
                             setState(() {
-                              _settings = _settings.copyWith(maxInnings: value.round());
+                              _settings =
+                                  _settings.copyWith(maxInnings: value.round());
                             });
                           },
                         ),
@@ -259,8 +270,11 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                       SizedBox(
                         width: 80,
                         child: Text(
-                          _settings.maxInnings == 0 ? l10n.unlimited : '${_settings.maxInnings}',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          _settings.maxInnings == 0
+                              ? l10n.unlimited
+                              : '${_settings.maxInnings}',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -282,10 +296,11 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                 children: [
                   Text(
                     l10n.playersTitle,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Player 1 Input
                   PlayerNameField(
                     key: const ValueKey('player1_input'),
@@ -301,9 +316,9 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                       await _createPlayerInline(_settings.player1Name);
                     },
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Row(
                     children: [
                       Text('${l10n.handicap}: '),
@@ -312,7 +327,8 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                         onPressed: _settings.player1Handicap > 0
                             ? () => setState(() {
                                   _settings = _settings.copyWith(
-                                      player1Handicap: _settings.player1Handicap - 5);
+                                      player1Handicap:
+                                          _settings.player1Handicap - 5);
                                 })
                             : null,
                       ),
@@ -326,9 +342,9 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Player 2 Input
                   PlayerNameField(
                     key: const ValueKey('player2_input'),
@@ -344,9 +360,9 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                       await _createPlayerInline(_settings.player2Name);
                     },
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Row(
                     children: [
                       Text('${l10n.handicap}: '),
@@ -355,7 +371,8 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                         onPressed: _settings.player2Handicap > 0
                             ? () => setState(() {
                                   _settings = _settings.copyWith(
-                                      player2Handicap: _settings.player2Handicap - 5);
+                                      player2Handicap:
+                                          _settings.player2Handicap - 5);
                                 })
                             : null,
                       ),
@@ -385,7 +402,8 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                 children: [
                   Text(
                     l10n.additionalRules,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SwitchListTile(
                     title: Text(l10n.threeFoulRule),
@@ -393,7 +411,8 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                     value: _settings.threeFoulRuleEnabled,
                     onChanged: (value) {
                       setState(() {
-                        _settings = _settings.copyWith(threeFoulRuleEnabled: value);
+                        _settings =
+                            _settings.copyWith(threeFoulRuleEnabled: value);
                       });
                     },
                   ),
@@ -409,8 +428,9 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
           ThemedButton(
             label: 'SET PLAYER TO START',
             icon: Icons.play_circle_fill,
-            onPressed: (_settings.player1Name.isNotEmpty && _settings.player2Name.isNotEmpty) 
-                ? _startGame 
+            onPressed: (_settings.player1Name.isNotEmpty &&
+                    _settings.player2Name.isNotEmpty)
+                ? _startGame
                 : null,
             backgroundGradientColors: [
               Colors.green.shade900,
@@ -448,7 +468,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
 
   Widget _buildInningsButton(int value) {
     final isSelected = _settings.maxInnings == value;
-    
+
     return Expanded(
       child: OutlinedButton(
         onPressed: () {
@@ -472,7 +492,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   void _startGame() {
     // Save settings globally (persisting player names)
     Provider.of<Function(GameSettings)>(context, listen: false)(_settings);
-    
+
     // Both players are selected, start the game
     widget.onStartGame(_settings);
   }

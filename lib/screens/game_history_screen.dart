@@ -8,7 +8,7 @@ import '../services/game_history_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/steampunk_theme.dart';
 import '../widgets/themed_widgets.dart';
-import 'package:foulandfortune/screens/game_play_screen.dart';
+import 'game_screen.dart';
 import 'details_screen.dart';
 
 class GameHistoryScreen extends StatefulWidget {
@@ -32,7 +32,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
 
   Future<void> _loadGames() async {
     setState(() => _isLoading = true);
-    
+
     List<GameRecord> games;
     switch (_filter) {
       case 'active':
@@ -44,7 +44,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       default:
         games = await _historyService.getAllGames();
     }
-    
+
     setState(() {
       _games = games;
       _isLoading = false;
@@ -110,9 +110,12 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             children: [
               // Filter tabs
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: SteampunkTheme.brassDark, width: 2)),
+                  border: Border(
+                      bottom: BorderSide(
+                          color: SteampunkTheme.brassDark, width: 2)),
                   color: Colors.black26,
                 ),
                 child: Row(
@@ -140,11 +143,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   ],
                 ),
               ),
-        
+
               // Game list
               Expanded(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator(color: SteampunkTheme.amberGlow))
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                            color: SteampunkTheme.amberGlow))
                     : _games.isEmpty
                         ? _buildEmptyState(l10n)
                         : RefreshIndicator(
@@ -155,7 +160,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                               itemCount: _games.length,
                               padding: const EdgeInsets.all(16),
                               itemBuilder: (context, index) {
-                                return _buildGameCard(_games[index], l10n, theme);
+                                return _buildGameCard(
+                                    _games[index], l10n, theme);
                               },
                             ),
                           ),
@@ -172,8 +178,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     final theme = SteampunkTheme.themeData;
     return GestureDetector(
       onTap: () {
-         setState(() => _filter = value);
-         _loadGames();
+        setState(() => _filter = value);
+        _loadGames();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -187,7 +193,9 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           label.toUpperCase(),
           style: theme.textTheme.labelLarge?.copyWith(
             fontSize: 12,
-            color: isSelected ? SteampunkTheme.leatherDark : SteampunkTheme.brassPrimary,
+            color: isSelected
+                ? SteampunkTheme.leatherDark
+                : SteampunkTheme.brassPrimary,
           ),
         ),
       ),
@@ -220,20 +228,26 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     );
   }
 
-  Widget _buildGameCard(GameRecord game, AppLocalizations l10n, ThemeData theme) {
+  Widget _buildGameCard(
+      GameRecord game, AppLocalizations l10n, ThemeData theme) {
     final stTheme = SteampunkTheme.themeData;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         image: DecorationImage(
-           image: AssetImage('assets/images/ui/brass_plate_button.png'), // Reuse plate texture if available, or just colors
-           fit: BoxFit.cover,
-           colorFilter: ColorFilter.mode(SteampunkTheme.mahoganyLight.withOpacity(0.9), BlendMode.darken),
+          image: AssetImage(
+              'assets/images/ui/brass_plate_button.png'), // Reuse plate texture if available, or just colors
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+              SteampunkTheme.mahoganyLight.withOpacity(0.9), BlendMode.darken),
         ),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: SteampunkTheme.brassDark),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.5), offset: Offset(2, 2), blurRadius: 4),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.5),
+              offset: Offset(2, 2),
+              blurRadius: 4),
         ],
       ),
       child: Dismissible(
@@ -243,8 +257,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 16),
           decoration: BoxDecoration(
-             color: Color(0xFF8B0000), // Dark Red
-             borderRadius: BorderRadius.circular(8),
+            color: Color(0xFF8B0000), // Dark Red
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(Icons.delete, color: SteampunkTheme.brassBright),
         ),
@@ -278,44 +292,48 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     create: (_) => GameState(
                       settings: GameSettings(
                         raceToScore: game.raceToScore,
-                        player1Name: game.player1Name, 
+                        player1Name: game.player1Name,
                         player2Name: game.player2Name,
                       ),
-                      achievementManager: Provider.of<AchievementManager>(context, listen: false),
+                      achievementManager: Provider.of<AchievementManager>(
+                          context,
+                          listen: false),
                     ),
                     child: GameScreen(
-                      settings: Provider.of<GameSettings>(context, listen: false), 
-                      onSettingsChanged: (s) {}, 
+                      settings:
+                          Provider.of<GameSettings>(context, listen: false),
+                      onSettingsChanged: (s) {},
                       resumeGame: game,
                     ),
                   ),
                 ),
               ).then((_) => _loadGames());
             } else {
-               // Reconstruct state for verification/details
-               final tempState = GameState(
-                 settings: GameSettings(
-                    raceToScore: game.raceToScore,
-                    player1Name: game.player1Name, 
-                    player2Name: game.player2Name,
-                 ),
-                 achievementManager: Provider.of<AchievementManager>(context, listen: false),
-               );
-               
-               if (game.snapshot != null) {
-                  tempState.loadFromJson(game.snapshot!);
-               } else {
-                  // Fallback for old records
-                  tempState.players[0].score = game.player1Score;
-                  tempState.players[1].score = game.player2Score;
-                  tempState.players[0].currentInning = game.player1Innings;
-                  tempState.players[1].currentInning = game.player2Innings;
-               }
+              // Reconstruct state for verification/details
+              final tempState = GameState(
+                settings: GameSettings(
+                  raceToScore: game.raceToScore,
+                  player1Name: game.player1Name,
+                  player2Name: game.player2Name,
+                ),
+                achievementManager:
+                    Provider.of<AchievementManager>(context, listen: false),
+              );
 
-               Navigator.push(
-                 context, 
-                 MaterialPageRoute(builder: (_) => DetailsScreen(gameState: tempState))
-               );
+              if (game.snapshot != null) {
+                tempState.loadFromJson(game.snapshot!);
+              } else {
+                // Fallback for old records
+                tempState.players[0].score = game.player1Score;
+                tempState.players[1].score = game.player2Score;
+                tempState.players[0].currentInning = game.player1Innings;
+                tempState.players[1].currentInning = game.player2Innings;
+              }
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => DetailsScreen(gameState: tempState)));
             }
           },
           contentPadding: const EdgeInsets.all(16),
@@ -329,7 +347,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               const SizedBox(height: 8),
               Text(
                 '${l10n.score}: ${game.player1Score} - ${game.player2Score}',
-                style: stTheme.textTheme.bodyLarge?.copyWith(color: SteampunkTheme.amberGlow),
+                style: stTheme.textTheme.bodyLarge
+                    ?.copyWith(color: SteampunkTheme.amberGlow),
               ),
               const SizedBox(height: 4),
               Text(
@@ -339,7 +358,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               if (game.isCompleted && game.winner != null) ...[
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.black38,
                     border: Border.all(color: SteampunkTheme.verdigris),
@@ -347,21 +367,24 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   ),
                   child: Text(
                     '${l10n.winner}: ${game.winner}',
-                    style: stTheme.textTheme.labelLarge?.copyWith(color: SteampunkTheme.verdigris, fontSize: 14),
+                    style: stTheme.textTheme.labelLarge?.copyWith(
+                        color: SteampunkTheme.verdigris, fontSize: 14),
                   ),
                 ),
               ] else ...[
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.black38,
-                     border: Border.all(color: SteampunkTheme.amberGlow),
+                    border: Border.all(color: SteampunkTheme.amberGlow),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     l10n.inProgress,
-                    style: stTheme.textTheme.labelLarge?.copyWith(color: SteampunkTheme.amberGlow, fontSize: 14),
+                    style: stTheme.textTheme.labelLarge?.copyWith(
+                        color: SteampunkTheme.amberGlow, fontSize: 14),
                   ),
                 ),
               ],
