@@ -1,4 +1,21 @@
-### v3.8.0 Release
+### v3.8.1 - Hotfix 🛠️
+
+*   **Logo Update:** Updated the start screen placeholder logo to the correct new design.
+
+***
+
+### v3.8.0 - Das große Design-Update! 🎨
+
+Wir haben FoulAndFortune komplett überarbeitet, um es noch schöner und benutzerfreundlicher zu machen.
+
+**Das ist neu:**
+*   **Farben, die mitdenken:** Egal ob du das Steampunk-, Cyberpunk- oder Ghibli-Thema nutzt – Warnungen, Erfolge und Diagramme passen sich jetzt perfekt an den Stil deines gewählten Themas an.
+*   **Spricht deine Sprache:** Die App ist jetzt vollständig auf Deutsch verfügbar.
+*   **Feinschliff:** Wir haben viele kleine Fehler behoben und die App stabiler gemacht, damit dein Spiel noch flüssiger läuft.
+
+***
+
+### v3.8.0 Release (English - Technical)
 
 This version brings comprehensive semantic theming, full localization support (English/German), and massive code quality improvements.
 

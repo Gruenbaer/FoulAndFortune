@@ -61,7 +61,7 @@ class _VideoLogoState extends State<VideoLogo> {
           ),
           child: ClipOval(
             child: Image.asset(
-              'assets/images/static_logo.jpg',
+              'assets/images/app_logo.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -82,7 +82,7 @@ class _VideoLogoState extends State<VideoLogo> {
           ],
           // Border can be kept or removed. "Rest transparent" might imply strictly the video?
           // I'll keep a thin border to define the 'Round' shape clearly against backgrounds
-          border: Border.all(color: const Color(0xFFB8860B).withValues(alpha: 0.5), width: 2), 
+          border: Border.all(color: fortuneTheme.accent.withValues(alpha: 0.5), width: 2), 
         ),
         child: ClipOval(
           child: FittedBox(
