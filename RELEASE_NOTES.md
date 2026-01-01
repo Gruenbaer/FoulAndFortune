@@ -1,3 +1,9 @@
+### v3.8.2 - Fresh Look ✨
+
+*   **New Icon:** Updated the app icon and startup logo to the new design.
+
+***
+
 ### v3.8.1 - Hotfix 🛠️
 
 *   **Logo Update:** Updated the start screen placeholder logo to the correct new design.

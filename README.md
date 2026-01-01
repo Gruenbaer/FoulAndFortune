@@ -88,9 +88,9 @@ Die wichtigsten Abhängigkeiten werden in `pubspec.yaml` verwaltet:
 
 ## 📥 Download
 
-**Neueste Version:** [v3.8.0](https://github.com/Gruenbaer/FoulAndFortune/releases/tag/v3.8.0+12)
+**Neueste Version:** [Latest](https://github.com/Gruenbaer/FoulAndFortune/releases/tag/latest)
 
-📱 [APK herunterladen](https://github.com/Gruenbaer/FoulAndFortune/releases/download/v3.8.0+12/FoulAndFortune-v3.8.0.apk)
+📱 [APK herunterladen](https://github.com/Gruenbaer/FoulAndFortune/releases/download/latest/FoulAndFortune.apk)
 
 ## 📄 Lizenz
 
