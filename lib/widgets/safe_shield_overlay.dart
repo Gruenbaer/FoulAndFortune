@@ -66,7 +66,7 @@ class _SafeShieldOverlayState extends State<SafeShieldOverlay> with SingleTicker
                   Icon(
                     Icons.shield,
                     size: 220,
-                    color: Colors.green.withOpacity(0.3),
+                    color: Colors.green.withValues(alpha: 0.3),
                   ),
                   // Main shield
                   Icon(
@@ -81,7 +81,7 @@ class _SafeShieldOverlayState extends State<SafeShieldOverlay> with SingleTicker
                     color: Colors.green.shade200,
                   ),
                   // Center emblem
-                  Icon(
+                  const Icon(
                     Icons.verified_user,
                     size: 80,
                     color: Colors.white,

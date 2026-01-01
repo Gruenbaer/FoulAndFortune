@@ -14,7 +14,7 @@ class GhibliTheme {
   static const Color cloudWhite = Color(0xFFFFFFFF);
 
   static ThemeData get themeData {
-    final colors = const FortuneColors(
+    const colors = FortuneColors(
       themeId: 'ghibli',
       backgroundMain: creamBg,
       backgroundCard: cloudWhite,
@@ -25,7 +25,27 @@ class GhibliTheme {
       accent: sunYellow,
       textMain: charcoal,
       textContrast: cloudWhite,
-      backgroundImagePath: null, // Could add a subtle paper texture eventually
+      // Semantic colors (Ghibli theme - light mode)
+      danger: berryRed,                    // Deep red (danger)
+      dangerLight: Color(0xFFFFE5E7),      // Light pink background
+      dangerDark: Color(0xFF721C24),       // Dark red border
+      success: lushGreen,                  // Forest green (success)
+      successLight: Color(0xFFD4EDDA),     // Light green background
+      successDark: darkGreen,              // Dark green border
+      warning: sunYellow,                  // Gold (warning)
+      warningLight: Color(0xFFFFF3CD),     // Light yellow background
+      warningDark: Color(0xFF856404),      // Dark gold border
+      info: skyBlue,                       // Sky blue (info)
+      disabled: Color(0xFFBBBBBB),         // Light gray
+      overlay: Color(0x0bb11111),           // Semi-transparent dark
+      // Chart colors
+      chartBlue: skyBlue,
+      chartGreen: lushGreen,
+      chartOrange: Color(0xFFFF8C42),
+      chartPurple: Color(0xFF9B6B9E),
+      chartRed: berryRed,
+      chartAmber: sunYellow,
+      backgroundImagePath: null,
     );
 
     return ThemeData(
@@ -34,15 +54,15 @@ class GhibliTheme {
       primaryColor: lushGreen,
       scaffoldBackgroundColor: creamBg,
       
-      extensions: [colors], 
+      extensions: const [colors], 
 
       cardTheme: CardThemeData(
         color: cloudWhite,
         elevation: 0, // Flat with border or subtle shadow
-        shadowColor: charcoal.withOpacity(0.1),
+        shadowColor: charcoal.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20), 
-          side: BorderSide(color: lushGreen.withOpacity(0.2), width: 1), 
+          side: BorderSide(color: lushGreen.withValues(alpha: 0.2), width: 1), 
         ),
       ),
 
@@ -67,7 +87,7 @@ class GhibliTheme {
         
         bodyLarge: GoogleFonts.nunito(color: charcoal, fontSize: 18, fontWeight: FontWeight.w600),
         bodyMedium: GoogleFonts.nunito(color: charcoal, fontSize: 16, fontWeight: FontWeight.w500),
-        bodySmall: GoogleFonts.nunito(color: charcoal.withOpacity(0.7), fontSize: 14),
+        bodySmall: GoogleFonts.nunito(color: charcoal.withValues(alpha: 0.7), fontSize: 14),
         
         // Button text
         labelLarge: GoogleFonts.nunito(

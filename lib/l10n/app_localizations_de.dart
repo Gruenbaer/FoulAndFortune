@@ -300,17 +300,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Du hast 13 Mal auf die 13 gedrückt, ohne auch nur eine Kugel gesenkt zu haben. Musst Du Zeit haben...';
 
   @override
-  String get luckySevenTitle => 'Lucky Number 7';
+  String get luckySevenTitle => 'Glückszahl 7';
 
   @override
-  String get luckySevenLocked => 'Seven seems to follow you...';
+  String get luckySevenLocked => 'Die Sieben scheint dich zu verfolgen...';
 
   @override
   String get luckySevenDesc =>
-      'The 7 is your favorite ball! You sank it in 7 consecutive innings.';
+      'Die 7 ist deine Lieblingskugel! Du hast sie in 7 aufeinanderfolgenden Aufnahmen versenkt.';
 
   @override
-  String get winner => 'Winner';
+  String get winner => 'Gewinner';
 
   @override
   String get exitGame => 'Spiel beenden?';
@@ -454,8 +454,67 @@ class AppLocalizationsDe extends AppLocalizations {
   String get score => 'Punkte';
 
   @override
-  String get generalAverage => 'General Average';
+  String get generalAverage => 'Durchschnitt';
 
   @override
-  String get rivalryHistory => 'Rivalry History';
+  String get rivalryHistory => 'Rivalen-Historie';
+
+  @override
+  String get mechanicsSection => 'Mechanik';
+
+  @override
+  String get limitsHandicapsSection => 'Limits & Handicaps';
+
+  @override
+  String get dataManagement => 'Datenverwaltung';
+
+  @override
+  String get deleteAllDataDesc => 'Alle Erfolge und Einstellungen löschen';
+
+  @override
+  String get enterTargetScore => 'Zielpunktzahl eingeben';
+
+  @override
+  String get gotIt => 'Verstanden';
+
+  @override
+  String get straightPool => 'Straight Pool';
+
+  @override
+  String get inning => 'Aufnahme';
+
+  @override
+  String get victory => 'SIEG!';
+
+  @override
+  String matchTime(String duration) {
+    return 'Spieldauer: $duration';
+  }
+
+  @override
+  String get scoreCard => 'PUNKTEKARTE';
+
+  @override
+  String get noFoul => 'Kein Foul';
+
+  @override
+  String get foulMinusOne => 'Foul -1';
+
+  @override
+  String get breakFoulMinusTwo => 'Break Foul -2';
+
+  @override
+  String get setPlayerToStart => 'STARTSPIELER FESTLEGEN';
+
+  @override
+  String get saveConfiguration => 'Konfiguration speichern';
+
+  @override
+  String get innings => 'Aufnahmen';
+
+  @override
+  String get saves => 'Safety-Shots';
+
+  @override
+  String get average => 'Durchschnitt';
 }

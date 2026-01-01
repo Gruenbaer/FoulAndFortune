@@ -64,11 +64,11 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3), // Transparent per user request
+                  color: Colors.black.withValues(alpha: 0.3), // Transparent per user request
                   borderRadius: BorderRadius.circular(20),
                   // border: Border.all(color: Colors.amber.shade700, width: 2), // Removed per user request
-                  boxShadow: [
-                     const BoxShadow(color: Colors.black87, blurRadius: 20, spreadRadius: 5),
+                  boxShadow: const [
+                     BoxShadow(color: Colors.black87, blurRadius: 20, spreadRadius: 5),
                   ],
                 ),
                 child: Builder(

@@ -128,11 +128,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 10),
 
                     // LOGO SECTION
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: VideoLogo(
-                          soundEnabled:
-                              Provider.of<GameSettings>(context).soundEnabled),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: VideoLogo(),
                     ),
 
                     const SizedBox(height: 48),
@@ -243,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       'v3.3.0 - Steampunk Core',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: SteampunkTheme.steamWhite.withOpacity(0.3),
+                        color: SteampunkTheme.steamWhite.withValues(alpha: 0.3),
                       ),
                     ),
                   ],

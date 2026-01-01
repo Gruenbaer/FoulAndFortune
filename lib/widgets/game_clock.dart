@@ -34,8 +34,8 @@ class GameClock extends StatelessWidget {
           color: colors.textContrast,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: colors.primaryDark, width: 2),
-          boxShadow: [
-            const BoxShadow(
+          boxShadow: const [
+            BoxShadow(
               color: Colors.black54,
               blurRadius: 4,
               offset: Offset(0, 2),
@@ -53,7 +53,7 @@ class GameClock extends StatelessWidget {
 
         // Cyberpunk: Digital/HUD feel
         final cyberpunkDecor = BoxDecoration(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withValues(alpha: 0.8),
           // Cut corners handled by shape if we used ShapeDecoration, but simple box is fine for now
           // Or use a custom painter? Simple border for now.
           border: Border(
@@ -62,7 +62,7 @@ class GameClock extends StatelessWidget {
           ),
           boxShadow: [
              BoxShadow(
-              color: colors.primary.withOpacity(0.2),
+              color: colors.primary.withValues(alpha: 0.2),
               blurRadius: 8,
               spreadRadius: 1,
             ),

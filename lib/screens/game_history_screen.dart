@@ -94,11 +94,11 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: SteampunkTheme.brassPrimary),
+        iconTheme: const IconThemeData(color: SteampunkTheme.brassPrimary),
         actions: [
           if (_games.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.delete_sweep, color: SteampunkTheme.brassBright),
+              icon: const Icon(Icons.delete_sweep, color: SteampunkTheme.brassBright),
               onPressed: _clearAllHistory,
               tooltip: l10n.deleteAllGames,
             ),
@@ -112,7 +112,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   border: Border(
                       bottom: BorderSide(
                           color: SteampunkTheme.brassDark, width: 2)),
@@ -208,7 +208,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.history_edu, // Quill/History icon
             size: 64,
             color: SteampunkTheme.brassDark,
@@ -235,18 +235,18 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage(
+          image: const AssetImage(
               'assets/images/ui/brass_plate_button.png'), // Reuse plate texture if available, or just colors
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-              SteampunkTheme.mahoganyLight.withOpacity(0.9), BlendMode.darken),
+              SteampunkTheme.mahoganyLight.withValues(alpha: 0.9), BlendMode.darken),
         ),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: SteampunkTheme.brassDark),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.5),
-              offset: Offset(2, 2),
+              color: Colors.black.withValues(alpha: 0.5),
+              offset: const Offset(2, 2),
               blurRadius: 4),
         ],
       ),
@@ -257,10 +257,10 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 16),
           decoration: BoxDecoration(
-            color: Color(0xFF8B0000), // Dark Red
+            color: const Color(0xFF8B0000), // Dark Red
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(Icons.delete, color: SteampunkTheme.brassBright),
+          child: const Icon(Icons.delete, color: SteampunkTheme.brassBright),
         ),
         confirmDismiss: (direction) async {
           return await showDialog<bool>(
@@ -391,8 +391,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             ],
           ),
           trailing: game.isCompleted
-              ? Icon(Icons.check_circle, color: SteampunkTheme.verdigris)
-              : Icon(Icons.timelapse, color: SteampunkTheme.amberGlow),
+              ? const Icon(Icons.check_circle, color: SteampunkTheme.verdigris)
+              : const Icon(Icons.timelapse, color: SteampunkTheme.amberGlow),
         ),
       ),
     );

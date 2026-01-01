@@ -20,7 +20,7 @@ class PauseOverlay extends StatelessWidget {
           onTap: gameState.resumeGame,
           behavior: HitTestBehavior.opaque,
           child: Container(
-            color: Colors.black.withOpacity(0.7), // Dim background
+            color: Colors.black.withValues(alpha: 0.7), // Dim background
             alignment: Alignment.center,
             child: GestureDetector(
               onTap: () {}, // Trap taps on the box itself? No, tap anywhere resumes per instructions "Close it by tapping anywhere"
@@ -35,10 +35,10 @@ class PauseOverlay extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
                 decoration: isCyberpunk 
                   ? BoxDecoration(
-                      color: colors.backgroundCard.withOpacity(0.9),
+                      color: colors.backgroundCard.withValues(alpha: 0.9),
                       border: Border.all(color: colors.primary, width: 2),
                       boxShadow: [
-                        BoxShadow(color: colors.primary.withOpacity(0.5), blurRadius: 20),
+                        BoxShadow(color: colors.primary.withValues(alpha: 0.5), blurRadius: 20),
                       ],
                       // Cut corners?
                     )
@@ -46,8 +46,8 @@ class PauseOverlay extends StatelessWidget {
                       color: colors.backgroundCard,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: colors.primary, width: 3),
-                      boxShadow: [
-                        const BoxShadow(color: Colors.black, blurRadius: 10, offset: Offset(0, 4)),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black, blurRadius: 10, offset: Offset(0, 4)),
                       ],
                     ),
                 child: Column(

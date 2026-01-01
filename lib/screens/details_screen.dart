@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game_state.dart';
 import '../models/game_settings.dart';
-import '../models/player.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/score_card.dart';
 
@@ -97,9 +96,9 @@ class DetailsScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: colors.backgroundCard.withOpacity(0.8),
+                  color: colors.backgroundCard.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colors.primary.withOpacity(0.3)),
+                  border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -139,7 +138,7 @@ class DetailsScreen extends StatelessWidget {
             // Player Comparison (Left vs Right)
             Container(
               decoration: BoxDecoration(
-                color: colors.backgroundCard.withOpacity(0.5),
+                color: colors.backgroundCard.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: colors.primaryDark),
               ),

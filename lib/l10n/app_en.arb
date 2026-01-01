@@ -159,5 +159,29 @@
   "score": "Score",
   "generalAverage": "General Average",
   "rivalryHistory": "Rivalry History",
-  "highestRun": "Highest Run"
+  "highestRun": "Highest Run",
+  "mechanicsSection": "Mechanics",
+  "limitsHandicapsSection": "Limits & Handicaps",
+  "dataManagement": "Data Management",
+  "deleteAllDataDesc": "Delete all achievements and settings",
+  "enterTargetScore": "Enter target score",
+  "gotIt": "Got it",
+  "straightPool": "Straight Pool",
+  "inning": "Inning",
+  "victory": "VICTORY!",
+  "matchTime": "Match Time: {duration}",
+  "@matchTime": {
+    "placeholders": {
+      "duration": { "type": "String" }
+    }
+  },
+  "scoreCard": "SCORE CARD",
+  "noFoul": "No Foul",
+  "foulMinusOne": "Foul -1",
+  "breakFoulMinusTwo": "Break Foul -2",
+  "setPlayerToStart": "SET PLAYER TO START",
+  "saveConfiguration": "Save Configuration",
+  "innings": "Innings",
+  "saves": "Saves",
+  "average": "Average"
 }

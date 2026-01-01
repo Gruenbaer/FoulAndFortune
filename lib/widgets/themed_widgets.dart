@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../theme/steampunk_theme.dart'; // Keep for legacy constants if needed, or remove?
+// Keep for legacy constants if needed, or remove?
 import '../theme/fortune_theme.dart';
 
 class ThemedBackground extends StatelessWidget {
@@ -113,7 +113,7 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: widget.backgroundGradientColors ?? [
-                    colors.backgroundCard.withOpacity(0.8),
+                    colors.backgroundCard.withValues(alpha: 0.8),
                     colors.backgroundCard,
                   ],
                 ),
@@ -124,12 +124,12 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                 
                 // For Cyberpunk, we might want a clipPath for cut corners, but for now simple box
                 border: colors.themeId == 'cyberpunk' 
-                    ? Border.all(color: colors.primary.withOpacity(0.3)) 
+                    ? Border.all(color: colors.primary.withValues(alpha: 0.3)) 
                     : null,
                 
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                     spreadRadius: -2,
@@ -157,7 +157,7 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                         letterSpacing: 0.5, // Reduced from 1.0 for space saving
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(0.8), // Stronger shadow
+                            color: Colors.black.withValues(alpha: 0.8), // Stronger shadow
                             offset: const Offset(1, 1),
                             blurRadius: 2,
                           ),
@@ -196,7 +196,7 @@ class BrassFramePainter extends CustomPainter {
     canvas.drawRRect(
       rrect.shift(const Offset(0, 3)),
       Paint()
-        ..color = Colors.black.withOpacity(0.4)
+        ..color = Colors.black.withValues(alpha: 0.4)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
     );
     
@@ -237,7 +237,7 @@ class BrassFramePainter extends CustomPainter {
     canvas.drawPath(
       highlightPath,
       Paint()
-        ..color = colors.primaryBright.withOpacity(0.6)
+        ..color = colors.primaryBright.withValues(alpha: 0.6)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
       );
@@ -251,8 +251,8 @@ class BrassFramePainter extends CustomPainter {
     
     void _drawRivet(Canvas canvas, Offset center) {
       canvas.drawCircle(center, 4, Paint()..color = colors.primaryDark..style = PaintingStyle.fill);
-      canvas.drawCircle(center.translate(-0.5, -0.5), 4, Paint()..shader = RadialGradient(colors: [colors.primaryBright.withOpacity(0.8), Colors.transparent], stops: const [0.3, 1.0]).createShader(Rect.fromCircle(center: center, radius: 4)));
-      canvas.drawLine(center.translate(-2, 0), center.translate(2, 0), Paint()..color = Colors.black.withOpacity(0.7)..strokeWidth = 1..strokeCap = StrokeCap.round);
+      canvas.drawCircle(center.translate(-0.5, -0.5), 4, Paint()..shader = RadialGradient(colors: [colors.primaryBright.withValues(alpha: 0.8), Colors.transparent], stops: const [0.3, 1.0]).createShader(Rect.fromCircle(center: center, radius: 4)));
+      canvas.drawLine(center.translate(-2, 0), center.translate(2, 0), Paint()..color = Colors.black.withValues(alpha: 0.7)..strokeWidth = 1..strokeCap = StrokeCap.round);
     }
   
     @override
@@ -317,7 +317,7 @@ class CyberpunkFramePainter extends CustomPainter {
     canvas.drawPath(Path()..moveTo(size.width, size.height - cut - 10)..lineTo(size.width, size.height - cut)..lineTo(size.width - cut, size.height)..lineTo(size.width - cut - 10, size.height), cornerPaint);
     
     // 5. Tech Bits (Decorations)
-    final decorPaint = Paint()..color = colors.primary.withOpacity(0.5)..style = PaintingStyle.fill;
+    final decorPaint = Paint()..color = colors.primary.withValues(alpha: 0.5)..style = PaintingStyle.fill;
     // Small rects
     canvas.drawRect(Rect.fromLTWH(size.width / 2 - 20, size.height - 4, 40, 2), decorPaint);
     canvas.drawRect(Rect.fromLTWH(size.width / 2 - 20, 2, 40, 2), decorPaint);
@@ -338,7 +338,7 @@ class GhibliFramePainter extends CustomPainter {
     // SEEDED RANDOM
     final random = math.Random(seed);
     
-    final charcoal = const Color(0xFF4A4844);
+    const charcoal = Color(0xFF4A4844);
     
     // 1. Organic Shape
     final path = Path();
@@ -364,20 +364,20 @@ class GhibliFramePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     
     // Shadow
-    canvas.drawPath(path.shift(const Offset(3, 4)), Paint()..color = charcoal.withOpacity(0.15));
+    canvas.drawPath(path.shift(const Offset(3, 4)), Paint()..color = charcoal.withValues(alpha: 0.15));
     canvas.drawPath(path, fillPaint);
     
     // Highlight
     canvas.save();
     canvas.clipPath(path);
-    final highlightPaint = Paint()..color = Colors.white.withOpacity(0.15)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    final highlightPaint = Paint()..color = Colors.white.withValues(alpha: 0.15)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
     canvas.drawCircle(Offset(w * 0.2, h * 0.3), h * 0.8, highlightPaint);
     canvas.drawCircle(Offset(w * 0.8, h * 0.6), h * 0.6, highlightPaint);
     canvas.restore();
 
     // 3. Border
     final borderPaint = Paint()
-      ..color = charcoal.withOpacity(0.9)
+      ..color = charcoal.withValues(alpha: 0.9)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round

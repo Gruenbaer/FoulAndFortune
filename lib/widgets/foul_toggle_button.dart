@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/game_state.dart';
+import '../l10n/app_localizations.dart';
 
 class FoulToggleButton extends StatelessWidget {
   final FoulMode currentMode;
@@ -22,14 +23,15 @@ class FoulToggleButton extends StatelessWidget {
     }
   }
 
-  String _getButtonText() {
+  String _getButtonText(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     switch (currentMode) {
       case FoulMode.none:
-        return 'No Foul';
+        return l10n.noFoul;
       case FoulMode.normal:
-        return 'Foul -1';
+        return l10n.foulMinusOne;
       case FoulMode.severe:
-        return 'Break Foul -2';
+        return l10n.breakFoulMinusTwo;
     }
   }
 
@@ -47,7 +49,7 @@ class FoulToggleButton extends StatelessWidget {
           ),
         ),
         child: Text(
-          _getButtonText(),
+          _getButtonText(context),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

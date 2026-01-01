@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
-import 'player.dart';
 import 'foul_tracker.dart';
 import 'achievement_manager.dart';
 import '../data/messages.dart';

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/player_service.dart';
 import '../models/achievement_manager.dart';
@@ -7,8 +6,8 @@ import '../models/achievement.dart';
 import '../widgets/achievement_badge.dart';
 import '../l10n/app_localizations.dart';
 import '../services/game_history_service.dart';
-import '../models/game_record.dart';
 import '../widgets/player_name_input_dialog.dart';
+import '../theme/fortune_theme.dart';
 
 class PlayerProfileScreen extends StatefulWidget {
   final Player player;
@@ -108,6 +107,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
 
   Future<void> _deletePlayer() async {
     final l10n = AppLocalizations.of(context);
+    final fortuneTheme = FortuneColors.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -120,7 +120,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: fortuneTheme.danger),
             child: Text(l10n.delete),
           ),
         ],
@@ -138,6 +138,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final fortuneTheme = FortuneColors.of(context);
     final achievementManager = Provider.of<AchievementManager>(context);
     final playerAchievements = achievementManager.allAchievements
         .where((a) => a.unlockedBy.contains(_player.name))
@@ -157,7 +158,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
             tooltip: l10n.editPlayer,
           ),
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
+            icon: Icon(Icons.delete, color: fortuneTheme.danger),
             onPressed: _deletePlayer,
             tooltip: l10n.deletePlayer,
           ),
@@ -174,12 +175,12 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: Colors.green[700],
+                    backgroundColor: fortuneTheme.success,
                     child: Text(
                       _player.name[0].toUpperCase(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 48,
-                        color: Colors.white,
+                        color: fortuneTheme.textContrast,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -216,7 +217,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   l10n.games,
                   _player.gamesPlayed.toString(),
                   Icons.sports,
-                  Colors.blue,
+                  fortuneTheme.chartBlue,
                 ),
               ),
               const SizedBox(width: 12),
@@ -225,7 +226,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   l10n.gamesWon,
                   _player.gamesWon.toString(),
                   Icons.emoji_events,
-                  Colors.amber,
+                  fortuneTheme.chartAmber,
                 ),
               ),
             ],
@@ -240,7 +241,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   l10n.winRate,
                   '$winRate%',
                   Icons.trending_up,
-                  Colors.green,
+                  fortuneTheme.chartGreen,
                 ),
               ),
               const SizedBox(width: 12),
@@ -249,7 +250,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   l10n.gamesLost,
                   (_player.gamesPlayed - _player.gamesWon).toString(),
                   Icons.trending_down,
-                  Colors.red,
+                  fortuneTheme.chartRed,
                 ),
               ),
             ],
@@ -265,7 +266,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   l10n.highestRun,
                   _player.highestRun.toString(),
                   Icons.star,
-                  Colors.orange,
+                  fortuneTheme.chartOrange,
                 ),
               ),
               const SizedBox(width: 12),
@@ -274,7 +275,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   l10n.generalAverage,
                   _player.generalAverage.toStringAsFixed(2),
                   Icons.show_chart,
-                  Colors.purple,
+                  fortuneTheme.chartPurple,
                 ),
               ),
             ],
@@ -307,8 +308,8 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blueGrey,
-                      child: Text(opponentName[0].toUpperCase(), style: const TextStyle(color: Colors.white)),
+                      backgroundColor: fortuneTheme.primaryDark,
+                      child: Text(opponentName[0].toUpperCase(), style: TextStyle(color: fortuneTheme.textContrast)),
                     ),
                     title: Text('vs $opponentName'),
                     subtitle: Text('${l10n.games}: $games  •  ${l10n.gamesWon}: $wins'),
@@ -320,11 +321,11 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                           '$winRate%', 
                           style: TextStyle(
                             fontWeight: FontWeight.bold, 
-                            color: (double.tryParse(winRate) ?? 0) > 50 ? Colors.green : Colors.red,
+                            color: (double.tryParse(winRate) ?? 0) > 50 ? fortuneTheme.success : fortuneTheme.danger,
                             fontSize: 16
                           ),
                         ),
-                        Text(l10n.winRate, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                        Text(l10n.winRate, style: TextStyle(fontSize: 10, color: fortuneTheme.disabled)),
                       ],
                     ),
                   ),
@@ -348,7 +349,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.green[100],
+                  color: fortuneTheme.successLight,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -356,7 +357,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green[900],
+                    color: fortuneTheme.successDark,
                   ),
                 ),
               ),
@@ -370,13 +371,13 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                 padding: const EdgeInsets.all(32),
                 child: Column(
                   children: [
-                    Icon(Icons.emoji_events_outlined, size: 64, color: Colors.grey[400]),
+                    Icon(Icons.emoji_events_outlined, size: 64, color: fortuneTheme.disabled),
                     const SizedBox(height: 16),
                     Text(
                       l10n.noAchievementsYet,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[600],
+                        color: fortuneTheme.disabled,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -436,6 +437,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
   }
 
   Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    final fortuneTheme = FortuneColors.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -455,7 +457,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: fortuneTheme.disabled,
               ),
               textAlign: TextAlign.center,
             ),

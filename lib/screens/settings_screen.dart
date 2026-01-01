@@ -45,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         margin: const EdgeInsets.only(top: 24, bottom: 8),
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         decoration: BoxDecoration(
-          color: fortuneTheme.primaryDark.withOpacity(0.3),
+          color: fortuneTheme.primaryDark.withValues(alpha: 0.3),
           border: Border(bottom: BorderSide(color: fortuneTheme.primary, width: 2)),
         ),
         child: Row(
@@ -70,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         decoration: BoxDecoration(
           color: Colors.black26,
           // Using slightly transparent border to blend with potential background
-          border: Border.all(color: fortuneTheme.primaryDark.withOpacity(0.3)),
+          border: Border.all(color: fortuneTheme.primaryDark.withValues(alpha: 0.3)),
           borderRadius: BorderRadius.circular(4),
         ),
         child: child,
@@ -97,7 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: const Icon(Icons.save),
                 color: fortuneTheme.primary, // Using primary for bright accent
                 onPressed: _saveSettings,
-                tooltip: 'Save Configuration',
+                tooltip: l10n.saveConfiguration,
               ),
               if (_settings != widget.currentSettings)
                 Positioned(
@@ -107,12 +107,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: Colors.redAccent,
+                      color: fortuneTheme.danger,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: fortuneTheme.textContrast, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.5),
+                          color: fortuneTheme.overlay,
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -161,47 +161,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
 
-              buildSectionHeader('Mechanics', Icons.settings_input_component),
+              buildSectionHeader(l10n.mechanicsSection, Icons.settings_input_component),
 
               // 3-Foul Rule Toggle
               buildPanelTile(
-                child: SwitchListTile(
+                child: ListTile(
                   title: Text(l10n.threeFoulRule, style: theme.textTheme.bodyLarge),
                   subtitle: Text(l10n.threeFoulRuleSubtitle, style: theme.textTheme.bodySmall),
-                  value: _settings.threeFoulRuleEnabled,
-                  activeColor: fortuneTheme.secondary, // Amber/Glow equivalent
-                  activeTrackColor: fortuneTheme.primaryDark,
-                  inactiveThumbColor: Colors.grey,
-                  inactiveTrackColor: Colors.black,
-                  onChanged: (value) {
-                    setState(() {
-                      _settings = _settings.copyWith(threeFoulRuleEnabled: value);
-                    });
-                  },
+                  trailing: Switch(
+                    value: _settings.threeFoulRuleEnabled,
+                    onChanged: (value) => setState(() => _settings = _settings.copyWith(threeFoulRuleEnabled: value)),
+                    activeThumbColor: fortuneTheme.secondary,
+                    inactiveThumbColor: fortuneTheme.disabled,
+                    inactiveTrackColor: fortuneTheme.primaryDark.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
 
               // Sound Effects Toggle
               buildPanelTile(
-                child: SwitchListTile(
+                child: ListTile(
                   title: Text(l10n.soundEffects, style: theme.textTheme.bodyLarge),
                   subtitle: Text(l10n.enableGameSounds, style: theme.textTheme.bodySmall),
-                  value: _settings.soundEnabled,
-                  activeColor: fortuneTheme.secondary,
-                   activeTrackColor: fortuneTheme.primaryDark,
-                  secondary: Icon(
+                  trailing: Icon(
                     _settings.soundEnabled ? Icons.volume_up : Icons.volume_off,
-                    color: _settings.soundEnabled ? fortuneTheme.primary : Colors.grey,
+                    color: _settings.soundEnabled ? fortuneTheme.primary : fortuneTheme.disabled,
                   ),
-                  onChanged: (value) {
+                  onTap: () {
                     setState(() {
-                      _settings = _settings.copyWith(soundEnabled: value);
+                      _settings = _settings.copyWith(soundEnabled: !_settings.soundEnabled);
                     });
                   },
                 ),
               ),
               // Innings & Handicap Section
-              buildSectionHeader('Limits & Handicaps', Icons.tune),
+              buildSectionHeader(l10n.limitsHandicapsSection, Icons.tune),
 
               // Max Innings Slider
               buildPanelTile(
@@ -228,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       divisions: 18, // Steps of 5 (approx)
                       label: '${_settings.maxInnings}',
                       activeColor: fortuneTheme.secondary,
-                      inactiveColor: fortuneTheme.primaryDark.withOpacity(0.3),
+                      inactiveColor: fortuneTheme.primaryDark.withValues(alpha: 0.3),
                       thumbColor: fortuneTheme.primary,
                       onChanged: (value) {
                         setState(() {
@@ -375,23 +369,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 24),
               
               // Data Management Section (Dangerous)
-              buildSectionHeader('Data Management', Icons.delete_forever),
               Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  border: Border.all(color: Colors.red.shade900),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(8),
+                  color: fortuneTheme.danger.withValues(alpha: 0.1),
+                  border: Border.all(color: fortuneTheme.dangerDark),
                 ),
                 child: ListTile(
-                  leading: Icon(Icons.warning_amber_rounded, color: Colors.red.shade700),
+                  leading: Icon(Icons.warning_amber_rounded, color: fortuneTheme.danger),
                   title: Text(
-                    'Reset All Data', 
-                    style: theme.textTheme.bodyLarge?.copyWith(color: Colors.red.shade200),
+                    l10n.deleteAllDataDesc,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: fortuneTheme.danger),
                   ),
                   subtitle: Text(
-                    'Delete all achievements and settings',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade100),
+                    l10n.dataManagement,
+                    style: theme.textTheme.bodySmall?.copyWith(color: fortuneTheme.danger.withValues(alpha: 0.8)),
                   ),
+                  trailing: Icon(Icons.chevron_right, color: fortuneTheme.primary),
                   onTap: _showResetDataConfirmation,
                 ),
               ),
@@ -404,6 +400,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _showResetDataConfirmation() async {
     final l10n = AppLocalizations.of(context);
+    final fortuneTheme = FortuneColors.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -416,7 +413,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-             style: TextButton.styleFrom(foregroundColor: Colors.red),
+             style: TextButton.styleFrom(foregroundColor: fortuneTheme.danger),
             child: Text(l10n.resetAll),
           ),
         ],
@@ -450,7 +447,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           contextMenuBuilder: (context, editableTextState) => const SizedBox.shrink(),
           decoration: InputDecoration(
             labelText: l10n.points,
-            hintText: 'Enter target score',
+            hintText: l10n.enterTargetScore,
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -459,7 +456,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -468,7 +465,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Navigator.pop(context, value);
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -491,7 +488,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: playerNumber == 1 ? l10n.player1 : l10n.player2,
       initialName: currentName,
       labelText: l10n.playerName,
-      hintText: 'Enter or select player',
+      hintText: l10n.enterOrSelectPlayer,
     );
 
     if (finalName != null && finalName != currentName && finalName.isNotEmpty) {
@@ -521,9 +518,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildMultiplierSelector(double current, Function(double) onChanged, FortuneColors themeColors) {
     return Container(
       decoration: BoxDecoration(
-        color: themeColors.primaryDark.withOpacity(0.5),
+        color: themeColors.primaryDark.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: themeColors.primary.withOpacity(0.3)),
+        border: Border.all(color: themeColors.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -540,7 +537,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(
                 '${val.toInt()}x',
                 style: TextStyle(
-                  color: isSelected ? Colors.black : themeColors.primary,
+                  color: isSelected ? themeColors.textContrast : themeColors.primary,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),

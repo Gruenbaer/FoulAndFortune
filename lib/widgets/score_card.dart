@@ -35,7 +35,7 @@ class ScoreCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(color: colors.primaryDark),
         borderRadius: BorderRadius.circular(8),
-        color: colors.backgroundCard.withOpacity(0.5),
+        color: colors.backgroundCard.withValues(alpha: 0.5),
       ),
       child: Column(
         children: [
@@ -62,7 +62,7 @@ class ScoreCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                Expanded(
+                const Expanded(
                   flex: 1,
                   child: SizedBox(), // Spacer for Inning column
                 ),
@@ -118,7 +118,7 @@ class ScoreCard extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: colors.textMain.withOpacity(0.7),
+        color: colors.textMain.withValues(alpha: 0.7),
         fontSize: 10,
         fontWeight: FontWeight.w900,
         letterSpacing: 1.0,

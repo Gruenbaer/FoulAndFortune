@@ -455,4 +455,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rivalryHistory => 'Rivalry History';
+
+  @override
+  String get mechanicsSection => 'Mechanics';
+
+  @override
+  String get limitsHandicapsSection => 'Limits & Handicaps';
+
+  @override
+  String get dataManagement => 'Data Management';
+
+  @override
+  String get deleteAllDataDesc => 'Delete all achievements and settings';
+
+  @override
+  String get enterTargetScore => 'Enter target score';
+
+  @override
+  String get gotIt => 'Got it';
+
+  @override
+  String get straightPool => 'Straight Pool';
+
+  @override
+  String get inning => 'Inning';
+
+  @override
+  String get victory => 'VICTORY!';
+
+  @override
+  String matchTime(String duration) {
+    return 'Match Time: $duration';
+  }
+
+  @override
+  String get scoreCard => 'SCORE CARD';
+
+  @override
+  String get noFoul => 'No Foul';
+
+  @override
+  String get foulMinusOne => 'Foul -1';
+
+  @override
+  String get breakFoulMinusTwo => 'Break Foul -2';
+
+  @override
+  String get setPlayerToStart => 'SET PLAYER TO START';
+
+  @override
+  String get saveConfiguration => 'Save Configuration';
+
+  @override
+  String get innings => 'Innings';
+
+  @override
+  String get saves => 'Saves';
+
+  @override
+  String get average => 'Average';
 }

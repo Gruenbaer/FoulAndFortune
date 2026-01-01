@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import '../models/player.dart';
-import '../theme/steampunk_theme.dart';
 import '../theme/fortune_theme.dart';
 import 'themed_widgets.dart';
 import 'score_card.dart';
+import '../l10n/app_localizations.dart';
 
 class VictorySplash extends StatefulWidget {
   final Player winner;
@@ -61,7 +61,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
           IconButton(
             icon: const Icon(Icons.undo),
             color: colors.primary,
-            tooltip: 'Undo',
+            tooltip: AppLocalizations.of(context).undo,
             onPressed: () {
               // Undo last action before victory
               Navigator.of(context).pop();
@@ -71,7 +71,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
           IconButton(
             icon: const Icon(Icons.redo),
             color: colors.primaryDark,
-            tooltip: 'Redo (disabled)',
+            tooltip: AppLocalizations.of(context).redo,
             onPressed: null, // Greyed out
           ),
         ],
@@ -116,7 +116,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                   const SizedBox(height: 8),
                   
                   Text(
-                    'VICTORY!',
+                    AppLocalizations.of(context).victory,
                     style: Theme.of(context).textTheme.displayLarge?.copyWith(
                       color: colors.primaryBright,
                       fontSize: 32,
@@ -197,7 +197,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                           decoration: BoxDecoration(
                             color: colors.backgroundCard,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: colors.primary.withOpacity(0.5)),
+                            border: Border.all(color: colors.primary.withValues(alpha: 0.5)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -205,7 +205,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                               Icon(Icons.timer, size: 20, color: colors.primary),
                               const SizedBox(width: 8),
                               Text(
-                                'Match Time: ${_formatDuration(widget.elapsedDuration)}',
+                                AppLocalizations.of(context).matchTime(_formatDuration(widget.elapsedDuration)),
                                 style: TextStyle(
                                   color: colors.primaryBright,
                                   fontSize: 16,
@@ -230,7 +230,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                                 decoration: BoxDecoration(
                                   color: colors.backgroundCard,
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
                                 ),
                                 child: Row(
                                   children: [
@@ -261,10 +261,10 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                                 ),
                               ),
                               // Stats rows
-                              _buildStatsRow('Innings', widget.winner.currentInning.toString(), widget.loser.currentInning.toString()),
-                              _buildStatsRow('Saves', widget.winner.saves.toString(), widget.loser.saves.toString()),
-                              _buildStatsRow('Average', _calculateAverage(widget.winner), _calculateAverage(widget.loser)),
-                              _buildStatsRow('Highest Run', _calculateHighestRun(widget.winner), _calculateHighestRun(widget.loser)),
+                              _buildStatsRow(AppLocalizations.of(context).innings, widget.winner.currentInning.toString(), widget.loser.currentInning.toString()),
+                              _buildStatsRow(AppLocalizations.of(context).saves, widget.winner.saves.toString(), widget.loser.saves.toString()),
+                              _buildStatsRow(AppLocalizations.of(context).average, _calculateAverage(widget.winner), _calculateAverage(widget.loser)),
+                              _buildStatsRow(AppLocalizations.of(context).highestRun, _calculateHighestRun(widget.winner), _calculateHighestRun(widget.loser)),
                             ],
                           ),
                         ),
@@ -273,7 +273,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                         
                         // Score Card
                         Text(
-                          'SCORE CARD',
+                          AppLocalizations.of(context).scoreCard,
                           style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: colors.primary,
                             letterSpacing: 2,
@@ -298,14 +298,14 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                     children: [
                       Expanded(
                         child: ThemedButton(
-                          label: 'New',
+                          label: AppLocalizations.of(context).newGame,
                           onPressed: widget.onNewGame,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: ThemedButton(
-                          label: 'Exit',
+                          label: AppLocalizations.of(context).exit,
                           onPressed: widget.onExit,
                         ),
                       ),

@@ -53,8 +53,23 @@
   "save": "Speichern",
   "settingsSaved": "Einstellungen gespeichert!",
   "playerCreatedSnackbar": "Spieler \"{name}\" erstellt",
+  "@playerCreatedSnackbar": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "playerDeletedSnackbar": "Spieler \"{name}\" gelöscht",
+  "@playerDeletedSnackbar": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "confirmDeletePlayer": "\"{name}\" löschen?",
+  "@confirmDeletePlayer": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "noPlayersYet": "Noch keine Spieler",
   "tapToCreate": "Tippen Sie auf +, um einen Spieler zu erstellen",
   "deletePlayer": "Spieler löschen",
@@ -93,9 +108,10 @@
   "vinzend_title": "Lord Vinzend the 13th",
   "vinzend_locked": "13 ist die magische Zahl. Nur wo?",
   "vinzend_desc": "Du hast 13 Mal auf die 13 gedrückt, ohne auch nur eine Kugel gesenkt zu haben. Musst Du Zeit haben...",
-  "lucky7_title": "Glückszahl 7",
-  "lucky7_locked": "Die Sieben scheint dich zu verfolgen...",
-  "lucky7_desc": "Die 7 ist deine Lieblingskugel! Du hast sie in 7 aufeinanderfolgenden Aufnahmen versenkt.",
+  "luckySevenTitle": "Glückszahl 7",
+  "luckySevenLocked": "Die Sieben scheint dich zu verfolgen...",
+  "luckySevenDesc": "Die 7 ist deine Lieblingskugel! Du hast sie in 7 aufeinanderfolgenden Aufnahmen versenkt.",
+  "winner": "Gewinner",
   "exitGame": "Spiel beenden?",
   "exitGameMessage": "Spielfortschritt geht verloren. Sind Sie sicher?",
   "restartGame": "Spiel neustarten?",
@@ -140,5 +156,31 @@
   "gameDetails": "Spieldetails",
   "duration": "Dauer",
   "vs": "vs",
-  "score": "Punkte"
+  "score": "Punkte",
+  "mechanicsSection": "Mechanik",
+  "limitsHandicapsSection": "Limits & Handicaps",
+  "dataManagement": "Datenverwaltung",
+  "deleteAllDataDesc": "Alle Erfolge und Einstellungen löschen",
+  "enterTargetScore": "Zielpunktzahl eingeben",
+  "gotIt": "Verstanden",
+  "straightPool": "Straight Pool",
+  "inning": "Aufnahme",
+  "victory": "SIEG!",
+  "matchTime": "Spieldauer: {duration}",
+  "@matchTime": {
+    "placeholders": {
+      "duration": { "type": "String" }
+    }
+  },
+  "scoreCard": "PUNKTEKARTE",
+  "noFoul": "Kein Foul",
+  "foulMinusOne": "Foul -1",
+  "breakFoulMinusTwo": "Break Foul -2",
+  "setPlayerToStart": "STARTSPIELER FESTLEGEN",
+  "saveConfiguration": "Konfiguration speichern",
+  "innings": "Aufnahmen",
+  "saves": "Safety-Shots",
+  "average": "Durchschnitt",
+  "generalAverage": "Durchschnitt",
+  "rivalryHistory": "Rivalen-Historie"
 }

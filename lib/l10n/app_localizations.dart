@@ -967,6 +967,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rivalry History'**
   String get rivalryHistory;
+
+  /// No description provided for @mechanicsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Mechanics'**
+  String get mechanicsSection;
+
+  /// No description provided for @limitsHandicapsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Limits & Handicaps'**
+  String get limitsHandicapsSection;
+
+  /// No description provided for @dataManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Management'**
+  String get dataManagement;
+
+  /// No description provided for @deleteAllDataDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all achievements and settings'**
+  String get deleteAllDataDesc;
+
+  /// No description provided for @enterTargetScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter target score'**
+  String get enterTargetScore;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get gotIt;
+
+  /// No description provided for @straightPool.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight Pool'**
+  String get straightPool;
+
+  /// No description provided for @inning.
+  ///
+  /// In en, this message translates to:
+  /// **'Inning'**
+  String get inning;
+
+  /// No description provided for @victory.
+  ///
+  /// In en, this message translates to:
+  /// **'VICTORY!'**
+  String get victory;
+
+  /// No description provided for @matchTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Match Time: {duration}'**
+  String matchTime(String duration);
+
+  /// No description provided for @scoreCard.
+  ///
+  /// In en, this message translates to:
+  /// **'SCORE CARD'**
+  String get scoreCard;
+
+  /// No description provided for @noFoul.
+  ///
+  /// In en, this message translates to:
+  /// **'No Foul'**
+  String get noFoul;
+
+  /// No description provided for @foulMinusOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Foul -1'**
+  String get foulMinusOne;
+
+  /// No description provided for @breakFoulMinusTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Break Foul -2'**
+  String get breakFoulMinusTwo;
+
+  /// No description provided for @setPlayerToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'SET PLAYER TO START'**
+  String get setPlayerToStart;
+
+  /// No description provided for @saveConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Configuration'**
+  String get saveConfiguration;
+
+  /// No description provided for @innings.
+  ///
+  /// In en, this message translates to:
+  /// **'Innings'**
+  String get innings;
+
+  /// No description provided for @saves.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves'**
+  String get saves;
+
+  /// No description provided for @average.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get average;
 }
 
 class _AppLocalizationsDelegate

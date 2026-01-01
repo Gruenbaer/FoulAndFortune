@@ -16,7 +16,7 @@ class SteampunkTheme {
   static const Color amberGlow = Color(0xFFFFA000);      // Active/Highlight glow
 
   static ThemeData get themeData {
-    final colors = const FortuneColors(
+    const colors = FortuneColors(
       themeId: 'steampunk',
       backgroundMain: mahoganyDark,
       backgroundCard: mahoganyLight,
@@ -27,6 +27,26 @@ class SteampunkTheme {
       accent: amberGlow,
       textMain: steamWhite,
       textContrast: leatherDark,
+      // Semantic colors (Steampunk theme)
+      danger: Color(0xFFD32F2F),           // Classic red (danger)
+      dangerLight: Color(0xFF5D1B1B),      // Dark red background
+      dangerDark: Color(0xFF8B0000),       // Deep red border
+      success: verdigris,                  // Oxidized copper (success)
+      successLight: Color(0xFF1B3D3A),     // Dark teal background
+      successDark: Color(0xFF2B6B66),      // Deep teal border
+      warning: amberGlow,                  // Amber glow (warning)
+      warningLight: Color(0xFF4D3400),     // Dark amber background
+      warningDark: Color(0xFFFFB300),      // Bright amber border
+      info: brassBright,                   // Brass bright (info)
+      disabled: Color(0xFF5A5A5A),         // Gray
+      overlay: Color(0xBB1A1110),          // Semi-transparent dark
+      // Chart colors
+      chartBlue: Color(0xFF5DADE2),
+      chartGreen: verdigris,
+      chartOrange: amberGlow,
+      chartPurple: Color(0xFF9B59B6),
+      chartRed: Color(0xFFE74C3C),
+      chartAmber: Color(0xFFF39C12),
       backgroundImagePath: 'assets/images/ui/background.png',
     );
 
@@ -36,7 +56,7 @@ class SteampunkTheme {
       primaryColor: brassPrimary,
       scaffoldBackgroundColor: mahoganyDark,
       
-      extensions: [colors],
+      extensions: const [colors],
 
       
       // Card Theme (Leather/Wood look)
@@ -76,7 +96,7 @@ class SteampunkTheme {
         // Body text (Readable Serif or Slab Serif)
         bodyLarge: GoogleFonts.libreBaskerville(color: steamWhite, fontSize: 18),
         bodyMedium: GoogleFonts.libreBaskerville(color: steamWhite, fontSize: 16),
-        bodySmall: GoogleFonts.libreBaskerville(color: brassPrimary.withOpacity(0.8), fontSize: 14),
+        bodySmall: GoogleFonts.libreBaskerville(color: brassPrimary.withValues(alpha: 0.8), fontSize: 14),
         
         // Button text (Condensed, Bold Serif)
         labelLarge: GoogleFonts.crimsonPro(

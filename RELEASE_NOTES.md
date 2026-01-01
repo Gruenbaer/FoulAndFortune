@@ -1,3 +1,21 @@
+### v3.8.0 Release
+
+This version brings comprehensive semantic theming, full localization support (English/German), and massive code quality improvements.
+
+#### Key Changes:
+- **Semantic Theming**: A robust new color system that naturally adapts danger, success, and warning colors (and charts!) to match Steampunk, Cyberpunk, or Ghibli themes.
+- **Localization (L10n)**:
+  - Added full German translation support.
+  - Fixed all missing translation keys.
+  - Consistent naming for localization keys.
+- **Code Quality**:
+  - Resolved **140+ lint issues** (const correctness, unused code).
+  - Fixed ~120 deprecation warnings (migrated to modern Flutter APIs).
+  - Zero analysis errors.
+
+Full changelog available in commit history.
+***
+
 ### v3.7.4 Release
 
 This version introduces the new Ghibli-inspired "Whimsy & Wonder" theme and several UI refinements.

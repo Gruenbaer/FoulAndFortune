@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../models/game_state.dart';
-import '../models/player.dart'; // Explicit import needed after aliasing player_service
+// Explicit import needed after aliasing player_service
 import '../models/game_settings.dart';
 import '../models/achievement_manager.dart';
 import '../models/achievement.dart';
 import '../widgets/ball_button.dart';
 import '../widgets/player_plaque.dart';
-import '../widgets/foul_toggle_button.dart';
 import '../widgets/hint_bubble.dart';
 import '../widgets/achievement_splash.dart';
 import '../l10n/app_localizations.dart';
@@ -22,8 +21,7 @@ import '../widgets/themed_widgets.dart';
 import '../widgets/victory_splash.dart';
 import '../widgets/game_clock.dart';
 import '../widgets/pause_overlay.dart';
-import 'new_game_settings_screen.dart';
-import 'package:google_fonts/google_fonts.dart'; // For Arial alternative (Lato/Roboto) if Arial not available, but user said Arial.
+// For Arial alternative (Lato/Roboto) if Arial not available, but user said Arial.
 import '../services/player_service.dart' as stats; // For stats fetching
 import '../widgets/foul_overlays.dart';
 import '../widgets/safe_shield_overlay.dart'; // Flying Penalty Animation
@@ -94,33 +92,36 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       // Restore Warning Dialog (Needed for 2-Foul Warning)
       showZoomDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: SteampunkTheme.mahoganyDark,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(
-                  color: Colors.amber, width: 2) // Yellow for warning
+        builder: (dialogContext) {
+          final l10n = AppLocalizations.of(dialogContext);
+          return AlertDialog(
+            backgroundColor: SteampunkTheme.mahoganyDark,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(
+                    color: Colors.amber, width: 2) // Yellow for warning
+                ),
+            title: Text(event.title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: Colors.amber, fontWeight: FontWeight.bold)),
+            content: Text(event.message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: SteampunkTheme.steamWhite, fontSize: 16)),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              ThemedButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  _isProcessingEvent = false;
+                  _processNextEvent();
+                },
+                label: l10n.gotIt,
               ),
-          title: Text(event.title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: Colors.amber, fontWeight: FontWeight.bold)),
-          content: Text(event.message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: SteampunkTheme.steamWhite, fontSize: 16)),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: [
-            ThemedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _isProcessingEvent = false;
-                _processNextEvent();
-              },
-              label: "Got it",
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       );
     } else if (event is DecisionEvent) {
       // Show Decision Dialog
@@ -349,14 +350,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final achievementManager =
           Provider.of<AchievementManager>(context, listen: false);
-      if (achievementManager != null) {
-        achievementManager.onAchievementUnlocked = (achievement) {
-          setState(() {
-            _achievementToShow = achievement;
-          });
-        };
-      }
-    });
+      achievementManager.onAchievementUnlocked = (achievement) {
+        setState(() {
+          _achievementToShow = achievement;
+        });
+      };
+        });
 
     _rackAnimationController = AnimationController(
       vsync: this,
@@ -401,10 +400,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final gameState = Provider.of<GameState>(context);
     final colors = FortuneColors.of(context);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     // Helper functions for Drawer actions
     void showRestartConfirmation() {
-      final l10n = AppLocalizations.of(context);
       Navigator.pop(context); // Close drawer
       showZoomDialog(
         context: context,
@@ -429,7 +428,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
 
     void showRulesPopup() {
-      final l10n = AppLocalizations.of(context);
       Navigator.pop(context); // Close drawer
       showZoomDialog(
         context: context,
@@ -492,18 +490,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             appBar: AppBar(
               // Title moved to standard 'title' property for better layout control
               title: Text(
-                'Straight Pool',
+                l10n.straightPool,
                 style: theme.textTheme.titleLarge?.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.bold,
                   shadows: [
-                    Shadow(
+                    const Shadow(
                         blurRadius: 3,
                         color: Colors.black87,
-                        offset: const Offset(1, 1)),
+                        offset: Offset(1, 1)),
                     Shadow(
                         blurRadius: 6,
-                        color: colors.primary.withOpacity(0.5),
+                        color: colors.primary.withValues(alpha: 0.5),
                         offset: const Offset(0, 0)),
                   ],
                 ),
@@ -514,7 +512,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 IconButton(
                   icon: const Icon(Icons.analytics_outlined),
                   color: colors.primary,
-                  tooltip: 'Details',
+                  tooltip: l10n.details,
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -528,7 +526,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 IconButton(
                   icon: const Icon(Icons.settings),
                   color: colors.primary,
-                  tooltip: 'Settings',
+                  tooltip: l10n.settings,
                   onPressed: () async {
                     final updateSettings = Provider.of<Function(GameSettings)>(
                         context,
@@ -576,7 +574,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         : [],
                   ),
                   color: colors.primary,
-                  tooltip: 'Undo',
+                  tooltip: l10n.undo,
                   onPressed: gameState.canUndo ? gameState.undo : null,
                 ),
                 IconButton(
@@ -592,7 +590,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         : [],
                   ),
                   color: colors.primary,
-                  tooltip: 'Redo',
+                  tooltip: l10n.redo,
                   onPressed: gameState.canRedo ? gameState.redo : null,
                 ),
               ],
@@ -607,7 +605,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ),
                     child: Center(
                       child: Text(
-                        '14.1 Fortune',
+                        l10n.appTitle,
                         style: SteampunkTheme.themeData.textTheme.displayMedium,
                       ),
                     ),
@@ -615,14 +613,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   ListTile(
                     leading: const Icon(Icons.refresh,
                         color: SteampunkTheme.brassPrimary),
-                    title: Text('Restart Game',
+                    title: Text(l10n.restartGame,
                         style: SteampunkTheme.themeData.textTheme.bodyLarge),
                     onTap: showRestartConfirmation,
                   ),
                   ListTile(
                     leading: const Icon(Icons.menu_book,
                         color: SteampunkTheme.brassPrimary),
-                    title: Text('Rules',
+                    title: Text(l10n.gameRules,
                         style: SteampunkTheme.themeData.textTheme.bodyLarge),
                     onTap: showRulesPopup,
                   ),
@@ -712,14 +710,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       fontWeight: FontWeight.w900,
                                       fontSize: 32,
                                       shadows: [
-                                        Shadow(
+                                        const Shadow(
                                             blurRadius: 4,
                                             color: Colors.black,
                                             offset: Offset(2, 2)),
                                         Shadow(
                                             blurRadius: 8,
                                             color:
-                                                colors.accent.withOpacity(0.6)),
+                                                colors.accent.withValues(alpha: 0.6)),
                                       ],
                                     ),
                                   ),
@@ -741,7 +739,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                         text: TextSpan(
                                           children: [
                                             TextSpan(
-                                              text: 'Inning: ',
+                                              text: '${l10n.inning}: ',
                                               style: theme.textTheme.titleMedium
                                                   ?.copyWith(
                                                 color: colors.primary,
@@ -776,11 +774,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                         text: TextSpan(
                                           children: [
                                             TextSpan(
-                                              text: 'Race to ',
+                                              text: '${l10n.raceTo} ',
                                               style: theme.textTheme.titleMedium
                                                   ?.copyWith(
                                                 color: colors.primary
-                                                    .withOpacity(0.8),
+                                                    .withValues(alpha: 0.8),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 18,
                                               ),
@@ -860,12 +858,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           padding: const EdgeInsets.symmetric(
                               vertical: 6, horizontal: 8),
                           decoration: BoxDecoration(
-                            color: colors.primaryDark.withOpacity(0.4),
+                            color: colors.primaryDark.withValues(alpha: 0.4),
                             border: Border(
                               top: BorderSide(
-                                  color: colors.primary.withOpacity(0.2)),
+                                  color: colors.primary.withValues(alpha: 0.2)),
                               bottom: BorderSide(
-                                  color: colors.primary.withOpacity(0.2)),
+                                  color: colors.primary.withValues(alpha: 0.2)),
                             ),
                           ),
                           child: Row(
@@ -895,7 +893,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   width: 1,
                                   height: 20,
                                   color: colors.primary
-                                      .withOpacity(0.5)), // Themed Divider
+                                      .withValues(alpha: 0.5)), // Themed Divider
                               // P2 Stats (Match)
                               Expanded(
                                 child: Row(
@@ -995,6 +993,33 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               // Foul Button - COMPACT
                               Expanded(
                                 child: ThemedButton(
+                                  backgroundGradientColors: gameState
+                                              .foulMode !=
+                                          FoulMode.none
+                                      ? [
+                                          Colors.red.shade900.withValues(alpha: 0.3),
+                                          Colors.red.shade700.withValues(alpha: 0.3)
+                                        ]
+                                      : null,
+                                  onPressed: gameState.gameOver
+                                      ? () {}
+                                      : () {
+                                          FoulMode next;
+                                          switch (gameState.foulMode) {
+                                            case FoulMode.none:
+                                              next = FoulMode.normal;
+                                              break;
+                                            case FoulMode.normal:
+                                              next = gameState.canBreakFoul
+                                                  ? FoulMode.severe
+                                                  : FoulMode.none;
+                                              break;
+                                            case FoulMode.severe:
+                                              next = FoulMode.none;
+                                              break;
+                                          }
+                                          gameState.setFoulMode(next);
+                                        },
                                   child: SizedBox(
                                     height:
                                         24, // Smaller height per user request
@@ -1050,47 +1075,32 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   ),
-                                  backgroundGradientColors: gameState
-                                              .foulMode !=
-                                          FoulMode.none
-                                      ? [
-                                          Colors.red.shade900.withOpacity(0.3),
-                                          Colors.red.shade700.withOpacity(0.3)
-                                        ]
-                                      : null,
-                                  onPressed: gameState.gameOver
-                                      ? () {}
-                                      : () {
-                                          FoulMode next;
-                                          switch (gameState.foulMode) {
-                                            case FoulMode.none:
-                                              next = FoulMode.normal;
-                                              break;
-                                            case FoulMode.normal:
-                                              next = gameState.canBreakFoul
-                                                  ? FoulMode.severe
-                                                  : FoulMode.none;
-                                              break;
-                                            case FoulMode.severe:
-                                              next = FoulMode.none;
-                                              break;
-                                          }
-                                          gameState.setFoulMode(next);
-                                        },
                                 ),
                               ),
                               const SizedBox(width: 12),
                               // Safe Button - COMPACT (No Shield)
                               Expanded(
                                 child: ThemedButton(
-                                  child: SizedBox(
+                                  onPressed: gameState.gameOver
+                                      ? () {}
+                                      : () {
+                                          // Just toggle the safe mode, don't switch players
+                                          gameState.toggleSafeMode();
+                                        },
+                                  backgroundGradientColors: gameState.isSafeMode
+                                      ? const [
+                                          Color(0xFF66BB6A),
+                                          Color(0xFF2E7D32)
+                                        ]
+                                      : null,
+                                  child: const SizedBox(
                                     height:
                                         24, // Smaller height per user request
                                     width: double.infinity,
                                     child: Center(
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
-                                        child: const Text(
+                                        child: Text(
                                           'SAFE',
                                           style: TextStyle(
                                             color: Colors.white,
@@ -1104,18 +1114,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   ),
-                                  onPressed: gameState.gameOver
-                                      ? () {}
-                                      : () {
-                                          // Just toggle the safe mode, don't switch players
-                                          gameState.toggleSafeMode();
-                                        },
-                                  backgroundGradientColors: gameState.isSafeMode
-                                      ? const [
-                                          Color(0xFF66BB6A),
-                                          Color(0xFF2E7D32)
-                                        ]
-                                      : null,
                                 ),
                               ),
                             ],
@@ -1253,7 +1251,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       // Total 15 balls. Index count 0..14 roughly.
                       // We need a stable index.
                       int flatIndex = 0;
-                      for (int i = 0; i < r; i++) flatIndex += rows[i].length;
+                      for (int i = 0; i < r; i++) {
+                        flatIndex += rows[i].length;
+                      }
                       flatIndex += c;
 
                       // Stagger: 0.0 to 1.0 range
@@ -1420,7 +1420,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final targetKey = isP1 ? _p1PlaqueKey : _p2PlaqueKey;
 
     // 2. Get Target Position (Score height, plaque center X)
-    final plaqueState = targetKey.currentState as PlayerPlaqueState?;
+    final plaqueState = targetKey.currentState;
     final plaqueContext = targetKey.currentContext;
 
     if (plaqueContext == null ||

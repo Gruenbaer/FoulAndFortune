@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/game_settings.dart' hide Player;
 import '../l10n/app_localizations.dart';
@@ -22,7 +21,7 @@ class NewGameSettingsScreen extends StatefulWidget {
 class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   late GameSettings _settings;
   double _raceSliderValue = 100;
-  bool _hasLoadedPlayerNames = false;
+  final bool _hasLoadedPlayerNames = false;
   bool _initialSettingsLoaded = false;
 
   final PlayerService _playerService = PlayerService();
@@ -426,7 +425,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
           // Start Game Button
           // Start Game Button
           ThemedButton(
-            label: 'SET PLAYER TO START',
+            label: l10n.setPlayerToStart,
             icon: Icons.play_circle_fill,
             onPressed: (_settings.player1Name.isNotEmpty &&
                     _settings.player2Name.isNotEmpty)

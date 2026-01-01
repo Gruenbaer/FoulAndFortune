@@ -169,7 +169,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
     // Message Count Check
     _messageCount++;
     if (_messageCount > _maxMessages) {
-      _addBotMessage("💬 Nachrichten-Limit erreicht (${_maxMessages}). Klicke 'SEND REPORT'.");
+      _addBotMessage("💬 Nachrichten-Limit erreicht ($_maxMessages). Klicke 'SEND REPORT'.");
       return;
     } else if (_messageCount == _maxMessages - 3) {
       _addBotMessage("⚠️ Noch 3 Nachrichten. Bitte zusammenfassen.");
@@ -346,7 +346,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
       
       
       final message = Message()
-        ..from = Address(BuildEnv.feedbackRecipient, '14.1 Fortune App')
+        ..from = const Address(BuildEnv.feedbackRecipient, '14.1 Fortune App')
         ..recipients.add(BuildEnv.feedbackRecipient)
         ..subject = subject
         ..text = body;
@@ -474,7 +474,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
     final Color primary = colors.primary;
     final Color primaryDark = colors.primaryDark;
     final Color textMain = colors.textMain;
-    final Color textInverse = Colors.black87; // Usually for buttons on primary
+    const Color textInverse = Colors.black87; // Usually for buttons on primary
     final Color itemColor = textMain; // For inputs
 
 
@@ -548,7 +548,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
                               hintText: "Your Name...",
-                              hintStyle: GoogleFonts.libreBaskerville(color: primary.withOpacity(0.5)),
+                              hintStyle: GoogleFonts.libreBaskerville(color: primary.withValues(alpha: 0.5)),
                               border: InputBorder.none,
                             ),
                             onSubmitted: (_) => _submitName(),
@@ -576,7 +576,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
             // Chat Area
             Expanded(
               child: Container(
-                color: const Color(0xFF1A1110).withOpacity(0.5), // Slight dim for content area
+                color: const Color(0xFF1A1110).withValues(alpha: 0.5), // Slight dim for content area
                 child: ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
@@ -589,7 +589,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                           padding: const EdgeInsets.all(8), 
                           child: Text(
                             "Zahnräder drehen sich...", 
-                            style: GoogleFonts.libreBaskerville(color: primary.withOpacity(0.7), fontSize: 12, fontStyle: FontStyle.italic),
+                            style: GoogleFonts.libreBaskerville(color: primary.withValues(alpha: 0.7), fontSize: 12, fontStyle: FontStyle.italic),
                           ),
                         ),
                       );
@@ -610,11 +610,11 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                             bottomRight: msg.isUser ? Radius.zero : const Radius.circular(12),
                           ),
                           border: Border.all(
-                            color: msg.isUser ? primaryDark : primary.withOpacity(0.5),
+                            color: msg.isUser ? primaryDark : primary.withValues(alpha: 0.5),
                             width: 1,
                           ),
                           boxShadow: [
-                             BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(2,2))
+                             BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(2,2))
                           ],
                         ),
                         child: Text(
@@ -658,7 +658,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
               decoration: BoxDecoration(
                 color: cardBg,
                 border: Border(top: BorderSide(color: primaryDark, width: 2)),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
               child: Row(
                 children: [
@@ -671,7 +671,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                       cursorColor: primary,
                       decoration: InputDecoration(
                         hintText: 'Nachricht senden...',
-                        hintStyle: GoogleFonts.libreBaskerville(color: primary.withOpacity(0.5)),
+                        hintStyle: GoogleFonts.libreBaskerville(color: primary.withValues(alpha: 0.5)),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                         counterText: '',

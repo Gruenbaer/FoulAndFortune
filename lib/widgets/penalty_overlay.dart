@@ -125,7 +125,7 @@ class _PenaltyOverlayState extends State<PenaltyOverlay> with SingleTickerProvid
                               color: Colors.redAccent, // Keep Red for penalty visuals
                               shadows: [
                                 const Shadow(blurRadius: 10, color: Colors.black, offset: Offset(2, 2)),
-                                BoxShadow(color: Colors.red.withOpacity(0.8), blurRadius: 20),
+                                BoxShadow(color: Colors.red.withValues(alpha: 0.8), blurRadius: 20),
                               ],
                             ),
                           ),

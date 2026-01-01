@@ -77,7 +77,7 @@ class Player {
     lastPoints: lastPoints ?? this.lastPoints,
       highestRun: highestRun ?? this.highestRun,
       currentRun: currentRun ?? this.currentRun,
-      lastRun: lastRun ?? this.lastRun,
+      lastRun: lastRun ?? lastRun,
       updateCount: updateCount ?? this.updateCount,
     );
   }

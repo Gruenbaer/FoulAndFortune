@@ -62,10 +62,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: SteampunkTheme.brassPrimary),
+        iconTheme: const IconThemeData(color: SteampunkTheme.brassPrimary),
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.sort, color: SteampunkTheme.brassPrimary),
+            icon: const Icon(Icons.sort, color: SteampunkTheme.brassPrimary),
             color: SteampunkTheme.mahoganyLight,
             onSelected: (value) {
               setState(() {
@@ -91,7 +91,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.bar_chart, size: 64, color: SteampunkTheme.brassDark),
+                          const Icon(Icons.bar_chart, size: 64, color: SteampunkTheme.brassDark),
                           const SizedBox(height: 16),
                           Text(
                             l10n.noStatistics,
@@ -121,9 +121,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                             decoration: BoxDecoration(
-                              border: Border(bottom: BorderSide(color: SteampunkTheme.brassPrimary, width: 2)),
+                              border: const Border(bottom: BorderSide(color: SteampunkTheme.brassPrimary, width: 2)),
                               gradient: LinearGradient(
-                                colors: [SteampunkTheme.brassDark.withOpacity(0.5), Colors.transparent],
+                                colors: [SteampunkTheme.brassDark.withValues(alpha: 0.5), Colors.transparent],
                               ),
                             ),
                             child: Text(
@@ -140,7 +140,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             final index = entry.key;
                             final player = entry.value;
                             return _buildPlayerCard(player, index + 1);
-                          }).toList(),
+                          }),
                         ],
                       ),
                     ),
@@ -160,7 +160,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         color: SteampunkTheme.mahoganyLight,
         border: Border.all(color: SteampunkTheme.brassDark, width: 2),
         borderRadius: BorderRadius.circular(4),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(2, 2)),
         ],
       ),

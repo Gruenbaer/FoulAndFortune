@@ -128,7 +128,7 @@ class AchievementsGalleryScreen extends StatelessWidget {
                 color: achievement.isUnlocked ? Colors.amber.shade300 : Colors.grey.shade500,
                 fontWeight: FontWeight.bold,
                 shadows: [
-                  BoxShadow(color: Colors.black, blurRadius: 2, offset: Offset(1,1)),
+                  const BoxShadow(color: Colors.black, blurRadius: 2, offset: Offset(1,1)),
                 ],
               ),
               maxLines: 2,

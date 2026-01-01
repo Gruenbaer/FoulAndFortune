@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import '../theme/fortune_theme.dart';
 
 class VideoLogo extends StatefulWidget {
   final VoidCallback? onUserInteraction;
-  final bool soundEnabled;
   
-  const VideoLogo({super.key, this.onUserInteraction, this.soundEnabled = true});
+  const VideoLogo({super.key, this.onUserInteraction});
 
   @override
   State<VideoLogo> createState() => _VideoLogoState();
@@ -43,6 +43,8 @@ class _VideoLogoState extends State<VideoLogo> {
 
   @override
   Widget build(BuildContext context) {
+    final fortuneTheme = FortuneColors.of(context);
+    
     if (!_initialized) {
       // Placeholder: Static Image (No clock!)
       return Center(
@@ -53,9 +55,9 @@ class _VideoLogoState extends State<VideoLogo> {
             shape: BoxShape.circle,
             color: Colors.transparent, // or Colors.black ??
             boxShadow: [
-               BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+               BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
             ],
-            border: Border.all(color: const Color(0xFFB8860B).withOpacity(0.5), width: 2), 
+            border: Border.all(color: fortuneTheme.accent.withValues(alpha: 0.5), width: 2), 
           ),
           child: ClipOval(
             child: Image.asset(
@@ -76,11 +78,11 @@ class _VideoLogoState extends State<VideoLogo> {
           // Transparent background, effectively just the clip
           color: Colors.transparent,
           boxShadow: [
-             BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+             BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
           ],
           // Border can be kept or removed. "Rest transparent" might imply strictly the video?
           // I'll keep a thin border to define the 'Round' shape clearly against backgrounds
-          border: Border.all(color: const Color(0xFFB8860B).withOpacity(0.5), width: 2), 
+          border: Border.all(color: const Color(0xFFB8860B).withValues(alpha: 0.5), width: 2), 
         ),
         child: ClipOval(
           child: FittedBox(
