@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../widgets/themed_widgets.dart';
 import '../widgets/player_name_field.dart';
 import '../services/player_service.dart';
+import '../widgets/foul_overlays.dart';
 
 class NewGameSettingsScreen extends StatefulWidget {
   final Function(GameSettings) onStartGame;
@@ -35,7 +36,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     _settings = GameSettings();
     _raceSliderValue = _settings.raceToScore.toDouble();
     _loadPlayers();
-
+    
     // Defer loading initial values from provider until after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialSettingsFromProvider();
@@ -53,24 +54,28 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     try {
       final currentSettings = Provider.of<GameSettings>(context, listen: false);
 
-      // Only load last used names if current settings are empty (they will be initially)
-      // and provider has non-empty names
-      if (_settings.player1Name.isEmpty &&
-          currentSettings.player1Name.isNotEmpty) {
-        setState(() {
-          _settings =
-              _settings.copyWith(player1Name: currentSettings.player1Name);
-        });
+      // 1. Check if Provider has any data (player names are key indicator)
+      if (currentSettings.player1Name.isNotEmpty || currentSettings.player2Name.isNotEmpty) {
+         setState(() {
+           // Fully adopt the persisted settings
+           _settings = currentSettings;
+           // Update local UI state to match
+           _raceSliderValue = _settings.raceToScore.toDouble();
+         });
       }
-
-      if (_settings.player2Name.isEmpty &&
-          currentSettings.player2Name.isNotEmpty) {
-        setState(() {
-          _settings =
-              _settings.copyWith(player2Name: currentSettings.player2Name);
-        });
-      }
-
+      
+      // 2. If Provider is empty (fresh start), names should have come from _loadSettings() in main.dart
+      //    But wait, main.dart loads settings into _settingsNotifier. 
+      //    NewGameSettingsScreen gets defaults from GameSettings() constructor in initState.
+      //    We must check if the Provider (which holds the loaded settings) has data.
+      
+      // Actually, if we are here, Provider ALREADY points to the loaded settings from main.dart
+      // So checking currentSettings SHOULD work. 
+      // ISSUE: In initState, we did _settings = GameSettings(); which resets to defaults.
+      // FIX: Check if we haven't manually set names yet, then pull from provider.
+      
+      // Note: We already check isNotEmpty above. If main.dart loaded data, it should be in currentSettings.
+      
       setState(() {
         _initialSettingsLoaded = true;
       });
@@ -424,18 +429,27 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
 
           // Start Game Button
           // Start Game Button
+          // Start Game Button
           ThemedButton(
-            label: l10n.setPlayerToStart,
+            label: l10n.startGame.toUpperCase(),
             icon: Icons.play_circle_fill,
-            onPressed: (_settings.player1Name.isNotEmpty &&
-                    _settings.player2Name.isNotEmpty)
-                ? _startGame
-                : null,
-            backgroundGradientColors: [
-              Colors.green.shade900,
-              Colors.green.shade700,
-            ],
-            textColor: Colors.white,
+            onPressed: () {
+              if (_arePlayersValid) {
+                _startGame();
+              } else {
+                _showValidationSplash();
+              }
+            },
+            backgroundGradientColors: _arePlayersValid
+                ? [
+                    Colors.green.shade900,
+                    Colors.green.shade700,
+                  ]
+                : [
+                    Colors.grey.shade800,
+                    Colors.grey.shade700,
+                  ],
+            textColor: _arePlayersValid ? Colors.white : Colors.white54,
           ),
         ],
       ),
@@ -486,6 +500,35 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
         ),
       ),
     );
+  }
+
+  bool get _arePlayersValid {
+    // 1. Names must not be empty
+    if (_settings.player1Name.isEmpty || _settings.player2Name.isEmpty) return false;
+    
+    // 2. Names must exist in the loaded players list (DB)
+    final p1Exists = _players.any((p) => p.name == _settings.player1Name);
+    final p2Exists = _players.any((p) => p.name == _settings.player2Name);
+    
+    return p1Exists && p2Exists;
+  }
+
+  void _showValidationSplash() {
+    print('Showing Splash'); // Debug
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    
+    entry = OverlayEntry(
+      builder: (context) => FoulMessageOverlay(
+        message: "SET\nPLAYERS\nFIRST!",
+        textColor: Colors.deepOrangeAccent,
+        onFinish: () {
+          entry.remove();
+        },
+      ),
+    );
+    
+    overlay.insert(entry);
   }
 
   void _startGame() {

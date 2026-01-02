@@ -55,6 +55,10 @@
 
 ## Entwicklung
 
+**Development Environment:**
+- **Manager:** Puro (use `puro flutter` commands if `flutter` is not in PATH)
+- **Environment:** `stable` (3.38.5)
+
 **Flutter Version:** 3.22.1  
 **Min SDK:** API 21 (Android 5.0)  
 **Dependencies:**

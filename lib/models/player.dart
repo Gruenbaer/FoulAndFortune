@@ -32,14 +32,17 @@ class Player {
     lastPoints = points;
     updateCount++;
     
-    if (points > 0) {
+    if (points != 0) {
       currentRun += points;
+      // Track highest run only for positive accumulation sequences?
+      // Or just "best inning score"?
+      // Definition of Run usually excludes fouls.
+      // But user wants "Last Points" to show net result.
+      // We will use currentRun as "Net Inning Score" for display purposes.
       if (currentRun > highestRun) {
          highestRun = currentRun;
       }
     }
-    // Negative points don't affect current run (e.g. foul), 
-    // but the run ends when inning increments.
   }
 
   void incrementInning() {
@@ -77,7 +80,7 @@ class Player {
     lastPoints: lastPoints ?? this.lastPoints,
       highestRun: highestRun ?? this.highestRun,
       currentRun: currentRun ?? this.currentRun,
-      lastRun: lastRun ?? lastRun,
+      lastRun: lastRun ?? this.lastRun, // FIXED: was "lastRun ?? lastRun"
       updateCount: updateCount ?? this.updateCount,
     );
   }

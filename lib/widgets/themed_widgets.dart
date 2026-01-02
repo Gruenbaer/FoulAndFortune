@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 // Keep for legacy constants if needed, or remove?
 import '../theme/fortune_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ThemedBackground extends StatelessWidget {
   final Widget child;
@@ -16,7 +17,7 @@ class ThemedBackground extends StatelessWidget {
         color: colors.backgroundMain, 
         image: colors.backgroundImagePath != null ? DecorationImage(
           image: AssetImage(colors.backgroundImagePath!),
-          fit: BoxFit.cover,
+          fit: BoxFit.contain, // Changed from cover to contain per user request (image cut off)
           colorFilter: const ColorFilter.mode(
             Colors.black38,
             BlendMode.darken,
@@ -35,6 +36,7 @@ class ThemedButton extends StatefulWidget {
   final IconData? icon;
   final Color? textColor;
   final List<Color>? backgroundGradientColors;
+  final Color? glowColor;
 
   const ThemedButton({
     super.key,
@@ -44,6 +46,7 @@ class ThemedButton extends StatefulWidget {
     this.icon,
     this.textColor,
     this.backgroundGradientColors,
+    this.glowColor,
   }) : assert(label != null || child != null, 'Label or Child must be provided');
 
   @override
@@ -97,7 +100,7 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
           constraints: const BoxConstraints(maxWidth: 400, minHeight: 60), // Reduced minHeight, removed maxHeight
           child: CustomPaint(
             painter: colors.themeId == 'cyberpunk' 
-                ? CyberpunkFramePainter(colors) 
+                ? CyberpunkFramePainter(colors, glowColor: widget.glowColor) 
                 : (colors.themeId == 'ghibli' 
                     ? GhibliFramePainter(colors, seed: _seed) 
                     : BrassFramePainter(colors)),
@@ -113,8 +116,8 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: widget.backgroundGradientColors ?? [
-                    colors.backgroundCard.withValues(alpha: 0.8),
-                    colors.backgroundCard,
+                    Colors.transparent,
+                    Colors.transparent,
                   ],
                 ),
                 // Cyberpunk uses cut corners (Beveled), Steampunk uses Rounded
@@ -152,7 +155,12 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                   Flexible(
                     child: Text(
                       widget.label?.toUpperCase() ?? '',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      style: (colors.themeId == 'cyberpunk'
+                              ? GoogleFonts.orbitron(
+                                  textStyle: Theme.of(context).textTheme.labelLarge,
+                                )
+                              : Theme.of(context).textTheme.labelLarge)
+                          ?.copyWith(
                         color: widget.textColor ?? const Color(0xFFF0F0F0), // Near white for contrast
                         letterSpacing: 0.5, // Reduced from 1.0 for space saving
                         shadows: [
@@ -262,8 +270,9 @@ class BrassFramePainter extends CustomPainter {
 // Tech/HUD Painter for Cyberpunk
 class CyberpunkFramePainter extends CustomPainter {
   final FortuneColors colors;
+  final Color? glowColor;
   
-  CyberpunkFramePainter(this.colors);
+  CyberpunkFramePainter(this.colors, {this.glowColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -290,7 +299,7 @@ class CyberpunkFramePainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = colors.primary
+        ..color = glowColor ?? colors.primary
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4), // Glow
@@ -300,7 +309,7 @@ class CyberpunkFramePainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = colors.primary
+        ..color = glowColor ?? colors.primary
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );

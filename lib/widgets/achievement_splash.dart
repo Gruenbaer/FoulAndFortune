@@ -4,6 +4,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import '../models/achievement.dart';
 import '../models/game_settings.dart';
+import '../theme/fortune_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AchievementSplash extends StatefulWidget {
   final Achievement achievement;
@@ -81,6 +83,7 @@ class _AchievementSplashState extends State<AchievementSplash>
 
   @override
   Widget build(BuildContext context) {
+    final colors = FortuneColors.of(context); // Access theme colors
     return Material(
       color: Colors.black87,
       child: Stack(
@@ -138,14 +141,15 @@ class _AchievementSplashState extends State<AchievementSplash>
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            Colors.amber.shade700,
-                            Colors.orange.shade600,
+
+                            colors.backgroundCard,
+                            colors.primaryDark,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.amber.withValues(alpha: 0.6),
+                            color: colors.primary.withValues(alpha: 0.6),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -154,13 +158,18 @@ class _AchievementSplashState extends State<AchievementSplash>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
+                          Text(
                             '🏆 ACHIEVEMENT UNLOCKED! 🏆',
-                            style: TextStyle(
+                            style: GoogleFonts.orbitron(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontStyle: FontStyle.italic,
+                              color: colors.accent,
                               letterSpacing: 2,
+                              decoration: TextDecoration.none,
+                              shadows: [
+                                Shadow(blurRadius: 10, color: colors.primary.withValues(alpha: 0.5), offset: const Offset(0, 0)),
+                              ],
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -171,21 +180,26 @@ class _AchievementSplashState extends State<AchievementSplash>
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            widget.achievement.title,
-                            style: const TextStyle(
+                            widget.achievement.title.toUpperCase(),
+                            style: GoogleFonts.orbitron(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: colors.primaryBright,
+                              decoration: TextDecoration.none,
+                              shadows: [
+                                Shadow(blurRadius: 5, color: colors.primary, offset: const Offset(0, 0)),
+                              ],
                             ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             widget.achievement.description,
-                            style: const TextStyle(
+                            style: GoogleFonts.nunito( // Keep readable body font
                               fontSize: 16,
-                              color: Colors.white70,
+                              color: colors.textMain,
                               height: 1.4,
+                              decoration: TextDecoration.none,
                             ),
                             textAlign: TextAlign.center,
                           ),

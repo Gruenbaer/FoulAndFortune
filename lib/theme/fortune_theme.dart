@@ -250,11 +250,11 @@ class CyberpunkTheme {
         backgroundColor: blackVoid,
         foregroundColor: neonCyan,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.crimsonPro(
+        titleTextStyle: GoogleFonts.orbitron(
           fontSize: 30,
           color: neonCyan,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5, // Reduced spacing
+          fontWeight: FontWeight.w900,
+          letterSpacing: 2.0, // Wider for sci-fi feel
           shadows: [
             Shadow(blurRadius: 10, color: neonCyan.withValues(alpha: 0.8), offset: const Offset(0, 0)),
           ],
@@ -263,22 +263,22 @@ class CyberpunkTheme {
       ),
 
       textTheme: TextTheme(
-        // Headlines: Serif instead of Orbitron, but kept bold/neon
-        displayLarge: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 36, fontWeight: FontWeight.bold),
-        displayMedium: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 28, fontWeight: FontWeight.bold),
-        displaySmall: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 24, fontWeight: FontWeight.bold),
+        // Headlines: Orbitron for everything
+        displayLarge: GoogleFonts.orbitron(color: neonCyan, fontSize: 36, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+        displayMedium: GoogleFonts.orbitron(color: neonCyan, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+        displaySmall: GoogleFonts.orbitron(color: neonCyan, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.0),
         
-        // Body: LibreBaskerville for consistency ("normal serif")
-        bodyLarge: GoogleFonts.libreBaskerville(color: textWhite, fontSize: 18),
-        bodyMedium: GoogleFonts.libreBaskerville(color: textWhite, fontSize: 16),
-        bodySmall: GoogleFonts.libreBaskerville(color: neonCyan.withValues(alpha: 0.8), fontSize: 14),
+        // Body: Orbitron (cleaner weight)
+        bodyLarge: GoogleFonts.orbitron(color: textWhite, fontSize: 18),
+        bodyMedium: GoogleFonts.orbitron(color: textWhite, fontSize: 16),
+        bodySmall: GoogleFonts.orbitron(color: neonCyan.withValues(alpha: 0.8), fontSize: 14),
         
         // Buttons
-        labelLarge: GoogleFonts.crimsonPro(
+        labelLarge: GoogleFonts.orbitron(
             color: textBlack, 
             fontSize: 20, 
             fontWeight: FontWeight.w900,
-            letterSpacing: 0.5
+            letterSpacing: 1.5
         ),
       ),
       
@@ -289,8 +289,8 @@ class CyberpunkTheme {
 
       dialogTheme: DialogThemeData(
         backgroundColor: darkMatrix,
-        titleTextStyle: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 26, fontWeight: FontWeight.bold),
-        contentTextStyle: GoogleFonts.libreBaskerville(color: textWhite, fontSize: 16),
+        titleTextStyle: GoogleFonts.orbitron(color: neonCyan, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+        contentTextStyle: GoogleFonts.orbitron(color: textWhite, fontSize: 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
           side: const BorderSide(color: neonCyan, width: 2),
@@ -314,3 +314,143 @@ class CyberpunkTheme {
     );
   }
 }
+
+class SteampunkTheme {
+  // Palette
+  static const Color mahoganyDark = Color(0xFF2D160E);   // Deep wood for background
+  static const Color mahoganyLight = Color(0xFF4A2817);  // Lighter wood for cards
+  static const Color brassPrimary = Color(0xFFCDBE78);   // Main brass/gold color
+  static const Color brassDark = Color(0xFF8B7E40);      // Shadow/Border brass
+  static const Color brassBright = Color(0xFFFFF5C3);    // Highlight
+  static const Color verdigris = Color(0xFF43B3AE);      // Oxidized copper accent
+  static const Color leatherDark = Color(0xFF1A1110);    // Deepest shadow
+  static const Color steamWhite = Color(0xFFE0E0E0);     // Text color (off-white)
+  static const Color amberGlow = Color(0xFFFFA000);      // Active/Highlight glow
+
+  static ThemeData get themeData {
+    const colors = FortuneColors(
+      themeId: 'steampunk',
+      backgroundMain: mahoganyDark,
+      backgroundCard: mahoganyLight,
+      primary: brassPrimary,
+      primaryDark: brassDark,
+      primaryBright: brassBright,
+      secondary: verdigris,
+      accent: amberGlow,
+      textMain: steamWhite,
+      textContrast: leatherDark,
+      // Semantic colors (Steampunk theme)
+      danger: Color(0xFFD32F2F),           // Classic red (danger)
+      dangerLight: Color(0xFF5D1B1B),      // Dark red background
+      dangerDark: Color(0xFF8B0000),       // Deep red border
+      success: verdigris,                  // Oxidized copper (success)
+      successLight: Color(0xFF1B3D3A),     // Dark teal background
+      successDark: Color(0xFF2B6B66),      // Deep teal border
+      warning: amberGlow,                  // Amber glow (warning)
+      warningLight: Color(0xFF4D3400),     // Dark amber background
+      warningDark: Color(0xFFFFB300),      // Bright amber border
+      info: brassBright,                   // Brass bright (info)
+      disabled: Color(0xFF5A5A5A),         // Gray
+      overlay: Color(0xBB1A1110),          // Semi-transparent dark
+      // Chart colors
+      chartBlue: Color(0xFF5DADE2),
+      chartGreen: verdigris,
+      chartOrange: amberGlow,
+      chartPurple: Color(0xFF9B59B6),
+      chartRed: Color(0xFFE74C3C),
+      chartAmber: Color(0xFFF39C12),
+      backgroundImagePath: 'assets/images/ui/background.png',
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      primaryColor: brassPrimary,
+      scaffoldBackgroundColor: mahoganyDark,
+      
+      extensions: const [colors],
+
+      
+      // Card Theme (Leather/Wood look)
+      cardTheme: CardThemeData(
+        color: mahoganyLight,
+        elevation: 8,
+        shadowColor: Colors.black54,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: brassDark, width: 2),
+        ),
+      ),
+      
+        // AppBar Theme
+      appBarTheme: AppBarTheme(
+        backgroundColor: mahoganyDark,
+        foregroundColor: brassPrimary,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.crimsonPro(
+          fontSize: 30, // Slightly larger to match presence
+          fontWeight: FontWeight.w800, // Extra Bold for Title
+          color: brassPrimary,
+          shadows: [
+            const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
+          ],
+        ),
+        iconTheme: const IconThemeData(color: brassPrimary),
+      ),
+      
+      // Text Theme
+      textTheme: TextTheme(
+        // Headlines (Victorian style -> Classic Serif)
+        displayLarge: GoogleFonts.crimsonPro(color: brassPrimary, fontSize: 36, fontWeight: FontWeight.w700),
+        displayMedium: GoogleFonts.crimsonPro(color: brassPrimary, fontSize: 28, fontWeight: FontWeight.w700),
+        displaySmall: GoogleFonts.crimsonPro(color: brassPrimary, fontSize: 24, fontWeight: FontWeight.w700),
+        
+        // Body text (Readable Serif or Slab Serif)
+        bodyLarge: GoogleFonts.libreBaskerville(color: steamWhite, fontSize: 18),
+        bodyMedium: GoogleFonts.libreBaskerville(color: steamWhite, fontSize: 16),
+        bodySmall: GoogleFonts.libreBaskerville(color: brassPrimary.withValues(alpha: 0.8), fontSize: 14),
+        
+        // Button text (Condensed, Bold Serif)
+        labelLarge: GoogleFonts.crimsonPro(
+            color: leatherDark, 
+            fontSize: 20, // Slightly larger than Rye's 18 as it's more compact
+            fontWeight: FontWeight.w900, 
+            letterSpacing: 0.5 // Reduce spacing slightly
+        ),
+      ),
+      
+      // Icon Theme
+      iconTheme: const IconThemeData(
+        color: brassPrimary,
+        size: 28,
+      ),
+      
+      // Dialog Theme
+      dialogTheme: DialogThemeData(
+        backgroundColor: mahoganyLight,
+        titleTextStyle: GoogleFonts.crimsonPro(color: brassPrimary, fontSize: 26, fontWeight: FontWeight.bold),
+        contentTextStyle: GoogleFonts.libreBaskerville(color: steamWhite, fontSize: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: brassPrimary, width: 3),
+        ),
+      ),
+      
+      // Divider Theme
+      dividerTheme: const DividerThemeData(
+        color: brassDark,
+        thickness: 1,
+      ), colorScheme: const ColorScheme.dark(
+        primary: brassPrimary,
+        secondary: verdigris,
+        surface: mahoganyLight,
+        // background: mahoganyDark, // Deprecated in recent Flutter but safe to omit if surface covers it
+        error: Color(0xFFCF6679),
+        onPrimary: leatherDark,
+        onSecondary: leatherDark,
+        onSurface: steamWhite,
+      ),
+    );
+  }
+}
+

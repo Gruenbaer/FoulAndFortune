@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/game_state.dart';
 // Explicit import needed after aliasing player_service
 import '../models/game_settings.dart';
@@ -15,7 +16,6 @@ import '../models/game_record.dart';
 import '../services/game_history_service.dart';
 import 'settings_screen.dart';
 import 'details_screen.dart';
-import '../theme/steampunk_theme.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart';
 import '../widgets/victory_splash.dart';
@@ -94,21 +94,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         context: context,
         builder: (dialogContext) {
           final l10n = AppLocalizations.of(dialogContext);
+          final colors = FortuneColors.of(dialogContext);
           return AlertDialog(
-            backgroundColor: SteampunkTheme.mahoganyDark,
+            backgroundColor: colors.backgroundMain,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(
-                    color: Colors.amber, width: 2) // Yellow for warning
+                side: BorderSide(
+                    color: colors.warning, width: 2) // Yellow for warning
                 ),
             title: Text(event.title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: Colors.amber, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    color: colors.warning, fontWeight: FontWeight.bold)),
             content: Text(event.message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: SteampunkTheme.steamWhite, fontSize: 16)),
+                style: TextStyle(
+                    color: colors.textMain, fontSize: 16)),
             actionsAlignment: MainAxisAlignment.center,
             actions: [
               ThemedButton(
@@ -128,20 +129,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       showZoomDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          backgroundColor: SteampunkTheme.mahoganyDark,
+        builder: (context) {
+          final colors = FortuneColors.of(context);
+          return AlertDialog(
+          backgroundColor: colors.backgroundMain,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(
-                  color: SteampunkTheme.brassPrimary, width: 2)),
+              side: BorderSide(
+                  color: colors.primary, width: 2)),
           title: Text(event.title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: SteampunkTheme.brassBright,
+              style: TextStyle(
+                  color: colors.primaryBright,
                   fontWeight: FontWeight.bold)),
           content: Text(event.message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: SteampunkTheme.steamWhite)),
+              style: TextStyle(color: colors.textMain)),
           actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
             // Option 1 (Player 1)
@@ -166,9 +169,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               label: event.options[1],
             ),
           ],
-        ),
-      );
-    } else if (event is ReRackEvent) {
+          );
+    },
+  );
+} else if (event is ReRackEvent) {
       // Show Re-Rack Overlay
       // Reset animation immediately to hide balls (show empty rack)
       if (mounted) _rackAnimationController.value = 0.0;
@@ -288,7 +292,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       player2Fouls: 0,
       activeBalls: [], // Cleared
       player1IsActive: false,
-      snapshot: null, // Don't save snapshot for completed game
+      snapshot: gameState.toJson(), // Save snapshot for history details
     );
 
     // Add matchLog if GameRecord supports it (it appeared missing in previous step view of GameRecord, let's omit if not there)
@@ -600,28 +604,28 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 padding: EdgeInsets.zero,
                 children: [
                   DrawerHeader(
-                    decoration: const BoxDecoration(
-                      color: SteampunkTheme.mahoganyDark,
+                    decoration: BoxDecoration(
+                      color: colors.backgroundMain,
                     ),
                     child: Center(
                       child: Text(
                         l10n.appTitle,
-                        style: SteampunkTheme.themeData.textTheme.displayMedium,
+                        style: theme.textTheme.displayMedium,
                       ),
                     ),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.refresh,
-                        color: SteampunkTheme.brassPrimary),
+                    leading: Icon(Icons.refresh,
+                        color: colors.primary),
                     title: Text(l10n.restartGame,
-                        style: SteampunkTheme.themeData.textTheme.bodyLarge),
+                        style: theme.textTheme.bodyLarge),
                     onTap: showRestartConfirmation,
                   ),
                   ListTile(
-                    leading: const Icon(Icons.menu_book,
-                        color: SteampunkTheme.brassPrimary),
+                    leading: Icon(Icons.menu_book,
+                        color: colors.primary),
                     title: Text(l10n.gameRules,
-                        style: SteampunkTheme.themeData.textTheme.bodyLarge),
+                        style: theme.textTheme.bodyLarge),
                     onTap: showRulesPopup,
                   ),
                 ],
@@ -655,7 +659,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               loser: gameState.players
                                   .firstWhere((p) => p != gameState.winner),
                               raceToScore: gameState.raceToScore,
-                              matchLog: gameState.matchLog,
+                              history: gameState.history,
                               elapsedDuration: gameState.elapsedDuration,
                               onNewGame: () {
                                 Navigator.of(context)
@@ -851,73 +855,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
 
-                        // 2. Statistics Row (Current Match)
-                        // Uses active GameState players instead of historical DB stats
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 6, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: colors.primaryDark.withValues(alpha: 0.4),
-                            border: Border(
-                              top: BorderSide(
-                                  color: colors.primary.withValues(alpha: 0.2)),
-                              bottom: BorderSide(
-                                  color: colors.primary.withValues(alpha: 0.2)),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              // P1 Stats (Match)
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildStatItem(
-                                        '�',
-                                        (gameState.players[0].score /
-                                                (gameState.players[0]
-                                                            .currentInning >
-                                                        0
-                                                    ? gameState.players[0]
-                                                        .currentInning
-                                                    : 1))
-                                            .toStringAsFixed(2)),
-                                    _buildStatItem('HR',
-                                        '${gameState.players[0].highestRun}'),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                  width: 1,
-                                  height: 20,
-                                  color: colors.primary
-                                      .withValues(alpha: 0.5)), // Themed Divider
-                              // P2 Stats (Match)
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildStatItem(
-                                        '�',
-                                        (gameState.players[1].score /
-                                                (gameState.players[1]
-                                                            .currentInning >
-                                                        0
-                                                    ? gameState.players[1]
-                                                        .currentInning
-                                                    : 1))
-                                            .toStringAsFixed(2)),
-                                    _buildStatItem('HR',
-                                        '${gameState.players[1].highestRun}'),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
 
                         // CLOCK
                         const Padding(
@@ -954,8 +891,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             alignment: Alignment.center,
                             children: [
                               // Decorative Gears behind the rack
-                              if (colors.backgroundMain ==
-                                  SteampunkTheme.mahoganyDark)
+                              if (colors.themeId == 'steampunk')
                                 Opacity(
                                   opacity: 0.1,
                                   child: Image.asset(
@@ -993,13 +929,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               // Foul Button - COMPACT
                               Expanded(
                                 child: ThemedButton(
-                                  backgroundGradientColors: gameState
-                                              .foulMode !=
-                                          FoulMode.none
-                                      ? [
-                                          Colors.red.shade900.withValues(alpha: 0.3),
-                                          Colors.red.shade700.withValues(alpha: 0.3)
-                                        ]
+                                  backgroundGradientColors: null,
+                                  glowColor: gameState.foulMode != FoulMode.none
+                                      ? Colors.redAccent
                                       : null,
                                   onPressed: gameState.gameOver
                                       ? () {}
@@ -1010,9 +942,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                               next = FoulMode.normal;
                                               break;
                                             case FoulMode.normal:
-                                              next = gameState.canBreakFoul
-                                                  ? FoulMode.severe
-                                                  : FoulMode.none;
+                                              // Only allow Break Foul if available (start of game)
+                                              if (gameState.canBreakFoul) {
+                                                next = FoulMode.severe;
+                                              } else {
+                                                next = FoulMode.none;
+                                              }
                                               break;
                                             case FoulMode.severe:
                                               next = FoulMode.none;
@@ -1033,7 +968,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                               color: gameState.foulMode ==
                                                       FoulMode.none
                                                   ? Colors.white
-                                                  : Colors.red,
+                                                  : Colors.redAccent,
                                               fontSize: 14, // Larger font
                                               fontWeight: FontWeight.w700,
                                               letterSpacing: 0.3,
@@ -1041,32 +976,42 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                             children: gameState.foulMode ==
                                                     FoulMode.none
                                                 ? [
-                                                    const TextSpan(
-                                                        text: 'NO FOUL')
+                                                    TextSpan(
+                                                        text: 'NO FOUL',
+                                                        style:
+                                                            GoogleFonts.orbitron(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ))
                                                   ]
                                                 : gameState.foulMode ==
                                                         FoulMode.normal
                                                     ? [
-                                                        const TextSpan(
-                                                            text: 'FOUL '),
-                                                        const TextSpan(
+                                                        TextSpan(
+                                                            text: 'FOUL ',
+                                                            style: GoogleFonts
+                                                                .orbitron()),
+                                                        TextSpan(
                                                           text: '-1',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w900),
+                                                          style: GoogleFonts
+                                                              .orbitron(
+                                                            fontWeight:
+                                                                FontWeight.w900,
+                                                          ),
                                                         ),
                                                       ]
                                                     : [
-                                                        const TextSpan(
-                                                            text:
-                                                                'BREAK FOUL '),
-                                                        const TextSpan(
+                                                        TextSpan(
+                                                            text: 'BREAK FOUL ',
+                                                            style: GoogleFonts
+                                                                .orbitron()),
+                                                        TextSpan(
                                                           text: '-2',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w900),
+                                                          style: GoogleFonts
+                                                              .orbitron(
+                                                            fontWeight:
+                                                                FontWeight.w900,
+                                                          ),
                                                         ),
                                                       ],
                                           ),
@@ -1087,13 +1032,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                           // Just toggle the safe mode, don't switch players
                                           gameState.toggleSafeMode();
                                         },
-                                  backgroundGradientColors: gameState.isSafeMode
-                                      ? const [
-                                          Color(0xFF66BB6A),
-                                          Color(0xFF2E7D32)
-                                        ]
-                                      : null,
-                                  child: const SizedBox(
+                                  glowColor: gameState.isSafeMode ? colors.accent : null,
+                                  backgroundGradientColors: null,
+                                  child: SizedBox(
                                     height:
                                         24, // Smaller height per user request
                                     width: double.infinity,
@@ -1102,12 +1043,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                         fit: BoxFit.scaleDown,
                                         child: Text(
                                           'SAFE',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize:
-                                                14, // Larger font, same as foul button
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.3,
+                                          style: GoogleFonts.orbitron(
+                                            textStyle: TextStyle(
+                                              color: gameState.isSafeMode
+                                                  ? colors.accent
+                                                  : Colors.white,
+                                              fontSize:
+                                                  14, // Larger font, same as foul button
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.3,
+                                            ),
                                           ),
                                           maxLines: 1,
                                         ),

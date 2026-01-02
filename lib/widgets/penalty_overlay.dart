@@ -120,12 +120,13 @@ class _PenaltyOverlayState extends State<PenaltyOverlay> with SingleTickerProvid
                           Text(
                             '${widget.points}',
                             style: GoogleFonts.nunito(
-                              fontSize: 48, // Slightly larger
+                              fontSize: 48,
                               fontWeight: FontWeight.w900,
-                              color: Colors.redAccent, // Keep Red for penalty visuals
+                              color: Colors.redAccent,
                               shadows: [
                                 const Shadow(blurRadius: 10, color: Colors.black, offset: Offset(2, 2)),
-                                BoxShadow(color: Colors.red.withValues(alpha: 0.8), blurRadius: 20),
+                                Shadow(color: Colors.red.withValues(alpha: 0.8), blurRadius: 30, offset: Offset.zero),
+                                Shadow(color: Colors.redAccent.withValues(alpha: 1.0), blurRadius: 50, offset: Offset.zero),
                               ],
                             ),
                           ),

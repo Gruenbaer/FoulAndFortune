@@ -6,7 +6,7 @@ import '../models/achievement_manager.dart';
 import '../models/game_record.dart';
 import '../services/game_history_service.dart';
 import '../l10n/app_localizations.dart';
-import '../theme/steampunk_theme.dart';
+import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart';
 import 'game_screen.dart';
 import 'details_screen.dart';
@@ -85,7 +85,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = SteampunkTheme.themeData;
+    final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -94,11 +95,11 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: SteampunkTheme.brassPrimary),
+        iconTheme: IconThemeData(color: colors.primary),
         actions: [
           if (_games.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.delete_sweep, color: SteampunkTheme.brassBright),
+              icon: Icon(Icons.delete_sweep, color: colors.primaryBright),
               onPressed: _clearAllHistory,
               tooltip: l10n.deleteAllGames,
             ),
@@ -112,10 +113,10 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   border: Border(
                       bottom: BorderSide(
-                          color: SteampunkTheme.brassDark, width: 2)),
+                          color: colors.primaryDark, width: 2)),
                   color: Colors.black26,
                 ),
                 child: Row(
@@ -147,14 +148,14 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               // Game list
               Expanded(
                 child: _isLoading
-                    ? const Center(
+                    ? Center(
                         child: CircularProgressIndicator(
-                            color: SteampunkTheme.amberGlow))
+                            color: colors.accent))
                     : _games.isEmpty
                         ? _buildEmptyState(l10n)
                         : RefreshIndicator(
-                            color: SteampunkTheme.amberGlow,
-                            backgroundColor: SteampunkTheme.mahoganyLight,
+                            color: colors.accent,
+                            backgroundColor: colors.backgroundCard,
                             onRefresh: _loadGames,
                             child: ListView.builder(
                               itemCount: _games.length,
@@ -175,7 +176,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
 
   Widget _buildFilterChip({required String label, required String value}) {
     final isSelected = _filter == value;
-    final theme = SteampunkTheme.themeData;
+    final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
     return GestureDetector(
       onTap: () {
         setState(() => _filter = value);
@@ -185,8 +187,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected ? SteampunkTheme.brassPrimary : Colors.transparent,
-          border: Border.all(color: SteampunkTheme.brassPrimary),
+          color: isSelected ? colors.primary : Colors.transparent,
+          border: Border.all(color: colors.primary),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
@@ -194,8 +196,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           style: theme.textTheme.labelLarge?.copyWith(
             fontSize: 12,
             color: isSelected
-                ? SteampunkTheme.leatherDark
-                : SteampunkTheme.brassPrimary,
+                ? colors.textContrast
+                : colors.primary,
           ),
         ),
       ),
@@ -203,15 +205,16 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   }
 
   Widget _buildEmptyState(AppLocalizations l10n) {
-    final theme = SteampunkTheme.themeData;
+    final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.history_edu, // Quill/History icon
             size: 64,
-            color: SteampunkTheme.brassDark,
+            color: colors.primaryDark,
           ),
           const SizedBox(height: 16),
           Text(
@@ -230,7 +233,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
 
   Widget _buildGameCard(
       GameRecord game, AppLocalizations l10n, ThemeData theme) {
-    final stTheme = SteampunkTheme.themeData;
+    final colors = FortuneColors.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -239,10 +242,10 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               'assets/images/ui/brass_plate_button.png'), // Reuse plate texture if available, or just colors
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-              SteampunkTheme.mahoganyLight.withValues(alpha: 0.9), BlendMode.darken),
+              colors.backgroundCard.withValues(alpha: 0.9), BlendMode.darken),
         ),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: SteampunkTheme.brassDark),
+        border: Border.all(color: colors.primaryDark),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withValues(alpha: 0.5),
@@ -260,7 +263,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             color: const Color(0xFF8B0000), // Dark Red
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(Icons.delete, color: SteampunkTheme.brassBright),
+          child: Icon(Icons.delete, color: colors.primaryBright),
         ),
         confirmDismiss: (direction) async {
           return await showDialog<bool>(
@@ -339,7 +342,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           contentPadding: const EdgeInsets.all(16),
           title: Text(
             '${game.player1Name} vs ${game.player2Name}',
-            style: stTheme.textTheme.displaySmall?.copyWith(fontSize: 18),
+            style: theme.textTheme.displaySmall?.copyWith(fontSize: 18),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,13 +350,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               const SizedBox(height: 8),
               Text(
                 '${l10n.score}: ${game.player1Score} - ${game.player2Score}',
-                style: stTheme.textTheme.bodyLarge
-                    ?.copyWith(color: SteampunkTheme.amberGlow),
+                style: theme.textTheme.bodyLarge
+                    ?.copyWith(color: colors.accent),
               ),
               const SizedBox(height: 4),
               Text(
                 '${_formatDate(game.startTime)} • ${game.getFormattedDuration()}',
-                style: stTheme.textTheme.bodySmall,
+                style: theme.textTheme.bodySmall,
               ),
               if (game.isCompleted && game.winner != null) ...[
                 const SizedBox(height: 8),
@@ -362,13 +365,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.black38,
-                    border: Border.all(color: SteampunkTheme.verdigris),
+                    border: Border.all(color: colors.secondary),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     '${l10n.winner}: ${game.winner}',
-                    style: stTheme.textTheme.labelLarge?.copyWith(
-                        color: SteampunkTheme.verdigris, fontSize: 14),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                        color: colors.secondary, fontSize: 14),
                   ),
                 ),
               ] else ...[
@@ -378,21 +381,21 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.black38,
-                    border: Border.all(color: SteampunkTheme.amberGlow),
+                    border: Border.all(color: colors.accent),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     l10n.inProgress,
-                    style: stTheme.textTheme.labelLarge?.copyWith(
-                        color: SteampunkTheme.amberGlow, fontSize: 14),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                        color: colors.accent, fontSize: 14),
                   ),
                 ),
               ],
             ],
           ),
           trailing: game.isCompleted
-              ? const Icon(Icons.check_circle, color: SteampunkTheme.verdigris)
-              : const Icon(Icons.timelapse, color: SteampunkTheme.amberGlow),
+              ? Icon(Icons.check_circle, color: colors.secondary)
+              : Icon(Icons.timelapse, color: colors.accent),
         ),
       ),
     );

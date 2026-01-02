@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/player.dart';
 import '../theme/fortune_theme.dart';
 import 'themed_widgets.dart';
 import 'score_card.dart';
+import '../models/game_action.dart'; // Import for type
 import '../l10n/app_localizations.dart';
 
 class VictorySplash extends StatefulWidget {
   final Player winner;
   final Player loser;
   final int raceToScore;
-  final List<String> matchLog;
+  final List<GameAction> history;
   final Duration elapsedDuration;
   final VoidCallback onNewGame;
   final VoidCallback onExit;
@@ -20,7 +22,7 @@ class VictorySplash extends StatefulWidget {
     required this.winner,
     required this.loser,
     required this.raceToScore,
-    required this.matchLog,
+    required this.history,
     required this.elapsedDuration,
     required this.onNewGame,
     required this.onExit,
@@ -116,15 +118,18 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                   const SizedBox(height: 8),
                   
                   Text(
-                    AppLocalizations.of(context).victory,
-                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                    AppLocalizations.of(context).victory.toUpperCase(),
+                    style: GoogleFonts.orbitron(
                       color: colors.primaryBright,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 48,
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
+                      decoration: TextDecoration.none, // Fix double underline
                       shadows: [
                         Shadow(
-                          blurRadius: 10,
-                          color: colors.accent,
+                          blurRadius: 15,
+                          color: colors.primary.withValues(alpha: 0.8),
+                          offset: const Offset(0, 0),
                         ),
                       ],
                     ),
@@ -281,12 +286,12 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                           ),
                         ),
                         const SizedBox(height: 16),
-                        ScoreCard(
-                          player1: widget.winner,
-                          player2: widget.loser,
-                          matchLog: widget.matchLog,
-                          winnerName: widget.winner.name,
-                        ),
+                          ScoreCard(
+                            player1: widget.winner,
+                            player2: widget.loser,
+                            history: widget.history, // Pass structured history
+                            winnerName: widget.winner.name,
+                          ),
                       ],
                     ),
                   ),
@@ -440,63 +445,30 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
   }
 
   String _calculateHighestRun(Player player) {
-    // Parse match log to find highest consecutive run for this player
+    // Determine highest run using structured history.
+    int highest = 0;
     int currentRun = 0;
-    int highestRun = 0;
-    String lastPlayerName = '';
     
-    // Iterate through match log chronologically (matchLog[0]=newest, iterate backwards for chronological order)
-    for (int i = widget.matchLog.length - 1; i >= 0; i--) {
-      String logEntry = widget.matchLog[i];
-      
-      // Check if this entry is for the current player
-      if (logEntry.contains('${player.name}:')) {
-        // Parse points from various formats:
-        // - "Player: +14 pts" (normal scoring)
-        // - "Player: Double-Sack! +15" (white ball)
-        // - "Player: Re-rack (14.1 Continuous)" (ball 1 re-rack)
-        RegExp pointsRegex = RegExp(r'\+(\d+)');
-        Match? match = pointsRegex.firstMatch(logEntry);
-        
-        if (match != null) {
-          int points = int.parse(match.group(1)!);
-          
-          // If same player as last scoring action, add to current run
-          if (lastPlayerName == player.name) {
-            currentRun += points;
+    // History is Newest -> Oldest. We want chronological for run calculation.
+    for (int i = widget.history.length - 1; i >= 0; i--) {
+       final action = widget.history[i];
+       if (action.playerId == player.name) {
+          if (action.points > 0 && action.type != GameActionType.safety) {
+               currentRun += action.points;
           } else {
-            // New player started scoring, reset current run
-            currentRun = points;
-            lastPlayerName = player.name;
+               if (currentRun > highest) highest = currentRun;
+               currentRun = 0;
           }
           
-          // Update highest run if current exceeds it
-          if (currentRun > highestRun) {
-            highestRun = currentRun;
+          if (action.isTurnEnd) {
+             if (currentRun > highest) highest = currentRun;
+             currentRun = 0;
           }
-        } else if (logEntry.contains('Miss') || logEntry.contains('Safe')) {
-          // Entry exists but no points (safe, miss) - break the run
-          if (lastPlayerName == player.name) {
-            currentRun = 0;
-            lastPlayerName = '';
-          }
-        } else if (logEntry.contains('Foul')) {
-          // Foul - break the run
-          if (lastPlayerName == player.name) {
-            currentRun = 0;
-            lastPlayerName = '';
-          }
-        }
-        // Note: Re-rack and Double-Sack don't break the run - player continues
-      } else {
-        // Entry for other player - break the run if we were tracking this player
-        if (lastPlayerName == player.name) {
-          currentRun = 0;
-          lastPlayerName = '';
-        }
-      }
+       }
+       // Opponent actions don't directly break run unless it implies turn change, which is handled by isTurnEnd.
     }
     
-    return highestRun.toString();
+    if (currentRun > highest) highest = currentRun;
+    return highest.toString();
   }
 }

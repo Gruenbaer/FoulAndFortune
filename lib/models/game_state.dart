@@ -4,6 +4,7 @@ import 'foul_tracker.dart';
 import 'achievement_manager.dart';
 import '../data/messages.dart';
 import 'game_settings.dart';
+import 'game_action.dart';
 
 enum FoulMode { none, normal, severe }
 
@@ -62,6 +63,7 @@ class GameState extends ChangeNotifier {
   FoulMode foulMode = FoulMode.none;
   // Safe Mode Toggle
   bool isSafeMode = false;
+  bool _wasSafeModeBeforeFoul = false;
 
   // Break Sequence Flag (True at start, false after first valid shot)
   bool inBreakSequence = true;
@@ -73,7 +75,14 @@ class GameState extends ChangeNotifier {
   String breakFoulHintMessage = "Only Ball 15!";
 
   // Match History
-  List<String> matchLog = [];
+  // Match History
+  // List<String> matchLog = []; // DEPRECATED
+  List<GameAction> history = []; // NEW Structured History
+
+  // Getter for UI compatibility and legacy logging
+  // We construct the "log" on the fly for simple displays if needed, 
+  // or simple return the description from actions.
+  List<String> get matchLog => history.map((e) => e.description).toList();
 
   // Undo/Redo Stacks
   final List<GameSnapshot> _undoStack = [];
@@ -86,7 +95,10 @@ class GameState extends ChangeNotifier {
 
   // Robust check for Break Foul availability
   // Available if explicitly in sequence OR if game hasn't really started (log empty)
-  bool get canBreakFoul => inBreakSequence || matchLog.isEmpty;
+  // Robust check for Break Foul availability
+  // Available if explicitly in sequence OR if game hasn't really started (log empty)
+  // bool get canBreakFoul => inBreakSequence || matchLog.isEmpty;
+  bool get canBreakFoul => inBreakSequence || history.isEmpty;
   bool get canRedo => _redoStack.isNotEmpty;
 
   // Game Clock
@@ -182,14 +194,14 @@ class GameState extends ChangeNotifier {
     if (raceToScore != settings.raceToScore) {
       raceToScore = settings.raceToScore;
       somethingChanged = true;
-      _logAction('Race to Score changed to $raceToScore');
+      _logSystemMessage('Race to Score changed to $raceToScore');
     }
 
     // Update 3-Foul Rule
     if (foulTracker.threeFoulRuleEnabled != settings.threeFoulRuleEnabled) {
       foulTracker.threeFoulRuleEnabled = settings.threeFoulRuleEnabled;
       somethingChanged = true;
-      _logAction(
+      _logSystemMessage(
           '3-Foul Rule ${settings.threeFoulRuleEnabled ? "Enabled" : "Disabled"}');
     }
 
@@ -197,13 +209,13 @@ class GameState extends ChangeNotifier {
     if (players[0].name != settings.player1Name) {
       players[0] = players[0].copyWith(name: settings.player1Name);
       somethingChanged = true;
-      _logAction('Player 1 renamed to ${settings.player1Name}');
+      _logSystemMessage('Player 1 renamed to ${settings.player1Name}');
     }
 
     if (players[1].name != settings.player2Name) {
       players[1] = players[1].copyWith(name: settings.player2Name);
       somethingChanged = true;
-      _logAction('Player 2 renamed to ${settings.player2Name}');
+      _logSystemMessage('Player 2 renamed to ${settings.player2Name}');
     }
 
     // Update Handicap Multipliers
@@ -211,7 +223,7 @@ class GameState extends ChangeNotifier {
       players[0] = players[0]
           .copyWith(handicapMultiplier: settings.player1HandicapMultiplier);
       somethingChanged = true;
-      _logAction(
+      _logSystemMessage(
           'Player 1 Handicap changed to ${settings.player1HandicapMultiplier}x');
     }
 
@@ -219,7 +231,7 @@ class GameState extends ChangeNotifier {
       players[1] = players[1]
           .copyWith(handicapMultiplier: settings.player2HandicapMultiplier);
       somethingChanged = true;
-      _logAction(
+      _logSystemMessage(
           'Player 2 Handicap changed to ${settings.player2HandicapMultiplier}x');
     }
 
@@ -238,6 +250,13 @@ class GameState extends ChangeNotifier {
   // Toggle safe mode without switching players (per user request)
   void toggleSafeMode() {
     isSafeMode = !isSafeMode;
+    
+    if (isSafeMode) {
+      // If entering Safe Mode, disable Foul Mode
+      foulMode = FoulMode.none;
+      _wasSafeModeBeforeFoul = false; // Reset memory
+    }
+    
     notifyListeners();
   }
 
@@ -323,6 +342,21 @@ class GameState extends ChangeNotifier {
   }
 
   void setFoulMode(FoulMode mode) {
+    // Logic: Mutual Exclusion with Safe Mode
+    if (mode != FoulMode.none) {
+      // Activating Foul
+      if (isSafeMode) {
+        _wasSafeModeBeforeFoul = true;
+        isSafeMode = false;
+      }
+    } else {
+      // Deactivating Foul
+      if (_wasSafeModeBeforeFoul) {
+        isSafeMode = true;
+        _wasSafeModeBeforeFoul = false;
+      }
+    }
+    
     foulMode = mode;
     resetBreakFoulError();
     notifyListeners();
@@ -338,7 +372,12 @@ class GameState extends ChangeNotifier {
       // CONFIRM Standard Safe (No points, Switch Player)
       _pushState();
       currentPlayer.incrementSaves();
-      _logAction('${currentPlayer.name}: Safe (Standard)');
+      _logAction('${currentPlayer.name}: Safe (Standard)', 
+        type: GameActionType.safety, 
+        points: 0, 
+        isTurnEnd: true, 
+        ballsRemaining: activeBalls.length
+      );
 
       foulMode = FoulMode.none;
       isSafeMode = false; // Reset mode
@@ -392,20 +431,36 @@ class GameState extends ChangeNotifier {
             (points * currentPlayer.handicapMultiplier).round();
         currentPlayer.addScore(scoredPoints);
         currentPlayer.incrementSaves();
-        _logAction('${currentPlayer.name}: Defensive Pocket (+$scoredPoints)');
+        _logAction('${currentPlayer.name}: Defensive Pocket (+$scoredPoints)', 
+            type: GameActionType.defensivePot, 
+            points: scoredPoints,
+            isTurnEnd: true, 
+            ballsRemaining: newBallCount
+        );
 
         // Update rack to new count
         _updateRackCount(newBallCount);
       } else {
         // Did not reduce count? Maybe just tapped same number?
         // Treat as standard safe if 0?
-        _logAction('${currentPlayer.name}: Safe (No balls pocketed)');
+        _logAction('${currentPlayer.name}: Safe (No balls pocketed)',
+           type: GameActionType.safety,
+           points: 0,
+           isTurnEnd: true,
+           ballsRemaining: newBallCount
+        );
         currentPlayer.incrementSaves();
       }
 
       if (newBallCount == 1) {
         _updateRackCount(15);
-        _logAction('${currentPlayer.name}: Re-rack (Auto/Safe)');
+        _logAction('${currentPlayer.name}: Re-rack (Auto/Safe)', 
+           type: GameActionType.reRack,
+           points: 0,
+           isTurnEnd: false, // Auto re-rack usually allows continuation if not foul? But here it is context of safety?
+           // If it was safe, turn ended. But re-rack happens.
+           ballsRemaining: 15
+        );
       }
 
       _checkWinCondition();
@@ -417,42 +472,54 @@ class GameState extends ChangeNotifier {
 
     // STANDARD PLAY
     String foulText = '';
+    int netPoints = 0; // Track precise net score change for history
+    int penalty = 0;
 
     if (currentFoulMode == FoulMode.normal) {
-      final penalty =
-          foulTracker.applyNormalFoul(currentPlayer); // Use current Player
+      penalty = foulTracker.applyNormalFoul(currentPlayer); // Use current Player
+      
       // Calculate scored points once if needed
-      int? scoredPoints;
+      int scoredPoints = 0;
       if (points > 0) {
         scoredPoints = (points * currentPlayer.handicapMultiplier).round();
         currentPlayer.addScore(scoredPoints);
       }
       currentPlayer.addScore(penalty);
+      
+      // Net Points for Action = Scored Points + Penalty
+      netPoints = scoredPoints + penalty;
+      
       foulText = penalty == -15 ? ' (3-Foul!)' : ' (Foul)';
 
       // Queue Event for Animation
-      if (penalty == -15) {
-        // 3-Foul! Queue the big one.
+      // Only show animations when there are also scored points
+      // If ONLY penalty, Last Points box already shows it
+      if (penalty == -15 && scoredPoints > 0) {
+        // 3-Foul with points: Show the penalty
         eventQueue.add(FoulEvent(currentPlayer, -15, "Triple Foul!"));
         showThreeFoulPopup = true; // State persistence only
-        // Dialog Removed per user request (Animation is sufficient)
-      } else if (scoredPoints != null) {
-        // Show breakdown: positive points and foul penalty
-        eventQueue.add(FoulEvent(currentPlayer, scoredPoints + penalty, "Foul!",
-            positivePoints: scoredPoints, penalty: penalty));
-      } else {
-        // Just penalty, no positive points
+      } else if (penalty == -15) {
+        // 3-Foul without points: No animation, but set popup flag
+        showThreeFoulPopup = true;
+      } else if (scoredPoints > 0) {
+        // Points awarded WITH regular foul: Show just the penalty animation (-1)
         eventQueue.add(FoulEvent(currentPlayer, penalty, "Foul!"));
       }
+      // If ONLY penalty (no points scored), no animation (Last Points box shows it)
     } else if (currentFoulMode == FoulMode.severe) {
-      final penalty =
-          foulTracker.applySevereFoul(currentPlayer); // Use current Player
+      penalty = foulTracker.applySevereFoul(currentPlayer); // Use current Player
       currentPlayer.addScore(penalty);
+      netPoints = penalty;
+      
       // BREAK FOUL DIALOG REMOVED - User doesn't want any info/warnings
       foulText = ' (Break Foul)';
 
-      eventQueue
-          .add(FoulEvent(currentPlayer, penalty, "Break Foul!")); // Usually -2
+      // Only show penalty animation if there are also positive points
+      // If ONLY penalty (no points), Last Points box shows it already.
+      if (points > 0) {
+        eventQueue.add(FoulEvent(currentPlayer, penalty, "Break Foul!"));
+      }
+      // If no positive points, no animation (user sees -2 in Last Points box)
 
       // Break Foul Decision: Who breaks next?
       // Use local variable capture for safe closure
@@ -494,6 +561,7 @@ class GameState extends ChangeNotifier {
           final scoredPoints =
               (points * currentPlayer.handicapMultiplier).round();
           currentPlayer.addScore(scoredPoints);
+          netPoints = scoredPoints;
           // Removed FlyingPointsOverlay event per user request
         } else {
           // Negative points? Logic usually prevents this unless input error.
@@ -501,17 +569,23 @@ class GameState extends ChangeNotifier {
           // If NEW count > OLD count? (Balls added?) -> points negative.
           // Usually we don't multiply negative.
           currentPlayer.addScore(points);
+          netPoints = points;
         }
       }
     }
 
-    // RE-RACK DETECTION (Check First)
+    // RE-RACK DETECTION using Ball 1
     bool isReRack = false;
     if (newBallCount == 1) {
       isReRack = true;
-      // Queue re-rack animation event
+      // User Requirement: "Tapping the one should leave the 1ball active."
+      // So activeBalls should be {1}.
+      // But _updateRackCount(1) sets activeBalls to {1} which is correct.
+      // Wait, _updateRackCount generation logic:
+      // activeBalls = Set.from(List.generate(count, (i) => i + 1));
+      // if count is 1, it generates [1]. Correct.
+      
       eventQueue.add(ReRackEvent("Re-rack!"));
-      // Note: We do NOT reset rack here; UI handles it after splash
     }
 
     // Prepare Log Suffix
@@ -524,16 +598,24 @@ class GameState extends ChangeNotifier {
       if (currentFoulMode == FoulMode.none && points > 0) {
         displayPoints = (points * currentPlayer.handicapMultiplier).round();
       }
-
+      
       String sign = displayPoints > 0 ? "+" : "";
       _logAction(
-          '${currentPlayer.name}: $sign$displayPoints pts$foulText (Left: $newBallCount)$reRackSuffix');
+          '${currentPlayer.name}: $sign$displayPoints pts$foulText (Left: $newBallCount)$reRackSuffix',
+          type: foulText.contains('Foul') ? GameActionType.foul : GameActionType.pot,
+          points: netPoints, // USE NET POINTS
+          isTurnEnd: false, // Will be calculated after
+          ballsRemaining: newBallCount
+      );
     } else if (isReRack) {
       // Special case: 0 points (Safe/Miss) but landing on Re-rack state (1 ball)
-      _logAction('${currentPlayer.name}: Re-rack');
+      _logAction('${currentPlayer.name}: Re-rack', 
+        type: GameActionType.reRack,
+        points: 0,
+        isTurnEnd: false, 
+        ballsRemaining: 15
+      );
     }
-
-    // Update Rack State
     _updateRackCount(newBallCount);
 
     bool turnEnded = false;
@@ -556,7 +638,13 @@ class GameState extends ChangeNotifier {
       } else if (points <= 0) {
         // Miss/Safe (0 points or negative)
         turnEnded = true;
-        _logAction('${currentPlayer.name}: Miss/Safe (0 pts)');
+        turnEnded = true;
+        _logAction('${currentPlayer.name}: Miss/Safe (0 pts)',
+            type: GameActionType.safety,
+            points: 0,
+            isTurnEnd: true,
+            ballsRemaining: newBallCount
+        );
         currentPlayer.incrementSaves();
         // Removed 0-point event per user request
       }
@@ -611,61 +699,135 @@ class GameState extends ChangeNotifier {
     }
 
     final currentFoulMode = foulMode;
-    foulMode = FoulMode.none;
-    resetBreakFoulError();
+    // Note: We do NOT reset foulMode immediately here if we want to process it.
+    // actually we should process it then reset.
+    // foulMode = FoulMode.none; // Moving reset down
 
-    // Award points based on actual balls remaining on table
-    int ballsRemaining = activeBalls.length;
-    int points = ballsRemaining;
+    int pointsToAward = 0;
+    // int ballsOnTable = activeBalls.length; // Capture for log/logic
+    // Actually, user wants "Grey out balls" -> clear active set immediately.
+    int ballsOnTable = activeBalls.length;
+
     String foulText = '';
+    GameActionType actionType = GameActionType.pot;
 
     if (currentFoulMode == FoulMode.normal) {
-      final penalty = foulTracker.applyNormalFoul(currentPlayer);
-      points += penalty;
+      final penalty = foulTracker.applyNormalFoul(currentPlayer); // Handle foul logic
+      pointsToAward = penalty; // Only penalty, no positive points for balls!
       foulText = ' (Foul)';
+      actionType = GameActionType.foul;
       if (penalty == -15) showThreeFoulPopup = true;
     } else if (currentFoulMode == FoulMode.severe) {
-      points += -2;
+      final penalty = foulTracker.applySevereFoul(currentPlayer);
+      pointsToAward = penalty;
       foulText = ' (Break Foul)';
+      actionType = GameActionType.foul;
     } else {
-      currentPlayer.consecutiveFouls = 0;
+      // STANDARD: Clearing the table
+      pointsToAward = (ballsOnTable * currentPlayer.handicapMultiplier).round();
     }
-
-    // Apply multiplier to the POSITIVE portion (ballsRemaining).
-    // Penalties were added to points above.
-    // Extract penalty, multiply the positive ball count, then add penalty back
-    int penalty = points - ballsRemaining;
-    int multipliedPoints =
-        (ballsRemaining * currentPlayer.handicapMultiplier).round() + penalty;
-
-    currentPlayer.addScore(multipliedPoints);
+    
+    // Apply Score
+    currentPlayer.addScore(pointsToAward);
+    
+    // 1. Log Score/Foul Action
     _logAction(
-        '${currentPlayer.name}: Double-sack! +$multipliedPoints$foulText');
+        '${currentPlayer.name}: Double-sack${pointsToAward > 0 ? " +$pointsToAward" : " $pointsToAward"} pts$foulText',
+        type: actionType,
+        points: pointsToAward,
+        isTurnEnd: currentFoulMode != FoulMode.none, // Foul ends turn
+        ballsRemaining: 0 
+    );
 
-    // Check win BEFORE potentially switching player
+    // 2. Log Explicit Re-Rack Action (for Notation '.')
+    // This ensures the ScoreCard puts a dot after the run.
+    _logAction(
+        '${currentPlayer.name}: Re-rack (Auto)',
+        type: GameActionType.reRack,
+        points: 0, 
+        isTurnEnd: false, // Player continues (unless foul above ended it, but this log is separate)
+        ballsRemaining: 0
+    );
+
+    // Trigger Splash
+    eventQueue.add(ReRackEvent("Re-rack!")); // Visual Splash
+
+    // 3. Visuals & Reset
+    activeBalls.clear();
+    foulMode = FoulMode.none;
+    resetBreakFoulError();
     _checkWinCondition();
-
-    // Double Sack: Player continues turn.
-    // unless foul? Usually double sack is re-rack same player.
-    // If foul, it's foul.
-    if (currentFoulMode != FoulMode.none) {
-      _switchPlayer();
-    }
-
+    
     notifyListeners();
+
+    // 4. Delayed Re-Rack
+    Future.delayed(const Duration(milliseconds: 1200), () {
+        if (activeBalls.isEmpty && !gameOver) { 
+           _updateRackCount(15);
+           if (currentFoulMode != FoulMode.none) {
+             _switchPlayer();
+           }
+           notifyListeners();
+        }
+    });
   }
 
   // Helper to log actions with inning tracking
-  void _logAction(String action) {
-    // Get current player's inning number
-    int currentInning = currentPlayer.currentInning;
+  // Now creates a proper GameAction object
+  void _logAction(String description, {
+    required GameActionType type,
+    required int points,
+    required bool isTurnEnd,
+    required int ballsRemaining,
+  }) {
+    final action = GameAction(
+      type: type,
+      points: points,
+      playerId: currentPlayer.name,
+      inning: currentPlayer.currentInning,
+      timestamp: DateTime.now(),
+      description: 'I${currentPlayer.currentInning} | $description', // Keep legacy format for description
+      ballsRemaining: ballsRemaining,
+      isTurnEnd: isTurnEnd,
+    );
 
-    // Prefix with inning marker: "I{inning} | {action}"
-    String logEntry = 'I$currentInning | $action';
-
-    lastAction = logEntry;
-    matchLog.insert(0, logEntry); // Newest first
+    lastAction = action.description;
+    
+    // Insert at TOP (index 0) to match UI expectation (Newest First) if that is what UI does?
+    // matchLog.insert(0, ...) usually implies newest first.
+    // Let's keep newest first for consistency with existing UI.
+    history.insert(0, action);
+    
     notifyListeners();
+  }
+
+  // Legacy helper helper for simple string logs (system messages like "Player 1 Wins")
+  // We treat these as "GameActionType.pot" with 0 points for now, or maybe they shouldn't be in history??
+  // "Player 1 renamed" -> Probably shouldn't affect score calculation.
+  // We can make them "GameActionType.reRack" or just a generic type if we add one.
+  // For now, let's use 0 points and 'pot' type but mark effectively as info?
+  // Actually, we usually only log SCORING actions in the history for calculation.
+  // System messages just clutter the log.
+  // Let's create a separate "System Log" if needed?
+  // For now, I will use a special overload or just keep string Log for debug?
+  // The ScoreCard relies on history. It will crash on "Player 1 Wins".
+  
+  // Update: _logAction is mostly used for SCORING.
+  // The "Settings Updated" logs... maybe we filter those out of the ScoreCard?
+  // Let's allow them but handle gracefully.
+  // Better: Add GameActionType.info
+  
+  void _logSystemMessage(String message) {
+     // Optional: Don't add to history if it's purely meta-data?
+     // Or add with 0 points.
+     // For simplicity of refactor, let's add them so UI behaves same.
+     _logAction(
+        message, 
+        type: GameActionType.pot, // dummy
+        points: 0, 
+        isTurnEnd: false, 
+        ballsRemaining: activeBalls.length
+     );
   }
 
   void _switchPlayer() {
@@ -710,13 +872,15 @@ class GameState extends ChangeNotifier {
     // Activate new
     players[currentPlayerIndex].isActive = true;
 
-    _logAction('Starting Player Swapped to ${currentPlayer.name}');
+    _logSystemMessage('Starting Player Swapped to ${currentPlayer.name}');
     // Clear log because we just added an action but game hasn't "started" for scoring purposes?
     // Actually, swapping starting player shouldn't be in match log usually?
     // Or maybe it is fine. But "gameStarted" flag triggers on first shot.
     // If we log it, matchLog is not empty, so next swap fails.
     // Let's NOT log it, or clear log.
-    matchLog.clear();
+    // Let's NOT log it, or clear log.
+    history.clear(); // Reset history if swapping starting player per logic
+    // matchLog.clear();
     notifyListeners();
   }
 
@@ -726,7 +890,7 @@ class GameState extends ChangeNotifier {
       if (player.score >= raceToScore && !gameOver) {
         gameOver = true;
         winner = player;
-        _logAction('${player.name} WINS! 🎉');
+        _logSystemMessage('${player.name} WINS! 🎉');
         // TODO: Trigger win achievements in future
         notifyListeners();
         return; // Exit after first winner found
@@ -753,7 +917,9 @@ class GameState extends ChangeNotifier {
     showThreeFoulPopup = false;
     showTwoFoulWarning = false;
     foulMode = FoulMode.none;
-    matchLog.clear();
+    foulMode = FoulMode.none;
+    history.clear(); // Reset history
+    // matchLog.clear(); // Deprecated
     // We do NOT clear undo stack, so reset can be undone!
     resetBreakFoulError();
     inBreakSequence = true; // Reset Break Sequence Logic
@@ -793,7 +959,8 @@ class GameSnapshot implements UndoState {
   final bool showThreeFoulPopup;
   final FoulMode foulMode;
   // final FoulTrackerSnapshot foulTrackerSnapshot; // REMOVED
-  final List<String> matchLog;
+  // final FoulTrackerSnapshot foulTrackerSnapshot; // REMOVED
+  final List<GameAction> history;
   final String breakFoulHintMessage;
   final bool inBreakSequence; // Persistence
   final int elapsedDurationInSeconds; // Persistence
@@ -809,7 +976,8 @@ class GameSnapshot implements UndoState {
         showThreeFoulPopup = state.showThreeFoulPopup,
         foulMode = state.foulMode,
         // foulTrackerSnapshot = FoulTrackerSnapshot(state.foulTracker.consecutiveNormalFouls), // REMOVED
-        matchLog = List.from(state.matchLog),
+        // matchLog = List.from(state.matchLog), // DEPRECATED
+        history = List<GameAction>.from(state.history.map((e) => e)), // Deep copy not strictly needed if immutable, but list copy is
         breakFoulHintMessage = state.breakFoulHintMessage,
         inBreakSequence = state.inBreakSequence,
         elapsedDurationInSeconds = state.elapsedDuration.inSeconds;
@@ -829,8 +997,11 @@ class GameSnapshot implements UndoState {
             ? FoulMode.values[json['foulMode'] as int]
             : FoulMode.none,
         // foulTrackerSnapshot = FoulTrackerSnapshot.fromJson(json['foulTrackerSnapshot']), // REMOVED
-        matchLog = List<String>.from(json['matchLog'] as List),
-        breakFoulHintMessage = json['breakFoulHintMessage'] as String,
+        // matchLog = List<String>.from(json['matchLog'] as List),
+        // Handle migration: If json has 'matchLog' (string list), we might want to convert or ignore?
+        // If it has 'history' (list of GameAction), use it.
+        history = (json['history'] as List?)?.map((e) => GameAction.fromJson(e)).toList() ?? [],
+        breakFoulHintMessage = json['breakFoulHintMessage'] as String? ?? "Only Ball 15!",
         inBreakSequence = json['inBreakSequence'] as bool? ?? true,
         elapsedDurationInSeconds =
             json['elapsedDurationInSeconds'] as int? ?? 0;
@@ -846,7 +1017,8 @@ class GameSnapshot implements UndoState {
         'showThreeFoulPopup': showThreeFoulPopup,
         'foulMode': foulMode.index,
         // 'foulTrackerSnapshot': foulTrackerSnapshot.toJson(), // REMOVED
-        'matchLog': matchLog,
+        // 'matchLog': matchLog, // DEPRECATED
+        'history': history.map((e) => e.toJson()).toList(),
         'breakFoulHintMessage': breakFoulHintMessage,
         'inBreakSequence': inBreakSequence,
         'elapsedDurationInSeconds': elapsedDurationInSeconds,
@@ -869,7 +1041,8 @@ class GameSnapshot implements UndoState {
     state.showThreeFoulPopup = showThreeFoulPopup;
     state.inBreakSequence = inBreakSequence;
     state.foulMode = foulMode;
-    state.matchLog = List.from(matchLog);
+    // state.matchLog = List.from(matchLog);
+    state.history = List.from(history);
     state.breakFoulHintMessage = breakFoulHintMessage;
 
     // Restore Timer

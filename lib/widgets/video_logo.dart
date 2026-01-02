@@ -57,11 +57,12 @@ class _VideoLogoState extends State<VideoLogo> {
             boxShadow: [
                BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
             ],
-            border: Border.all(color: fortuneTheme.accent.withValues(alpha: 0.5), width: 2), 
+            // Removed border for cleaner look, or keep if requested
+             // border: Border.all(color: fortuneTheme.accent.withValues(alpha: 0.5), width: 2), 
           ),
           child: ClipOval(
             child: Image.asset(
-              'assets/images/app_logo.png',
+              'assets/images/app_logo.png', // Ensure this asset is updated if "old logo" refers to this
               fit: BoxFit.cover,
             ),
           ),
@@ -86,7 +87,7 @@ class _VideoLogoState extends State<VideoLogo> {
         ),
         child: ClipOval(
           child: FittedBox(
-            fit: BoxFit.cover, 
+            fit: BoxFit.cover, // Reverted to cover to fill circle and hide white background
             child: SizedBox(
               width: _controller.value.size.width,
               height: _controller.value.size.height,

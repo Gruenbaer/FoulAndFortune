@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/player_service.dart';
 import '../l10n/app_localizations.dart';
-import '../theme/steampunk_theme.dart';
+import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -53,7 +53,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = SteampunkTheme.themeData;
+    final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
     
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -62,11 +63,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: SteampunkTheme.brassPrimary),
+        iconTheme: IconThemeData(color: colors.primary),
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.sort, color: SteampunkTheme.brassPrimary),
-            color: SteampunkTheme.mahoganyLight,
+            icon: Icon(Icons.sort, color: colors.primary),
+            color: colors.backgroundCard,
             onSelected: (value) {
               setState(() {
                 _sortBy = value;
@@ -85,13 +86,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       body: ThemedBackground(
         child: SafeArea(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: SteampunkTheme.amberGlow))
+              ? Center(child: CircularProgressIndicator(color: colors.accent))
               : _players.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.bar_chart, size: 64, color: SteampunkTheme.brassDark),
+                          Icon(Icons.bar_chart, size: 64, color: colors.primaryDark),
                           const SizedBox(height: 16),
                           Text(
                             l10n.noStatistics,
@@ -106,14 +107,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                     )
                   : RefreshIndicator(
-                      color: SteampunkTheme.amberGlow,
-                      backgroundColor: SteampunkTheme.mahoganyLight,
+                      color: colors.accent,
+                      backgroundColor: colors.backgroundCard,
                       onRefresh: _loadPlayers,
                       child: ListView(
                         padding: const EdgeInsets.all(16),
                         children: [
                           // Overall Stats Card
-                          _buildOverallStatsCard(l10n),
+                          _buildOverallStatsCard(l10n, colors, theme),
                           
                           const SizedBox(height: 24),
                           
@@ -121,16 +122,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                             decoration: BoxDecoration(
-                              border: const Border(bottom: BorderSide(color: SteampunkTheme.brassPrimary, width: 2)),
+                              border: Border(bottom: BorderSide(color: colors.primary, width: 2)),
                               gradient: LinearGradient(
-                                colors: [SteampunkTheme.brassDark.withValues(alpha: 0.5), Colors.transparent],
+                                colors: [colors.primaryDark.withValues(alpha: 0.5), Colors.transparent],
                               ),
                             ),
                             child: Text(
                               l10n.playerRankings.toUpperCase(),
                               style: theme.textTheme.labelLarge?.copyWith(
                                 letterSpacing: 1.5,
-                                color: SteampunkTheme.brassBright,
+                                color: colors.primaryBright,
                               ),
                             ),
                           ),
@@ -149,7 +150,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildOverallStatsCard(AppLocalizations l10n) {
+  Widget _buildOverallStatsCard(AppLocalizations l10n, FortuneColors colors, ThemeData theme) {
     final totalGames = _players.fold<int>(0, (sum, p) => sum + p.gamesPlayed);
     final totalPoints = _players.fold<int>(0, (sum, p) => sum + p.totalPoints);
     final totalFouls = _players.fold<int>(0, (sum, p) => sum + p.totalFouls);
@@ -157,8 +158,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: SteampunkTheme.mahoganyLight,
-        border: Border.all(color: SteampunkTheme.brassDark, width: 2),
+        color: colors.backgroundCard,
+        border: Border.all(color: colors.primaryDark, width: 2),
         borderRadius: BorderRadius.circular(4),
         boxShadow: const [
           BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(2, 2)),
@@ -170,11 +171,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.insights, color: SteampunkTheme.brassPrimary),
+              Icon(Icons.insights, color: colors.primary),
               const SizedBox(width: 8),
               Text(
                 l10n.overallStatistics,
-                style: SteampunkTheme.themeData.textTheme.displaySmall?.copyWith(fontSize: 18),
+                style: theme.textTheme.displaySmall?.copyWith(fontSize: 18),
               ),
             ],
           ),
@@ -194,14 +195,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildStatColumn(String label, String value, IconData icon) {
-    final theme = SteampunkTheme.themeData;
+    final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
     return Column(
       children: [
-        Icon(icon, color: SteampunkTheme.brassBright, size: 24),
+        Icon(icon, color: colors.primaryBright, size: 24),
         const SizedBox(height: 4),
         Text(
           value,
-          style: theme.textTheme.displaySmall?.copyWith(fontSize: 24, color: SteampunkTheme.amberGlow),
+          style: theme.textTheme.displaySmall?.copyWith(fontSize: 24, color: colors.accent),
         ),
         Text(
           label,
@@ -212,18 +214,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildPlayerCard(Player player, int rank) {
-    final theme = SteampunkTheme.themeData;
+    final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
     return Container( // Replaced Card with Container for custom border
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: Colors.black45,
-        border: Border.all(color: SteampunkTheme.brassDark, width: 1),
+        border: Border.all(color: colors.primaryDark, width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: ExpansionTile(
-        iconColor: SteampunkTheme.amberGlow,
+        iconColor: colors.accent,
         leading: CircleAvatar(
-          backgroundColor: rank <= 3 ? SteampunkTheme.amberGlow : SteampunkTheme.brassDark,
+          backgroundColor: rank <= 3 ? colors.accent : colors.primaryDark,
           foregroundColor: Colors.black,
           child: Text(
             '#$rank',

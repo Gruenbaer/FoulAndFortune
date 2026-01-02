@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/fortune_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ReRackOverlay extends StatefulWidget {
   final String type; // e.g. "14.1 Re-Rack"
@@ -80,13 +81,16 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
                         // Icon removed per user request
                         const SizedBox(height: 12),
                         Text(
-                          widget.type,
+                          widget.type.toUpperCase(),
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            fontSize: 32,
+                          style: GoogleFonts.orbitron(
+                            fontSize: 48, // Larger
+                            fontWeight: FontWeight.w900,
+                            fontStyle: FontStyle.italic,
+                            decoration: TextDecoration.none, // Fix double underline
                             color: colors.primaryBright,
                             shadows: [
-                              Shadow(blurRadius: 10, color: colors.accent, offset: const Offset(0, 0)),
+                              Shadow(blurRadius: 15, color: colors.primary.withValues(alpha: 0.8), offset: const Offset(0, 0)),
                             ],
                           ),
                         ),

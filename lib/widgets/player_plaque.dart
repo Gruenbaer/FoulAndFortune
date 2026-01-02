@@ -144,6 +144,49 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
     _safetyTimer?.cancel();
   }
 
+  // Helper method to build stat boxes
+  Widget _buildStatBox({
+    required String label,
+    required String value,
+    required Color valueColor,
+    required Color labelColor,
+  }) {
+    final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.black38,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: colors.primaryDark.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              textStyle: theme.textTheme.bodySmall,
+              color: labelColor,
+              fontSize: 9,
+              letterSpacing: 0.5,
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              textStyle: theme.textTheme.bodySmall,
+              color: valueColor,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -284,13 +327,11 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                   
                   const SizedBox(height: 4),
                   
-                  // Stats Row: Last Points | HR
+                  // Stats Row: Last | Average | HR
                   Row(
-                    mainAxisAlignment: widget.isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Last Points (Left) - Always shown, animated via listener
-                      // Last Points / Run Indicator
-                      // Shows Cumulative Run
+                      // Last Points/Run (Left)
                       Builder(
                         builder: (context) {
                           // Logic: Active -> currentRun, Inactive -> lastRun
@@ -306,62 +347,30 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
 
                           return Transform.scale(
                             scale: _lastPointsPulse.value,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.black38,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: valColor.withValues(alpha: 0.5),
-                                ),
-                              ),
-                              child: Text(
-                                runText,
-                                style: GoogleFonts.nunito(
-                                  textStyle: theme.textTheme.bodySmall,
-                                  color: valColor,
-                                  fontSize: 16, 
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
+                            child: _buildStatBox(
+                              label: 'Last',
+                              value: runText,
+                              valueColor: valColor,
+                              labelColor: colors.textMain.withValues(alpha: 0.6),
                             ),
                           );
                         }
                       ),
-                      const SizedBox(width: 8),
-                      const Spacer(), // Push HR to right
+                      
+                      // Average (Center)
+                      _buildStatBox(
+                        label: '�',
+                        value: (widget.player.score / (widget.player.currentInning > 0 ? widget.player.currentInning : 1)).toStringAsFixed(1),
+                        valueColor: colors.primary,
+                        labelColor: colors.textMain.withValues(alpha: 0.6),
+                      ),
 
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.black38,
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: colors.primaryDark.withValues(alpha: 0.5)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'HR ',
-                              style: GoogleFonts.nunito(
-                                textStyle: theme.textTheme.bodySmall,
-                                color: colors.textMain.withValues(alpha: 0.6),
-                                fontSize: 10, // Increased from 9
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            Text(
-                              '${widget.player.highestRun}',
-                              style: GoogleFonts.nunito(
-                                textStyle: theme.textTheme.bodySmall,
-                                color: colors.primary,
-                                fontSize: 13, // Increased from 11
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                      // HR (Right)
+                      _buildStatBox(
+                        label: 'HR',
+                        value: '${widget.player.highestRun}',
+                        valueColor: colors.primary,
+                        labelColor: colors.textMain.withValues(alpha: 0.6),
                       ),
                     ],
                   ),

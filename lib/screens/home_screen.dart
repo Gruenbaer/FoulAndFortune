@@ -13,7 +13,8 @@ import '../screens/achievements_gallery_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/game_history_screen.dart';
 import '../widgets/themed_widgets.dart';
-import '../theme/steampunk_theme.dart';
+import '../theme/fortune_theme.dart';
+
 import '../services/game_history_service.dart';
 import '../widgets/video_logo.dart';
 
@@ -111,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final colors = FortuneColors.of(context);
 
     return Scaffold(
       // Background handled by specialized widget
@@ -241,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       'v3.3.0 - Steampunk Core',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: SteampunkTheme.steamWhite.withValues(alpha: 0.3),
+                        color: colors.textMain.withValues(alpha: 0.3),
                       ),
                     ),
                   ],

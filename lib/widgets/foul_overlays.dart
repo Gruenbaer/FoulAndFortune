@@ -8,11 +8,13 @@ import '../models/game_settings.dart';
 class FoulMessageOverlay extends StatefulWidget {
   final String message; // "Foul!", "Break Foul!", "Triple Foul!"
   final VoidCallback onFinish;
+  final Color? textColor;
 
   const FoulMessageOverlay({
     super.key,
     required this.message,
     required this.onFinish,
+    this.textColor,
   });
 
   @override
@@ -69,14 +71,17 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
                   child: Container(
                     constraints: const BoxConstraints(maxWidth: 300),
                     child: Text(
-                      widget.message.replaceAll('Triple Foul', 'Triple\nFoul'),
+                      widget.message.replaceAll('Triple Foul', 'Triple\nFoul').toUpperCase(),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.nunito(
+                      style: GoogleFonts.orbitron(
                         fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w900,
+                        fontStyle: FontStyle.italic,
+                        decoration: TextDecoration.none, // Fix double underline
+                        color: widget.textColor ?? const Color(0xFF00F0FF), // Cyan default
                         shadows: [
-                          const Shadow(blurRadius: 10, color: Colors.black, offset: Offset(2, 2)),
+                          const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
+                          Shadow(blurRadius: 15, color: (widget.textColor ?? const Color(0xFF00F0FF)).withValues(alpha: 0.6), offset: const Offset(0, 0)), // Cyan Glow
                         ],
                       ),
                     ),
@@ -200,15 +205,19 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
                             // 2. If penalty missing but points negative, show points
                             : (widget.points < 0 ? '${widget.points}' 
                                 // 3. If points positive (Pot+Foul) and penalty lost, avoid "+X". Show "Foul".
-                                : 'Foul'),
+                                : 'FOUL'),
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
+                        style: GoogleFonts.orbitron(
                           fontSize: singleFontSize,
                           fontWeight: FontWeight.w900,
-                          // Always Red for Foul Overlay (since we removed Flying Points for normal play)
-                          color: Colors.redAccent,
+                          fontStyle: FontStyle.italic,
+                          decoration: TextDecoration.none, // Fix double underline
+                          // Red for penalty points, but keep styling
+                          color: Colors.redAccent, 
                           shadows: [
-                            const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
+                            const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(2, 2)),
+                            Shadow(blurRadius: 30, color: Colors.redAccent.withValues(alpha: 0.8), offset: const Offset(0, 0)), // Stronger Red Glow
+                            Shadow(blurRadius: 50, color: Colors.red.withValues(alpha: 0.4), offset: const Offset(0, 0)), // Outer Haze
                           ],
                         ),
                       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game_state.dart';
+import '../models/game_action.dart';
 import '../models/game_settings.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/score_card.dart';
@@ -19,45 +20,41 @@ class DetailsScreen extends StatelessWidget {
   }
 
   String _calculateHighestRun(Player player) {
-    // This logic duplicates logic in VictorySplash. Ideally should be in GameState or Player logic.
-    // For now, simple implementation or we can rely on parsing if complex.
-    // But wait, the user asked for High Run.
-    // Let's implement a simple parser for HR here? Or move logic to GameState?
-    // Moving logic to GameState is safer to avoid duplication.
-    // But for now, let's just parse it simply as we did in VictorySplash.
-    
-    // Copy-paste logic from VictorySplash (condensed for brevity)
-    // Actually, let's just use what we have. If it's too complex, maybe just skip or use a simple heuristic.
-    // User asked for "High Run". 
-    // Let's iterate match log quickly.
-    
+    // Determine highest run using structured history.
     int highest = 0;
     int currentRun = 0;
-    String lastPlayer = '';
     
-    for (var entry in gameState.matchLog) {
-      if (entry.contains(player.name)) {
-        if (!entry.contains(lastPlayer)) {
-          currentRun = 0;
-          lastPlayer = player.name;
-        }
-        
-        final regex = RegExp(r'\+(\d+)');
-        final match = regex.firstMatch(entry);
-        if (match != null) {
-          int pts = int.parse(match.group(1)!);
-          currentRun += pts;
-          if (currentRun > highest) highest = currentRun;
-        } else if (entry.contains('Miss') || entry.contains('Safe') || entry.contains('Foul')) {
-           currentRun = 0;
-        }
-      } else {
-        if (lastPlayer == player.name) {
-          currentRun = 0;
-          lastPlayer = '';
-        }
-      }
+    // History is Newest -> Oldest. We want chronological for run calculation.
+    // Or iterate backwards.
+    for (int i = gameState.history.length - 1; i >= 0; i--) {
+       final action = gameState.history[i];
+       if (action.playerId == player.name) {
+          // If Pot or Defensive Pot, add points
+          // BUT: run breaks on missing shot or safety or foul.
+          // In 14.1, a run is continuous potting.
+          // If 'isTurnEnd' is true?
+          // If turn ends, run ends.
+          // Also, if I miss (Safe), run is ended.
+          if (action.points > 0 && action.type != GameActionType.safety) {
+               currentRun += action.points;
+          } else {
+               // Negative points (Foul) or 0 points (Safety/Miss) break the run?
+               // Yes.
+               if (currentRun > highest) highest = currentRun;
+               currentRun = 0;
+          }
+          
+          if (action.isTurnEnd) {
+             if (currentRun > highest) highest = currentRun;
+             currentRun = 0;
+          }
+       } else {
+          // Opponent action. Should not affect my run data except implying my turn ended.
+          // We handle turn end in my actions.
+       }
     }
+    
+    if (currentRun > highest) highest = currentRun;
     return highest.toString();
   }
 
@@ -283,7 +280,7 @@ class DetailsScreen extends StatelessWidget {
             ScoreCard(
               player1: gameState.players[0],
               player2: gameState.players[1],
-              matchLog: gameState.matchLog,
+              history: gameState.history,
               winnerName: leaderName,
             ),
             
