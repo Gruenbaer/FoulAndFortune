@@ -4,6 +4,7 @@ import 'foul_tracker.dart';
 import 'achievement_manager.dart';
 import '../data/messages.dart';
 import 'game_settings.dart';
+import '../services/achievement_checker.dart';
 
 enum FoulMode { none, normal, severe }
 enum FoulType { normal, breakFoul, threeFouls }
@@ -667,6 +668,11 @@ class GameState extends ChangeNotifier {
       notation: notation,
       runningTotal: player.score,
     ));
+    
+    // Check for achievements after inning
+    if (achievementManager != null) {
+      AchievementChecker.checkAfterInning(player, achievementManager!);
+    }
   }
   
   // Generate score card notation for an inning
@@ -776,8 +782,14 @@ class GameState extends ChangeNotifier {
       if (player.score >= raceToScore && !gameOver) {
         gameOver = true;
         winner = player;
+        _stopTicker();
         _logAction('${player.name} WINS! 🎉');
-        // TODO: Trigger win achievements in future
+        
+        // Check win-related achievements
+        if (achievementManager != null) {
+          AchievementChecker.checkAfterWin(player, this, achievementManager!);
+        }
+        
         notifyListeners();
         return; // Exit after first winner found
       }
