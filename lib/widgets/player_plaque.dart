@@ -4,7 +4,6 @@ import 'package:provider/provider.dart'; // Added for Provider
 import 'package:foulandfortune/models/game_state.dart'; // Added for GameState
 import 'package:foulandfortune/models/player.dart';
 import 'package:foulandfortune/theme/fortune_theme.dart';
-import 'package:foulandfortune/theme/theme_provider.dart';
 import 'dart:async';
 
 class PlayerPlaque extends StatefulWidget {
