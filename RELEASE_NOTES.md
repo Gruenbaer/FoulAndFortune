@@ -1,3 +1,14 @@
+### v3.8.4 - Smarter Player Setup 🎯
+
+Neues Spiel starten war noch nie so einfach!
+
+* **Spieler merken sich:** Deine Spielernamen werden jetzt automatisch gespeichert und beim nächsten Spiel vorausgefüllt
+* **Start-Button:** Wird erst aktiv, wenn beide Spieler eingetragen sind – keine versehentlichen Starts mehr
+* **Einstellungen:** "Spielregeln" heißt jetzt "Voreinstellungen" (macht mehr Sinn!)
+* **Releases:** Ab jetzt haben alle Downloads eindeutige Versionsnummern im Dateinamen
+
+***
+
 ### v3.8.3 - Polished & Precise 💎
 
 We've polished the UI and tightened the game logic for a smoother experience.
