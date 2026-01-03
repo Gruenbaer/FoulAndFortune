@@ -32,7 +32,7 @@ class BallButton extends StatelessWidget {
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-        opacity: opacity ?? (isActive ? 1.0 : 0.2),
+        opacity: opacity ?? (isActive ? 1.0 : 0.1),
         child: ClipOval(
           child: Image.asset(
             getImagePath(),

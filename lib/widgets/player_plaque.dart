@@ -265,8 +265,8 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                       // Shows Cumulative Run
                       Builder(
                         builder: (context) {
-                          // Logic: Show LAST AWARDED points (not cumulative run)
-                          final int runValue = widget.player.lastAwardedPoints;
+                          // LR shows total points from last completed inning
+                          final int runValue = widget.player.lastPoints ?? 0;
                           
                           // Always show sign (+0, +5, -1)
                           final String runText = runValue >= 0 ? '+$runValue' : '$runValue';
