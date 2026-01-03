@@ -179,7 +179,7 @@ class Player {
   );
   // Projected Score for UI Display (Real-time feedback)
   int get projectedScore {
-    int projected = score + inningPoints;
+    int projected = score + inningPoints + reRackPoints;
     
     // Apply penalties
     if (inningHasBreakFoul) {

@@ -8,8 +8,10 @@ import 'score_card.dart';
 import '../l10n/app_localizations.dart';
 
 class VictorySplash extends StatefulWidget {
-  final Player winner;
-  final Player loser;
+  final Player player1; // Always Player 1 (Left)
+  final Player player2; // Always Player 2 (Right)
+  final Player winner;  // The actual winner object (for highlighting)
+  
   final int raceToScore;
   final List<InningRecord> inningRecords;
   final Duration elapsedDuration;
@@ -18,8 +20,9 @@ class VictorySplash extends StatefulWidget {
 
   const VictorySplash({
     super.key,
+    required this.player1,
+    required this.player2,
     required this.winner,
-    required this.loser,
     required this.raceToScore,
     required this.inningRecords,
     required this.elapsedDuration,
@@ -50,6 +53,9 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
+    
+    // Determine winner based on passed object
+    final isP1Winner = widget.winner.name == widget.player1.name; 
     
     return Scaffold(
       backgroundColor: colors.backgroundMain,
@@ -140,51 +146,10 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                         // Player names and scores at top
                         Row(
                           children: [
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    widget.winner.score.toString(),
-                                    style: TextStyle(
-                                      color: colors.accent,
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    widget.winner.name.toUpperCase(),
-                                    style: TextStyle(
-                                      color: colors.primaryBright,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    widget.loser.score.toString(),
-                                    style: TextStyle(
-                                      color: colors.textMain,
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    widget.loser.name.toUpperCase(),
-                                    style: TextStyle(
-                                      color: colors.textMain,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            Expanded(child: _buildPlayerHeader(context, widget.player1, isWinner: isP1Winner, align: CrossAxisAlignment.center)),
+                            // Divider or VS?
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildPlayerHeader(context, widget.player2, isWinner: !isP1Winner, align: CrossAxisAlignment.center)),
                           ],
                         ),
                         
@@ -236,9 +201,9 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        widget.winner.name.toUpperCase(),
+                                        widget.player1.name.toUpperCase(),
                                         style: TextStyle(
-                                          color: colors.primaryBright,
+                                          color: isP1Winner ? colors.accent : colors.primaryBright, // Highlight winner name
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -248,9 +213,9 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                                     const SizedBox(width: 80, child: Text('')),
                                     Expanded(
                                       child: Text(
-                                        widget.loser.name.toUpperCase(),
+                                        widget.player2.name.toUpperCase(),
                                         style: TextStyle(
-                                          color: colors.textMain,
+                                          color: !isP1Winner ? colors.accent : colors.primaryBright, // Highlight winner name
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -261,10 +226,10 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                                 ),
                               ),
                               // Stats rows
-                              _buildStatsRow(AppLocalizations.of(context).innings, widget.winner.currentInning.toString(), widget.loser.currentInning.toString()),
-                              _buildStatsRow(AppLocalizations.of(context).saves, widget.winner.saves.toString(), widget.loser.saves.toString()),
-                              _buildStatsRow(AppLocalizations.of(context).average, _calculateAverage(widget.winner), _calculateAverage(widget.loser)),
-                              _buildStatsRow(AppLocalizations.of(context).highestRun, _calculateHighestRun(widget.winner), _calculateHighestRun(widget.loser)),
+                              _buildStatsRow(AppLocalizations.of(context).innings, widget.player1.currentInning.toString(), widget.player2.currentInning.toString()),
+                              _buildStatsRow(AppLocalizations.of(context).saves, widget.player1.saves.toString(), widget.player2.saves.toString()),
+                              _buildStatsRow(AppLocalizations.of(context).average, _calculateAverage(widget.player1), _calculateAverage(widget.player2)),
+                              _buildStatsRow(AppLocalizations.of(context).highestRun, _calculateHighestRun(widget.player1), _calculateHighestRun(widget.player2)),
                             ],
                           ),
                         ),
@@ -282,8 +247,8 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                         ),
                         const SizedBox(height: 16),
                         ScoreCard(
-                          player1: widget.winner,
-                          player2: widget.loser,
+                          player1: widget.player1,
+                          player2: widget.player2,
                           inningRecords: widget.inningRecords,
                           winnerName: widget.winner.name,
                         ),
@@ -320,6 +285,44 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
     );
   }
 
+  Widget _buildPlayerHeader(BuildContext context, Player player, {required bool isWinner, required CrossAxisAlignment align}) {
+    final colors = FortuneColors.of(context);
+    return Column(
+      crossAxisAlignment: align,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Text(
+              player.score.toString(),
+              style: TextStyle(
+                color: isWinner ? colors.accent : colors.textMain,
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                shadows: isWinner ? [Shadow(color: colors.accent.withValues(alpha:0.5), blurRadius: 10)] : [],
+              ),
+            ),
+            if (isWinner)
+              Positioned(
+                top: -15,
+                child: Icon(Icons.star, color: colors.accent, size: 24),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          player.name.toUpperCase(),
+          style: TextStyle(
+            color: isWinner ? colors.primaryBright : colors.textMain, // Winner gets brighter name too?
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
@@ -330,7 +333,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
 
 
 
-  Widget _buildStatsRow(String label, String winnerStat, String loserStat) {
+  Widget _buildStatsRow(String label, String p1Stat, String p2Stat) {
     final colors = FortuneColors.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -341,9 +344,9 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
         children: [
           Expanded(
             child: Text(
-              winnerStat,
+              p1Stat,
               style: TextStyle(
-                color: colors.primaryBright,
+                color: colors.textMain, // Standard color
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -363,7 +366,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
           ),
           Expanded(
             child: Text(
-              loserStat,
+              p2Stat,
               style: TextStyle(
                 color: colors.textMain,
                 fontSize: 16,

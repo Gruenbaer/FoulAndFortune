@@ -491,9 +491,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             pageBuilder:
                                 (context, animation, secondaryAnimation) =>
                                     VictorySplash(
+                              player1: gameState.players[0],
+                              player2: gameState.players[1],
                               winner: gameState.winner!,
-                              loser: gameState.players
-                                  .firstWhere((p) => p != gameState.winner),
                               raceToScore: gameState.raceToScore,
                               inningRecords: gameState.inningRecords,
                               elapsedDuration: gameState.elapsedDuration,

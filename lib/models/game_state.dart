@@ -496,13 +496,15 @@ class GameState extends ChangeNotifier {
     if (currentFoulMode == FoulMode.normal) {
       turnEnded = true;
     } else if (isReRack) {
-      // After a re-rack, first shot ALWAYS ends turn (even if ball is made)
-      turnEnded = true;
-    } else if (ballsPocketed > 0) {
-      turnEnded = false; // Made a ball, continue!
+      // Re-rack is NOT a turn-ending event (unless a foul occurred)
+      // Player continues their run.
+      turnEnded = false;
     } else {
-      // Miss (<= 0)
+      // "Count per Inning" Logic:
+      // Any other tap implies the inning is over (whether points were scored or not).
       turnEnded = true;
+      
+      // Log explicit Miss if 0 points (and not Safe)
       if (ballsPocketed == 0 && !currentSafeMode) {
         _logAction('${currentPlayer.name}: Miss (0 pts)');
       }
@@ -628,12 +630,29 @@ class GameState extends ChangeNotifier {
       return;
     }
     
-    int totalInningPoints = player.inningPoints;
-    
+    // Calculate points from both parts of the inning (pre and post re-rack)
+    int pointsInInning = player.inningPoints;
+    int pointsPreReRack = player.reRackPoints;
+
     // Apply handicap multiplier to positive points only
-    if (totalInningPoints > 0) {
-      totalInningPoints = (totalInningPoints * player.handicapMultiplier).round();
+    // Note: We apply rounding to the SUM of raw points to avoid rounding errors splitting the inning?
+    // OR we apply to each part?
+    // The notation generator applies to EACH part. To match notation, we should probably apply to each.
+    // However, 14.1 usually counts balls. Handicap stands on top.
+    
+    int addedPoints = 0;
+    
+    // 1. Post-rerack points
+    if (pointsInInning > 0) {
+      addedPoints += (pointsInInning * player.handicapMultiplier).round();
     }
+    
+    // 2. Pre-rerack points
+    if (pointsPreReRack > 0) {
+      addedPoints += (pointsPreReRack * player.handicapMultiplier).round();
+    }
+    
+    int totalInningPoints = addedPoints;
     
     // Apply foul penalties
     int foulPenalty = 0;
