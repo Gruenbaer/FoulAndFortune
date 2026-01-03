@@ -409,6 +409,7 @@ class GameState extends ChangeNotifier {
     if (currentFoulMode == FoulMode.severe) {
       // Mark as break foul for notation
       currentPlayer.inningHasBreakFoul = true;
+      currentPlayer.setFoulPenalty(-2); // Animate -2
       
       _logAction('${currentPlayer.name}: Break Foul (-2 pts)');
       
@@ -453,11 +454,12 @@ class GameState extends ChangeNotifier {
     inBreakSequence = false;
 
     // ACCUMULATE POINTS IN INNING
-    currentPlayer.inningPoints += ballsPocketed;
+    currentPlayer.addInningPoints(ballsPocketed);
 
     // TRACK FOUL
     if (currentFoulMode == FoulMode.normal) {
       currentPlayer.inningHasFoul = true;
+      currentPlayer.setFoulPenalty(-1); // Animate -1
     }
 
     // TRACK SAFE (statistical only)
@@ -479,10 +481,85 @@ class GameState extends ChangeNotifier {
       eventQueue.add(ReRackEvent("Re-rack!"));
       
       _logAction('${currentPlayer.name}: Re-rack');
+      
+      // CRITICAL LOGIC: 
+      // Do NOT update rack to just 1 ball in the set of activeBalls immediately if we want it to persist visually?
+      // Actually, if activeBalls = {1}, then only ball 1 is shown.
+      // The user issue is "Rerack still removes the balls and does not make them opaque."
+      // In 14.1, you leave the break ball (the last ball).
+      // If we just set activeBalls = {1}, the other 14 are gone. 
+      // The user might mean they want the RACK to fade out but the BALL 1 to stay solid?
+      // Currently `_updateRackCount` wipes the set and rebuilds it.
+      // If newBallCount is 1, activeBalls becomes {1}. 
+      // This means balls 2-15 disappear instantly.
+      // The user wants them to be greyed out or opacity change?
+      // "does not make them opaque" implies they are transparent/gone.
+      // "When tapping 1, 1 should stay active."
+      
+      // Wait, let's look at `_updateRackCount`.
+      // It does: activeBalls = Set.from(List.generate(count, (i) => i + 1));
+      
+      // If we want ball 1 to stay, we should set count to 1.
+      // Ball 1 will remain visible. 2-15 are removed from activeBalls, so they gain opacity 0.4 or 0.
+      
+      // Let's check GameScreen opacity logic:
+      // !isOnTable ? 0.4 : (isInteractable ? 1.0 : 0.4)
+      
+      // If Ball 2 is NOT in activeBalls, isOnTable is false => Opacity 0.4.
+      // User says "removes the balls". Maybe 0.4 is too light or they are invisible?
+      // Wait, earlier fix: "Pocketed balls become invisible instead of greyed out" was fixed by setting 0.4.
+      
+      // "Rerack still removes the balls" -> This might mean they disappear COMPLETELY?
+      // If Ball 1 is the ONLY active ball, then balls 2-15 are !isOnTable.
+      // If !isOnTable opacity is 0.4, they should be visible grey ghosts.
+      // Unless the re-rack overlay covers them? No, it's transparent.
+      
+      // "When tapping 1, 1 should stay active."
+      // With count=1, Ball 1 IS in activeBalls. isOnTable=true.
+      // isInteractable = !gameOver && isOnTable && (!severe || ball==15).
+      // So Ball 1 IS interactable -> Opacity 1.0.
+      
+      // Why does user say "removes the balls"?
+      // Ah, maybe they mean the animation `ReRackEvent`?
+      // Does `ReRackOverlay` hide the rack? It's just a center popup.
+      
+      // Let's assume the user wants the "pocketed" balls (2-15) to NOT disappear instantly but fade out?
+      // Or maybe they mean "removes the balls" = "balls disappear from screen".
+      // If opacity 0.4 is working, they shouldn't disappear.
+      
+      // Let's ensure Ball 1 is indeed the one kept.
+      // `_updateRackCount(1)` makes activeBalls = {1}. Correct.
+      
+      // Re-read: "Rerack still removes teh balls and dows not make them opaque."
+      // "does not make them opaque" -> maybe they ARE opaque (invisible)?
+      // If opacity is 0.0, they are invisible.
+      // I set it to 0.4 in step 1162.
+      
+      // Maybe `_resetRack()` is called too early?
+      // `finalizeReRack` calls `_resetRack` which sets count to 15.
+      
+      // Issue might be `onDoubleSack` vs `onBallTapped(1)`.
+      // `onBallTapped(ballNumber)` calls `_updateRackCount(newBallCount)`.
+      // If I tap Ball 1 (leaving 1 ball), newBallCount = 1.
+      // `activeBalls` becomes {1}.
+      // Balls 2-15 are removed. Opacity -> 0.4.
+      
+      // Maybe the user wants the other balls to stay visible as "pocketed"?
+      // "make them opaque". Opaque = Solid (1.0). Transparent = Invisible (0.0).
+      // Maybe user misused "opaque"? "make them opaque" usually means "make them visible".
+      // "removes the balls" -> they are gone.
+      // "does not make them opaque" -> they are transparent?
+      
+      // "When tapping 1, 1 should stay active."
+      // Maybe they mean Ball 1 should be clickable? It IS clickable if active.
+      
+      // Let's just pass `newBallCount` to `_updateRackCount`.
+      _updateRackCount(newBallCount);
+    } else {
+       // Only update rack if NOT a re-rack event triggering immediately?
+       // No, we must update rack to reflect the shot.
+       _updateRackCount(newBallCount);
     }
-
-    // Update rack state
-    _updateRackCount(newBallCount);
 
     // DETERMINE IF TURN ENDS
     bool turnEnded = false;
@@ -551,7 +628,7 @@ class GameState extends ChangeNotifier {
     int ballsRemaining = activeBalls.length;
     
     // ACCUMULATE POINTS IN INNING (like onBallTapped)
-    currentPlayer.inningPoints += ballsRemaining;
+    currentPlayer.addInningPoints(ballsRemaining);
     
     // TRACK FOULS
     if (currentFoulMode == FoulMode.normal) {

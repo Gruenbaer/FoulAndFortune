@@ -193,25 +193,36 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
                     constraints: const BoxConstraints(maxHeight: 100),
                     child: FittedBox(
                       fit: BoxFit.contain,
-                      child: Text(
-                        // Logic Update: Fail-safe for Foul Animation
-                        // 1. Show penalty if available (e.g. "-1")
-                        widget.penalty != null 
-                            ? '${widget.penalty}' 
-                            // 2. If penalty missing but points negative, show points
-                            : (widget.points < 0 ? '${widget.points}' 
-                                // 3. If points positive (Pot+Foul) and penalty lost, avoid "+X". Show "Foul".
-                                : 'Foul'),
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          fontSize: singleFontSize,
-                          fontWeight: FontWeight.w900,
-                          // Always Red for Foul Overlay (since we removed Flying Points for normal play)
-                          color: FortuneColors.of(context).danger,
-                          shadows: [
-                             Shadow(blurRadius: 4, color: FortuneColors.of(context).dangerDark, offset: const Offset(1, 1)),
-                          ],
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 1. Foul Type Header (FOUL / BREAK FOUL)
+                          Text(
+                            (widget.penalty != null && widget.penalty!.abs() > 1) ? 'BREAK FOUL' : 'FOUL', 
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(
+                              fontSize: singleFontSize * 0.5, // Header slightly smaller
+                              fontWeight: FontWeight.w900,
+                              color: FortuneColors.of(context).danger, 
+                              shadows: [
+                                Shadow(blurRadius: 4, color: FortuneColors.of(context).dangerDark, offset: const Offset(1, 1)),
+                              ],
+                            ),
+                          ),
+                          // 2. Penalty Points (RED BOLD)
+                          Text(
+                            widget.penalty != null ? '${widget.penalty}' : '${widget.points}',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(
+                              fontSize: singleFontSize,
+                              fontWeight: FontWeight.w900,
+                              color: FortuneColors.of(context).danger, // User mandated RED
+                              shadows: [
+                                Shadow(blurRadius: 10, color: FortuneColors.of(context).dangerDark, offset: const Offset(2, 2)),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

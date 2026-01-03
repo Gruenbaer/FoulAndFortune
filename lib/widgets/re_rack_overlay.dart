@@ -73,6 +73,10 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
                           ? GhibliFramePainter(colors, seed: 42) // Constant seed for consistency
                           : BrassFramePainter(colors)),
                   child: Container(
+                    decoration: BoxDecoration(
+                      color: colors.backgroundMain.withValues(alpha: 0.9), // Fill background
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

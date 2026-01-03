@@ -837,73 +837,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
 
-                        // 2. Statistics Row (Current Match)
-                        // Uses active GameState players instead of historical DB stats
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 6, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: colors.primaryDark.withValues(alpha: 0.4),
-                            border: Border(
-                              top: BorderSide(
-                                  color: colors.primary.withValues(alpha: 0.2)),
-                              bottom: BorderSide(
-                                  color: colors.primary.withValues(alpha: 0.2)),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              // P1 Stats (Match)
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildStatItem(
-                                        '�',
-                                        (gameState.players[0].score /
-                                                (gameState.players[0]
-                                                            .currentInning >
-                                                        0
-                                                    ? gameState.players[0]
-                                                        .currentInning
-                                                    : 1))
-                                            .toStringAsFixed(2)),
-                                    _buildStatItem('HR',
-                                        '${gameState.players[0].highestRun}'),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                  width: 1,
-                                  height: 20,
-                                  color: colors.primary
-                                      .withValues(alpha: 0.5)), // Themed Divider
-                              // P2 Stats (Match)
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildStatItem(
-                                        '�',
-                                        (gameState.players[1].score /
-                                                (gameState.players[1]
-                                                            .currentInning >
-                                                        0
-                                                    ? gameState.players[1]
-                                                        .currentInning
-                                                    : 1))
-                                            .toStringAsFixed(2)),
-                                    _buildStatItem('HR',
-                                        '${gameState.players[1].highestRun}'),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+
 
                         // CLOCK
                         const Padding(
@@ -918,16 +852,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           width: double.infinity,
                           child: gameState.lastAction != null
                               ? Container(
-                                  color: colors.primary,
+                                  // Removed background color as requested
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 4),
                                   child: Text(
                                     gameState.lastAction!.toUpperCase(),
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.black,
+                                    style: TextStyle(
+                                      color: colors.primary, // Text is now primary color
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12,
+                                      shadows: [
+                                        Shadow(
+                                          blurRadius: 2,
+                                          color: Colors.black.withValues(alpha: 0.8),
+                                          offset: const Offset(1, 1),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 )
@@ -1236,7 +1177,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           isOnTable &&
                           (gameState.foulMode != FoulMode.severe || rows[r][c] == 15);
                       
-                      final double targetOpacity = !isOnTable ? 0.4 : (isInteractable ? 1.0 : 0.4);
+                      final double targetOpacity = !isOnTable ? 0.6 : (isInteractable ? 1.0 : 0.6);
 
                       return AnimatedBuilder(
                     animation: _rackAnimationController,

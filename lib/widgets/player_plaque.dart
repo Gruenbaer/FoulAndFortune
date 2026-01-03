@@ -305,7 +305,8 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                           return Transform.scale(
                             scale: _lastPointsPulse.value,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              constraints: const BoxConstraints(minWidth: 32),
                               decoration: BoxDecoration(
                                 color: Colors.black38,
                                 borderRadius: BorderRadius.circular(4),
@@ -313,39 +314,92 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                                   color: valColor.withValues(alpha: 0.5),
                                 ),
                               ),
-                              child: Text(
-                                runText,
-                                style: GoogleFonts.nunito(
-                                  textStyle: theme.textTheme.bodySmall,
-                                  color: valColor,
-                                  fontSize: 16, 
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'LR',
+                                    style: GoogleFonts.nunito(
+                                      textStyle: theme.textTheme.bodySmall,
+                                      color: colors.textMain.withValues(alpha: 0.4), // Lighter (was 0.6)
+                                      fontSize: 8, 
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  Text(
+                                    runText,
+                                    style: GoogleFonts.nunito(
+                                      textStyle: theme.textTheme.bodySmall,
+                                      color: valColor,
+                                      fontSize: 12, 
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );
+
                         }
                       ),
-                      const SizedBox(width: 8),
-                      const Spacer(), // Push HR to right
+                      
+                      // Spacer to center AVG
+                      const Spacer(),
 
+                      // Middle Box: AVG (Score / Inning)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        constraints: const BoxConstraints(minWidth: 32),
                         decoration: BoxDecoration(
                           color: Colors.black38,
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: colors.primaryDark.withValues(alpha: 0.5)),
                         ),
-                        child: Row(
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'HR ',
+                              'AVG',
                               style: GoogleFonts.nunito(
                                 textStyle: theme.textTheme.bodySmall,
-                                color: colors.textMain.withValues(alpha: 0.6),
-                                fontSize: 10, // Increased from 9
+                                color: colors.textMain.withValues(alpha: 0.4), // Lighter (was 0.6)
+                                fontSize: 8,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            Text(
+                              (widget.player.score / (widget.player.currentInning > 0 ? widget.player.currentInning : 1)).toStringAsFixed(1),
+                              style: GoogleFonts.nunito( // Rounded font
+                                textStyle: theme.textTheme.bodySmall,
+                                color: colors.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      // Spacer to push HR to right
+                      const Spacer(), 
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        constraints: const BoxConstraints(minWidth: 32),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: colors.primaryDark.withValues(alpha: 0.5)),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'HR',
+                              style: GoogleFonts.nunito(
+                                textStyle: theme.textTheme.bodySmall,
+                                color: colors.textMain.withValues(alpha: 0.4), // Lighter (was 0.6)
+                                fontSize: 8, // Increased from 9
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -354,7 +408,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                               style: GoogleFonts.nunito(
                                 textStyle: theme.textTheme.bodySmall,
                                 color: colors.primary,
-                                fontSize: 13, // Increased from 11
+                                fontSize: 12, // Increased from 11
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

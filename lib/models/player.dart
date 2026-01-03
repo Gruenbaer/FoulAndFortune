@@ -81,6 +81,19 @@ class Player {
     updateCount++; // Trigger animation for +0/Safe
   }
 
+  // Helper to update inning points and trigger animation (Real-time)
+  void addInningPoints(int points) {
+    inningPoints += points;
+    lastAwardedPoints = points;
+    updateCount++;
+  }
+
+  // Helper to set foul penalty for animation (Real-time)
+  void setFoulPenalty(int penalty) {
+    lastAwardedPoints = penalty;
+    updateCount++;
+  }
+
   Player copyWith({
     String? name,
     int? score,
