@@ -495,6 +495,9 @@ class GameState extends ChangeNotifier {
 
     if (currentFoulMode == FoulMode.normal) {
       turnEnded = true;
+    } else if (isReRack) {
+      // After a re-rack, first shot ALWAYS ends turn (even if ball is made)
+      turnEnded = true;
     } else if (ballsPocketed > 0) {
       turnEnded = false; // Made a ball, continue!
     } else {
