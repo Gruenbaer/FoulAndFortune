@@ -20,7 +20,7 @@ class FoulSplashContent extends StatelessWidget {
       title: message.toUpperCase(),
       subtitle: '$penaltyPoints', // Display Penalty explicitly
       icon: Icons.warning_amber_rounded,
-      color: colors.danger,
+      color: Colors.cyanAccent, // Requested Cyan Glow
     );
   }
 }
