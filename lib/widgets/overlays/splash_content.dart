@@ -53,7 +53,7 @@ class SplashContent extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.orbitron( // Orbitron Font
                 textStyle: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  fontSize: 64, // Larger
+                  fontSize: 48, // Reduced from 64
                   color: effectiveColor,
                   height: 1.0, 
                   shadows: [
@@ -71,17 +71,20 @@ class SplashContent extends StatelessWidget {
               ),
             ),
             if (subtitle != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontSize: 24,
-                  color: effectiveColor.withValues(alpha: 0.9),
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(blurRadius: 10, color: effectiveColor, offset: const Offset(0, 0)),
-                  ],
+                style: GoogleFonts.orbitron(
+                  textStyle: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontSize: 48, // Same size as title
+                    color: effectiveColor,
+                    fontWeight: FontWeight.w900, // Bold
+                    shadows: [
+                      Shadow(blurRadius: 20, color: effectiveColor, offset: const Offset(0, 0)),
+                      Shadow(blurRadius: 10, color: Colors.black, offset: const Offset(2, 2)),
+                    ],
+                  ),
                 ),
               ),
             ],

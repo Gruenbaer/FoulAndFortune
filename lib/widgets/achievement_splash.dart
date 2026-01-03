@@ -131,68 +131,115 @@ class _AchievementSplashState extends State<AchievementSplash>
                   opacity: _fadeAnimation,
                   child: ScaleTransition(
                     scale: _scaleAnimation,
-                    child: Container(
-                      margin: const EdgeInsets.all(32),
-                      padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            FortuneColors.of(context).primaryBright,
-                            FortuneColors.of(context).primary,
+                      child: Container(
+                        margin: const EdgeInsets.all(32),
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          color: FortuneColors.of(context).backgroundCard,
+                          border: Border.all(
+                            color: FortuneColors.of(context).success,
+                            width: 3,
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: FortuneColors.of(context).success.withValues(alpha: 0.6),
+                              blurRadius: 40,
+                              spreadRadius: 8,
+                            ),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: FortuneColors.of(context).primary.withValues(alpha: 0.6),
-                            blurRadius: 30,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '🏆 ACHIEVEMENT UNLOCKED! 🏆',
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Header
+                            Text(
+                              '🏆 ACHIEVEMENT UNLOCKED! 🏆',
                               style: TextStyle(
                                 fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: FortuneColors.of(context).success,
+                                letterSpacing: 2,
+                                fontFamily: 'Orbitron',
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            
+                            // Emoji
+                            Text(
+                              widget.achievement.emoji,
+                              style: const TextStyle(fontSize: 80),
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // Title
+                            Text(
+                              widget.achievement.title,
+                              style: TextStyle(
+                                fontSize: 32,
                                 fontWeight: FontWeight.bold,
                                 color: FortuneColors.of(context).textMain,
-                                letterSpacing: 2,
+                                fontFamily: 'Orbitron',
                               ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            widget.achievement.emoji,
-                            style: const TextStyle(fontSize: 80),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            widget.achievement.title,
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              textAlign: TextAlign.center,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            widget.achievement.description,
+                            const SizedBox(height: 12),
+                            
+                            // Description
+                            Text(
+                              widget.achievement.description,
                               style: TextStyle(
                                 fontSize: 16,
-                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.8),
+                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.85),
                                 height: 1.4,
                               ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            
+                            // Divider
+                            Container(
+                              height: 2,
+                              width: 200,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    FortuneColors.of(context).success,
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // How to unlock explanation
+                            Text(
+                              widget.achievement.howToUnlock,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.7),
+                                fontStyle: FontStyle.italic,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            
+                            // Show who unlocked it (if available)
+                            if (widget.achievement.unlockedBy.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Text(
+                                'Unlocked by: ${widget.achievement.unlockedBy.last}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: FortuneColors.of(context).textMain.withValues(alpha: 0.5),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                    ),
                   ),
                 ),
               ),

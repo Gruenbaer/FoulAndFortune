@@ -7,18 +7,23 @@ class AchievementChecker {
   /// Check for achievements after a player completes their inning
   static void checkAfterInning(Player player, AchievementManager manager) {
     // Run streak achievements (10, 20, 30, 40, 50)
+    // Check all tiers - if they score 50, they should get all lower ones too
     final run = player.currentRun;
     
+    if (run >= 10 && !manager.isUnlocked('streak_10')) {
+      manager.unlock('streak_10', playerName: player.name);
+    }
+    if (run >= 20 && !manager.isUnlocked('streak_20')) {
+      manager.unlock('streak_20', playerName: player.name);
+    }
+    if (run >= 30 && !manager.isUnlocked('streak_30')) {
+      manager.unlock('streak_30', playerName: player.name);
+    }
+    if (run >= 40 && !manager.isUnlocked('streak_40')) {
+      manager.unlock('streak_40', playerName: player.name);
+    }
     if (run >= 50 && !manager.isUnlocked('streak_50')) {
       manager.unlock('streak_50', playerName: player.name);
-    } else if (run >= 40 && !manager.isUnlocked('streak_40')) {
-      manager.unlock('streak_40', playerName: player.name);
-    } else if (run >= 30 && !manager.isUnlocked('streak_30')) {
-      manager.unlock('streak_30', playerName: player.name);
-    } else if (run >= 20 && !manager.isUnlocked('streak_20')) {
-      manager.unlock('streak_20', playerName: player.name);
-    } else if (run >= 10 && !manager.isUnlocked('streak_10')) {
-      manager.unlock('streak_10', playerName: player.name);
     }
   }
 

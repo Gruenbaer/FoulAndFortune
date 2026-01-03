@@ -18,10 +18,12 @@ class GameEventOverlay extends StatefulWidget {
 }
 
 class _GameEventOverlayState extends State<GameEventOverlay>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
+  late AnimationController _shakeController;
+  late Animation<Offset> _shakeOffset;
 
   // Queue State
   final List<GameEvent> _localQueue = [];
@@ -59,6 +61,25 @@ class _GameEventOverlayState extends State<GameEventOverlay>
         _onAnimationComplete();
       }
     });
+
+    // Initialize shake controller for triple foul
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    // Shake animation: rapid oscillation
+    final shakeTween = TweenSequence<Offset>([
+      TweenSequenceItem(tween: Tween(begin: Offset.zero, end: const Offset(0.05, 0)), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: const Offset(0.05, 0), end: const Offset(-0.05, 0)), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: const Offset(-0.05, 0), end: const Offset(0.05, 0)), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: const Offset(0.05, 0), end: Offset.zero), weight: 1),
+    ]);
+    _shakeOffset = shakeTween.animate(_shakeController);
+  }
+
+  void _triggerScreenShake() {
+    _shakeController.forward(from: 0.0);
   }
 
   void _onAnimationComplete() {
@@ -73,6 +94,7 @@ class _GameEventOverlayState extends State<GameEventOverlay>
   @override
   void dispose() {
     _controller.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
@@ -155,6 +177,7 @@ class _GameEventOverlayState extends State<GameEventOverlay>
           break;
         case FoulType.threeFouls:
           message = AppLocalizations.of(context).threeFoulsTitle;
+          _triggerScreenShake(); // Screen shake effect
           break;
       }
       
@@ -301,17 +324,20 @@ class _GameEventOverlayState extends State<GameEventOverlay>
         if (_currentContent == null) return const SizedBox.shrink();
 
         return Positioned.fill(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Opacity(
-                opacity: _opacityAnimation.value,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: _currentContent, // Display the content
-                ),
-              );
-            },
+          child: SlideTransition(
+            position: _shakeOffset,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _opacityAnimation.value,
+                  child: Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: _currentContent, // Display the content
+                  ),
+                );
+              },
+            ),
           ),
         );
       },
