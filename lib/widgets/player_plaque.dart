@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/player.dart';
-import '../theme/fortune_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart'; // Added for Provider
+import 'package:foulandfortune/models/game_state.dart'; // Added for GameState
+import 'package:foulandfortune/models/player.dart';
+import 'package:foulandfortune/theme/fortune_theme.dart';
+import 'package:foulandfortune/theme/theme_provider.dart';
 import 'dart:async';
 
 class PlayerPlaque extends StatefulWidget {
