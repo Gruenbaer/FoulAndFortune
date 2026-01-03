@@ -419,19 +419,30 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
           const SizedBox(height: 32),
 
           // Start Game Button
-          // Start Game Button
-          ThemedButton(
-            label: l10n.setPlayerToStart,
-            icon: Icons.play_circle_fill,
-            onPressed: (_settings.player1Name.isNotEmpty &&
-                    _settings.player2Name.isNotEmpty)
-                ? _startGame
-                : null,
-            backgroundGradientColors: [
-              Colors.green.shade900,
-              Colors.green.shade700,
-            ],
-            textColor: Colors.white,
+          ElevatedButton.icon(
+            onPressed: _settings.hasValidPlayers ? _startGame : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _settings.hasValidPlayers
+                  ? Colors.green.shade700
+                  : Colors.grey.shade600,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: Colors.grey.shade600,
+              disabledForegroundColor: Colors.white60,
+              minimumSize: const Size(double.infinity, 64),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: _settings.hasValidPlayers ? 4 : 0,
+            ),
+            icon: const Icon(Icons.play_circle_fill, size: 32),
+            label: Text(
+              l10n.startGame,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+              ),
+            ),
           ),
         ],
       ),

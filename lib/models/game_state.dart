@@ -6,6 +6,7 @@ import '../data/messages.dart';
 import 'game_settings.dart';
 
 enum FoulMode { none, normal, severe }
+enum FoulType { normal, breakFoul, threeFouls }
 
 // Event System for UI Animations
 abstract class GameEvent {}
@@ -13,13 +14,15 @@ abstract class GameEvent {}
 class FoulEvent extends GameEvent {
   final Player player;
   final int points;
-  final String message;
+  final FoulType type;
   final int? positivePoints; // Optional: balls pocketed for breakdown display
   final int? penalty; // Optional: foul penalty for breakdown display
 
-  FoulEvent(this.player, this.points, this.message,
+  FoulEvent(this.player, this.points, this.type,
       {this.positivePoints, this.penalty});
 }
+
+class TwoFoulsWarningEvent extends GameEvent {}
 
 class WarningEvent extends GameEvent {
   final String title;
@@ -39,6 +42,12 @@ class DecisionEvent extends GameEvent {
   final Function(int) onOptionSelected;
 
   DecisionEvent(this.title, this.message, this.options, this.onOptionSelected);
+}
+
+class BreakFoulDecisionEvent extends GameEvent {
+    final List<String> options;
+    final Function(int) onOptionSelected;
+    BreakFoulDecisionEvent(this.options, this.onOptionSelected);
 }
 
 class SafeEvent extends GameEvent {}
@@ -393,198 +402,109 @@ class GameState extends ChangeNotifier {
       startGameTimer();
     }
 
-    // Capture foul mode before reset
+    // Capture state before reset
     final currentFoulMode = foulMode;
     final currentSafeMode = isSafeMode;
-    foulMode = FoulMode.none; // Reset flag
-    isSafeMode = false; // Reset flag
+    
+    // Reset temporary modes
+    foulMode = FoulMode.none;
+    isSafeMode = false;
     resetBreakFoulError();
 
-    // Calculate points (balls pocketed)
+    // Calculate basic data
     int currentBallCount = activeBalls.length;
     int newBallCount = ballNumber;
     int ballsPocketed = currentBallCount - newBallCount;
 
-    // Handle BREAK FOUL (use inning accumulation now)
+    // --- CASE 1: BREAK FOUL (Severe) ---
     if (currentFoulMode == FoulMode.severe) {
-      // Mark as break foul for notation
+      // Mark as break foul (-2 points)
       currentPlayer.inningHasBreakFoul = true;
-      currentPlayer.setFoulPenalty(-2); // Animate -2
+      currentPlayer.setFoulPenalty(-2);
       
       _logAction('${currentPlayer.name}: Break Foul (-2 pts)');
-      
-      // Queue animation event
-      eventQueue.add(FoulEvent(currentPlayer, -2, "Break Foul!"));
+      eventQueue.add(FoulEvent(currentPlayer, -2, FoulType.breakFoul));
 
-      // Break Foul Decision: Who breaks next?
+      // Decision: Who breaks next?
       final p1 = players[0];
       final p2 = players[1];
-
-      eventQueue.add(DecisionEvent(
-          "WHO BREAKS NEXT?",
-          "Break Foul Rule: Decide who takes the next break shot.",
-          [p1.name, p2.name], (selectedIndex) {
-        final selectedPlayer = selectedIndex == 0 ? p1 : p2;
-
-        // Switch to selected player if needed
-        if (currentPlayer != selectedPlayer) {
-          _switchPlayer();
-        } else {
-          // Same player continues, but still need to finalize this inning
-          _finalizeInning(currentPlayer);
-          currentPlayer.incrementInning();
-        }
-
-        // Reset rack for break
-        _updateRackCount(15);
-        notifyListeners();
-      }));
-
-      // Stay in break sequence
-      inBreakSequence = true;
       
-      // Update rack
-      _updateRackCount(newBallCount);
+      eventQueue.add(BreakFoulDecisionEvent(
+        [p1.name, p2.name],
+        (selectedIndex) {
+             handleBreakFoulDecision(selectedIndex);
+        }
+      ));
+      
+      inBreakSequence = true;
+      _updateRackCount(15);
+      
+      // Finalize current inning immediately
+      _finalizeInning(currentPlayer);
+      currentPlayer.incrementInning();
+      
       _checkWinCondition();
       notifyListeners();
-      return; // Break foul handled, exit
+      return; 
     }
 
-    // Exit break sequence (any non-break-foul action)
+    // --- CASE 2: NORMAL SHOT ---
     inBreakSequence = false;
 
-    // ACCUMULATE POINTS IN INNING
-    currentPlayer.addInningPoints(ballsPocketed);
+    // ACCUMULATE POINTS
+    if (currentFoulMode == FoulMode.none) {
+      currentPlayer.addInningPoints(ballsPocketed);
+    }
 
     // TRACK FOUL
     if (currentFoulMode == FoulMode.normal) {
       currentPlayer.inningHasFoul = true;
-      currentPlayer.setFoulPenalty(-1); // Animate -1
+      currentPlayer.setFoulPenalty(-1);
+      
+      if (currentPlayer.consecutiveFouls == 2) {
+         eventQueue.add(FoulEvent(currentPlayer, -16, FoulType.threeFouls));
+      } else {
+         eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
+      }
     }
 
-    // TRACK SAFE (statistical only)
+    // TRACK SAFE
     if (currentSafeMode) {
       currentPlayer.inningHasSafe = true;
-      currentPlayer.incrementSaves(); // For statistics
+      currentPlayer.incrementSaves();
     }
 
     // HANDLE RE-RACK
     bool isReRack = false;
     if (newBallCount == 1) {
       isReRack = true;
-      // Save pre-rerack points
       currentPlayer.reRackPoints = currentPlayer.inningPoints;
-      currentPlayer.inningPoints = 0; // Reset for post-rerack
+      currentPlayer.inningPoints = 0; 
       currentPlayer.inningHasReRack = true;
       
-      // Queue re-rack animation event
       eventQueue.add(ReRackEvent("Re-rack!"));
-      
       _logAction('${currentPlayer.name}: Re-rack');
-      
-      // CRITICAL LOGIC: 
-      // Do NOT update rack to just 1 ball in the set of activeBalls immediately if we want it to persist visually?
-      // Actually, if activeBalls = {1}, then only ball 1 is shown.
-      // The user issue is "Rerack still removes the balls and does not make them opaque."
-      // In 14.1, you leave the break ball (the last ball).
-      // If we just set activeBalls = {1}, the other 14 are gone. 
-      // The user might mean they want the RACK to fade out but the BALL 1 to stay solid?
-      // Currently `_updateRackCount` wipes the set and rebuilds it.
-      // If newBallCount is 1, activeBalls becomes {1}. 
-      // This means balls 2-15 disappear instantly.
-      // The user wants them to be greyed out or opacity change?
-      // "does not make them opaque" implies they are transparent/gone.
-      // "When tapping 1, 1 should stay active."
-      
-      // Wait, let's look at `_updateRackCount`.
-      // It does: activeBalls = Set.from(List.generate(count, (i) => i + 1));
-      
-      // If we want ball 1 to stay, we should set count to 1.
-      // Ball 1 will remain visible. 2-15 are removed from activeBalls, so they gain opacity 0.4 or 0.
-      
-      // Let's check GameScreen opacity logic:
-      // !isOnTable ? 0.4 : (isInteractable ? 1.0 : 0.4)
-      
-      // If Ball 2 is NOT in activeBalls, isOnTable is false => Opacity 0.4.
-      // User says "removes the balls". Maybe 0.4 is too light or they are invisible?
-      // Wait, earlier fix: "Pocketed balls become invisible instead of greyed out" was fixed by setting 0.4.
-      
-      // "Rerack still removes the balls" -> This might mean they disappear COMPLETELY?
-      // If Ball 1 is the ONLY active ball, then balls 2-15 are !isOnTable.
-      // If !isOnTable opacity is 0.4, they should be visible grey ghosts.
-      // Unless the re-rack overlay covers them? No, it's transparent.
-      
-      // "When tapping 1, 1 should stay active."
-      // With count=1, Ball 1 IS in activeBalls. isOnTable=true.
-      // isInteractable = !gameOver && isOnTable && (!severe || ball==15).
-      // So Ball 1 IS interactable -> Opacity 1.0.
-      
-      // Why does user say "removes the balls"?
-      // Ah, maybe they mean the animation `ReRackEvent`?
-      // Does `ReRackOverlay` hide the rack? It's just a center popup.
-      
-      // Let's assume the user wants the "pocketed" balls (2-15) to NOT disappear instantly but fade out?
-      // Or maybe they mean "removes the balls" = "balls disappear from screen".
-      // If opacity 0.4 is working, they shouldn't disappear.
-      
-      // Let's ensure Ball 1 is indeed the one kept.
-      // `_updateRackCount(1)` makes activeBalls = {1}. Correct.
-      
-      // Re-read: "Rerack still removes teh balls and dows not make them opaque."
-      // "does not make them opaque" -> maybe they ARE opaque (invisible)?
-      // If opacity is 0.0, they are invisible.
-      // I set it to 0.4 in step 1162.
-      
-      // Maybe `_resetRack()` is called too early?
-      // `finalizeReRack` calls `_resetRack` which sets count to 15.
-      
-      // Issue might be `onDoubleSack` vs `onBallTapped(1)`.
-      // `onBallTapped(ballNumber)` calls `_updateRackCount(newBallCount)`.
-      // If I tap Ball 1 (leaving 1 ball), newBallCount = 1.
-      // `activeBalls` becomes {1}.
-      // Balls 2-15 are removed. Opacity -> 0.4.
-      
-      // Maybe the user wants the other balls to stay visible as "pocketed"?
-      // "make them opaque". Opaque = Solid (1.0). Transparent = Invisible (0.0).
-      // Maybe user misused "opaque"? "make them opaque" usually means "make them visible".
-      // "removes the balls" -> they are gone.
-      // "does not make them opaque" -> they are transparent?
-      
-      // "When tapping 1, 1 should stay active."
-      // Maybe they mean Ball 1 should be clickable? It IS clickable if active.
-      
-      // Let's just pass `newBallCount` to `_updateRackCount`.
       _updateRackCount(newBallCount);
     } else {
-       // Only update rack if NOT a re-rack event triggering immediately?
-       // No, we must update rack to reflect the shot.
-       _updateRackCount(newBallCount);
+      _updateRackCount(newBallCount);
     }
 
     // DETERMINE IF TURN ENDS
     bool turnEnded = false;
 
     if (currentFoulMode == FoulMode.normal) {
-      // Normal foul always ends turn
       turnEnded = true;
     } else if (ballsPocketed > 0) {
-      // Pocketed balls
-      if (isReRack) {
-        // Re-rack: player continues
-        turnEnded = false;
-      } else {
-        // Normal shot: turn ends
-        turnEnded = true;
-      }
-    } else if (ballsPocketed <= 0) {
-      // Miss/Safe (0 or negative points)
+      turnEnded = false; // Made a ball, continue!
+    } else {
+      // Miss (<= 0)
       turnEnded = true;
       if (ballsPocketed == 0 && !currentSafeMode) {
         _logAction('${currentPlayer.name}: Miss (0 pts)');
       }
     }
 
-    // Log action for match history
+    // LOGGING
     if (ballsPocketed != 0 || currentFoulMode != FoulMode.none) {
       String foulText = currentFoulMode == FoulMode.normal ? ' (Foul)' : '';
       String safeText = currentSafeMode ? ' (Safe)' : '';
@@ -602,11 +522,30 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void handleBreakFoulDecision(int selectedIndex) {
+      // selectedIndex: 0 = Player 1, 1 = Player 2 (based on names array)
+      if (selectedIndex != currentPlayerIndex) {
+          // Switch active player manually
+          players[currentPlayerIndex].isActive = false;
+          currentPlayerIndex = selectedIndex; // Set to new player
+          players[currentPlayerIndex].isActive = true;
+          
+          _logAction('Decision: ${currentPlayer.name} will break');
+      } else {
+          _logAction('Decision: ${currentPlayer.name} re-breaks');
+      }
+      
+      inBreakSequence = true;
+      _updateRackCount(15);
+      notifyListeners();
+  }
+
   void _updateRackCount(int count) {
     if (count < 0) count = 0;
     if (count > 15) count = 15;
     activeBalls = Set.from(List.generate(count, (i) => i + 1));
   }
+
 
   // Called by UI after Splash animation to physically reset the rack
   void finalizeReRack() {
@@ -793,8 +732,7 @@ class GameState extends ChangeNotifier {
     if (foulTracker.threeFoulRuleEnabled &&
         currentPlayer.consecutiveFouls == 2) {
       // Replaced showTwoFoulWarning flag with Event
-      eventQueue.add(WarningEvent("2 FOULS!",
-          "You are on 2 consecutive fouls.\nOne more foul will result in a \n-15 points penalty!"));
+      eventQueue.add(TwoFoulsWarningEvent());
     }
 
     notifyListeners();

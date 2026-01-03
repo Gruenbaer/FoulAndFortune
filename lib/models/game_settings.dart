@@ -39,6 +39,10 @@ class GameSettings {
     this.hasShown3FoulWarning = false,
   });
 
+  // Validation helpers
+  bool get hasValidPlayers => 
+      player1Name.trim().isNotEmpty && player2Name.trim().isNotEmpty;
+
   Map<String, dynamic> toJson() => {
         'threeFoulRuleEnabled': threeFoulRuleEnabled,
         'raceToScore': raceToScore,

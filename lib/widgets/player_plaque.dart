@@ -85,42 +85,14 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
       _lastPointsController.forward(from: 0.0); // Trigger pulse animation
     }
     
-    final oldDisplayScore = oldWidget.player.projectedScore;
-    final newDisplayScore = widget.player.projectedScore;
-    
-    if (newDisplayScore != oldDisplayScore) {
-      if (newDisplayScore < oldDisplayScore) {
-        // Score Dropped (Penalty?) -> DEFER UPDATE
-        // We wait for triggerPenaltyImpact() to call sync.
-        
-        // Safety: If animation never comes, sync after 3s
-        _safetyTimer?.cancel();
-        _safetyTimer = Timer(const Duration(seconds: 3), () {
-          if (mounted && _visualScore != newDisplayScore) {
-            setState(() {
-              _visualScore = newDisplayScore;
-            });
-          }
-        });
-      } else {
-        // Score Increased (Pot/Points) -> Update Immediately (no animation)
-        if (_visualScore != newDisplayScore) {
-          setState(() {
-            _visualScore = newDisplayScore;
-          });
-        }
-      }
+    // Always update immediately to prevent desync
+    if (_visualScore != widget.player.projectedScore) {
+      setState(() {
+        _visualScore = widget.player.projectedScore;
+      });
     }
     
-    // Safety Sync: Ensure visual score catches up if desynced and valid
-    if (newDisplayScore > _visualScore && _safetyTimer == null) {
-       // Force update if we drifted logic
-        if (_visualScore != newDisplayScore) {
-          setState(() {
-            _visualScore = newDisplayScore;
-          });
-        }
-    }
+
   }
 
   @override
@@ -321,7 +293,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                                     'LR',
                                     style: GoogleFonts.nunito(
                                       textStyle: theme.textTheme.bodySmall,
-                                      color: colors.textMain.withValues(alpha: 0.4), // Lighter (was 0.6)
+                                      color: const Color(0xFFB0B0B0), // Light Grey
                                       fontSize: 8, 
                                       letterSpacing: 0.5,
                                     ),
@@ -362,7 +334,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                               'AVG',
                               style: GoogleFonts.nunito(
                                 textStyle: theme.textTheme.bodySmall,
-                                color: colors.textMain.withValues(alpha: 0.4), // Lighter (was 0.6)
+                                color: const Color(0xFFB0B0B0), // Light Grey
                                 fontSize: 8,
                                 letterSpacing: 0.5,
                               ),
@@ -398,7 +370,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                               'HR',
                               style: GoogleFonts.nunito(
                                 textStyle: theme.textTheme.bodySmall,
-                                color: colors.textMain.withValues(alpha: 0.4), // Lighter (was 0.6)
+                                color: const Color(0xFFB0B0B0), // Light Grey
                                 fontSize: 8, // Increased from 9
                                 letterSpacing: 0.5,
                               ),

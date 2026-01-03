@@ -21,11 +21,10 @@ import '../widgets/themed_widgets.dart';
 import '../widgets/victory_splash.dart';
 import '../widgets/game_clock.dart';
 import '../widgets/pause_overlay.dart';
+import '../widgets/game_event_overlay.dart'; // Unified Overlay System
+import '../widgets/game_control_button.dart';
 // For Arial alternative (Lato/Roboto) if Arial not available, but user said Arial.
 import '../services/player_service.dart' as stats; // For stats fetching
-import '../widgets/foul_overlays.dart';
-import '../widgets/safe_shield_overlay.dart'; // Flying Penalty Animation
-import '../widgets/re_rack_overlay.dart';
 import '../utils/ui_utils.dart'; // Zoom Dialog Helper
 
 class GameScreen extends StatefulWidget {
@@ -63,145 +62,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   final GlobalKey<PlayerPlaqueState> _p2PlaqueKey =
       GlobalKey<PlayerPlaqueState>();
 
-  // Serial Event Processing
-  final List<GameEvent> _localEventQueue = [];
-  bool _isProcessingEvent = false;
-
-  void _processNextEvent() {
-    if (_isProcessingEvent || _localEventQueue.isEmpty) return;
-
-    _isProcessingEvent = true;
-    final event = _localEventQueue.removeAt(0);
-
-    if (event is FoulEvent) {
-      // Play Animation
-      // Play Animation
-      _showFoulSplash(
-        event.message,
-        event.player,
-        () {
-          _isProcessingEvent = false;
-          _processNextEvent(); // Loop
-        },
-      );
-    } else if (event is WarningEvent) {
-      // Restore Warning Dialog (Needed for 2-Foul Warning)
-      showZoomDialog(
-        context: context,
-        builder: (dialogContext) {
-          final l10n = AppLocalizations.of(dialogContext);
-          final colors = FortuneColors.of(dialogContext);
-          return AlertDialog(
-            backgroundColor: colors.backgroundCard,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(
-                    color: colors.primary, width: 2) 
-                ),
-            title: Text(event.title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: colors.primaryBright, fontWeight: FontWeight.bold)),
-            content: Text(event.message,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: colors.textMain, fontSize: 16)),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: [
-              ThemedButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  _isProcessingEvent = false;
-                  _processNextEvent();
-                },
-                label: l10n.gotIt,
-              ),
-            ],
-          );
-        },
-      );
-    } else if (event is DecisionEvent) {
-      // Show Decision Dialog
-      showZoomDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          final colors = FortuneColors.of(context);
-          return AlertDialog(
-          backgroundColor: colors.backgroundCard,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                  color: colors.primary, width: 2)),
-          title: Text(event.title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: colors.primaryBright,
-                  fontWeight: FontWeight.bold)),
-          content: Text(event.message,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colors.textMain)),
-          actionsAlignment: MainAxisAlignment.spaceEvenly,
-          actions: [
-            // Option 1 (Player 1)
-            ThemedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                event.onOptionSelected(0);
-                _isProcessingEvent = false;
-                _processNextEvent();
-              },
-              label: event.options[0],
-            ),
-            const SizedBox(width: 8),
-            // Option 2 (Player 2)
-            ThemedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                event.onOptionSelected(1);
-                _isProcessingEvent = false;
-                _processNextEvent();
-              },
-              label: event.options[1],
-            ),
-          ],
-        );
-      });
-
-    } else if (event is ReRackEvent) {
-      // Show Re-Rack Overlay
-      // Reset animation immediately to hide balls (show empty rack)
-      if (mounted) _rackAnimationController.value = 0.0;
-
-      _showReRackSplash(event.type, () {
-        // After overlay finishes, trigger Sequential Ball Fade-in
-        if (mounted) {
-          // NOW we physically reset the rack in logic
-          Provider.of<GameState>(context, listen: false).finalizeReRack();
-
-          // Ensure animation starts from invisible
-          _rackAnimationController.value = 0.0;
-          _rackAnimationController.forward();
-        }
-        _isProcessingEvent = false;
-        _processNextEvent();
-      });
-    } else if (event is SafeEvent) {
-      _showSafeShield();
-      // Safe Shield handles its own duration, but we should unblock queue
-      // Wait 1s? Or just unblock immediately? SafeShield is non-blocking visually?
-      // Usually _showSafeShield inserts overlay. We can wait a bit or direct.
-      // Let's assume non-blocking flow for now, or wait 1s.
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        _isProcessingEvent = false;
-        _processNextEvent();
-      });
-    } else {
-      // Unknown?
-      _isProcessingEvent = false;
-      _processNextEvent();
-    }
-  }
+  // Serial Event Processing - REMOVED (Handled by GameEventOverlay)
 
   // Overlay Entry for Penalty Animation
 
@@ -617,14 +478,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               child: SafeArea(
                 child: Consumer<GameState>(
                   builder: (context, gameState, child) {
-                    // Process Game Events (Animations)
-                    final events = gameState.consumeEvents();
-                    if (events.isNotEmpty) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _localEventQueue.addAll(events);
-                        _processNextEvent();
-                      });
-                    }
+                    // Game Events moved to GameEventOverlay
 
                     final hasWinner = gameState.players
                         .any((p) => p.score >= gameState.raceToScore);
@@ -917,132 +771,53 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               horizontal: 16, vertical: 8),
                           child: Row(
                             children: [
-                              // Foul Button - COMPACT
-                              Expanded(
-                                child: ThemedButton(
-                                  backgroundGradientColors: gameState
-                                              .foulMode !=
-                                          FoulMode.none
-                                      ? [
-                                          Colors.red.shade900.withValues(alpha: 0.3),
-                                          Colors.red.shade700.withValues(alpha: 0.3)
-                                        ]
-                                      : null,
-                                  onPressed: gameState.gameOver
-                                      ? () {}
-                                      : () {
-                                          FoulMode next;
-                                          switch (gameState.foulMode) {
-                                            case FoulMode.none:
-                                              next = FoulMode.normal;
-                                              break;
-                                            case FoulMode.normal:
-                                              next = gameState.canBreakFoul
-                                                  ? FoulMode.severe
-                                                  : FoulMode.none;
-                                              break;
-                                            case FoulMode.severe:
-                                              next = FoulMode.none;
-                                              break;
-                                          }
-                                          gameState.setFoulMode(next);
-                                        },
-                                  child: SizedBox(
-                                    height:
-                                        24, // Smaller height per user request
-                                    width: double.infinity,
-                                    child: Center(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: RichText(
-                                          text: TextSpan(
-                                            style: TextStyle(
-                                              color: gameState.foulMode ==
-                                                      FoulMode.none
-                                                  ? Colors.white
-                                                  : Colors.red,
-                                              fontSize: 14, // Larger font
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 0.3,
-                                            ),
-                                            children: gameState.foulMode ==
-                                                    FoulMode.none
-                                                ? [
-                                                    const TextSpan(
-                                                        text: 'NO FOUL')
-                                                  ]
-                                                : gameState.foulMode ==
-                                                        FoulMode.normal
-                                                    ? [
-                                                        const TextSpan(
-                                                            text: 'FOUL '),
-                                                        const TextSpan(
-                                                          text: '-1',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w900),
-                                                        ),
-                                                      ]
-                                                    : [
-                                                        const TextSpan(
-                                                            text:
-                                                                'BREAK FOUL '),
-                                                        const TextSpan(
-                                                          text: '-2',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w900),
-                                                        ),
-                                                      ],
-                                          ),
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Safe Button - COMPACT (No Shield)
-                              Expanded(
-                                child: ThemedButton(
-                                  onPressed: gameState.gameOver
-                                      ? () {}
-                                      : () {
-                                          // Just toggle the safe mode, don't switch players
-                                          gameState.toggleSafeMode();
-                                        },
-                                  backgroundGradientColors: gameState.isSafeMode
-                                      ? const [
-                                          Color(0xFF66BB6A),
-                                          Color(0xFF2E7D32)
-                                        ]
-                                      : null,
-                                  child: const SizedBox(
-                                    height:
-                                        24, // Smaller height per user request
-                                    width: double.infinity,
-                                    child: Center(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          'SAFE',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize:
-                                                14, // Larger font, same as foul button
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.3,
-                                          ),
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                            // Foul Button (Toggle)
+                            GameControlButton(
+                              text: gameState.foulMode == FoulMode.none
+                                  ? 'NO FOUL'
+                                  : (gameState.foulMode == FoulMode.normal
+                                      ? 'FOUL'
+                                      : 'BREAK FOUL'),
+                              subText: gameState.foulMode == FoulMode.none
+                                  ? null
+                                  : (gameState.foulMode == FoulMode.normal
+                                      ? '-1'
+                                      : '-2'),
+                              isActive: gameState.foulMode != FoulMode.none,
+                              activeColor: colors.danger,
+                              onPressed: () {
+                                // Cycle: None -> Normal -> Severe -> None
+                                FoulMode next;
+                                switch (gameState.foulMode) {
+                                  case FoulMode.none:
+                                    next = FoulMode.normal;
+                                    break;
+                                  case FoulMode.normal:
+                                    next = gameState.canBreakFoul
+                                        ? FoulMode.severe
+                                        : FoulMode.none;
+                                    break;
+                                  case FoulMode.severe:
+                                    next = FoulMode.none;
+                                    break;
+                                }
+                                gameState.setFoulMode(next);
+                              },
+                            ),
+                            
+                            const SizedBox(width: 12),
+                            
+                            // Safe Button (Toggle)
+                            GameControlButton(
+                              text: 'SAFE',
+                              isActive: gameState.isSafeMode,
+                              activeColor: const Color(0xFF4CAF50), // Green for Safe
+                              onPressed: gameState.gameOver
+                                  ? () {}
+                                  : () {
+                                      gameState.toggleSafeMode();
+                                    },
+                            ),
                             ],
                           ),
                         ),
@@ -1070,6 +845,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
         // Pause Overlay
         const PauseOverlay(),
+        
+        // Unified Game Event System (Splashes)
+        const GameEventOverlay(),
       ],
     ); // close Stack - this is the return of build()
   }
@@ -1281,114 +1059,5 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     ];
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFFE0E0E0),
-            fontSize: 12, // Increased label size
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.0,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20, // Increased value size (was 16/10)
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier',
-          ),
-        ),
-      ],
-    );
-  }
 
-  OverlayEntry? _messageOverlayEntry;
-
-  OverlayEntry? _shieldOverlayEntry;
-
-  void _showSafeShield() {
-    // Remove existing shield if any
-    _shieldOverlayEntry?.remove();
-
-    // Create shield overlay
-    _shieldOverlayEntry = OverlayEntry(
-      builder: (context) => SafeShieldOverlay(
-        onFinish: () {
-          _shieldOverlayEntry?.remove();
-          _shieldOverlayEntry = null;
-        },
-      ),
-    );
-
-    // Insert
-    Overlay.of(context, rootOverlay: true).insert(_shieldOverlayEntry!);
-  }
-
-  OverlayEntry? _reRackOverlayEntry;
-
-  void _showReRackSplash(String type, VoidCallback onComplete) {
-    _reRackOverlayEntry = OverlayEntry(
-      builder: (context) => ReRackOverlay(
-        type: type,
-        onFinish: () {
-          _reRackOverlayEntry?.remove();
-          _reRackOverlayEntry = null;
-          onComplete();
-        },
-      ),
-    );
-
-    // Insert
-    Overlay.of(context, rootOverlay: true).insert(_reRackOverlayEntry!);
-  }
-
-  // Replaced Flying Penalty with just the Splash (User Request)
-  void _showFoulSplash(
-      String message, Player player, VoidCallback onComplete) {
-    
-    // 1. Identify Target Plaque Key (for triggering score update sync)
-    final isP1 =
-        player == Provider.of<GameState>(context, listen: false).players[0];
-    final targetKey = isP1 ? _p1PlaqueKey : _p2PlaqueKey;
-
-    // 2. Remove existing overlays if any
-    _messageOverlayEntry?.remove();
-    _messageOverlayEntry = null;
-
-    // 3. Create Message Overlay (center fade)
-    _messageOverlayEntry = OverlayEntry(
-      builder: (context) {
-        // Ensure Theme is available in Overlay context
-        return Theme( // Wrap in Theme to ensure inherited styles work if needed, though usually automatic
-          data: Theme.of(context), 
-          child: FoulMessageOverlay(
-            message: message,
-            onFinish: () {
-              // Trigger Score Update Sync when splash finishes (or logic could be earlier)
-               targetKey.currentState?.triggerPenaltyImpact();
-               
-              _messageOverlayEntry?.remove();
-              _messageOverlayEntry = null;
-              onComplete();
-            },
-          ),
-        );
-      },
-    );
-
-    // 4. Insert overlay
-    Overlay.of(context, rootOverlay: true).insert(_messageOverlayEntry!);
-    
-    // Trigger score update immediately? 
-    // User wants "Immediate Update". Let's trigger sync right away, 
-    // but the plaque might defer if score went down.
-    // Actually, calling triggerPenaltyImpact NOW aligns visual with reality instantly.
-    targetKey.currentState?.triggerPenaltyImpact();
-  }
 }

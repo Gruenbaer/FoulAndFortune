@@ -176,11 +176,29 @@ abstract class AppLocalizations {
   /// **'Track for statistics and rankings'**
   String get leagueGameSubtitle;
 
+  /// No description provided for @breakFoulTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'BREAK FOUL'**
+  String get breakFoulTitle;
+
+  /// No description provided for @whoBreaksNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Who breaks next?'**
+  String get whoBreaksNext;
+
   /// No description provided for @twoFoulsWarning.
   ///
   /// In en, this message translates to:
   /// **'2 FOULS!'**
   String get twoFoulsWarning;
+
+  /// No description provided for @twoFoulsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on 2 consecutive fouls.\nOne more foul will result in a \n-15 points penalty!'**
+  String get twoFoulsMessage;
 
   /// No description provided for @iUnderstand.
   ///
@@ -281,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @startGame.
   ///
   /// In en, this message translates to:
-  /// **'Start Game'**
+  /// **'START GAME'**
   String get startGame;
 
   /// No description provided for @noPlayerSelected.

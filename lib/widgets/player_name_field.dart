@@ -40,6 +40,15 @@ class _PlayerNameFieldState extends State<PlayerNameField> {
   }
 
   @override
+  void didUpdateWidget(PlayerNameField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controller text if initialValue prop changed
+    if (widget.initialValue != oldWidget.initialValue) {
+      _controller.text = widget.initialValue;
+    }
+  }
+
+  @override
   void dispose() {
     _controller.removeListener(_onTextChanged);
     _focusNode.removeListener(_onFocusChanged);

@@ -48,7 +48,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get leagueGameSubtitle => 'Für Statistiken und Ranglisten erfassen';
 
   @override
+  String get breakFoulTitle => 'BREAK FOUL';
+
+  @override
+  String get whoBreaksNext => 'Wer stößt an?';
+
+  @override
   String get twoFoulsWarning => '2 FOULS!';
+
+  @override
+  String get twoFoulsMessage =>
+      'Du hast 2 aufeinanderfolgende Fouls.\nEin weiteres Foul führt zu einer Strafe von \n-15 Punkten!';
 
   @override
   String get iUnderstand => 'VERSTANDEN';
@@ -100,7 +110,7 @@ class AppLocalizationsDe extends AppLocalizations {
       '3 aufeinanderfolgende Fouls = -15 Punkte';
 
   @override
-  String get startGame => 'Spiel starten';
+  String get startGame => 'SPIEL STARTEN';
 
   @override
   String get noPlayerSelected => 'Kein Spieler ausgewählt';
@@ -327,7 +337,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dies setzt alle Punkte und Verlauf zurück. Sind Sie sicher?';
 
   @override
-  String get gameRules => 'Spielregeln';
+  String get gameRules => 'Voreinstellungen';
 
   @override
   String get details => 'Details';
