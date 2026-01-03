@@ -283,7 +283,7 @@ class DetailsScreen extends StatelessWidget {
             ScoreCard(
               player1: gameState.players[0],
               player2: gameState.players[1],
-              matchLog: gameState.matchLog,
+              inningRecords: gameState.inningRecords,
               winnerName: leaderName,
             ),
             

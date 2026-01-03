@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/fortune_theme.dart';
+import 'themed_widgets.dart';
 
 class ReRackOverlay extends StatefulWidget {
   final String type; // e.g. "14.1 Re-Rack"
@@ -53,6 +54,8 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final colors = FortuneColors.of(context);
+    
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -62,23 +65,18 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
             child: Transform.scale(
               scale: _scaleAnimation.value,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.3), // Transparent per user request
-                  borderRadius: BorderRadius.circular(20),
-                  // border: Border.all(color: Colors.amber.shade700, width: 2), // Removed per user request
-                  boxShadow: const [
-                     BoxShadow(color: Colors.black87, blurRadius: 20, spreadRadius: 5),
-                  ],
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final colors = FortuneColors.of(context);
-                    return Column(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: CustomPaint(
+                  painter: colors.themeId == 'cyberpunk'
+                      ? CyberpunkFramePainter(colors)
+                      : (colors.themeId == 'ghibli'
+                          ? GhibliFramePainter(colors, seed: 42) // Constant seed for consistency
+                          : BrassFramePainter(colors)),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Icon removed per user request
-                        const SizedBox(height: 12),
                         Text(
                           widget.type,
                           textAlign: TextAlign.center,
@@ -91,8 +89,8 @@ class _ReRackOverlayState extends State<ReRackOverlay> with SingleTickerProvider
                           ),
                         ),
                       ],
-                    );
-                  },
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import '../models/game_record.dart';
 
 class GameHistoryService {
@@ -21,7 +22,7 @@ class GameHistoryService {
       games.sort((a, b) => b.startTime.compareTo(a.startTime));
       return games;
     } catch (e) {
-      print('Error loading game history: $e');
+      debugPrint('Error loading game history: \$e');
       return [];
     }
   }

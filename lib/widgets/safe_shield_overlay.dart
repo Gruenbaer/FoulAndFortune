@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/fortune_theme.dart';
 
 /// Shield overlay that fades in/out when Safe Mode is activated
 class SafeShieldOverlay extends StatefulWidget {
@@ -51,6 +52,9 @@ class _SafeShieldOverlayState extends State<SafeShieldOverlay> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    // Access Theme Colors
+    final colors = FortuneColors.of(context);
+    
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -66,25 +70,25 @@ class _SafeShieldOverlayState extends State<SafeShieldOverlay> with SingleTicker
                   Icon(
                     Icons.shield,
                     size: 220,
-                    color: Colors.green.withValues(alpha: 0.3),
+                    color: colors.successLight.withValues(alpha: 0.3),
                   ),
                   // Main shield
                   Icon(
                     Icons.shield,
                     size: 200,
-                    color: Colors.green.shade400,
+                    color: colors.success,
                   ),
                   // Inner highlight
                   Icon(
                     Icons.shield,
                     size: 160,
-                    color: Colors.green.shade200,
+                    color: colors.successDark.withValues(alpha: 0.2), // Subtle detail
                   ),
                   // Center emblem
-                  const Icon(
+                  Icon(
                     Icons.verified_user,
                     size: 80,
-                    color: Colors.white,
+                    color: colors.textMain, // Contrast text color
                   ),
                 ],
               ),

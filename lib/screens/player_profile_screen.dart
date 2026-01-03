@@ -28,7 +28,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
   
   // Rivalry Data: Opponent Name -> {games, wins, losses}
   Map<String, Map<String, int>> _rivalryStats = {};
-  bool _isLoadingRivalry = true;
+
 
   @override
   void initState() {
@@ -63,7 +63,6 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
     if (mounted) {
       setState(() {
         _rivalryStats = stats;
-        _isLoadingRivalry = false;
       });
     }
   }

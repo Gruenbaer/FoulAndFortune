@@ -48,7 +48,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
   IssueData? _detectedIssue;
   String? _issueType; // 'bug' or 'feature'
   final IssueGeneratorService _issueService = IssueGeneratorService();
-  bool _isCreatingIssue = false;
+
 
   // Rate limiting for API calls
   DateTime? _lastApiCall;
@@ -417,7 +417,7 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
             style: ElevatedButton.styleFrom(backgroundColor: FortuneColors.of(context).primary),
             onPressed: () async {
               Navigator.of(ctx).pop();
-              setState(() => _isCreatingIssue = true);
+              
               _addBotMessage("Creating issue file...");
               
               try {
@@ -448,12 +448,12 @@ class _FeedbackChatDialogState extends State<FeedbackChatDialog> {
                 _addBotMessage("✅ Issue created successfully!\nLocation: $path");
                 setState(() {
                   _detectedIssue = null;
-                  _isCreatingIssue = false;
+                  
                 });
                 
               } catch (e) {
                 _addBotMessage("❌ Error creating issue: $e");
-                setState(() => _isCreatingIssue = false);
+                
               }
             },
             child: const Text('Create'),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
@@ -26,11 +27,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   GameRecord? _activeGame;
+  String _version = '';
 
   @override
   void initState() {
     super.initState();
     _checkActiveGame();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _version = 'v${info.version} (${info.buildNumber})';
+      });
+    }
   }
 
   Future<void> _checkActiveGame() async {
@@ -238,12 +250,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 80), // Space for cogs
 
                     // Version
-                    Text(
-                      'v3.3.0 - Steampunk Core',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: SteampunkTheme.steamWhite.withValues(alpha: 0.3),
+                    if (_version.isNotEmpty)
+                      Text(
+                        _version,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: SteampunkTheme.steamWhite.withValues(alpha: 0.7),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

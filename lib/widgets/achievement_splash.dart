@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import '../models/achievement.dart';
 import '../models/game_settings.dart';
+import '../theme/fortune_theme.dart';
 
 class AchievementSplash extends StatefulWidget {
   final Achievement achievement;
@@ -138,14 +139,14 @@ class _AchievementSplashState extends State<AchievementSplash>
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            Colors.amber.shade700,
-                            Colors.orange.shade600,
+                            FortuneColors.of(context).primaryBright,
+                            FortuneColors.of(context).primary,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.amber.withValues(alpha: 0.6),
+                            color: FortuneColors.of(context).primary.withValues(alpha: 0.6),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -154,14 +155,14 @@ class _AchievementSplashState extends State<AchievementSplash>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
+                          Text(
                             '🏆 ACHIEVEMENT UNLOCKED! 🏆',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 2,
-                            ),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: FortuneColors.of(context).textMain,
+                                letterSpacing: 2,
+                              ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
@@ -182,11 +183,11 @@ class _AchievementSplashState extends State<AchievementSplash>
                           const SizedBox(height: 16),
                           Text(
                             widget.achievement.description,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white70,
-                              height: 1.4,
-                            ),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.8),
+                                height: 1.4,
+                              ),
                             textAlign: TextAlign.center,
                           ),
                         ],

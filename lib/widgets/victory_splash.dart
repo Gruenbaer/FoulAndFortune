@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import '../models/player.dart';
+import '../models/game_state.dart'; // For InningRecord
 import '../theme/fortune_theme.dart';
 import 'themed_widgets.dart';
 import 'score_card.dart';
@@ -10,7 +11,7 @@ class VictorySplash extends StatefulWidget {
   final Player winner;
   final Player loser;
   final int raceToScore;
-  final List<String> matchLog;
+  final List<InningRecord> inningRecords;
   final Duration elapsedDuration;
   final VoidCallback onNewGame;
   final VoidCallback onExit;
@@ -20,7 +21,7 @@ class VictorySplash extends StatefulWidget {
     required this.winner,
     required this.loser,
     required this.raceToScore,
-    required this.matchLog,
+    required this.inningRecords,
     required this.elapsedDuration,
     required this.onNewGame,
     required this.onExit,
@@ -49,7 +50,6 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
-    final theme = Theme.of(context);
     
     return Scaffold(
       backgroundColor: colors.backgroundMain,
@@ -284,7 +284,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                         ScoreCard(
                           player1: widget.winner,
                           player2: widget.loser,
-                          matchLog: widget.matchLog,
+                          inningRecords: widget.inningRecords,
                           winnerName: widget.winner.name,
                         ),
                       ],
@@ -328,65 +328,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
     return "$hours$minutes:$seconds";
   }
 
-  Widget _buildScoreLine(String name, int score, {required bool isWinner}) {
-    final colors = FortuneColors.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Text(
-            name,
-            style: TextStyle(
-              color: isWinner ? colors.primaryBright : colors.textMain,
-              fontSize: isWinner ? 24 : 18,
-              fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-        Text(
-          score.toString(),
-          style: TextStyle(
-            color: isWinner ? colors.accent : colors.textMain,
-            fontSize: isWinner ? 32 : 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildStatLine(String label, String winnerStat, String loserStat) {
-    final colors = FortuneColors.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              winnerStat,
-              style: TextStyle(color: colors.textMain),
-              textAlign: TextAlign.left,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              color: colors.primaryDark,
-              fontSize: 12,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              loserStat,
-              style: TextStyle(color: colors.textMain),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildStatsRow(String label, String winnerStat, String loserStat) {
     final colors = FortuneColors.of(context);
@@ -440,63 +382,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
   }
 
   String _calculateHighestRun(Player player) {
-    // Parse match log to find highest consecutive run for this player
-    int currentRun = 0;
-    int highestRun = 0;
-    String lastPlayerName = '';
-    
-    // Iterate through match log chronologically (matchLog[0]=newest, iterate backwards for chronological order)
-    for (int i = widget.matchLog.length - 1; i >= 0; i--) {
-      String logEntry = widget.matchLog[i];
-      
-      // Check if this entry is for the current player
-      if (logEntry.contains('${player.name}:')) {
-        // Parse points from various formats:
-        // - "Player: +14 pts" (normal scoring)
-        // - "Player: Double-Sack! +15" (white ball)
-        // - "Player: Re-rack (14.1 Continuous)" (ball 1 re-rack)
-        RegExp pointsRegex = RegExp(r'\+(\d+)');
-        Match? match = pointsRegex.firstMatch(logEntry);
-        
-        if (match != null) {
-          int points = int.parse(match.group(1)!);
-          
-          // If same player as last scoring action, add to current run
-          if (lastPlayerName == player.name) {
-            currentRun += points;
-          } else {
-            // New player started scoring, reset current run
-            currentRun = points;
-            lastPlayerName = player.name;
-          }
-          
-          // Update highest run if current exceeds it
-          if (currentRun > highestRun) {
-            highestRun = currentRun;
-          }
-        } else if (logEntry.contains('Miss') || logEntry.contains('Safe')) {
-          // Entry exists but no points (safe, miss) - break the run
-          if (lastPlayerName == player.name) {
-            currentRun = 0;
-            lastPlayerName = '';
-          }
-        } else if (logEntry.contains('Foul')) {
-          // Foul - break the run
-          if (lastPlayerName == player.name) {
-            currentRun = 0;
-            lastPlayerName = '';
-          }
-        }
-        // Note: Re-rack and Double-Sack don't break the run - player continues
-      } else {
-        // Entry for other player - break the run if we were tracking this player
-        if (lastPlayerName == player.name) {
-          currentRun = 0;
-          lastPlayerName = '';
-        }
-      }
-    }
-    
-    return highestRun.toString();
+    // Use the highestRun tracked directly in the Player model
+    return player.highestRun.toString();
   }
 }

@@ -58,36 +58,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     }
   }
 
-  Future<void> _deletePlayer(Player player) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).deletePlayer),
-        content: Text('${AppLocalizations.of(context).confirmDelete} "${player.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context).delete),
-          ),
-        ],
-      ),
-    );
 
-    if (confirm == true) {
-      await _playerService.deletePlayer(player.id);
-      await _loadPlayers();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Player "${player.name}" deleted')),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

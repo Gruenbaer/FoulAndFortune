@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +21,7 @@ class IssueGeneratorService {
           labels: ['bug', 'qa-bot'],
         );
       } catch (e) {
-        print("GitHub API failed: $e. Falling back to local file.");
+        debugPrint("GitHub API failed: $e. Falling back to local file.");
       }
     }
 
@@ -43,7 +44,7 @@ class IssueGeneratorService {
           labels: ['enhancement', 'qa-bot'],
         );
       } catch (e) {
-        print("GitHub API failed: $e. Falling back to local file.");
+        debugPrint("GitHub API failed: $e. Falling back to local file.");
       }
     }
 

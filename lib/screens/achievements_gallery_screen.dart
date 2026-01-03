@@ -335,37 +335,7 @@ class AchievementsGalleryScreen extends StatelessWidget {
     );
   }
   
-  Widget _buildInfoSection(AppLocalizations l10n, String label, String content, IconData icon) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-             Icon(icon, size: 16, color: Colors.brown.shade600),
-             const SizedBox(width: 8),
-             Text(
-               label.toUpperCase(),
-               style: TextStyle(
-                 fontSize: 12,
-                 fontWeight: FontWeight.bold,
-                 letterSpacing: 1.2,
-                 color: Colors.brown.shade600,
-               ),
-             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          content,
-          style: GoogleFonts.rye(
-            fontSize: 16,
-            color: const Color(0xFF5D4037),
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
+
 
   String _formatDate(DateTime date) {
     return '${date.day}.${date.month}.${date.year}';

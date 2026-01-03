@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import '../models/game_settings.dart';
+import '../theme/fortune_theme.dart';
 
 /// Message Overlay: Fades in/out at screen center
 class FoulMessageOverlay extends StatefulWidget {
@@ -74,9 +75,9 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
                       style: GoogleFonts.nunito(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
-                        color: Colors.redAccent,
+                        color: FortuneColors.of(context).danger,
                         shadows: [
-                          const Shadow(blurRadius: 10, color: Colors.black, offset: Offset(2, 2)),
+                           Shadow(blurRadius: 10, color: FortuneColors.of(context).dangerDark, offset: const Offset(2, 2)),
                         ],
                       ),
                     ),
@@ -174,7 +175,7 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
         left = left.clamp(0.0, screenWidth - 200.0);
         
         // Dynamic font sizing based on screen width
-        final baseFontSize = screenWidth < 400 ? 60.0 : 72.0;
+
         final singleFontSize = screenWidth < 400 ? 72.0 : 84.0;
         
         return Positioned(
@@ -206,9 +207,9 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
                           fontSize: singleFontSize,
                           fontWeight: FontWeight.w900,
                           // Always Red for Foul Overlay (since we removed Flying Points for normal play)
-                          color: Colors.redAccent,
+                          color: FortuneColors.of(context).danger,
                           shadows: [
-                            const Shadow(blurRadius: 4, color: Colors.black, offset: Offset(1, 1)),
+                             Shadow(blurRadius: 4, color: FortuneColors.of(context).dangerDark, offset: const Offset(1, 1)),
                           ],
                         ),
                       ),

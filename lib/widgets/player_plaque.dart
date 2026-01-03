@@ -22,16 +22,16 @@ class PlayerPlaque extends StatefulWidget {
 
 class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixin {
   late AnimationController _effectController;
-  late Animation<double> _scaleAnimation;
-  
-  // Animation for last points box pulse
-  late AnimationController _lastPointsController;
-  late Animation<double> _lastPointsPulse;
+
   
   // UI Logic: Visual Score (delayed update)
   late int _visualScore;
   Timer? _safetyTimer;
-  
+
+  // Animation for last points box pulse
+  late AnimationController _lastPointsController;
+  late Animation<double> _lastPointsPulse;
+
   // Track last update for animation trigger
   int _lastUpdateCount = -1;
   
@@ -44,14 +44,9 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
     _effectController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
     
-    // Scale: Bump up
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.3), weight: 1), // Grow
-      TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0), weight: 2), // Shrink back
-    ]).animate(CurvedAnimation(
-      parent: _effectController,
-      curve: Curves.elasticOut,
-    ));
+
+    
+    
     
     // Last points pulse: 1.0 -> 5.0 -> Hold -> 1.0
     _lastPointsController = AnimationController(
@@ -74,8 +69,8 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
         setState(() {}); // Trigger rebuild
       }
     });
-    
-    _visualScore = widget.player.score; // Init with current
+
+    _visualScore = widget.player.projectedScore; // Init with projected
     _lastUpdateCount = widget.player.updateCount;
   }
 
@@ -90,36 +85,39 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
       _lastPointsController.forward(from: 0.0); // Trigger pulse animation
     }
     
-    if (widget.player.score != oldWidget.player.score) {
-      if (widget.player.score < oldWidget.player.score) {
+    final oldDisplayScore = oldWidget.player.projectedScore;
+    final newDisplayScore = widget.player.projectedScore;
+    
+    if (newDisplayScore != oldDisplayScore) {
+      if (newDisplayScore < oldDisplayScore) {
         // Score Dropped (Penalty?) -> DEFER UPDATE
         // We wait for triggerPenaltyImpact() to call sync.
         
         // Safety: If animation never comes, sync after 3s
         _safetyTimer?.cancel();
         _safetyTimer = Timer(const Duration(seconds: 3), () {
-          if (mounted && _visualScore != widget.player.score) {
+          if (mounted && _visualScore != newDisplayScore) {
             setState(() {
-              _visualScore = widget.player.score;
+              _visualScore = newDisplayScore;
             });
           }
         });
       } else {
         // Score Increased (Pot/Points) -> Update Immediately (no animation)
-        if (_visualScore != widget.player.score) {
+        if (_visualScore != newDisplayScore) {
           setState(() {
-            _visualScore = widget.player.score;
+            _visualScore = newDisplayScore;
           });
         }
       }
     }
     
     // Safety Sync: Ensure visual score catches up if desynced and valid
-    if (widget.player.score > _visualScore && _safetyTimer == null) {
+    if (newDisplayScore > _visualScore && _safetyTimer == null) {
        // Force update if we drifted logic
-        if (_visualScore != widget.player.score) {
+        if (_visualScore != newDisplayScore) {
           setState(() {
-            _visualScore = widget.player.score;
+            _visualScore = newDisplayScore;
           });
         }
     }
@@ -134,11 +132,13 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
   }
 
   // Exposed method to trigger effect AND update score
+  // Exposed method to trigger effect AND update score
   void triggerPenaltyImpact() {
     // Award the score (Sync visual to actual)
-    if (_visualScore != widget.player.score) {
+    final targetScore = widget.player.projectedScore;
+    if (_visualScore != targetScore) {
       setState(() {
-        _visualScore = widget.player.score;
+        _visualScore = targetScore;
       });
     }
     _safetyTimer?.cancel();
@@ -293,16 +293,14 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                       // Shows Cumulative Run
                       Builder(
                         builder: (context) {
-                          // Logic: Active -> currentRun, Inactive -> lastRun
-                          final int runValue = widget.player.isActive 
-                              ? widget.player.currentRun 
-                              : widget.player.lastRun;
+                          // Logic: Show LAST AWARDED points (not cumulative run)
+                          final int runValue = widget.player.lastAwardedPoints;
                           
                           // Always show sign (+0, +5, -1)
                           final String runText = runValue >= 0 ? '+$runValue' : '$runValue';
                           
                           // Color logic: 0 is Accent (for visibility), Negative Red
-                          final Color valColor = runValue < 0 ? Colors.red : colors.accent;
+                          final Color valColor = runValue < 0 ? FortuneColors.of(context).danger : colors.accent;
 
                           return Transform.scale(
                             scale: _lastPointsPulse.value,

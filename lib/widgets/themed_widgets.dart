@@ -267,7 +267,7 @@ class CyberpunkFramePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
     
     // Cut corners (Chamfered)
     const double cut = 12.0;

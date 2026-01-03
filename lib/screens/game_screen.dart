@@ -52,9 +52,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   DateTime? _gameStartTime; // Track when game started
   bool _isCompletedSaved = false;
 
-  // Historical stats for display
-  stats.Player? _p1Stats;
-  stats.Player? _p2Stats;
+
 
   // Rack Animation Controller
   late AnimationController _rackAnimationController;
@@ -77,16 +75,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     if (event is FoulEvent) {
       // Play Animation
-      _showFlyingPenalty(
-        event.points,
+      // Play Animation
+      _showFoulSplash(
         event.message,
         event.player,
         () {
           _isProcessingEvent = false;
           _processNextEvent(); // Loop
         },
-        positivePoints: event.positivePoints,
-        penalty: event.penalty,
       );
     } else if (event is WarningEvent) {
       // Restore Warning Dialog (Needed for 2-Foul Warning)
@@ -94,21 +90,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         context: context,
         builder: (dialogContext) {
           final l10n = AppLocalizations.of(dialogContext);
+          final colors = FortuneColors.of(dialogContext);
           return AlertDialog(
-            backgroundColor: SteampunkTheme.mahoganyDark,
+            backgroundColor: colors.backgroundCard,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(
-                    color: Colors.amber, width: 2) // Yellow for warning
+                side: BorderSide(
+                    color: colors.primary, width: 2) 
                 ),
             title: Text(event.title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: Colors.amber, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    color: colors.primaryBright, fontWeight: FontWeight.bold)),
             content: Text(event.message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: SteampunkTheme.steamWhite, fontSize: 16)),
+                style: TextStyle(
+                    color: colors.textMain, fontSize: 16)),
             actionsAlignment: MainAxisAlignment.center,
             actions: [
               ThemedButton(
@@ -128,20 +125,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       showZoomDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          backgroundColor: SteampunkTheme.mahoganyDark,
+        builder: (context) {
+          final colors = FortuneColors.of(context);
+          return AlertDialog(
+          backgroundColor: colors.backgroundCard,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(
-                  color: SteampunkTheme.brassPrimary, width: 2)),
+              side: BorderSide(
+                  color: colors.primary, width: 2)),
           title: Text(event.title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: SteampunkTheme.brassBright,
+              style: TextStyle(
+                  color: colors.primaryBright,
                   fontWeight: FontWeight.bold)),
           content: Text(event.message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: SteampunkTheme.steamWhite)),
+              style: TextStyle(color: colors.textMain)),
           actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
             // Option 1 (Player 1)
@@ -166,8 +165,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               label: event.options[1],
             ),
           ],
-        ),
-      );
+        );
+      });
+
     } else if (event is ReRackEvent) {
       // Show Re-Rack Overlay
       // Reset animation immediately to hide balls (show empty rack)
@@ -204,23 +204,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   // Overlay Entry for Penalty Animation
-  OverlayEntry? _penaltyOverlayEntry;
 
-  Future<void> _loadPlayerStats() async {
-    final gameState = Provider.of<GameState>(context, listen: false);
-    final service = stats.PlayerService();
-    // Fetch persistent data for P1 and P2
-    // We match by Name since that's what we have
-    final p1 = await service.getPlayerByName(gameState.players[0].name);
-    final p2 = await service.getPlayerByName(gameState.players[1].name);
 
-    if (mounted) {
-      setState(() {
-        _p1Stats = p1;
-        _p2Stats = p2;
-      });
-    }
-  }
+
 
   Future<void> _saveInProgressGame(GameState gameState) async {
     // Check if game is completed (score >= raceToScore)
@@ -319,7 +305,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       await updatePlayerStats(p1, p1 == effectiveWinner);
       await updatePlayerStats(p2, p2 == effectiveWinner);
     } catch (e) {
-      print('Error updating player stats: $e');
+      debugPrint('Error updating player stats: \$e');
     }
   }
 
@@ -336,14 +322,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         if (widget.resumeGame!.snapshot != null) {
           gameState.loadFromJson(widget.resumeGame!.snapshot!);
         }
-        _loadPlayerStats();
+
       });
     } else {
       _gameId = DateTime.now().millisecondsSinceEpoch.toString();
       _gameStartTime = DateTime.now();
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadPlayerStats();
+
       });
     }
 
@@ -655,7 +641,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               loser: gameState.players
                                   .firstWhere((p) => p != gameState.winner),
                               raceToScore: gameState.raceToScore,
-                              matchLog: gameState.matchLog,
+                              inningRecords: gameState.inningRecords,
                               elapsedDuration: gameState.elapsedDuration,
                               onNewGame: () {
                                 Navigator.of(context)
@@ -1189,13 +1175,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final rackWidth = 5 * diameter;
     final rackHeight = 4 * verticalOffset + diameter;
 
-    // Helper to check if ball can be tapped (rule enforcement)
-    bool canTapBall(int ballNumber) {
-      // Logic Simplified: We allow tapping even if it's the last ball.
-      // This is necessary to register Fouls/Safes without pocketing the ball (Ball Count remains 1).
-      // The GameState.onBallTapped logic handles the "0 points" calculation correctly.
-      return true;
-    }
+
 
     // Helper to validate and handle taps
     void handleTap(int ballNumber) {
@@ -1203,7 +1183,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       if (gameState.gameOver) return;
 
       // Enforce rule: cannot tap last ball during foul/safe
-      if (!canTapBall(ballNumber)) return;
+      // if (!canTapBall(ballNumber)) return; // Logic simplified, always true now
 
       if (gameState.foulMode == FoulMode.severe &&
           ballNumber != 15 &&
@@ -1244,48 +1224,63 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 child: SizedBox(
                   width: diameter,
                   height: diameter,
-                  child: AnimatedBuilder(
+                  child: Builder(
+                    builder: (context) {
+                      // Opacity Logic:
+                      // 1. Not on table -> 0 (Invisible)
+                      // 2. On table but disabled (Break Foul Mode) -> 0.4 (Greyed Out)
+                      // 3. On table and active -> 1.0
+                      
+                      final bool isOnTable = gameState.activeBalls.contains(rows[r][c]);
+                      final bool isInteractable = !gameState.gameOver &&
+                          isOnTable &&
+                          (gameState.foulMode != FoulMode.severe || rows[r][c] == 15);
+                      
+                      final double targetOpacity = !isOnTable ? 0.4 : (isInteractable ? 1.0 : 0.4);
+
+                      return AnimatedBuilder(
                     animation: _rackAnimationController,
                     builder: (context, child) {
-                      // Sequential Fade In
-                      // Total 15 balls. Index count 0..14 roughly.
-                      // We need a stable index.
+                      // Sequential Fade In Logic
                       int flatIndex = 0;
                       for (int i = 0; i < r; i++) {
                         flatIndex += rows[i].length;
                       }
                       flatIndex += c;
 
-                      // Stagger: 0.0 to 1.0 range
-                      // Each ball takes 0.3 of duration.
-                      // Starts shift by index * 0.04 (15 * 0.04 = 0.6)
-                      // End = Start + 0.3. Max = 0.6 + 0.3 = 0.9. Fits in 1.0.
                       final double start = flatIndex * 0.05;
                       final double end = start + 0.3;
 
-                      final opacity = Curves.easeOut.transform(
+                      final animOpacity = Curves.easeOut.transform(
                           ((_rackAnimationController.value - start) /
                                   (end - start))
                               .clamp(0.0, 1.0));
 
+                      // Combine opacities? No, BallButton handles its own opacity logic now.
+                      // But we need the enter animation fade too.
+                      // If BallButton opacity is 0 (invisible), animOpacity doesn't matter.
+                      // If BallButton is visible, we multiply/apply.
+                      // Actually, BallButton takes `opacity`.
+                      // AnimatedBuilder wraps it in Opacity?
+                      // The original code wrapped `child` in `Opacity(opacity: animOpacity)`.
+                      // So we have Outer Opacity (Animation) -> Inner Opacity (BallButton Logic).
+                      
                       return Opacity(
-                        opacity: opacity,
+                        opacity: animOpacity,
                         child: child,
                       );
                     },
                     child: BallButton(
                       ballNumber: rows[r][c],
-                      // Grey out all balls except 15 during Break Foul
-                      isActive: !gameState.gameOver &&
-                          gameState.activeBalls.contains(rows[r][c]) &&
-                          canTapBall(rows[r][c]) &&
-                          (gameState.foulMode != FoulMode.severe ||
-                              rows[r][c] == 15),
+                      isActive: isInteractable,
+                      opacity: targetOpacity, 
                       onTap: () => handleTap(rows[r][c]),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
+            ),
+          ),
 
           // Cue Ball (Double Sack)
           // Moved closer to Ball 1 (left: 0) to avoid cutoff.
@@ -1299,11 +1294,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: diameter,
                   height: diameter,
-                  child: BallButton(
+                    child: BallButton(
                     ballNumber: 0,
-                    // Disabled during Break Foul (per user request)
                     isActive: !gameState.gameOver &&
                         gameState.foulMode != FoulMode.severe,
+                    // Cue Ball always visible if game not over, or handled by rack animation
+                    // No separate opacity logic needed as it doesn't get "pocketed" in same way
                     onTap: () => handleTap(0),
                   ),
                 ),
@@ -1372,7 +1368,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   OverlayEntry? _messageOverlayEntry;
-  OverlayEntry? _pointsOverlayEntry;
+
   OverlayEntry? _shieldOverlayEntry;
 
   void _showSafeShield() {
@@ -1411,175 +1407,47 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     Overlay.of(context, rootOverlay: true).insert(_reRackOverlayEntry!);
   }
 
-  void _showFlyingPenalty(
-      int points, String message, Player player, VoidCallback onComplete,
-      {int? positivePoints, int? penalty}) {
-    // 1. Identify Target Plaque Key based on player instance
+  // Replaced Flying Penalty with just the Splash (User Request)
+  void _showFoulSplash(
+      String message, Player player, VoidCallback onComplete) {
+    
+    // 1. Identify Target Plaque Key (for triggering score update sync)
     final isP1 =
         player == Provider.of<GameState>(context, listen: false).players[0];
     final targetKey = isP1 ? _p1PlaqueKey : _p2PlaqueKey;
 
-    // 2. Get Target Position (Score height, plaque center X)
-    final plaqueState = targetKey.currentState;
-    final plaqueContext = targetKey.currentContext;
-
-    if (plaqueContext == null ||
-        plaqueState == null ||
-        plaqueState.scoreKey.currentContext == null) {
-      onComplete();
-      return;
-    }
-
-    final plaqueRenderBox = plaqueContext.findRenderObject() as RenderBox?;
-    final scoreRenderBox =
-        plaqueState.scoreKey.currentContext!.findRenderObject() as RenderBox?;
-
-    if (plaqueRenderBox == null || scoreRenderBox == null) {
-      onComplete();
-      return;
-    }
-
-    // Use plaque center X, score center Y
-    final plaqueCenter =
-        plaqueRenderBox.localToGlobal(plaqueRenderBox.size.center(Offset.zero));
-    final scoreCenter =
-        scoreRenderBox.localToGlobal(scoreRenderBox.size.center(Offset.zero));
-    final position = Offset(plaqueCenter.dx, scoreCenter.dy);
-
-    // 3. Remove existing overlays if any (spam protection)
+    // 2. Remove existing overlays if any
     _messageOverlayEntry?.remove();
-    _pointsOverlayEntry?.remove();
+    _messageOverlayEntry = null;
 
-    // 4. Create Message Overlay (center fade)
+    // 3. Create Message Overlay (center fade)
     _messageOverlayEntry = OverlayEntry(
-      builder: (context) => FoulMessageOverlay(
-        message: message,
-        onFinish: () {
-          _messageOverlayEntry?.remove();
-          _messageOverlayEntry = null;
-        },
-      ),
+      builder: (context) {
+        // Ensure Theme is available in Overlay context
+        return Theme( // Wrap in Theme to ensure inherited styles work if needed, though usually automatic
+          data: Theme.of(context), 
+          child: FoulMessageOverlay(
+            message: message,
+            onFinish: () {
+              // Trigger Score Update Sync when splash finishes (or logic could be earlier)
+               targetKey.currentState?.triggerPenaltyImpact();
+               
+              _messageOverlayEntry?.remove();
+              _messageOverlayEntry = null;
+              onComplete();
+            },
+          ),
+        );
+      },
     );
 
-    // 5. Create Points Overlay (above score, fades then updates)
-    _pointsOverlayEntry = OverlayEntry(
-      builder: (context) => FoulPointsOverlay(
-        points: points,
-        positivePoints: positivePoints,
-        penalty: penalty,
-        targetPosition: position,
-        onImpact: () {
-          // Trigger Shake on Plaque and update score
-          targetKey.currentState?.triggerPenaltyImpact();
-        },
-        onFinish: () {
-          _pointsOverlayEntry?.remove();
-          _pointsOverlayEntry = null;
-          onComplete();
-        },
-      ),
-    );
-
-    // 6. Insert both overlays
+    // 4. Insert overlay
     Overlay.of(context, rootOverlay: true).insert(_messageOverlayEntry!);
-    Overlay.of(context, rootOverlay: true).insert(_pointsOverlayEntry!);
-  }
-
-  void _show2FoulWarning(BuildContext context, GameState gameState) {
-    showZoomDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.amber.shade900,
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.white, size: 32),
-            SizedBox(width: 12),
-            Text('2 FOULS!',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
-            SizedBox(width: 12),
-            Icon(Icons.warning_amber_rounded, color: Colors.white, size: 32),
-          ],
-        ),
-        content: RichText(
-          textAlign: TextAlign.center,
-          text: const TextSpan(
-            style: TextStyle(color: Colors.white, fontSize: 18),
-            children: [
-              TextSpan(
-                  text:
-                      'You are on 2 consecutive fouls.\nOne more foul will result in a '),
-              TextSpan(
-                text: '-15 points',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-              TextSpan(text: ' penalty!'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              gameState.dismissTwoFoulWarning();
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.black45,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('I UNDERSTAND'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _show3FoulPopup(BuildContext context, GameState gameState) {
-    // Logic split: Animation handled by Event Queue.
-    // This method now only handles the Dialog/Reset logic if needed.
-
-    gameState.dismissThreeFoulPopup(); // Done
-
-    // Maybe show a dialog explaining the reset?
-    // "3 FOULS! -15 Points. Rack Reset."
-    showZoomDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: const Text('3 FOULS!'),
-              content: const Text(
-                  'Three consecutive fouls.\nPenalty: -15 Points.\nRack is reset.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
-                )
-              ],
-            ));
-  }
-
-  void _showResetDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.resetGame),
-        content: Text(l10n.resetGameMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Provider.of<GameState>(context, listen: false).resetGame();
-              Navigator.of(context).pop();
-            },
-            child: Text(l10n.reset),
-          ),
-        ],
-      ),
-    );
+    
+    // Trigger score update immediately? 
+    // User wants "Immediate Update". Let's trigger sync right away, 
+    // but the plaque might defer if score went down.
+    // Actually, calling triggerPenaltyImpact NOW aligns visual with reality instantly.
+    targetKey.currentState?.triggerPenaltyImpact();
   }
 }

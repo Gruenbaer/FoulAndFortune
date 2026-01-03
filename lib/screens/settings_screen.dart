@@ -291,8 +291,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     RadioListTile<String>(
                       title: Text(l10n.german, style: theme.textTheme.bodyMedium),
                       value: 'de',
+                      // ignore: deprecated_member_use
                       groupValue: _settings.languageCode,
                       activeColor: fortuneTheme.secondary,
+                      // ignore: deprecated_member_use
                       onChanged: (value) {
                         setState(() {
                           _settings = _settings.copyWith(languageCode: value);
@@ -302,8 +304,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     RadioListTile<String>(
                       title: Text(l10n.english, style: theme.textTheme.bodyMedium),
                       value: 'en',
+                      // ignore: deprecated_member_use
                       groupValue: _settings.languageCode,
                       activeColor: fortuneTheme.secondary,
+                      // ignore: deprecated_member_use
                       onChanged: (value) {
                         setState(() {
                           _settings = _settings.copyWith(languageCode: value);
@@ -324,8 +328,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: const Text('Classic Brass & Wood'),
                       secondary: const Icon(Icons.access_time_filled, color: Color(0xFFCDBE78)),
                       value: 'steampunk',
+                      // ignore: deprecated_member_use
                       groupValue: _settings.themeId,
                       activeColor: const Color(0xFFFFA000),
+                      // ignore: deprecated_member_use
                       onChanged: (value) {
                         setState(() {
                           _settings = _settings.copyWith(themeId: value);
@@ -337,8 +343,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: const Text('Neon & Glitch'),
                       secondary: const Icon(Icons.memory, color: Color(0xFF00F0FF)),
                       value: 'cyberpunk',
+                      // ignore: deprecated_member_use
                       groupValue: _settings.themeId,
                       activeColor: const Color(0xFF00F0FF),
+                      // ignore: deprecated_member_use
                       onChanged: (value) {
                         setState(() {
                           _settings = _settings.copyWith(themeId: value);
@@ -350,8 +358,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: const Text('Nature & Magic'),
                       secondary: const Icon(Icons.nature_people, color: Color(0xFF6B8C6E)),
                       value: 'ghibli',
+                      // ignore: deprecated_member_use
                       groupValue: _settings.themeId,
                       activeColor: const Color(0xFFC57C7E),
+                      // ignore: deprecated_member_use
                       onChanged: (value) {
                         setState(() {
                           _settings = _settings.copyWith(themeId: value);

@@ -25,7 +25,7 @@ class _PenaltyOverlayState extends State<PenaltyOverlay> with SingleTickerProvid
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
-  late Animation<Offset> _positionAnimation;
+
 
   @override
   void initState() {

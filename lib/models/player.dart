@@ -10,12 +10,16 @@ class Player {
   int highestRun; // Highest run in the current match
   int lastRun; // Run from the previous inning (for display)
   int currentRun; // Run in current inning
+
+
   int updateCount; // For detecting changes (animations)
+  int lastAwardedPoints; // Explicitly track the last points awarded (e.g. +1, -1)
   
   // Inning-based tracking (new for proper point counting)
   int inningPoints; // Points accumulated in current inning (before multiplier/fouls)
   int reRackPoints; // Points before re-rack (for notation like "14.1")
-  bool inningHasFoul; // Whether current inning has a foul
+  bool inningHasFoul; // Whether current inning has a normal foul
+  bool inningHasBreakFoul; // Whether current inning has a break foul (-2)
   bool inningHasSafe; // Whether current inning has a safe (statistical)
   bool inningHasReRack; // Whether current inning had a re-rack
 
@@ -32,9 +36,11 @@ class Player {
     this.currentRun = 0,
     this.lastRun = 0,
     this.updateCount = 0,
+    this.lastAwardedPoints = 0, // Default 0
     this.inningPoints = 0,
     this.reRackPoints = 0,
     this.inningHasFoul = false,
+    this.inningHasBreakFoul = false,
     this.inningHasSafe = false,
     this.inningHasReRack = false,
   }) : handicapMultiplier = handicapMultiplier.clamp(0.1, 10.0);
@@ -42,6 +48,7 @@ class Player {
   void addScore(int points) {
     score += points;
     lastPoints = points;
+    lastAwardedPoints = points; // Track specifically for "Last Points" box
     updateCount++;
     
     if (points > 0) {
@@ -63,12 +70,14 @@ class Player {
     inningPoints = 0;
     reRackPoints = 0;
     inningHasFoul = false;
+    inningHasBreakFoul = false;
     inningHasSafe = false;
     inningHasReRack = false;
   }
 
   void incrementSaves() {
     saves++;
+    lastAwardedPoints = 0; // Safe adds 0 points but is an event
     updateCount++; // Trigger animation for +0/Safe
   }
 
@@ -84,9 +93,11 @@ class Player {
     int? highestRun,
     int? currentRun,
     int? updateCount,
+    int? lastAwardedPoints,
     int? inningPoints,
     int? reRackPoints,
     bool? inningHasFoul,
+    bool? inningHasBreakFoul,
     bool? inningHasSafe,
     bool? inningHasReRack,
   }) {
@@ -101,11 +112,13 @@ class Player {
       lastPoints: lastPoints ?? this.lastPoints,
       highestRun: highestRun ?? this.highestRun,
       currentRun: currentRun ?? this.currentRun,
-      lastRun: lastRun ?? this.lastRun,
+      lastRun: lastRun,
       updateCount: updateCount ?? this.updateCount,
+      lastAwardedPoints: lastAwardedPoints ?? this.lastAwardedPoints,
       inningPoints: inningPoints ?? this.inningPoints,
       reRackPoints: reRackPoints ?? this.reRackPoints,
       inningHasFoul: inningHasFoul ?? this.inningHasFoul,
+      inningHasBreakFoul: inningHasBreakFoul ?? this.inningHasBreakFoul,
       inningHasSafe: inningHasSafe ?? this.inningHasSafe,
       inningHasReRack: inningHasReRack ?? this.inningHasReRack,
     );
@@ -122,9 +135,11 @@ class Player {
     'highestRun': highestRun,
     'currentRun': currentRun,
     'lastRun': lastRun,
+    'lastAwardedPoints': lastAwardedPoints,
     'inningPoints': inningPoints,
     'reRackPoints': reRackPoints,
     'inningHasFoul': inningHasFoul,
+    'inningHasBreakFoul': inningHasBreakFoul,
     'inningHasSafe': inningHasSafe,
     'inningHasReRack': inningHasReRack,
   };
@@ -141,10 +156,33 @@ class Player {
     highestRun: json['highestRun'] as int? ?? 0,
     currentRun: json['currentRun'] as int? ?? 0,
     lastRun: json['lastRun'] as int? ?? 0,
+    lastAwardedPoints: json['lastAwardedPoints'] as int? ?? 0,
     inningPoints: json['inningPoints'] as int? ?? 0,
     reRackPoints: json['reRackPoints'] as int? ?? 0,
     inningHasFoul: json['inningHasFoul'] as bool? ?? false,
+    inningHasBreakFoul: json['inningHasBreakFoul'] as bool? ?? false,
     inningHasSafe: json['inningHasSafe'] as bool? ?? false,
     inningHasReRack: json['inningHasReRack'] as bool? ?? false,
   );
+  // Projected Score for UI Display (Real-time feedback)
+  int get projectedScore {
+    int projected = score + inningPoints;
+    
+    // Apply penalties
+    if (inningHasBreakFoul) {
+      projected -= 2; // Break foul is always -2
+    }
+    
+    if (inningHasFoul) {
+        // Normal foul logic
+        // If consecutive fouls is already 2, this 3rd one triggers -15 extra
+        if (consecutiveFouls >= 2) {
+            projected -= 16; // -1 (foul) + -15 (3-foul penalty)
+        } else {
+            projected -= 1; // Standard foul
+        }
+    }
+    
+    return projected;
+  }
 }

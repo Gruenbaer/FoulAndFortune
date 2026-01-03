@@ -4,12 +4,14 @@ import 'dart:math' as math;
 class BallButton extends StatelessWidget {
   final int ballNumber;
   final bool isActive;
+  final double? opacity; // Allow external control (e.g. 0.0 for pocketed)
   final VoidCallback onTap;
 
   const BallButton({
     super.key,
     required this.ballNumber,
     required this.isActive,
+    this.opacity,
     required this.onTap,
   });
 
@@ -30,7 +32,7 @@ class BallButton extends StatelessWidget {
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-        opacity: isActive ? 1.0 : 0.4,
+        opacity: opacity ?? (isActive ? 1.0 : 0.4),
         child: ClipOval(
           child: Image.asset(
             getImagePath(),
@@ -255,20 +257,20 @@ class BallPainter extends CustomPainter {
   Color _brighten(Color c, int percent) {
     var p = percent / 100;
     return Color.fromARGB(
-        c.alpha,
-        (c.red + ((255 - c.red) * p)).round(),
-        (c.green + ((255 - c.green) * p)).round(),
-        (c.blue + ((255 - c.blue) * p)).round()
+        (c.a * 255).round(),
+        ((c.r * 255) + ((255 - (c.r * 255)) * p)).round(),
+        ((c.g * 255) + ((255 - (c.g * 255)) * p)).round(),
+        ((c.b * 255) + ((255 - (c.b * 255)) * p)).round()
     );
   }
 
   Color _darken(Color c, int percent) {
     var f = 1 - percent / 100;
     return Color.fromARGB(
-        c.alpha,
-        (c.red * f).round(),
-        (c.green * f).round(),
-        (c.blue * f).round()
+        (c.a * 255).round(),
+        ((c.r * 255) * f).round(),
+        ((c.g * 255) * f).round(),
+        ((c.b * 255) * f).round()
     );
   }
 

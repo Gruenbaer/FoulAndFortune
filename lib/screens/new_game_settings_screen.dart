@@ -21,12 +21,11 @@ class NewGameSettingsScreen extends StatefulWidget {
 class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   late GameSettings _settings;
   double _raceSliderValue = 100;
-  final bool _hasLoadedPlayerNames = false;
-  bool _initialSettingsLoaded = false;
+
 
   final PlayerService _playerService = PlayerService();
   List<Player> _players = [];
-  bool _isLoadingPlayers = true;
+
 
   @override
   void initState() {
@@ -71,9 +70,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
         });
       }
 
-      setState(() {
-        _initialSettingsLoaded = true;
-      });
+
     } catch (e) {
       // Provider not available, ignore
     }
@@ -84,7 +81,6 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     if (mounted) {
       setState(() {
         _players = players;
-        _isLoadingPlayers = false;
       });
     }
   }

@@ -405,18 +405,15 @@ class GameState extends ChangeNotifier {
     int newBallCount = ballNumber;
     int ballsPocketed = currentBallCount - newBallCount;
 
-    // Handle BREAK FOUL (special case - doesn't use inning accumulation)
+    // Handle BREAK FOUL (use inning accumulation now)
     if (currentFoulMode == FoulMode.severe) {
-      // Break foul: immediate -2 penalty
-      final penalty = foulTracker.applySevereFoul(currentPlayer);
-      currentPlayer.score += penalty;
-      currentPlayer.lastPoints = penalty;
-      currentPlayer.updateCount++;
+      // Mark as break foul for notation
+      currentPlayer.inningHasBreakFoul = true;
       
-      _logAction('${currentPlayer.name}: Break Foul ($penalty pts)');
+      _logAction('${currentPlayer.name}: Break Foul (-2 pts)');
       
       // Queue animation event
-      eventQueue.add(FoulEvent(currentPlayer, penalty, "Break Foul!"));
+      eventQueue.add(FoulEvent(currentPlayer, -2, "Break Foul!"));
 
       // Break Foul Decision: Who breaks next?
       final p1 = players[0];
@@ -431,6 +428,10 @@ class GameState extends ChangeNotifier {
         // Switch to selected player if needed
         if (currentPlayer != selectedPlayer) {
           _switchPlayer();
+        } else {
+          // Same player continues, but still need to finalize this inning
+          _finalizeInning(currentPlayer);
+          currentPlayer.incrementInning();
         }
 
         // Reset rack for break
@@ -548,42 +549,40 @@ class GameState extends ChangeNotifier {
 
     // Award points based on actual balls remaining on table
     int ballsRemaining = activeBalls.length;
-    int points = ballsRemaining;
-    String foulText = '';
-
+    
+    // ACCUMULATE POINTS IN INNING (like onBallTapped)
+    currentPlayer.inningPoints += ballsRemaining;
+    
+    // TRACK FOULS
     if (currentFoulMode == FoulMode.normal) {
-      final penalty = foulTracker.applyNormalFoul(currentPlayer);
-      points += penalty;
-      foulText = ' (Foul)';
-      if (penalty == -15) showThreeFoulPopup = true;
+      currentPlayer.inningHasFoul = true;
     } else if (currentFoulMode == FoulMode.severe) {
-      points += -2;
-      foulText = ' (Break Foul)';
-    } else {
-      currentPlayer.consecutiveFouls = 0;
+      currentPlayer.inningHasBreakFoul = true;
     }
-
-    // Apply multiplier to the POSITIVE portion (ballsRemaining).
-    // Penalties were added to points above.
-    // Extract penalty, multiply the positive ball count, then add penalty back
-    int penalty = points - ballsRemaining;
-    int multipliedPoints =
-        (ballsRemaining * currentPlayer.handicapMultiplier).round() + penalty;
-
-    currentPlayer.addScore(multipliedPoints);
-    _logAction(
-        '${currentPlayer.name}: Double-sack! +$multipliedPoints$foulText');
+    
+    // Mark as re-rack (double sack implies re-rack)
+    currentPlayer.inningHasReRack = true;
+    
+    // Log action
+    String foulText = currentFoulMode == FoulMode.normal ? ' (Foul)' 
+                    : currentFoulMode == FoulMode.severe ? ' (Break Foul)' 
+                    : '';
+    _logAction('${currentPlayer.name}: Double-sack! $ballsRemaining balls$foulText');
 
     // Check win BEFORE potentially switching player
     _checkWinCondition();
 
-    // Double Sack: Player continues turn.
-    // unless foul? Usually double sack is re-rack same player.
-    // If foul, it's foul.
+    // Double Sack: Player continues turn (unless foul)
+    // Turn ends if there was a foul
     if (currentFoulMode != FoulMode.none) {
-      _switchPlayer();
+      _switchPlayer(); // This will call _finalizeInning
     }
-
+    // If no foul, player continues (inning stays open for next shot)
+    
+    // Explicitly Clear Balls and Trigger Re-Rack Animation
+    activeBalls.clear(); 
+    eventQueue.add(ReRackEvent('14.1 Re-Rack'));
+    
     notifyListeners();
   }
 
@@ -603,7 +602,7 @@ class GameState extends ChangeNotifier {
   // Finalize the current player's inning: calculate score, apply multipliers/fouls, generate notation
   void _finalizeInning(Player player) {
     // Skip if no actions taken in this inning
-    if (player.inningPoints == 0 && !player.inningHasFoul && !player.inningHasSafe) {
+    if (player.inningPoints == 0 && !player.inningHasFoul && !player.inningHasBreakFoul && !player.inningHasSafe) {
       return;
     }
     
@@ -614,9 +613,14 @@ class GameState extends ChangeNotifier {
       totalInningPoints = (totalInningPoints * player.handicapMultiplier).round();
     }
     
-    // Apply foul penalty
+    // Apply foul penalties
     int foulPenalty = 0;
-    if (player.inningHasFoul) {
+    if (player.inningHasBreakFoul) {
+      // Break foul: -2 points, doesn't count toward 3-foul rule
+      foulPenalty = foulTracker.applySevereFoul(player);
+      totalInningPoints += foulPenalty; // foulPenalty is -2
+    } else if (player.inningHasFoul) {
+      // Normal foul: -1 or -16 (if 3rd consecutive)
       foulPenalty = foulTracker.applyNormalFoul(player);
       totalInningPoints += foulPenalty; // foulPenalty is negative
     } else {
@@ -675,7 +679,7 @@ class GameState extends ChangeNotifier {
         points = (points * player.handicapMultiplier).round();
       }
       
-      if (points == 0 && !player.inningHasFoul && !player.inningHasSafe) {
+      if (points == 0 && !player.inningHasFoul && !player.inningHasBreakFoul && !player.inningHasSafe) {
         notation = '-'; // Miss/no action
       } else {
         notation = points.toString();
@@ -687,8 +691,10 @@ class GameState extends ChangeNotifier {
       notation += 'S';
     }
     
-    // Add foul suffix
-    if (player.inningHasFoul) {
+    // Add foul suffix (BF for break foul, F for normal foul)
+    if (player.inningHasBreakFoul) {
+      notation += 'BF';
+    } else if (player.inningHasFoul) {
       notation += 'F';
     }
     
@@ -821,11 +827,11 @@ class GameSnapshot implements UndoState {
   final String? lastAction;
   final bool showThreeFoulPopup;
   final FoulMode foulMode;
-  // final FoulTrackerSnapshot foulTrackerSnapshot; // REMOVED
   final List<String> matchLog;
+  final List<InningRecord> inningRecords; // NEW: For score card
   final String breakFoulHintMessage;
-  final bool inBreakSequence; // Persistence
-  final int elapsedDurationInSeconds; // Persistence
+  final bool inBreakSequence;
+  final int elapsedDurationInSeconds;
 
   GameSnapshot.fromState(GameState state)
       : players = state.players.map((p) => p.copyWith()).toList(),
@@ -837,8 +843,8 @@ class GameSnapshot implements UndoState {
         lastAction = state.lastAction,
         showThreeFoulPopup = state.showThreeFoulPopup,
         foulMode = state.foulMode,
-        // foulTrackerSnapshot = FoulTrackerSnapshot(state.foulTracker.consecutiveNormalFouls), // REMOVED
         matchLog = List.from(state.matchLog),
+        inningRecords = List.from(state.inningRecords),
         breakFoulHintMessage = state.breakFoulHintMessage,
         inBreakSequence = state.inBreakSequence,
         elapsedDurationInSeconds = state.elapsedDuration.inSeconds;
@@ -857,8 +863,10 @@ class GameSnapshot implements UndoState {
                 (json['foulMode'] as int) < FoulMode.values.length
             ? FoulMode.values[json['foulMode'] as int]
             : FoulMode.none,
-        // foulTrackerSnapshot = FoulTrackerSnapshot.fromJson(json['foulTrackerSnapshot']), // REMOVED
         matchLog = List<String>.from(json['matchLog'] as List),
+        inningRecords = (json['inningRecords'] as List? ?? [])
+            .map((e) => InningRecord.fromJson(e))
+            .toList(),
         breakFoulHintMessage = json['breakFoulHintMessage'] as String,
         inBreakSequence = json['inBreakSequence'] as bool? ?? true,
         elapsedDurationInSeconds =
@@ -874,8 +882,8 @@ class GameSnapshot implements UndoState {
         'lastAction': lastAction,
         'showThreeFoulPopup': showThreeFoulPopup,
         'foulMode': foulMode.index,
-        // 'foulTrackerSnapshot': foulTrackerSnapshot.toJson(), // REMOVED
         'matchLog': matchLog,
+        'inningRecords': inningRecords.map((r) => r.toJson()).toList(),
         'breakFoulHintMessage': breakFoulHintMessage,
         'inBreakSequence': inBreakSequence,
         'elapsedDurationInSeconds': elapsedDurationInSeconds,
@@ -886,7 +894,6 @@ class GameSnapshot implements UndoState {
     state.players = players.map((p) => p.copyWith()).toList();
     state.activeBalls = Set.from(activeBalls);
     state.currentPlayerIndex = currentPlayerIndex;
-    // state.foulTracker.consecutiveNormalFouls = foulTrackerSnapshot.consecutiveNormalFouls; // REMOVED
     state.gameStarted = gameStarted;
     state.gameOver = gameOver;
     // Restore winner by finding player with matching name
@@ -899,20 +906,11 @@ class GameSnapshot implements UndoState {
     state.inBreakSequence = inBreakSequence;
     state.foulMode = foulMode;
     state.matchLog = List.from(matchLog);
+    state.inningRecords = List.from(inningRecords);
     state.breakFoulHintMessage = breakFoulHintMessage;
 
     // Restore Timer
     state._savedDuration = Duration(seconds: elapsedDurationInSeconds);
-    state._gameTimer.reset(); // Reset active stopwatch
-    // If game was running, should we auto-resume?
-    // Usually safe to default to paused or resume if we know it was running?
-    // let's leave it paused for safety, user can resume.
-    // actually, if we are loading from JSON (app restart), pausing is good.
-    // if we are undoing, we probably want to keep current running state?
-    // Undo logic might be tricky with timer.
-    // actually, if we are loading from JSON (app restart), pausing is good.
-    // if we are undoing, we probably want to keep current running state?
-    // Undo logic might be tricky with timer.
-    // Let's just restore the accumulated time.
+    state._gameTimer.reset();
   }
 }
