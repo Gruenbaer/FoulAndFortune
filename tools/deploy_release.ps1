@@ -138,6 +138,12 @@ if ($LASTEXITCODE -ne 0) { throw "Build Failed" }
 $apkPath = "build/app/outputs/flutter-apk/app-release.apk"
 if (-not (Test-Path $apkPath)) { throw "APK not found at $apkPath" }
 
+# Rename APK to include version for unique releases
+$versionedApkName = "FoulAndFortune-v$version.apk"
+$versionedApkPath = "build/app/outputs/flutter-apk/$versionedApkName"
+Write-Host "Renaming APK to $versionedApkName..." -ForegroundColor Cyan
+Copy-Item $apkPath $versionedApkPath -Force
+
 # 5. Create GitHub Release
 Write-Host "Publishing to GitHub..." -ForegroundColor Cyan
 $notesFile = [System.IO.Path]::GetTempFileName()
@@ -145,7 +151,7 @@ Set-Content -Path $notesFile -Value $releaseNotes
 
 try {
     # GH CLI usually in PATH
-    cmd /c "gh release create v$version ""$apkPath"" --title ""v$version"" --notes-file ""$notesFile"""
+    cmd /c "gh release create v$version ""$versionedApkPath"" --title ""v$version"" --notes-file ""$notesFile"""
 }
 finally {
     Remove-Item $notesFile
@@ -165,7 +171,7 @@ $platformChoice = Read-Host "Choice [1]"
 if ($platformChoice -eq "") { $platformChoice = "1" }
 
 $repoUrl = "https://github.com/Gruenbaer/141fortune"
-$downloadUrl = "$repoUrl/releases/download/v$version/app-release.apk"
+$downloadUrl = "$repoUrl/releases/download/v$version/$versionedApkName"
 
 $notesText = "See GitHub for details"
 if ($customNotes) {
