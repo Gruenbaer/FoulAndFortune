@@ -518,6 +518,8 @@ class GameState extends ChangeNotifier {
 
     if (turnEnded) {
       _switchPlayer();
+      // Check again after switching - score update happens in _finalizeInning
+      _checkWinCondition();
     }
 
     notifyListeners();
