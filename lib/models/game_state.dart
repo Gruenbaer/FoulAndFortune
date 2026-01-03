@@ -43,6 +43,35 @@ class DecisionEvent extends GameEvent {
 
 class SafeEvent extends GameEvent {}
 
+// Inning Record for Score Card (replaces log parsing)
+class InningRecord {
+  final int inning;
+  final String playerName;
+  final String notation; // "15", "5.3F", "10S", etc.
+  final int runningTotal; // Player's total score after this inning
+  
+  InningRecord({
+    required this.inning,
+    required this.playerName,
+    required this.notation,
+    required this.runningTotal,
+  });
+  
+  Map<String, dynamic> toJson() => {
+    'inning': inning,
+    'playerName': playerName,
+    'notation': notation,
+    'runningTotal': runningTotal,
+  };
+  
+  factory InningRecord.fromJson(Map<String, dynamic> json) => InningRecord(
+    inning: json['inning'] as int,
+    playerName: json['playerName'] as String,
+    notation: json['notation'] as String,
+    runningTotal: json['runningTotal'] as int,
+  );
+}
+
 class GameState extends ChangeNotifier {
   GameSettings settings;
   int raceToScore;
@@ -74,6 +103,9 @@ class GameState extends ChangeNotifier {
 
   // Match History
   List<String> matchLog = [];
+  
+  // Inning Records for Score Card (structured data, no parsing needed)
+  List<InningRecord> inningRecords = [];
 
   // Undo/Redo Stacks
   final List<GameSnapshot> _undoStack = [];
@@ -335,9 +367,13 @@ class GameState extends ChangeNotifier {
       isSafeMode = true;
       notifyListeners();
     } else {
-      // CONFIRM Standard Safe (No points, Switch Player)
+      // CONFIRM Standard Safe (No ball tap, just safe button)
       _pushState();
+      
+      // Mark inning as having safe (statistical)
+      currentPlayer.inningHasSafe = true;
       currentPlayer.incrementSaves();
+      
       _logAction('${currentPlayer.name}: Safe (Standard)');
 
       foulMode = FoulMode.none;
@@ -345,7 +381,7 @@ class GameState extends ChangeNotifier {
       resetBreakFoulError();
 
       eventQueue.add(SafeEvent()); // Queue animation
-      _switchPlayer();
+      _switchPlayer(); // This will call _finalizeInning
       notifyListeners();
     }
   }
@@ -359,103 +395,30 @@ class GameState extends ChangeNotifier {
 
     // Capture foul mode before reset
     final currentFoulMode = foulMode;
+    final currentSafeMode = isSafeMode;
     foulMode = FoulMode.none; // Reset flag
+    isSafeMode = false; // Reset flag
     resetBreakFoulError();
 
-    // SAFE MODE: Defensive Pocket (Special Case)
-    // If we are in Safe Mode, tapping a ball usually means "I pocketed this ball defensively".
-    // But with "Balls Remaining" logic, tapping a number means "This many are left".
-    // So if I have 15, and I play defensivle and pocket 1, there are 14 left. I tap 14.
-    // If Safe Mode is ON, we treat the DELTA as purely defensive points/stats?
-    // Or does the user explicitly "Tap Safe" button to confirm?
-    // User Instructions: "Tapping a ball (while in Safe Mode) registers a 'Defensive Pocket' (1 point, end turn)."
-    // If logic is "Balls Remaining", the user would tap the NEW count.
-    // Example: 15 on table. Safe Mode ON. I pocket 1 ball. I tap 14 (Balls Left).
-    // Delta = 1. Score +1. Turn Ends.
-
-    // Calculate Delta (Points Scored)
+    // Calculate points (balls pocketed)
     int currentBallCount = activeBalls.length;
     int newBallCount = ballNumber;
-    int points = currentBallCount - newBallCount;
+    int ballsPocketed = currentBallCount - newBallCount;
 
-    // Safety check: specific case for "Re-Rack" scenarios might act oddly,
-    // but assuming standard 15-ball to 0-ball flow.
-
-    // Safe Mode Logic: Defensive Pocket
-    if (isSafeMode) {
-      isSafeMode = false; // Consume mode
-
-      // If points > 0, we pocketed balls defensively
-      if (points > 0) {
-        // Apply Handicap Multiplier to positive points (Defensive Pocket counts as positive score)
-        final scoredPoints =
-            (points * currentPlayer.handicapMultiplier).round();
-        currentPlayer.addScore(scoredPoints);
-        currentPlayer.incrementSaves();
-        _logAction('${currentPlayer.name}: Defensive Pocket (+$scoredPoints)');
-
-        // Update rack to new count
-        _updateRackCount(newBallCount);
-      } else {
-        // Did not reduce count? Maybe just tapped same number?
-        // Treat as standard safe if 0?
-        _logAction('${currentPlayer.name}: Safe (No balls pocketed)');
-        currentPlayer.incrementSaves();
-      }
-
-      if (newBallCount == 1) {
-        _updateRackCount(15);
-        _logAction('${currentPlayer.name}: Re-rack (Auto/Safe)');
-      }
-
-      _checkWinCondition();
-      eventQueue.add(SafeEvent()); // Queue animation for Defensive Pocket too
-      _switchPlayer();
-      notifyListeners();
-      return;
-    }
-
-    // STANDARD PLAY
-    String foulText = '';
-
-    if (currentFoulMode == FoulMode.normal) {
-      final penalty =
-          foulTracker.applyNormalFoul(currentPlayer); // Use current Player
-      // Calculate scored points once if needed
-      int? scoredPoints;
-      if (points > 0) {
-        scoredPoints = (points * currentPlayer.handicapMultiplier).round();
-        currentPlayer.addScore(scoredPoints);
-      }
-      currentPlayer.addScore(penalty);
-      foulText = penalty == -15 ? ' (3-Foul!)' : ' (Foul)';
-
-      // Queue Event for Animation
-      if (penalty == -15) {
-        // 3-Foul! Queue the big one.
-        eventQueue.add(FoulEvent(currentPlayer, -15, "Triple Foul!"));
-        showThreeFoulPopup = true; // State persistence only
-        // Dialog Removed per user request (Animation is sufficient)
-      } else if (scoredPoints != null) {
-        // Show breakdown: positive points and foul penalty
-        eventQueue.add(FoulEvent(currentPlayer, scoredPoints + penalty, "Foul!",
-            positivePoints: scoredPoints, penalty: penalty));
-      } else {
-        // Just penalty, no positive points
-        eventQueue.add(FoulEvent(currentPlayer, penalty, "Foul!"));
-      }
-    } else if (currentFoulMode == FoulMode.severe) {
-      final penalty =
-          foulTracker.applySevereFoul(currentPlayer); // Use current Player
-      currentPlayer.addScore(penalty);
-      // BREAK FOUL DIALOG REMOVED - User doesn't want any info/warnings
-      foulText = ' (Break Foul)';
-
-      eventQueue
-          .add(FoulEvent(currentPlayer, penalty, "Break Foul!")); // Usually -2
+    // Handle BREAK FOUL (special case - doesn't use inning accumulation)
+    if (currentFoulMode == FoulMode.severe) {
+      // Break foul: immediate -2 penalty
+      final penalty = foulTracker.applySevereFoul(currentPlayer);
+      currentPlayer.score += penalty;
+      currentPlayer.lastPoints = penalty;
+      currentPlayer.updateCount++;
+      
+      _logAction('${currentPlayer.name}: Break Foul ($penalty pts)');
+      
+      // Queue animation event
+      eventQueue.add(FoulEvent(currentPlayer, penalty, "Break Foul!"));
 
       // Break Foul Decision: Who breaks next?
-      // Use local variable capture for safe closure
       final p1 = players[0];
       final p2 = players[1];
 
@@ -463,125 +426,94 @@ class GameState extends ChangeNotifier {
           "WHO BREAKS NEXT?",
           "Break Foul Rule: Decide who takes the next break shot.",
           [p1.name, p2.name], (selectedIndex) {
-        // 0 = P1, 1 = P2
         final selectedPlayer = selectedIndex == 0 ? p1 : p2;
 
-        // Logic: Set Active Player to selected
-        // If selected is currently active, DO NOT switch.
-        // If selected is NOT active, DO switch.
+        // Switch to selected player if needed
         if (currentPlayer != selectedPlayer) {
           _switchPlayer();
         }
 
-        // Ensure Rack is Reset for the Break
+        // Reset rack for break
         _updateRackCount(15);
         notifyListeners();
       }));
 
-      // Prevent standard switchPlayer at end of 'onBallTapped'
-      // We handle turn switching in the callback above.
-      // But 'onBallTapped' is void and continues...
-      // The current logic calls `_switchPlayer()` at the END of onBallTapped typically?
-      // Wait, let's check lines 460+
-    } else {
-      // Valid Shot
-      currentPlayer.consecutiveFouls =
-          0; // Reset consecutive fouls on valid shot/safe
-
-      // Normal Points
-      if (points != 0) {
-        if (points > 0) {
-          final scoredPoints =
-              (points * currentPlayer.handicapMultiplier).round();
-          currentPlayer.addScore(scoredPoints);
-          // Removed FlyingPointsOverlay event per user request
-        } else {
-          // Negative points? Logic usually prevents this unless input error.
-          // If balls tapped < balls previous, points is positive.
-          // If NEW count > OLD count? (Balls added?) -> points negative.
-          // Usually we don't multiply negative.
-          currentPlayer.addScore(points);
-        }
-      }
+      // Stay in break sequence
+      inBreakSequence = true;
+      
+      // Update rack
+      _updateRackCount(newBallCount);
+      _checkWinCondition();
+      notifyListeners();
+      return; // Break foul handled, exit
     }
 
-    // RE-RACK DETECTION (Check First)
+    // Exit break sequence (any non-break-foul action)
+    inBreakSequence = false;
+
+    // ACCUMULATE POINTS IN INNING
+    currentPlayer.inningPoints += ballsPocketed;
+
+    // TRACK FOUL
+    if (currentFoulMode == FoulMode.normal) {
+      currentPlayer.inningHasFoul = true;
+    }
+
+    // TRACK SAFE (statistical only)
+    if (currentSafeMode) {
+      currentPlayer.inningHasSafe = true;
+      currentPlayer.incrementSaves(); // For statistics
+    }
+
+    // HANDLE RE-RACK
     bool isReRack = false;
     if (newBallCount == 1) {
       isReRack = true;
+      // Save pre-rerack points
+      currentPlayer.reRackPoints = currentPlayer.inningPoints;
+      currentPlayer.inningPoints = 0; // Reset for post-rerack
+      currentPlayer.inningHasReRack = true;
+      
       // Queue re-rack animation event
       eventQueue.add(ReRackEvent("Re-rack!"));
-      // Note: We do NOT reset rack here; UI handles it after splash
-    }
-
-    // Prepare Log Suffix
-    String reRackSuffix = isReRack ? " (Re-rack)" : "";
-
-    // Log calculation
-    if (points != 0 || foulText.isNotEmpty) {
-      // Calculate effective displayed points for log
-      int displayPoints = points;
-      if (currentFoulMode == FoulMode.none && points > 0) {
-        displayPoints = (points * currentPlayer.handicapMultiplier).round();
-      }
-
-      String sign = displayPoints > 0 ? "+" : "";
-      _logAction(
-          '${currentPlayer.name}: $sign$displayPoints pts$foulText (Left: $newBallCount)$reRackSuffix');
-    } else if (isReRack) {
-      // Special case: 0 points (Safe/Miss) but landing on Re-rack state (1 ball)
+      
       _logAction('${currentPlayer.name}: Re-rack');
     }
 
-    // Update Rack State
+    // Update rack state
     _updateRackCount(newBallCount);
 
+    // DETERMINE IF TURN ENDS
     bool turnEnded = false;
 
-    // TURN SWITCHING LOGIC per rules:
-    // "Automatischer Spielerwechsel: Nach jedem Ball (außer Ball 1 und Weiße)"
-    // Turn switches after EVERY ball potted, EXCEPT:
-    // - Re-rack scenarios (Ball 1) - player continues
-    // - Double Sack (handled separately) - player continues
-    // - Fouls always end turn
-    if (currentFoulMode == FoulMode.none) {
-      if (points > 0) {
-        // Player potted ball(s) - turn ENDS (rule: switch after every ball)
-        // Exception: Re-rack at Ball 1 - player continues
-        if (isReRack) {
-          turnEnded = false; // Player continues after re-rack
-        } else {
-          turnEnded = true; // Normal ball pot - switch turns
-        }
-      } else if (points <= 0) {
-        // Miss/Safe (0 points or negative)
-        turnEnded = true;
-        _logAction('${currentPlayer.name}: Miss/Safe (0 pts)');
-        currentPlayer.incrementSaves();
-        // Removed 0-point event per user request
-      }
-    } else {
-      if (currentFoulMode == FoulMode.severe) {
-        // Break Foul: Turn switch is handled by DecisionEvent callback
+    if (currentFoulMode == FoulMode.normal) {
+      // Normal foul always ends turn
+      turnEnded = true;
+    } else if (ballsPocketed > 0) {
+      // Pocketed balls
+      if (isReRack) {
+        // Re-rack: player continues
         turnEnded = false;
       } else {
-        turnEnded = true; // Normal Foul always ends turn
+        // Normal shot: turn ends
+        turnEnded = true;
+      }
+    } else if (ballsPocketed <= 0) {
+      // Miss/Safe (0 or negative points)
+      turnEnded = true;
+      if (ballsPocketed == 0 && !currentSafeMode) {
+        _logAction('${currentPlayer.name}: Miss (0 pts)');
       }
     }
 
-    // BREAK FOUL SEQUENCE LOGIC
-    // If we just committed a Severe Foul, we stay in Break Sequence (allow another severe).
-    // Otherwise, any other action ends the Break Sequence.
-    if (currentFoulMode == FoulMode.severe) {
-      inBreakSequence = true;
-    } else {
-      inBreakSequence = false;
+    // Log action for match history
+    if (ballsPocketed != 0 || currentFoulMode != FoulMode.none) {
+      String foulText = currentFoulMode == FoulMode.normal ? ' (Foul)' : '';
+      String safeText = currentSafeMode ? ' (Safe)' : '';
+      String sign = ballsPocketed > 0 ? "+" : "";
+      _logAction(
+          '${currentPlayer.name}: $sign$ballsPocketed balls$foulText$safeText (Left: $newBallCount)');
     }
-
-    // If we cleared the rack (0? or 1?), user enters Re-rack manually or we detect logic.
-    // If balls == 1, usually we ask for rerack.
-    // Let's assume user manages rack flow via buttons.
-    // If they input a count, we trust it.
 
     _checkWinCondition();
 
@@ -668,7 +600,104 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Finalize the current player's inning: calculate score, apply multipliers/fouls, generate notation
+  void _finalizeInning(Player player) {
+    // Skip if no actions taken in this inning
+    if (player.inningPoints == 0 && !player.inningHasFoul && !player.inningHasSafe) {
+      return;
+    }
+    
+    int totalInningPoints = player.inningPoints;
+    
+    // Apply handicap multiplier to positive points only
+    if (totalInningPoints > 0) {
+      totalInningPoints = (totalInningPoints * player.handicapMultiplier).round();
+    }
+    
+    // Apply foul penalty
+    int foulPenalty = 0;
+    if (player.inningHasFoul) {
+      foulPenalty = foulTracker.applyNormalFoul(player);
+      totalInningPoints += foulPenalty; // foulPenalty is negative
+    } else {
+      // Valid shot resets consecutive fouls
+      player.consecutiveFouls = 0;
+    }
+    
+    // Update player score
+    player.score += totalInningPoints;
+    player.lastPoints = totalInningPoints;
+    player.updateCount++;
+    
+    // Update current run
+    if (totalInningPoints > 0) {
+      player.currentRun += totalInningPoints;
+      if (player.currentRun > player.highestRun) {
+        player.highestRun = player.currentRun;
+      }
+    }
+    
+    // Generate notation
+    String notation = _generateInningNotation(player);
+    
+    // Create inning record
+    inningRecords.add(InningRecord(
+      inning: player.currentInning,
+      playerName: player.name,
+      notation: notation,
+      runningTotal: player.score,
+    ));
+  }
+  
+  // Generate score card notation for an inning
+  String _generateInningNotation(Player player) {
+    String notation = '';
+    
+    // Handle re-rack notation (X.Y format)
+    if (player.inningHasReRack) {
+      // Apply multiplier to pre-rerack points
+      int preRerackPoints = player.reRackPoints;
+      if (preRerackPoints > 0) {
+        preRerackPoints = (preRerackPoints * player.handicapMultiplier).round();
+      }
+      
+      // Apply multiplier to post-rerack points
+      int postRerackPoints = player.inningPoints;
+      if (postRerackPoints > 0) {
+        postRerackPoints = (postRerackPoints * player.handicapMultiplier).round();
+      }
+      
+      notation = '$preRerackPoints.$postRerackPoints';
+    } else {
+      // Simple notation: just the points
+      int points = player.inningPoints;
+      if (points > 0) {
+        points = (points * player.handicapMultiplier).round();
+      }
+      
+      if (points == 0 && !player.inningHasFoul && !player.inningHasSafe) {
+        notation = '-'; // Miss/no action
+      } else {
+        notation = points.toString();
+      }
+    }
+    
+    // Add safe suffix
+    if (player.inningHasSafe) {
+      notation += 'S';
+    }
+    
+    // Add foul suffix
+    if (player.inningHasFoul) {
+      notation += 'F';
+    }
+    
+    return notation;
+  }
+
   void _switchPlayer() {
+    // Finalize current player's inning before switching
+    _finalizeInning(currentPlayer);
     currentPlayer.isActive = false;
     currentPlayer.incrementInning();
 

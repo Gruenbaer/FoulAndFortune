@@ -11,6 +11,13 @@ class Player {
   int lastRun; // Run from the previous inning (for display)
   int currentRun; // Run in current inning
   int updateCount; // For detecting changes (animations)
+  
+  // Inning-based tracking (new for proper point counting)
+  int inningPoints; // Points accumulated in current inning (before multiplier/fouls)
+  int reRackPoints; // Points before re-rack (for notation like "14.1")
+  bool inningHasFoul; // Whether current inning has a foul
+  bool inningHasSafe; // Whether current inning has a safe (statistical)
+  bool inningHasReRack; // Whether current inning had a re-rack
 
   Player({
     required this.name,
@@ -25,6 +32,11 @@ class Player {
     this.currentRun = 0,
     this.lastRun = 0,
     this.updateCount = 0,
+    this.inningPoints = 0,
+    this.reRackPoints = 0,
+    this.inningHasFoul = false,
+    this.inningHasSafe = false,
+    this.inningHasReRack = false,
   }) : handicapMultiplier = handicapMultiplier.clamp(0.1, 10.0);
 
   void addScore(int points) {
@@ -46,6 +58,13 @@ class Player {
     lastRun = currentRun; // Capture run before reset for display
     currentInning++;
     currentRun = 0; // Reset run for new inning
+    
+    // Reset inning trackers
+    inningPoints = 0;
+    reRackPoints = 0;
+    inningHasFoul = false;
+    inningHasSafe = false;
+    inningHasReRack = false;
   }
 
   void incrementSaves() {
@@ -65,6 +84,11 @@ class Player {
     int? highestRun,
     int? currentRun,
     int? updateCount,
+    int? inningPoints,
+    int? reRackPoints,
+    bool? inningHasFoul,
+    bool? inningHasSafe,
+    bool? inningHasReRack,
   }) {
     return Player(
       name: name ?? this.name,
@@ -74,11 +98,16 @@ class Player {
       saves: saves ?? this.saves,
       consecutiveFouls: consecutiveFouls ?? this.consecutiveFouls,
       handicapMultiplier: (handicapMultiplier ?? this.handicapMultiplier).clamp(0.1, 10.0),
-    lastPoints: lastPoints ?? this.lastPoints,
+      lastPoints: lastPoints ?? this.lastPoints,
       highestRun: highestRun ?? this.highestRun,
       currentRun: currentRun ?? this.currentRun,
-      lastRun: lastRun ?? lastRun,
+      lastRun: lastRun ?? this.lastRun,
       updateCount: updateCount ?? this.updateCount,
+      inningPoints: inningPoints ?? this.inningPoints,
+      reRackPoints: reRackPoints ?? this.reRackPoints,
+      inningHasFoul: inningHasFoul ?? this.inningHasFoul,
+      inningHasSafe: inningHasSafe ?? this.inningHasSafe,
+      inningHasReRack: inningHasReRack ?? this.inningHasReRack,
     );
   }
   Map<String, dynamic> toJson() => {
@@ -93,6 +122,11 @@ class Player {
     'highestRun': highestRun,
     'currentRun': currentRun,
     'lastRun': lastRun,
+    'inningPoints': inningPoints,
+    'reRackPoints': reRackPoints,
+    'inningHasFoul': inningHasFoul,
+    'inningHasSafe': inningHasSafe,
+    'inningHasReRack': inningHasReRack,
   };
 
   factory Player.fromJson(Map<String, dynamic> json) => Player(
@@ -107,5 +141,10 @@ class Player {
     highestRun: json['highestRun'] as int? ?? 0,
     currentRun: json['currentRun'] as int? ?? 0,
     lastRun: json['lastRun'] as int? ?? 0,
+    inningPoints: json['inningPoints'] as int? ?? 0,
+    reRackPoints: json['reRackPoints'] as int? ?? 0,
+    inningHasFoul: json['inningHasFoul'] as bool? ?? false,
+    inningHasSafe: json['inningHasSafe'] as bool? ?? false,
+    inningHasReRack: json['inningHasReRack'] as bool? ?? false,
   );
 }
