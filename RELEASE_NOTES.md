@@ -1,3 +1,18 @@
+### v3.8.3 - Polished & Precise 💎
+
+We've polished the UI and tightened the game logic for a smoother experience.
+
+*   **Plaque Redesign:** Player stats (LR, AVG, HR) are now cleaner 2-liner columns. The missing "AVG" box is back!
+*   **Visual Polish:**
+    *   **Re-Rack:** Now has a proper background fill. "Ghost" balls are more visible (opacity 0.6).
+    *   **Foul Splashes:** explicit "FOUL" / "BREAK FOUL" text with bold red penalties.
+    *   **Theming:** All overlays now fully respect your chosen theme (Steampunk, Cyberpunk, Ghibli).
+*   **Logic Fixes:**
+    *   **Real-time Scoring:** "Last Points" now updates instantly on every shot.
+    *   **Re-Rack Persistence:** The last ball now stays correctly visible on the table during re-rack events.
+
+***
+
 ### v3.8.2 - Fresh Look ✨
 
 *   **New Icon:** Updated the app icon and startup logo to the new design.
