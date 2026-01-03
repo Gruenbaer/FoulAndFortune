@@ -201,7 +201,7 @@ class CyberpunkTheme {
       primary: neonCyan,
       primaryDark: darkCyan,
       primaryBright: brightCyan,
-      secondary: neonMagenta,
+      secondary: neonCyan, // Changed from neonMagenta to match cyan theme
       accent: neonGreen,
       textMain: textWhite,
       textContrast: textBlack,
@@ -304,7 +304,7 @@ class CyberpunkTheme {
       
       colorScheme: const ColorScheme.dark(
         primary: neonCyan,
-        secondary: neonMagenta,
+        secondary: neonCyan, // Changed from neonMagenta to cyan
         surface: darkMatrix,
         error: Color(0xFFFF3333),
         onPrimary: textBlack,
