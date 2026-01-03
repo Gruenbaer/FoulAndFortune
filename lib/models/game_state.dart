@@ -477,9 +477,8 @@ class GameState extends ChangeNotifier {
 
     // HANDLE RE-RACK
     bool isReRack = false;
-    if (newBallCount == 1) {
       isReRack = true;
-      currentPlayer.reRackPoints = currentPlayer.inningPoints;
+      currentPlayer.reRackPoints += currentPlayer.inningPoints; // ACCUMULATE, don't overwrite!
       currentPlayer.inningPoints = 0; 
       currentPlayer.inningHasReRack = true;
       
