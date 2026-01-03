@@ -33,29 +33,34 @@ class AchievementChecker {
     GameState state,
     AchievementManager manager,
   ) {
-    // First win achievement
-    if (!manager.isUnlocked('first_win')) {
-      manager.unlock('first_win', playerName: winner.name);
-    }
-
-    // Perfect game (no fouls during the game)
-    // Check if winner never committed a foul in any inning
-    bool hadNoFouls = true;
-    for (var record in state.inningRecords) {
-      if (record.playerName == winner.name && 
-          (record.notation.contains('F') || record.notation.contains('BF'))) {
-        hadNoFouls = false;
-        break;
+    try {
+      // First win achievement
+      if (!manager.isUnlocked('first_win')) {
+        manager.unlock('first_win', playerName: winner.name);
       }
-    }
-    
-    if (hadNoFouls && !manager.isUnlocked('perfect_game')) {
-      manager.unlock('perfect_game', playerName: winner.name);
-    }
 
-    // Speed demon (< 10 innings)
-    if (winner.currentInning < 10 && !manager.isUnlocked('speed_demon')) {
-      manager.unlock('speed_demon', playerName: winner.name);
+      // Perfect game (no fouls during the game)
+      // Check if winner never committed a foul in any inning
+      bool hadNoFouls = true;
+      for (var record in state.inningRecords) {
+        if (record.playerName == winner.name && 
+            (record.notation.contains('F') || record.notation.contains('BF'))) {
+          hadNoFouls = false;
+          break;
+        }
+      }
+      
+      if (hadNoFouls && !manager.isUnlocked('perfect_game')) {
+        manager.unlock('perfect_game', playerName: winner.name);
+      }
+
+      // Speed demon (< 10 innings)
+      if (winner.currentInning < 10 && !manager.isUnlocked('speed_demon')) {
+        manager.unlock('speed_demon', playerName: winner.name);
+      }
+    } catch (e) {
+      // Fail silently - don't crash the game if achievement check fails
+      print('Achievement check error: $e');
     }
   }
 }
