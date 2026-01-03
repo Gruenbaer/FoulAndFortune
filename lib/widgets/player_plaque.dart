@@ -275,7 +275,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                           final gameState = Provider.of<GameState>(context, listen: true);
                           
                           if (widget.player.isActive) {
-                             runValue = gameState.calculateCurrentInningNetScore(widget.player);
+                             runValue = gameState.getDynamicInningScore(widget.player);
                           } else {
                              runValue = widget.player.lastRun;
                           }

@@ -171,7 +171,7 @@ class _GameEventOverlayState extends State<GameEventOverlay>
       // However, _processNext is called from listener/callback. context is valid.
       final l10n = AppLocalizations.of(context);
       String message;
-      String? subMessage;
+
 
       switch (event.type) {
         case FoulType.normal:

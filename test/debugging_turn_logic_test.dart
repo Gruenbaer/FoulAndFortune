@@ -1,8 +1,9 @@
 
+// ignore_for_file: avoid_print
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
-import 'package:foulandfortune/models/player.dart';
 
 void main() {
   test('Turn switching logic debug test', () {

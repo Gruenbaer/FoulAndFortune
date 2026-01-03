@@ -61,10 +61,10 @@ class SplashContent extends StatelessWidget {
                         blurRadius: 30, // Strong Glow
                         color: effectiveColor, // Glow with own color
                         offset: const Offset(0, 0)),
-                    Shadow(
+                    const Shadow(
                         blurRadius: 10,
                         color: Colors.black, // Contrast
-                        offset: const Offset(2, 2)),
+                        offset: Offset(2, 2)),
                   ],
                 ),
                 fontWeight: FontWeight.w900,
@@ -82,7 +82,7 @@ class SplashContent extends StatelessWidget {
                     fontWeight: FontWeight.w900, // Bold
                     shadows: [
                       Shadow(blurRadius: 20, color: effectiveColor, offset: const Offset(0, 0)),
-                      Shadow(blurRadius: 10, color: Colors.black, offset: const Offset(2, 2)),
+                      const Shadow(blurRadius: 10, color: Colors.black, offset: Offset(2, 2)),
                     ],
                   ),
                 ),

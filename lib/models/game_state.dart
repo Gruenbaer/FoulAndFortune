@@ -477,6 +477,7 @@ class GameState extends ChangeNotifier {
 
     // HANDLE RE-RACK
     bool isReRack = false;
+    if (newBallCount == 1) {
       isReRack = true;
       currentPlayer.reRackPoints += currentPlayer.inningPoints; // ACCUMULATE, don't overwrite!
       currentPlayer.inningPoints = 0; 
@@ -701,7 +702,7 @@ class GameState extends ChangeNotifier {
 
   // Helper to calculate the REAL-TIME net score of the current inning
   // Used for the "LR" box to show "15 + 14 - 1 = 28"
-  int calculateCurrentInningNetScore(Player player) {
+  int getDynamicInningScore(Player player) {
      // Base Points (Current Rack + Previous Racks in this inning)
      int total = player.inningPoints + player.reRackPoints;
      

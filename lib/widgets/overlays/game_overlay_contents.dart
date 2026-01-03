@@ -15,7 +15,7 @@ class FoulSplashContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = FortuneColors.of(context);
+
     return SplashContent(
       title: message.toUpperCase(),
       subtitle: '$penaltyPoints', // Display Penalty explicitly

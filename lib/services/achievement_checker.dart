@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../models/achievement_manager.dart';
 import '../models/player.dart';
 import '../models/game_state.dart';
@@ -60,7 +61,7 @@ class AchievementChecker {
       }
     } catch (e) {
       // Fail silently - don't crash the game if achievement check fails
-      print('Achievement check error: $e');
+      debugPrint('Achievement check error: $e');
     }
   }
 }
