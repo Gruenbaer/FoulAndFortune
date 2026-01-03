@@ -265,8 +265,19 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                       // Shows Cumulative Run
                       Builder(
                         builder: (context) {
-                          // Logic: Show LAST AWARDED points (not cumulative run)
-                          final int runValue = widget.player.lastAwardedPoints;
+                          // Dynamic LR Logic:
+                          // Active: Show Current Inning Net Score (Points - Pending Fouls)
+                          // Inactive: Show Last Completed Run
+                          
+                          int runValue;
+                          final gameState = Provider.of<GameState>(context, listen: true);
+                          
+                          if (widget.player.isActive) {
+                             runValue = gameState.calculateCurrentInningNetScore(widget.player);
+                          } else {
+                             runValue = widget.player.lastRun;
+                          }
+
                           
                           // Always show sign (+0, +5, -1)
                           final String runText = runValue >= 0 ? '+$runValue' : '$runValue';
