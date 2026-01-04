@@ -1,3 +1,13 @@
+### v3.9.2 - Clean & Standardized 🧹
+
+Removed the QA Assistant and standardized the score notation.
+
+* **Standard Notation:** 14-ball breaks now display as `|` (pipe) and re-racks use `•` (bullet) as a separator.
+* **Cleanup:** Removed the QA Assistant functionality for a streamlined experience.
+* **Polish:** Fixed various analysis warnings and optimized code.
+
+***
+
 ### v3.9.1 - Foul-Zähler Korrektur 🎯
 
 Kritischer Bugfix für die 3-Foul-Regel!
