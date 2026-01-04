@@ -524,9 +524,6 @@ class GameState extends ChangeNotifier {
     // Simple rule: Turn ends on every tap EXCEPT re-rack (ball 1)
     bool turnEnded = false;
 
-    // Simple rule: Turn ends on every tap EXCEPT re-rack (ball 1)
-    bool turnEnded = false;
-
     if (isReRack) {
       // Re-rack (ball 1): Player continues their run
       turnEnded = false;
