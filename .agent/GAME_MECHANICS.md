@@ -68,16 +68,24 @@ This is counter-intuitive to standard scoring apps (which usually ask "How many 
   - N cannot be 0
   - N must be ≥ 2
 - **Logic**:
-  - **Check Third Foul**: If `foulCount` is currently 2:
+  - **Foul Counter Management**:
+    - If **balls were pocketed** (N < currentRackCount): Reset `foulCount = 1`
+    - If **no balls pocketed** (N == currentRackCount): Increment `foulCount += 1`
+  - **Check Third Foul**: If `foulCount` reaches 3 (after increment):
     - **Score**: -16 points (-1 foul, -15 penalty)
     - **Reset**: `foulCount = 0`
     - **Rack**: Full Re-rack (`currentRackCount = 15`)
     - **Switch**: **YES**
-  - **Standard Foul**: If `foulCount < 2`:
+  - **Standard Foul**: If `foulCount < 3`:
     - **Score**: -1 point
-    - **Increment**: `foulCount += 1`
     - **Rack**: `currentRackCount` remains N
     - **Switch**: **YES**
+
+**Examples**:
+- Notation `1F, 1F, 1F`: Each pockets 1 ball + fouls → foulCount resets to 1 each time → NO penalty
+- Notation `F, F, F`: Pure fouls (0 balls) → foulCount increments to 3 → -18 total (-1, -1, -16)
+- Notation `1F, F, F`: First resets to 1, then increments to 2, then 3 → -16 penalty on third
+
 
 #### Scenario 4: Break Foul (Opening Shot)
 - **Conditions**: `isBreakFoul = ON`

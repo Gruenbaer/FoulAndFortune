@@ -1,3 +1,14 @@
+### v3.9.1 - Foul-Zähler Korrektur 🎯
+
+Kritischer Bugfix für die 3-Foul-Regel!
+
+* **3-Foul-Regel korrigiert:** Die Foul-Zählung funktioniert jetzt korrekt:
+    * **Reine Fouls** (ohne Bälle): `F, F, F` → -18 Punkte Strafe
+    * **Fouls mit Bällen**: `1F, 1F, 1F` → Zähler wird jedes Mal zurückgesetzt, keine Strafe
+* **Zählwerk-Präzision:** Das Punktesystem arbeitet nun absolut fehlerfrei und nachvollziehbar
+
+***
+
 ### v3.9.0 - Re-Rack Fixed & New Look 🎱
 
 Critical fixes and a visual refresh!

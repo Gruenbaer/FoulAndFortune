@@ -5,16 +5,26 @@ class FoulTracker {
 
   FoulTracker({this.threeFoulRuleEnabled = true});
 
-  /// Returns penalty points. -15 if 3-foul triggered, -1 otherwise
-  int applyNormalFoul(Player player) {
+  /// Returns penalty points. -16 if 3-foul triggered, -1 otherwise
+  /// ballsPocketed: Number of balls pocketed during this shot
+  int applyNormalFoul(Player player, int ballsPocketed) {
     if (threeFoulRuleEnabled) {
-      player.consecutiveFouls++;
+      // CRITICAL: Only increment for PURE fouls (no balls pocketed)
+      // If balls were pocketed, reset to 1 instead
+      if (ballsPocketed > 0) {
+        // Pocketed balls + foul: Reset counter to 1
+        player.consecutiveFouls = 1;
+      } else {
+        // Pure foul (no balls): Increment counter
+        player.consecutiveFouls++;
+      }
+      
       if (player.consecutiveFouls >= 3) {
         player.consecutiveFouls = 0; // Reset after penalty
         return -16; // 3-foul penalty TOTAL (-1 foul + -15 penalty)
       }
     } else {
-      player.consecutiveFouls = 0; // Ensure it doesn't accumulate if disabled?
+      player.consecutiveFouls = 0; // Ensure it doesn't accumulate if disabled
     }
     return -1;
   }

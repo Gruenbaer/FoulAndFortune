@@ -492,10 +492,11 @@ class GameState extends ChangeNotifier {
       // Always add Normal Foul (-1) event first
       eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
 
-      if (currentPlayer.consecutiveFouls == 2) { // Logic: If ALREADY at 2, this next one makes 3
-         // Add 3-Foul Penalty (-15) event sequentially
-         eventQueue.add(FoulEvent(currentPlayer, -15, FoulType.threeFouls));
-      }
+      // Check if this will be the 3rd foul AFTER applying the foul logic
+      // The foul tracker will handle incrementing/resetting based on ballsPocketed
+      // We need to check BEFORE calling applyNormalFoul in _finalizeInning
+      // For now, we'll determine if 3-foul penalty applies based on current count + foul type
+      // This check will be properly done in _finalizeInning where we have all the data
     }
 
     // TRACK SAFE
@@ -717,10 +718,27 @@ class GameState extends ChangeNotifier {
       totalInningPoints += foulPenalty; // foulPenalty is -2
     } else if (player.inningHasFoul) {
       // Normal foul: -1 or -16 (if 3rd consecutive)
-      foulPenalty = foulTracker.applyNormalFoul(player);
+      // Calculate total balls pocketed in this inning (pre-rerack + post-rerack)
+      int ballsPocketed = pointsInInning + pointsPreReRack;
+      
+      // Check if this will trigger the 3-foul penalty BEFORE applying
+      bool willTriggerThreeFouls = false;
+      if (foulTracker.threeFoulRuleEnabled) {
+        // Simulate the logic: if no balls pocketed and already at 2, this makes 3
+        if (ballsPocketed == 0 && player.consecutiveFouls == 2) {
+          willTriggerThreeFouls = true;
+        }
+      }
+      
+      foulPenalty = foulTracker.applyNormalFoul(player, ballsPocketed);
       totalInningPoints += foulPenalty; // foulPenalty is negative
+      
+      // Add 3-foul event if triggered
+      if (willTriggerThreeFouls) {
+        eventQueue.add(FoulEvent(player, -15, FoulType.threeFouls));
+      }
     } else {
-      // Valid shot resets consecutive fouls
+      // Valid shot (no foul) resets consecutive fouls
       player.consecutiveFouls = 0;
     }
     
