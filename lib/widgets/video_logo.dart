@@ -1,96 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import '../theme/fortune_theme.dart';
 
-class VideoLogo extends StatefulWidget {
+class VideoLogo extends StatelessWidget {
   final VoidCallback? onUserInteraction;
   
   const VideoLogo({super.key, this.onUserInteraction});
 
   @override
-  State<VideoLogo> createState() => _VideoLogoState();
-}
-
-class _VideoLogoState extends State<VideoLogo> {
-  late VideoPlayerController _controller;
-  bool _initialized = false;
-  
-  @override
-  void initState() {
-    super.initState();
-    // Initialize video from assets
-    _controller = VideoPlayerController.asset('assets/images/FoulAndFortuneAnimated.mp4')
-      ..initialize().then((_) {
-        debugPrint("✅ Video Initialized Successfully");
-        if (mounted) {
-          setState(() {
-            _initialized = true;
-          });
-          _controller.play();
-          _controller.setLooping(true);
-          _controller.setVolume(0.0);
-        }
-      }).catchError((error) {
-        debugPrint("❌ Video Initialization Error: $error");
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final fortuneTheme = FortuneColors.of(context);
     
-    if (!_initialized) {
-      // Placeholder: Static Image (No clock!)
-      return Center(
+    // Static Logo V2 (Placeholder for future video)
+    return Center(
+      child: GestureDetector(
+        onTap: onUserInteraction,
         child: Container(
           width: 250,
           height: 250,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.transparent, // or Colors.black ??
+            color: Colors.transparent, 
             boxShadow: [
-               BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
+               BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 15, offset: const Offset(0, 4)),
+               // Outer glow matching theme
+               BoxShadow(color: fortuneTheme.accent.withValues(alpha: 0.3), blurRadius: 20, spreadRadius: 2),
             ],
-            border: Border.all(color: fortuneTheme.accent.withValues(alpha: 0.5), width: 2), 
+            // Thin border to define edge
+            border: Border.all(color: fortuneTheme.primary.withValues(alpha: 0.8), width: 2), 
           ),
           child: ClipOval(
             child: Image.asset(
-              'assets/images/app_logo.png',
+              'assets/images/logo_v2.jpg',
               fit: BoxFit.cover,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Center(
-      child: Container(
-        width: 250, // Reduced from 250 (-20%) -> Back to 250
-        height: 250,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          // Transparent background, effectively just the clip
-          color: Colors.transparent,
-          boxShadow: [
-             BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
-          ],
-          // Border can be kept or removed. "Rest transparent" might imply strictly the video?
-          // I'll keep a thin border to define the 'Round' shape clearly against backgrounds
-          border: Border.all(color: fortuneTheme.accent.withValues(alpha: 0.5), width: 2), 
-        ),
-        child: ClipOval(
-          child: FittedBox(
-            fit: BoxFit.cover, 
-            child: SizedBox(
-              width: _controller.value.size.width,
-              height: _controller.value.size.height,
-              child: VideoPlayer(_controller),
             ),
           ),
         ),

@@ -356,7 +356,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                               (widget.player.score / (widget.player.currentInning > 0 ? widget.player.currentInning : 1)).toStringAsFixed(1),
                               style: GoogleFonts.nunito( // Rounded font
                                 textStyle: theme.textTheme.bodySmall,
-                                color: colors.primary,
+                                color: colors.textMain, // Readable Light Grey/White
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -392,7 +392,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                               '${widget.player.highestRun}',
                               style: GoogleFonts.nunito(
                                 textStyle: theme.textTheme.bodySmall,
-                                color: colors.primary,
+                                color: colors.textMain, // Readable Light Grey/White
                                 fontSize: 12, // Increased from 11
                                 fontWeight: FontWeight.bold,
                               ),

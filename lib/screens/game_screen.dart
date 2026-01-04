@@ -356,12 +356,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           child: Scaffold(
             extendBodyBehindAppBar: true,
             appBar: AppBar(
-              // Title moved to standard 'title' property for better layout control
               title: Text(
                 l10n.straightPool,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleMedium?.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.bold,
+                  fontSize: 20,
                   shadows: [
                     const Shadow(
                         blurRadius: 3,

@@ -501,13 +501,21 @@ class GameState extends ChangeNotifier {
       // Player continues their run.
       turnEnded = false;
     } else {
-      // "Count per Inning" Logic:
-      // Any other tap implies the inning is over (whether points were scored or not).
-      turnEnded = true;
-      
-      // Log explicit Miss if 0 points (and not Safe)
-      if (ballsPocketed == 0 && !currentSafeMode) {
-        _logAction('${currentPlayer.name}: Miss (0 pts)');
+      // Normal Shot Logic:
+      if (ballsPocketed > 0) {
+        // Scored points -> Continue turn
+        turnEnded = false;
+      } else if (ballsPocketed < 0) {
+        // Un-pocketed (Correction) -> Continue turn
+        turnEnded = false;
+      } else {
+        // Miss (0 points) -> Turn Ends
+        turnEnded = true;
+        
+        // Log explicit Miss if not Safe
+        if (!currentSafeMode) {
+          _logAction('${currentPlayer.name}: Miss (0 pts)');
+        }
       }
     }
 

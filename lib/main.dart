@@ -62,9 +62,32 @@ class _MyAppState extends State<MyApp> {
     if (_isLoading) {
       return MaterialApp(
         home: Scaffold(
+          backgroundColor: Colors.black, // Dark background as requested "steampunk dark"
           body: Center(
-            child: CircularProgressIndicator(
-              color: Colors.green[700],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo V2
+                Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.3), blurRadius: 20),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset('assets/images/logo_v2.jpg'),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Custom Loader
+                CircularProgressIndicator(
+                  color: const Color(0xFFC0C0C0), // Silver/Metal
+                  backgroundColor: Colors.black,
+                ),
+              ],
             ),
           ),
         ),

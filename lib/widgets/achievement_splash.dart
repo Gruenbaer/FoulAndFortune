@@ -195,20 +195,22 @@ class _AchievementSplashState extends State<AchievementSplash>
                             ),
                             const SizedBox(height: 16),
                             
-                            // Title
+                            // Title (Two lines allowed)
                             Text(
                               widget.achievement.title,
                               style: TextStyle(
-                                fontSize: 32,
+                                fontSize: 24, // Reduced from 32
                                 fontWeight: FontWeight.bold,
                                 color: FortuneColors.of(context).textMain,
                                 fontFamily: 'Orbitron',
                               ),
                               textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.visible,
                             ),
                             const SizedBox(height: 12),
                             
-                            // Description
+                            // Description (Flexible)
                             Text(
                               widget.achievement.description,
                               style: TextStyle(
@@ -217,6 +219,8 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 height: 1.4,
                               ),
                               textAlign: TextAlign.center,
+                              maxLines: 3,
+                              overflow: TextOverflow.visible,
                             ),
                             const SizedBox(height: 24),
                             
@@ -249,7 +253,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                             
                             // Show who unlocked it (if available)
                             if (widget.achievement.unlockedBy.isNotEmpty) ...[
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 8),
                               Text(
                                 'Unlocked by: ${widget.achievement.unlockedBy.last}',
                                 style: TextStyle(
@@ -259,6 +263,31 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 textAlign: TextAlign.center,
                               ),
                             ],
+
+                            const SizedBox(height: 24),
+                            
+                            // OK Button
+                            ElevatedButton(
+                              onPressed: widget.onDismiss,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: FortuneColors.of(context).success,
+                                foregroundColor: Colors.black, // Dark text on success color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                elevation: 8,
+                                shadowColor: FortuneColors.of(context).success.withValues(alpha: 0.5),
+                              ),
+                              child: Text(
+                                'OK',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
