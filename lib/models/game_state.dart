@@ -627,9 +627,15 @@ class GameState extends ChangeNotifier {
   // Finalize the current player's inning: calculate score, apply multipliers/fouls, generate notation
   void _finalizeInning(Player player) {
     // Skip if no actions taken in this inning
+    // SKIP CHECK REMOVED:
+    // Even if no points/fouls/safe occurred, if this method is called (via _switchPlayer),
+    // it implies the turn has ended (e.g. a Miss). 
+    // We MUST proceed to reset consecutive fouls and record the inning.
+    /*
     if (player.inningPoints == 0 && !player.inningHasFoul && !player.inningHasBreakFoul && !player.inningHasSafe) {
       return;
     }
+    */
     
     // Calculate points from both parts of the inning (pre and post re-rack)
     int pointsInInning = player.inningPoints;

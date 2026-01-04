@@ -261,11 +261,11 @@ class _GameEventOverlayState extends State<GameEventOverlay>
             backgroundColor: colors.backgroundCard,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: colors.primary, width: 2)),
+                side: const BorderSide(color: Colors.yellowAccent, width: 3)), // Yellow Border
             title: Text(title,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: colors.primaryBright, fontWeight: FontWeight.bold)),
+                style: const TextStyle(
+                    color: Colors.yellowAccent, fontWeight: FontWeight.bold, fontSize: 24)), // Yellow Title
             content: Text(message,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: colors.textMain, fontSize: 16)),

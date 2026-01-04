@@ -218,19 +218,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Enable wakelock to keep screen awake during gameplay
     WakelockPlus.enable();
 
-    // Initialize Global Screen Shake
+    // Initialize Red Flash Controller
     _screenShakeController = AnimationController(
        vsync: this,
-       duration: const Duration(milliseconds: 500),
+       duration: const Duration(milliseconds: 600),
     );
-    // Rapid oscillation for screen shake
+    // Flash Opacity Animation (0 -> 0.4 -> 0)
     _screenShakeOffset = TweenSequence<Offset>([
-      TweenSequenceItem(tween: Tween(begin: Offset.zero, end: const Offset(5, 0)), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: const Offset(5, 0), end: const Offset(-5, 0)), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: const Offset(-5, 0), end: const Offset(5, 0)), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: const Offset(5, 0), end: const Offset(-5, 0)), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: const Offset(-5, 0), end: const Offset(4, 0)), weight: 2),
-       TweenSequenceItem(tween: Tween(begin: const Offset(4, 0), end: Offset.zero), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: Offset.zero, end: const Offset(0.3, 0)), weight: 1), // Using Offset type to reuse variable, but it represents Opacity now
+      TweenSequenceItem(tween: Tween(begin: const Offset(0.3, 0), end: Offset.zero), weight: 3),
     ]).animate(_screenShakeController);
   }
 
@@ -320,15 +316,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         _screenShakeController.forward(from: 0.0);
         return true;
       },
-      child: AnimatedBuilder(
-        animation: _screenShakeController,
-        builder: (context, child) {
-          return Transform.translate(
-            offset: _screenShakeOffset.value, // Apply shake here
-            child: child,
-          );
-        },
-        child: Stack(
+      child: Stack(
       children: [
         PopScope(
           canPop: false,
@@ -879,11 +867,25 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         // Pause Overlay
         const PauseOverlay(),
         
+        // Red Flash Overlay (For Triple Foul)
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _screenShakeController,
+              builder: (context, child) {
+                return ColoredBox(
+                  color: Colors.red.withOpacity(_screenShakeOffset.value.dx.clamp(0.0, 1.0)),
+                );
+              },
+            ),
+          ),
+        ),
+
         // Unified Game Event System (Splashes)
         const GameEventOverlay(),
       ],
     ), // Close Stack
-   )); // Close NotificationListener & AnimatedBuilder
+   ); // Close NotificationListener
   }
 
   List<Widget> _buildRackFormation(BuildContext context, GameState gameState) {
@@ -989,7 +991,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           isOnTable &&
                           (gameState.foulMode != FoulMode.severe || rows[r][c] == 15);
                       
-                      final double targetOpacity = !isOnTable ? 0.6 : (isInteractable ? 1.0 : 0.6);
+                      final double targetOpacity = !isOnTable ? 0.15 : (isInteractable ? 1.0 : 0.5);
 
                       return AnimatedBuilder(
                     animation: _rackAnimationController,
