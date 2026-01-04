@@ -287,6 +287,23 @@ class DetailsScreen extends StatelessWidget {
               winnerName: leaderName,
             ),
             
+            const SizedBox(height: 16),
+            
+            // Legend
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildLegendItem(colors, '|', '14 (Break)'),
+                _buildLegendItem(colors, '•', 'Re-Rack'),
+                _buildLegendItem(colors, 'S', 'Safe'),
+                _buildLegendItem(colors, 'F', 'Foul'),
+                _buildLegendItem(colors, 'TF', '3-Foul'),
+                _buildLegendItem(colors, 'BF', 'Break Foul'),
+              ],
+            ),
+            
             const SizedBox(height: 32),
           ],
         ),
@@ -326,6 +343,29 @@ class DetailsScreen extends StatelessWidget {
             softWrap: false,
             overflow: TextOverflow.visible,
             style: TextStyle(color: colors.textMain, fontSize: 14), // Standardized with no-wrap
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _buildLegendItem(FortuneColors colors, String symbol, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          symbol,
+          style: TextStyle(
+            color: colors.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: colors.textMain.withValues(alpha: 0.7),
+            fontSize: 12,
           ),
         ),
       ],

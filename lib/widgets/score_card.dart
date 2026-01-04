@@ -61,8 +61,9 @@ class ScoreCard extends StatelessWidget {
                       color: player1.name == winnerName 
                           ? colors.primaryBright 
                           : colors.textMain,
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Arial',
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -79,8 +80,9 @@ class ScoreCard extends StatelessWidget {
                       color: player2.name == winnerName 
                           ? colors.primaryBright 
                           : colors.textMain,
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Arial',
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -118,9 +120,10 @@ class ScoreCard extends StatelessWidget {
       text,
       style: TextStyle(
         color: colors.textMain.withValues(alpha: 0.7),
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: FontWeight.w900,
         letterSpacing: 1.0,
+        fontFamily: 'Arial',
       ),
       textAlign: TextAlign.center,
     );
@@ -156,7 +159,7 @@ class ScoreCard extends StatelessWidget {
             flex: 2,
             child: Text(
               p1Total,
-              style: TextStyle(color: colors.primary, fontSize: 12),
+              style: TextStyle(color: colors.primary, fontSize: 14, fontFamily: 'Arial'),
               textAlign: TextAlign.center,
             ),
           ),
@@ -167,7 +170,8 @@ class ScoreCard extends StatelessWidget {
               inning.toString(),
               style: TextStyle(
                 color: colors.accent,
-                fontSize: 12,
+                fontSize: 14,
+                fontFamily: 'Arial',
               ),
               textAlign: TextAlign.center,
             ),
@@ -179,7 +183,8 @@ class ScoreCard extends StatelessWidget {
               p2Total,
               style: TextStyle(
                 color: colors.primaryBright,
-                fontSize: 12,
+                fontSize: 14,
+                fontFamily: 'Arial',
               ),
               textAlign: TextAlign.center,
             ),
@@ -199,7 +204,7 @@ class ScoreCard extends StatelessWidget {
       // No coloring, just plain text as requested (reverting previous change)
       return Text(
           notation, 
-          style: TextStyle(color: colors.textMain, fontSize: 12), 
+          style: TextStyle(color: colors.textMain, fontSize: 14, fontFamily: 'Arial'), 
           textAlign: TextAlign.center
       );
   }

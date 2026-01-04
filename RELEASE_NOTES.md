@@ -1,9 +1,13 @@
-### v3.9.3 - Hotfix: Turn Logic 🔧
+### v3.9.3 - Notation & Logic Refinement 🔧
 
-Critical fix for game flow issues.
+Critical fixes for game flow and major enhancements to the score card notation.
 
+* **Score Card Legend:** Added a helpful legend below the score card to explain all symbols (`|`, `TF`, `•`, etc.).
+* **Advanced Notation:**
+    *   **Triple Foul:** Now displays `TF` (or just `F` in scoring innings) and correctly tracks penalties.
+    *   **Multi-Segment:** Supports complex innings like `15•|•5F`.
+    *   **Logic Fix:** Scoring points now correctly resets the consecutive foul counter (so you can't get a Triple Foul if you potted balls in the same inning!).
 * **Fixed:** Turn now correctly continues after potting a ball! (Fixed regression where turn ended on every shot).
-* **Fixed:** Notation (`|`, `•`) now generates correctly since the turn flow is preserved.
 
 ***
 

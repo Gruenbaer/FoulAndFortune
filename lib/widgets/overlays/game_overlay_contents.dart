@@ -25,7 +25,7 @@ class FoulSplashContent extends StatelessWidget {
       textColor: Colors.cyanAccent, // Title Text
       subtitleColor: Colors.redAccent, // Number Text
       subtitleGlowColor: Colors.yellowAccent, // Number Glow (Yellow Border effect)
-      backgroundColor: Colors.black.withOpacity(0.7), // Semi-transparent background
+      backgroundColor: Colors.black.withValues(alpha: 0.7), // Semi-transparent background
     );
   }
 }

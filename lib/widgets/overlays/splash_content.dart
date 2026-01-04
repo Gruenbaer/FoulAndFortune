@@ -77,7 +77,7 @@ class _SplashContentState extends State<SplashContent> with SingleTickerProvider
               gradient: RadialGradient(
                 colors: [
                   widget.backgroundColor!, 
-                  widget.backgroundColor!.withOpacity(0.0)
+                  widget.backgroundColor!.withValues(alpha: 0.0)
                 ],
                 stops: const [0.2, 1.0], // Core is solid-ish, then fades
                 radius: 0.8,

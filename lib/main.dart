@@ -11,7 +11,7 @@ import 'theme/steampunk_theme.dart';
 import 'theme/fortune_theme.dart';
 import 'theme/ghibli_theme.dart';
 
-import 'widgets/feedback_wrapper.dart';
+
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -83,8 +83,8 @@ class _MyAppState extends State<MyApp> {
                 ),
                 const SizedBox(height: 24),
                 // Custom Loader
-                CircularProgressIndicator(
-                  color: const Color(0xFFC0C0C0), // Silver/Metal
+                const CircularProgressIndicator(
+                  color: Color(0xFFC0C0C0), // Silver/Metal
                   backgroundColor: Colors.black,
                 ),
               ],
@@ -118,11 +118,6 @@ class _MyAppState extends State<MyApp> {
             supportedLocales: AppLocalizations.supportedLocales,
             locale: Locale(settings.languageCode),
             
-            // Global Overlay Wrapper (Feedback Chat)
-            builder: (context, child) => FeedbackWrapper(
-              navigatorKey: navigatorKey, 
-              child: child
-            ),
             
             // Theme
             theme: _getTheme(settings.themeId),

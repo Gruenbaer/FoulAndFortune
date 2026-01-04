@@ -8,7 +8,7 @@ import 'package:foulandfortune/l10n/app_localizations.dart';
 import 'package:foulandfortune/utils/ui_utils.dart'; // For showZoomDialog
 
 /// Unified Overlay System handling the Game Event Queue
-import '../models/game_state.dart'; // For FoulType
+
 
 // Notification to bubble up shake request to parent Scaffold
 class ScreenShakeNotification extends Notification {}

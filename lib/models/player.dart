@@ -16,9 +16,11 @@ class Player {
   int lastAwardedPoints; // Explicitly track the last points awarded (e.g. +1, -1)
   
   // Inning-based tracking (new for proper point counting)
-  int inningPoints; // Points accumulated in current inning (before multiplier/fouls)
-  int reRackPoints; // Points before re-rack (for notation like "14.1")
+  int inningPoints; // Points accumulated in CURRENT active segment of the inning
+  List<int> inningHistory; // List of completed segments (runs) in this inning (e.g. [14, 14])
+  // int reRackPoints; // DEPRECATED - replaced by inningHistory
   bool inningHasFoul; // Whether current inning has a normal foul
+  bool inningHasThreeFouls; // Whether current inning triggered 3-foul penalty
   bool inningHasBreakFoul; // Whether current inning has a break foul (-2)
   bool inningHasSafe; // Whether current inning has a safe (statistical)
   bool inningHasReRack; // Whether current inning had a re-rack
@@ -38,12 +40,14 @@ class Player {
     this.updateCount = 0,
     this.lastAwardedPoints = 0, // Default 0
     this.inningPoints = 0,
-    this.reRackPoints = 0,
+    List<int>? inningHistory, // Optional param
     this.inningHasFoul = false,
+    this.inningHasThreeFouls = false,
     this.inningHasBreakFoul = false,
     this.inningHasSafe = false,
     this.inningHasReRack = false,
-  }) : handicapMultiplier = handicapMultiplier.clamp(0.1, 10.0);
+  }) : handicapMultiplier = handicapMultiplier.clamp(0.1, 10.0),
+       inningHistory = inningHistory ?? []; // Initialize list
 
   void addScore(int points) {
     score += points;
@@ -53,6 +57,7 @@ class Player {
     
     if (points > 0) {
       currentRun += points;
+      consecutiveFouls = 0; // Legal points break foul streak
       if (currentRun > highestRun) {
          highestRun = currentRun;
       }
@@ -68,7 +73,8 @@ class Player {
     
     // Reset inning trackers
     inningPoints = 0;
-    reRackPoints = 0;
+    inningHistory = [];
+    inningHasThreeFouls = false;
     inningHasFoul = false;
     inningHasBreakFoul = false;
     inningHasSafe = false;
@@ -85,6 +91,9 @@ class Player {
   void addInningPoints(int points) {
     inningPoints += points;
     lastAwardedPoints = points;
+    if (points > 0) {
+      consecutiveFouls = 0; // Legal points break foul streak
+    }
     updateCount++;
   }
 
@@ -108,8 +117,9 @@ class Player {
     int? updateCount,
     int? lastAwardedPoints,
     int? inningPoints,
-    int? reRackPoints,
+    List<int>? inningHistory,
     bool? inningHasFoul,
+    bool? inningHasThreeFouls,
     bool? inningHasBreakFoul,
     bool? inningHasSafe,
     bool? inningHasReRack,
@@ -129,8 +139,9 @@ class Player {
       updateCount: updateCount ?? this.updateCount,
       lastAwardedPoints: lastAwardedPoints ?? this.lastAwardedPoints,
       inningPoints: inningPoints ?? this.inningPoints,
-      reRackPoints: reRackPoints ?? this.reRackPoints,
+      inningHistory: inningHistory ?? List.from(this.inningHistory),
       inningHasFoul: inningHasFoul ?? this.inningHasFoul,
+      inningHasThreeFouls: inningHasThreeFouls ?? this.inningHasThreeFouls,
       inningHasBreakFoul: inningHasBreakFoul ?? this.inningHasBreakFoul,
       inningHasSafe: inningHasSafe ?? this.inningHasSafe,
       inningHasReRack: inningHasReRack ?? this.inningHasReRack,
@@ -150,8 +161,9 @@ class Player {
     'lastRun': lastRun,
     'lastAwardedPoints': lastAwardedPoints,
     'inningPoints': inningPoints,
-    'reRackPoints': reRackPoints,
+    'inningHistory': inningHistory,
     'inningHasFoul': inningHasFoul,
+    'inningHasThreeFouls': inningHasThreeFouls,
     'inningHasBreakFoul': inningHasBreakFoul,
     'inningHasSafe': inningHasSafe,
     'inningHasReRack': inningHasReRack,
@@ -171,15 +183,17 @@ class Player {
     lastRun: json['lastRun'] as int? ?? 0,
     lastAwardedPoints: json['lastAwardedPoints'] as int? ?? 0,
     inningPoints: json['inningPoints'] as int? ?? 0,
-    reRackPoints: json['reRackPoints'] as int? ?? 0,
+    inningHistory: (json['inningHistory'] as List?)?.map((e) => e as int).toList() ?? [],
     inningHasFoul: json['inningHasFoul'] as bool? ?? false,
+    inningHasThreeFouls: json['inningHasThreeFouls'] as bool? ?? false,
     inningHasBreakFoul: json['inningHasBreakFoul'] as bool? ?? false,
     inningHasSafe: json['inningHasSafe'] as bool? ?? false,
     inningHasReRack: json['inningHasReRack'] as bool? ?? false,
   );
   // Projected Score for UI Display (Real-time feedback)
   int get projectedScore {
-    int projected = score + inningPoints + reRackPoints;
+    int totalHistory = inningHistory.fold(0, (sum, item) => sum + item);
+    int projected = score + inningPoints + totalHistory;
     
     // Apply penalties
     if (inningHasBreakFoul) {
@@ -189,7 +203,8 @@ class Player {
     if (inningHasFoul) {
         // Normal foul logic
         // If consecutive fouls is already 2, this 3rd one triggers -15 extra
-        if (consecutiveFouls >= 2) {
+        // OR if 3-foul was explicitly flagged
+        if (consecutiveFouls >= 2 || inningHasThreeFouls) {
             projected -= 16; // -1 (foul) + -15 (3-foul penalty)
         } else {
             projected -= 1; // Standard foul

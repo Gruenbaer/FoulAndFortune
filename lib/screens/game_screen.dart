@@ -874,7 +874,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               animation: _screenShakeController,
               builder: (context, child) {
                 return ColoredBox(
-                  color: Colors.red.withOpacity(_screenShakeOffset.value.dx.clamp(0.0, 1.0)),
+                  color: Colors.red.withValues(alpha: _screenShakeOffset.value.dx.clamp(0.0, 1.0)),
                 );
               },
             ),

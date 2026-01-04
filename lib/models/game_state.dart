@@ -509,7 +509,8 @@ class GameState extends ChangeNotifier {
     bool isReRack = false;
     if (newBallCount == 1) {
       isReRack = true;
-      currentPlayer.reRackPoints += currentPlayer.inningPoints; // ACCUMULATE, don't overwrite!
+      // Add current inning points to history segment
+      currentPlayer.inningHistory.add(currentPlayer.inningPoints);
       currentPlayer.inningPoints = 0; 
       currentPlayer.inningHasReRack = true;
       
@@ -632,6 +633,10 @@ class GameState extends ChangeNotifier {
     // ACCUMULATE POINTS IN INNING (like onBallTapped)
     currentPlayer.addInningPoints(ballsRemaining);
     
+    // Push current points to history (Double Sack completes the rack)
+    currentPlayer.inningHistory.add(currentPlayer.inningPoints);
+    currentPlayer.inningPoints = 0;
+    
     // TRACK FOULS
     if (currentFoulMode == FoulMode.normal) {
       currentPlayer.inningHasFoul = true;
@@ -659,7 +664,8 @@ class GameState extends ChangeNotifier {
     // If no foul, player continues (inning stays open for next shot)
     
     // Explicitly Clear Balls and Trigger Re-Rack Animation
-    activeBalls.clear(); 
+    // Reset rack to 15 balls for next shot
+    _resetRack(); 
     eventQueue.add(ReRackEvent('reRack'));
     
     notifyListeners();
@@ -692,25 +698,21 @@ class GameState extends ChangeNotifier {
     */
     
     // Calculate points from both parts of the inning (pre and post re-rack)
+    // Calculate points from all segments + current
     int pointsInInning = player.inningPoints;
-    int pointsPreReRack = player.reRackPoints;
-
-    // Apply handicap multiplier to positive points only
-    // Note: We apply rounding to the SUM of raw points to avoid rounding errors splitting the inning?
-    // OR we apply to each part?
-    // The notation generator applies to EACH part. To match notation, we should probably apply to each.
-    // However, 14.1 usually counts balls. Handicap stands on top.
     
     int addedPoints = 0;
     
-    // 1. Post-rerack points
-    if (pointsInInning > 0) {
-      addedPoints += (pointsInInning * player.handicapMultiplier).round();
+    // 1. Process History Segments (Re-racks)
+    for (int segmentPoints in player.inningHistory) {
+      if (segmentPoints > 0) {
+        addedPoints += (segmentPoints * player.handicapMultiplier).round();
+      }
     }
     
-    // 2. Pre-rerack points
-    if (pointsPreReRack > 0) {
-      addedPoints += (pointsPreReRack * player.handicapMultiplier).round();
+    // 2. Process Current Active Segment
+    if (pointsInInning > 0) {
+      addedPoints += (pointsInInning * player.handicapMultiplier).round();
     }
     
     int totalInningPoints = addedPoints;
@@ -724,22 +726,24 @@ class GameState extends ChangeNotifier {
     } else if (player.inningHasFoul) {
       // Normal foul: -1 or -16 (if 3rd consecutive)
       // Calculate total balls pocketed in this inning (pre-rerack + post-rerack)
-      int ballsPocketed = pointsInInning + pointsPreReRack;
+      // Calculate total balls pocketed in this inning (history + current)
+      int totalRawPoints = player.inningHistory.fold(0, (sum, p) => sum + p) + pointsInInning;
       
       // Check if this will trigger the 3-foul penalty BEFORE applying
       bool willTriggerThreeFouls = false;
       if (foulTracker.threeFoulRuleEnabled) {
         // Simulate the logic: if no balls pocketed and already at 2, this makes 3
-        if (ballsPocketed == 0 && player.consecutiveFouls == 2) {
+        if (totalRawPoints == 0 && player.consecutiveFouls == 2) {
           willTriggerThreeFouls = true;
         }
       }
       
-      foulPenalty = foulTracker.applyNormalFoul(player, ballsPocketed);
+      foulPenalty = foulTracker.applyNormalFoul(player, totalRawPoints);
       totalInningPoints += foulPenalty; // foulPenalty is negative
       
       // Add 3-foul event if triggered
       if (willTriggerThreeFouls) {
+        player.inningHasThreeFouls = true; // Mark for notation "TF"
         eventQueue.add(FoulEvent(player, -15, FoulType.threeFouls));
       }
     } else {
@@ -783,7 +787,7 @@ class GameState extends ChangeNotifier {
   // Used for the "LR" box to show "15 + 14 - 1 = 28"
   int getDynamicInningScore(Player player) {
      // Base Points (Current Rack + Previous Racks in this inning)
-     int total = player.inningPoints + player.reRackPoints;
+     int total = player.inningPoints + player.inningHistory.fold(0, (prev, element) => prev + element);
      
      // Apply Handicap
      if (total > 0) {
@@ -799,54 +803,68 @@ class GameState extends ChangeNotifier {
   // Generate score card notation for an inning
   String _generateInningNotation(Player player) {
     String notation = '';
+    List<String> segments = [];
     
-    // Handle re-rack notation (X.Y format)
-    if (player.inningHasReRack) {
-      // Apply multiplier to pre-rerack points
-      int preRerackPoints = player.reRackPoints;
-      if (preRerackPoints > 0) {
-        preRerackPoints = (preRerackPoints * player.handicapMultiplier).round();
+    // 1. Process History Segments (completed racks)
+    for (int segmentPoints in player.inningHistory) {
+      int adjusted = segmentPoints;
+      if (adjusted > 0) {
+        adjusted = (adjusted * player.handicapMultiplier).round();
       }
       
-      // Apply multiplier to post-rerack points
-      int postRerackPoints = player.inningPoints;
-      if (postRerackPoints > 0) {
-        postRerackPoints = (postRerackPoints * player.handicapMultiplier).round();
-      }
-      
-      // NEW RULE: If pre-rerack cleared 14 balls (all but one), show "|" instead of number
-      // This represents a "break" - clearing the rack down to ball 1
-      String preNotation = preRerackPoints == 14 ? '|' : preRerackPoints.toString();
-      
-      // Use "•" as separator between re-rack segments
-      // If post-rerack points are 0, still show bullet to indicate re-rack occurred (e.g., "15•")
-      if (postRerackPoints > 0) {
-        notation = '$preNotation•$postRerackPoints';
+      // RULE: 14 balls = '|'
+      if (adjusted == 14) {
+        segments.add('|');
       } else {
-        notation = '$preNotation•';
-      }
-    } else {
-      // Simple notation: just the points
-      int points = player.inningPoints;
-      if (points > 0) {
-        points = (points * player.handicapMultiplier).round();
-      }
-      
-      if (points == 0 && !player.inningHasFoul && !player.inningHasBreakFoul && !player.inningHasSafe) {
-        notation = '-'; // Miss/no action
-      } else {
-        notation = points.toString();
+        segments.add(adjusted.toString());
       }
     }
+    
+    // 2. Process Current Active Segment
+    int currentPoints = player.inningPoints;
+    if (currentPoints > 0) {
+      currentPoints = (currentPoints * player.handicapMultiplier).round();
+    }
+    
+    // Only show current points if > 0 OR if it's the only thing (no history)
+    // If we have history (re-rack), we join with bullet.
+    // If currentPoints is 0 but we have a miss/foul/safe, we might just append suffix?
+    // The requested format is "15.|.5SF" -> "15", "|", "5" joined by dots/bullets.
+    
+    if (currentPoints > 0 || segments.isEmpty) {
+        // Special case: Miss (0 points) with no history -> '-'
+        if (currentPoints == 0 && segments.isEmpty && 
+            !player.inningHasFoul && !player.inningHasBreakFoul && !player.inningHasSafe) {
+             segments.add('-');
+        } else {
+             // If we have history but 0 current points, do we show '0'? 
+             // Example: "14.|" (missed immediately after break).
+             // User example: "15.|.5SF".
+             // If I have "15" and then miss (0), notation is "15." or "15.0"?
+             // Standard usually implies just the run.
+             if (currentPoints > 0 || segments.isEmpty) {
+                segments.add(currentPoints.toString());
+             }
+        }
+    } else {
+        // Case: History exists (re-rack) but current points are 0.
+        // Append empty string to create trailing bullet (e.g. "5•")
+        segments.add('');
+    }
+    
+    // Join all segments with bullet
+    notation = segments.join('•');
     
     // Add safe suffix
     if (player.inningHasSafe) {
       notation += 'S';
     }
     
-    // Add foul suffix (BF for break foul, F for normal foul)
+    // Add foul suffix (BF for break foul, TF for triple foul, F for normal foul)
     if (player.inningHasBreakFoul) {
       notation += 'BF';
+    } else if (player.inningHasThreeFouls) {
+      notation += 'TF';
     } else if (player.inningHasFoul) {
       notation += 'F';
     }

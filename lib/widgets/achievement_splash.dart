@@ -279,9 +279,9 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 elevation: 8,
                                 shadowColor: FortuneColors.of(context).success.withValues(alpha: 0.5),
                               ),
-                              child: Text(
+                              child: const Text(
                                 'OK',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.5,
