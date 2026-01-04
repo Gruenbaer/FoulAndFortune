@@ -492,30 +492,19 @@ class GameState extends ChangeNotifier {
     }
 
     // DETERMINE IF TURN ENDS
+    // Simple rule: Turn ends on every tap EXCEPT re-rack (ball 1)
     bool turnEnded = false;
 
-    if (currentFoulMode == FoulMode.normal) {
-      turnEnded = true;
-    } else if (isReRack) {
-      // Re-rack is NOT a turn-ending event (unless a foul occurred)
-      // Player continues their run.
+    if (isReRack) {
+      // Re-rack (ball 1): Player continues their run
       turnEnded = false;
     } else {
-      // Normal Shot Logic:
-      if (ballsPocketed > 0) {
-        // Scored points -> Continue turn
-        turnEnded = false;
-      } else if (ballsPocketed < 0) {
-        // Un-pocketed (Correction) -> Continue turn
-        turnEnded = false;
-      } else {
-        // Miss (0 points) -> Turn Ends
-        turnEnded = true;
-        
-        // Log explicit Miss if not Safe
-        if (!currentSafeMode) {
-          _logAction('${currentPlayer.name}: Miss (0 pts)');
-        }
+      // All other taps: Turn ends and player switches
+      turnEnded = true;
+      
+      // Log explicit Miss if no points scored and not Safe/Foul
+      if (ballsPocketed == 0 && !currentSafeMode && currentFoulMode == FoulMode.none) {
+        _logAction('${currentPlayer.name}: Miss (0 pts)');
       }
     }
 
