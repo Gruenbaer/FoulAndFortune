@@ -1,3 +1,12 @@
+### v3.9.3 - Hotfix: Turn Logic 🔧
+
+Critical fix for game flow issues.
+
+* **Fixed:** Turn now correctly continues after potting a ball! (Fixed regression where turn ended on every shot).
+* **Fixed:** Notation (`|`, `•`) now generates correctly since the turn flow is preserved.
+
+***
+
 ### v3.9.2 - Clean & Standardized 🧹
 
 Removed the QA Assistant and standardized the score notation.

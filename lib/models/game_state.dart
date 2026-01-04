@@ -411,7 +411,7 @@ class GameState extends ChangeNotifier {
     if (currentFoulMode == FoulMode.normal) {
       // "The Lone Ranger Foul": Cannot foul and leave 1 ball
       if (ballNumber == 1) {
-        print('ERROR: Illegal move - cannot foul and tap ball 1');
+        debugPrint('ERROR: Illegal move - cannot foul and tap ball 1');
         eventQueue.add(WarningEvent(
           'illegalMoveTitle',
           'cannotFoulAndLeave1Ball'
@@ -423,7 +423,7 @@ class GameState extends ChangeNotifier {
       }
       // "The Penalized Perfection": Cannot foul and clear the table
       if (ballNumber == 0) {
-        print('ERROR: Illegal move - cannot foul and tap white ball (0)');
+        debugPrint('ERROR: Illegal move - cannot foul and tap white ball (0)');
         eventQueue.add(WarningEvent(
           'illegalMoveTitle',
           'cannotFoulAndDoubleSack'
@@ -524,20 +524,31 @@ class GameState extends ChangeNotifier {
     // Simple rule: Turn ends on every tap EXCEPT re-rack (ball 1)
     bool turnEnded = false;
 
-    print('DEBUG: onBallTapped - ballNumber=$ballNumber, isReRack=$isReRack, ballsPocketed=$ballsPocketed');
-    
+    // Simple rule: Turn ends on every tap EXCEPT re-rack (ball 1)
+    bool turnEnded = false;
+
     if (isReRack) {
       // Re-rack (ball 1): Player continues their run
-      print('DEBUG: Re-rack detected, player continues');
       turnEnded = false;
     } else {
-      // All other taps: Turn ends and player switches
-      print('DEBUG: Normal tap, player should switch');
-      turnEnded = true;
+      // Logic for standard shots:
+      // Turn continues if:
+      // 1. Balls were pocketed (> 0)
+      // 2. NO standard foul
+      // 3. NO safe declared
+      bool isPot = ballsPocketed > 0;
+      bool isFoul = currentPlayer.inningHasFoul;
+      bool isSafe = currentPlayer.inningHasSafe;
       
-      // Log explicit Miss if no points scored and not Safe/Foul
-      if (ballsPocketed == 0 && !currentSafeMode && currentFoulMode == FoulMode.none) {
-        _logAction('${currentPlayer.name}: Miss (0 pts)');
+      if (isPot && !isFoul && !isSafe) {
+         turnEnded = false;
+      } else {
+         turnEnded = true; 
+         
+          // Log explicit Miss if no points scored and not Safe/Foul
+          if (ballsPocketed == 0 && !isSafe && !isFoul) {
+             _logAction('${currentPlayer.name}: Miss (0 pts)');
+          }
       }
     }
 
@@ -552,15 +563,12 @@ class GameState extends ChangeNotifier {
 
     _checkWinCondition();
 
-    print('DEBUG: turnEnded=$turnEnded, about to switch=${turnEnded}');
+    _checkWinCondition();
+
     if (turnEnded) {
-      print('DEBUG: Calling _switchPlayer()');
       _switchPlayer();
-      print('DEBUG: Player switched to ${currentPlayer.name}');
       // Check again after switching - score update happens in _finalizeInning
       _checkWinCondition();
-    } else {
-      print('DEBUG: Turn did NOT end, player ${currentPlayer.name} continues');
     }
 
     notifyListeners();
@@ -607,7 +615,7 @@ class GameState extends ChangeNotifier {
     
     // VALIDATION: "The Penalized Perfection" - Cannot foul and clear the table
     if (currentFoulMode == FoulMode.normal) {
-      print('ERROR: Illegal move - cannot foul and tap white ball (double sack)');
+      debugPrint('ERROR: Illegal move - cannot foul and tap white ball (double sack)');
       eventQueue.add(WarningEvent(
         'illegalMoveTitle',
         'cannotFoulAndDoubleSack'
@@ -746,7 +754,7 @@ class GameState extends ChangeNotifier {
     player.score += totalInningPoints;
     player.lastPoints = totalInningPoints;
     player.lastRun = totalInningPoints; // Persist for "LR" display
-    print('DEBUG: _finalizeInning - Total: $totalInningPoints, lastRun Set To: ${player.lastRun}, currentRun before: ${player.currentRun}');
+    debugPrint('DEBUG: _finalizeInning - Total: $totalInningPoints, lastRun Set To: ${player.lastRun}, currentRun before: ${player.currentRun}');
     player.updateCount++;
     
     // Update current run
@@ -809,7 +817,17 @@ class GameState extends ChangeNotifier {
         postRerackPoints = (postRerackPoints * player.handicapMultiplier).round();
       }
       
-      notation = '$preRerackPoints.$postRerackPoints';
+      // NEW RULE: If pre-rerack cleared 14 balls (all but one), show "|" instead of number
+      // This represents a "break" - clearing the rack down to ball 1
+      String preNotation = preRerackPoints == 14 ? '|' : preRerackPoints.toString();
+      
+      // Use "•" as separator between re-rack segments
+      // If post-rerack points are 0, still show bullet to indicate re-rack occurred (e.g., "15•")
+      if (postRerackPoints > 0) {
+        notation = '$preNotation•$postRerackPoints';
+      } else {
+        notation = '$preNotation•';
+      }
     } else {
       // Simple notation: just the points
       int points = player.inningPoints;
