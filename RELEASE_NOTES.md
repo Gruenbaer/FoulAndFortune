@@ -1,3 +1,16 @@
+### v3.9.0 - Re-Rack Fixed & New Look 🎱
+
+Critical fixes and a visual refresh!
+
+* **Re-Rack Fixed:** Fixed a major bug where shots were ending the turn prematurely. Your stats and high runs are now accurate!
+* **New Look:**
+    * **Brand New Logo:** Fresh "Foul & Fortune" logo on Start & Loading screens.
+    * **Themified History:** "Spielverlauf" now fully respects your chosen theme (Neon for Cyberpunk!).
+* **Settings Button:** Fixed an issue where the Settings gear was hidden on some screens.
+* **Score Sheet:** Now standardizes notation for easier reading.
+
+***
+
 ### v3.8.4 - Smarter Player Setup 🎯
 
 Neues Spiel starten war noch nie so einfach!
