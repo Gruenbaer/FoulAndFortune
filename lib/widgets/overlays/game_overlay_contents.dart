@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/fortune_theme.dart';
 import 'splash_content.dart';
+import '../../l10n/app_localizations.dart';
 
 class FoulSplashContent extends StatelessWidget {
   final String message;
@@ -35,8 +36,9 @@ class SafeSplashContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return SplashContent(
-      title: "SAFE",
+      title: l10n.safe,
       icon: Icons.shield,
       color: colors.success,
     );
@@ -54,9 +56,16 @@ class ReRackSplashContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
+    final l10n = AppLocalizations.of(context);
+    // Translate 'reRack' key if needed
+    String displayTitle = title;
+    if (title == 'reRack') {
+      displayTitle = l10n.reRack;
+    }
+    
     return SplashContent(
-      title: "RE-RACK", 
-      subtitle: title == "Re-rack!" || title == "14.1 Re-Rack" ? null : title,
+      title: displayTitle, 
+      subtitle: null,
       icon: null, // Removed Icon as requested
       color: colors.primaryBright,
     );

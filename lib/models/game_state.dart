@@ -407,6 +407,34 @@ class GameState extends ChangeNotifier {
     final currentFoulMode = foulMode;
     final currentSafeMode = isSafeMode;
     
+    // VALIDATION: Check for illegal move combinations
+    if (currentFoulMode == FoulMode.normal) {
+      // "The Lone Ranger Foul": Cannot foul and leave 1 ball
+      if (ballNumber == 1) {
+        print('ERROR: Illegal move - cannot foul and tap ball 1');
+        eventQueue.add(WarningEvent(
+          'illegalMoveTitle',
+          'cannotFoulAndLeave1Ball'
+        ));
+        // Reset state and return early
+        foulMode = FoulMode.none;
+        notifyListeners();
+        return;
+      }
+      // "The Penalized Perfection": Cannot foul and clear the table
+      if (ballNumber == 0) {
+        print('ERROR: Illegal move - cannot foul and tap white ball (0)');
+        eventQueue.add(WarningEvent(
+          'illegalMoveTitle',
+          'cannotFoulAndDoubleSack'
+        ));
+        // Reset state and return early
+        foulMode = FoulMode.none;
+        notifyListeners();
+        return;
+      }
+    }
+    
     // Reset temporary modes
     foulMode = FoulMode.none;
     isSafeMode = false;
@@ -484,7 +512,7 @@ class GameState extends ChangeNotifier {
       currentPlayer.inningPoints = 0; 
       currentPlayer.inningHasReRack = true;
       
-      eventQueue.add(ReRackEvent("Re-rack!"));
+      eventQueue.add(ReRackEvent("reRack"));
       _logAction('${currentPlayer.name}: Re-rack');
       _updateRackCount(newBallCount);
     } else {
@@ -495,11 +523,15 @@ class GameState extends ChangeNotifier {
     // Simple rule: Turn ends on every tap EXCEPT re-rack (ball 1)
     bool turnEnded = false;
 
+    print('DEBUG: onBallTapped - ballNumber=$ballNumber, isReRack=$isReRack, ballsPocketed=$ballsPocketed');
+    
     if (isReRack) {
       // Re-rack (ball 1): Player continues their run
+      print('DEBUG: Re-rack detected, player continues');
       turnEnded = false;
     } else {
       // All other taps: Turn ends and player switches
+      print('DEBUG: Normal tap, player should switch');
       turnEnded = true;
       
       // Log explicit Miss if no points scored and not Safe/Foul
@@ -519,10 +551,15 @@ class GameState extends ChangeNotifier {
 
     _checkWinCondition();
 
+    print('DEBUG: turnEnded=$turnEnded, about to switch=${turnEnded}');
     if (turnEnded) {
+      print('DEBUG: Calling _switchPlayer()');
       _switchPlayer();
+      print('DEBUG: Player switched to ${currentPlayer.name}');
       // Check again after switching - score update happens in _finalizeInning
       _checkWinCondition();
+    } else {
+      print('DEBUG: Turn did NOT end, player ${currentPlayer.name} continues');
     }
 
     notifyListeners();
@@ -566,6 +603,20 @@ class GameState extends ChangeNotifier {
     }
 
     final currentFoulMode = foulMode;
+    
+    // VALIDATION: "The Penalized Perfection" - Cannot foul and clear the table
+    if (currentFoulMode == FoulMode.normal) {
+      print('ERROR: Illegal move - cannot foul and tap white ball (double sack)');
+      eventQueue.add(WarningEvent(
+        'illegalMoveTitle',
+        'cannotFoulAndDoubleSack'
+      ));
+      // Reset state and return early
+      foulMode = FoulMode.none;
+      notifyListeners();
+      return;
+    }
+    
     foulMode = FoulMode.none;
     resetBreakFoulError();
 
@@ -603,7 +654,7 @@ class GameState extends ChangeNotifier {
     
     // Explicitly Clear Balls and Trigger Re-Rack Animation
     activeBalls.clear(); 
-    eventQueue.add(ReRackEvent('14.1 Re-Rack'));
+    eventQueue.add(ReRackEvent('reRack'));
     
     notifyListeners();
   }

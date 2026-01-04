@@ -1099,6 +1099,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Average'**
   String get average;
+
+  /// No description provided for @illegalMoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Illegal Move'**
+  String get illegalMoveTitle;
+
+  /// No description provided for @cannotFoulAndLeave1Ball.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot foul and leave 1 ball on the table'**
+  String get cannotFoulAndLeave1Ball;
+
+  /// No description provided for @cannotFoulAndDoubleSack.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot foul and clear the table (double sack)'**
+  String get cannotFoulAndDoubleSack;
+
+  /// No description provided for @reRack.
+  ///
+  /// In en, this message translates to:
+  /// **'RE-RACK!'**
+  String get reRack;
+
+  /// No description provided for @safe.
+  ///
+  /// In en, this message translates to:
+  /// **'SAFE'**
+  String get safe;
+
+  /// No description provided for @foul.
+  ///
+  /// In en, this message translates to:
+  /// **'FOUL'**
+  String get foul;
 }
 
 class _AppLocalizationsDelegate

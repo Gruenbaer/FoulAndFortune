@@ -154,7 +154,6 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                       widget.label?.toUpperCase() ?? '',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: widget.textColor ?? const Color(0xFFF0F0F0), // Near white for contrast
-                        letterSpacing: 0.5, // Reduced from 1.0 for space saving
                         shadows: [
                           Shadow(
                             color: Colors.black.withValues(alpha: 0.8), // Stronger shadow
@@ -162,7 +161,6 @@ class _ThemedButtonState extends State<ThemedButton> with SingleTickerProviderSt
                             blurRadius: 2,
                           ),
                         ],
-                        fontWeight: FontWeight.w900, // Black weight
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,

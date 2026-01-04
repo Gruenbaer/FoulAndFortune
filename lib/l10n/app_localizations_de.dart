@@ -527,4 +527,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get average => 'Durchschnitt';
+
+  @override
+  String get illegalMoveTitle => 'Unzulässiger Zug';
+
+  @override
+  String get cannotFoulAndLeave1Ball =>
+      'Kann nicht foulen und 1 Kugel auf dem Tisch lassen';
+
+  @override
+  String get cannotFoulAndDoubleSack =>
+      'Kann nicht foulen und den Tisch abräumen (Double Sack)';
+
+  @override
+  String get reRack => 'AUFBAU!';
+
+  @override
+  String get safe => 'SAFETY';
+
+  @override
+  String get foul => 'FOUL';
 }

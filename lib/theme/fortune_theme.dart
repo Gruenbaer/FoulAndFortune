@@ -250,11 +250,11 @@ class CyberpunkTheme {
         backgroundColor: blackVoid,
         foregroundColor: neonCyan,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.crimsonPro(
+        titleTextStyle: GoogleFonts.orbitron(
           fontSize: 30,
           color: neonCyan,
           fontWeight: FontWeight.w800,
-          letterSpacing: 0.5, // Reduced spacing
+          letterSpacing: 2.0, // Wide letter spacing for tech feel
           shadows: [
             Shadow(blurRadius: 10, color: neonCyan.withValues(alpha: 0.8), offset: const Offset(0, 0)),
           ],
@@ -263,22 +263,22 @@ class CyberpunkTheme {
       ),
 
       textTheme: TextTheme(
-        // Headlines: Serif instead of Orbitron, but kept bold/neon
-        displayLarge: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 36, fontWeight: FontWeight.bold),
-        displayMedium: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 28, fontWeight: FontWeight.bold),
-        displaySmall: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 24, fontWeight: FontWeight.bold),
+        // Headlines: Orbitron for bold cyberpunk headers
+        displayLarge: GoogleFonts.orbitron(color: neonCyan, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+        displayMedium: GoogleFonts.orbitron(color: neonCyan, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+        displaySmall: GoogleFonts.orbitron(color: neonCyan, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.0),
         
-        // Body: LibreBaskerville for consistency ("normal serif")
-        bodyLarge: GoogleFonts.libreBaskerville(color: textWhite, fontSize: 18),
-        bodyMedium: GoogleFonts.libreBaskerville(color: textWhite, fontSize: 16),
-        bodySmall: GoogleFonts.libreBaskerville(color: neonCyan.withValues(alpha: 0.8), fontSize: 14),
+        // Body: Rajdhani for clean, tech readability
+        bodyLarge: GoogleFonts.rajdhani(color: textWhite, fontSize: 20, fontWeight: FontWeight.w500),
+        bodyMedium: GoogleFonts.rajdhani(color: textWhite, fontSize: 18, fontWeight: FontWeight.w400),
+        bodySmall: GoogleFonts.rajdhani(color: neonCyan.withValues(alpha: 0.8), fontSize: 16, fontWeight: FontWeight.w400),
         
-        // Buttons
-        labelLarge: GoogleFonts.crimsonPro(
+        // Buttons: Orbitron for tech button feel
+        labelLarge: GoogleFonts.orbitron(
             color: textBlack, 
-            fontSize: 20, 
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.5
+            fontSize: 18, 
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5
         ),
       ),
       
@@ -289,8 +289,8 @@ class CyberpunkTheme {
 
       dialogTheme: DialogThemeData(
         backgroundColor: darkMatrix,
-        titleTextStyle: GoogleFonts.crimsonPro(color: neonCyan, fontSize: 26, fontWeight: FontWeight.bold),
-        contentTextStyle: GoogleFonts.libreBaskerville(color: textWhite, fontSize: 16),
+        titleTextStyle: GoogleFonts.orbitron(color: neonCyan, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+        contentTextStyle: GoogleFonts.rajdhani(color: textWhite, fontSize: 18, fontWeight: FontWeight.w400),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
           side: const BorderSide(color: neonCyan, width: 2),

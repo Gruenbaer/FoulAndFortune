@@ -145,7 +145,19 @@ class _GameEventOverlayState extends State<GameEventOverlay>
 
     // SPECIAL CASE: Warning Event (Dialog)
     if (event is WarningEvent) {
-      _showWarningDialog(event.title, event.message);
+      // Keys could be localization keys or direct strings
+      // We translate here if they are keys
+      final l10n = AppLocalizations.of(context);
+      // Translate keys to localized strings
+      String title = event.title;
+      String message = event.message;
+      
+      // Check if it's a localization key and translate it
+      if (title == 'illegalMoveTitle') title = l10n.illegalMoveTitle;
+      if (message == 'cannotFoulAndLeave1Ball') message = l10n.cannotFoulAndLeave1Ball;
+      if (message == 'cannotFoulAndDoubleSack') message = l10n.cannotFoulAndDoubleSack;
+      
+      _showWarningDialog(title, message);
       return;
     }
 
@@ -182,23 +194,7 @@ class _GameEventOverlayState extends State<GameEventOverlay>
 
       switch (event.type) {
         case FoulType.normal:
-          message = "FOUL";
-          // Use localized if available, or hardcoded "FOUL" to match previous behavior
-          // app_en has "foulMinusOne": "Foul -1".
-          // Maybe stick to simple "FOUL" for now or use l10n.foulMinusOne.
-          // User wants "Show penalty points below".
-          // The SplashContent likely handles subtitle.
-          // Let's pass "FOUL" as message.
-          // Wait, check if "FOUL" is localized. NO key for just "FOUL".
-          // I will use "FOUL" literal for now as it's universal-ish or add "foul" key?
-          // I'll use "FOUL" to be safe or reuse "twoFoulsWarning" -> "2 FOULS!".
-          // Let's just use "FOUL" for now to minimize risk found in 'check all texts'.
-          // Actually, I should check if I can separate the "FOUL" string.
-          // app_en.arb has "noFoul", "foulMinusOne".
-          // I'll use l10n.foulMinusOne for now, it's "Foul -1".
-          message = l10n.foulMinusOne.replaceAll(" -1", ""); // Hack? No.
-          message = "FOUL"; // Fallback to english/capital
-          if (l10n.localeName == 'de') message = "FOUL"; // Same
+          message = l10n.foul;
           break;
         case FoulType.breakFoul:
           message = AppLocalizations.of(context)
@@ -251,38 +247,36 @@ class _GameEventOverlayState extends State<GameEventOverlay>
   }
 
   void _showWarningDialog(String title, String message) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showZoomDialog(
-        context: context,
-        builder: (dialogContext) {
-          final l10n = AppLocalizations.of(dialogContext);
-          final colors = FortuneColors.of(dialogContext);
-          return AlertDialog(
-            backgroundColor: colors.backgroundCard,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Colors.yellowAccent, width: 3)), // Yellow Border
-            title: Text(title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: Colors.yellowAccent, fontWeight: FontWeight.bold, fontSize: 24)), // Yellow Title
-            content: Text(message,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colors.textMain, fontSize: 16)),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: [
-              ThemedButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  _processNext(); // Continue queue
-                },
-                label: l10n.gotIt,
-              ),
-            ],
-          );
-        },
-      );
-    });
+    showZoomDialog(
+      context: context,
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext);
+        final colors = FortuneColors.of(dialogContext);
+        return AlertDialog(
+          backgroundColor: colors.backgroundCard,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Colors.yellowAccent, width: 3)), // Yellow Border
+          title: Text(title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.yellowAccent, fontWeight: FontWeight.bold, fontSize: 24)), // Yellow Title
+          content: Text(message,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: colors.textMain, fontSize: 16)),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ThemedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _processNext(); // Continue queue
+              },
+              label: l10n.gotIt,
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showDecisionDialogHelper(String title, String message,

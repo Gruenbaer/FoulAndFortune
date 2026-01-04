@@ -186,5 +186,11 @@
   "saves": "Safety-Shots",
   "average": "Durchschnitt",
   "generalAverage": "Durchschnitt",
-  "rivalryHistory": "Rivalen-Historie"
+  "rivalryHistory": "Rivalen-Historie",
+  "illegalMoveTitle": "Unzulässiger Zug",
+  "cannotFoulAndLeave1Ball": "Kann nicht foulen und 1 Kugel auf dem Tisch lassen",
+  "cannotFoulAndDoubleSack": "Kann nicht foulen und den Tisch abräumen (Double Sack)",
+  "reRack": "AUFBAU!",
+  "safe": "SAFETY",
+  "foul": "FOUL"
 }

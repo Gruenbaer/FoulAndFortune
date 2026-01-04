@@ -187,5 +187,11 @@
   "saveConfiguration": "Save Configuration",
   "innings": "Innings",
   "saves": "Saves",
-  "average": "Average"
+  "average": "Average",
+  "illegalMoveTitle": "Illegal Move",
+  "cannotFoulAndLeave1Ball": "Cannot foul and leave 1 ball on the table",
+  "cannotFoulAndDoubleSack": "Cannot foul and clear the table (double sack)",
+  "reRack": "RE-RACK!",
+  "safe": "SAFE",
+  "foul": "FOUL"
 }

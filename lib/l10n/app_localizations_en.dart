@@ -524,4 +524,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get average => 'Average';
+
+  @override
+  String get illegalMoveTitle => 'Illegal Move';
+
+  @override
+  String get cannotFoulAndLeave1Ball =>
+      'Cannot foul and leave 1 ball on the table';
+
+  @override
+  String get cannotFoulAndDoubleSack =>
+      'Cannot foul and clear the table (double sack)';
+
+  @override
+  String get reRack => 'RE-RACK!';
+
+  @override
+  String get safe => 'SAFE';
+
+  @override
+  String get foul => 'FOUL';
 }
