@@ -149,11 +149,7 @@ class ScoreCard extends StatelessWidget {
           // P1 Points
           Expanded(
             flex: 2,
-            child: Text(
-              p1Notation,
-              style: TextStyle(color: colors.textMain, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
+            child: Center(child: _buildNotationText(colors, p1Notation)),
           ),
           // P1 Total
           Expanded(
@@ -184,25 +180,27 @@ class ScoreCard extends StatelessWidget {
               style: TextStyle(
                 color: colors.primaryBright,
                 fontSize: 12,
-                fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
             ),
           ),
           // P2 Notation
           Expanded(
-            flex: 3,
-            child: Text(
-              p2Notation,
-              style: TextStyle(
-                color: colors.textMain,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            flex: 2, // FIXED: from 3 to 2 to match Header
+            child: Center(child: _buildNotationText(colors, p2Notation)),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildNotationText(FortuneColors colors, String notation) {
+      if (notation.isEmpty) return const SizedBox.shrink();
+      // No coloring, just plain text as requested (reverting previous change)
+      return Text(
+          notation, 
+          style: TextStyle(color: colors.textMain, fontSize: 12), 
+          textAlign: TextAlign.center
+      );
   }
 }

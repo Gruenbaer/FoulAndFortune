@@ -8,6 +8,11 @@ import 'package:foulandfortune/l10n/app_localizations.dart';
 import 'package:foulandfortune/utils/ui_utils.dart'; // For showZoomDialog
 
 /// Unified Overlay System handling the Game Event Queue
+import '../models/game_state.dart'; // For FoulType
+
+// Notification to bubble up shake request to parent Scaffold
+class ScreenShakeNotification extends Notification {}
+
 class GameEventOverlay extends StatefulWidget {
   const GameEventOverlay({super.key});
 
@@ -90,7 +95,9 @@ class _GameEventOverlayState extends State<GameEventOverlay>
   }
 
   void _triggerScreenShake() {
-    _shakeController.forward(from: 0.0);
+    // Notify parent to shake the whole screen
+    ScreenShakeNotification().dispatch(context);
+    // _shakeController.forward(from: 0.0); // Disable local shake to avoid double-shake
   }
 
   void _onAnimationComplete() {

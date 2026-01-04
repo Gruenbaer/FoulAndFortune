@@ -453,19 +453,20 @@ class GameState extends ChangeNotifier {
     inBreakSequence = false;
 
     // ACCUMULATE POINTS
-    if (currentFoulMode == FoulMode.none) {
-      currentPlayer.addInningPoints(ballsPocketed);
-    }
+    // ACCUMULATE POINTS
+    currentPlayer.addInningPoints(ballsPocketed);
 
     // TRACK FOUL
     if (currentFoulMode == FoulMode.normal) {
       currentPlayer.inningHasFoul = true;
       currentPlayer.setFoulPenalty(-1);
       
-      if (currentPlayer.consecutiveFouls == 2) {
-         eventQueue.add(FoulEvent(currentPlayer, -16, FoulType.threeFouls));
-      } else {
-         eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
+      // Always add Normal Foul (-1) event first
+      eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
+
+      if (currentPlayer.consecutiveFouls == 2) { // Logic: If ALREADY at 2, this next one makes 3
+         // Add 3-Foul Penalty (-15) event sequentially
+         eventQueue.add(FoulEvent(currentPlayer, -15, FoulType.threeFouls));
       }
     }
 
@@ -673,6 +674,7 @@ class GameState extends ChangeNotifier {
     player.score += totalInningPoints;
     player.lastPoints = totalInningPoints;
     player.lastRun = totalInningPoints; // Persist for "LR" display
+    print('DEBUG: _finalizeInning - Total: $totalInningPoints, lastRun Set To: ${player.lastRun}, currentRun before: ${player.currentRun}');
     player.updateCount++;
     
     // Update current run
@@ -713,27 +715,6 @@ class GameState extends ChangeNotifier {
      
      // Apply PENDING foul penalties (if currently selected but not yet finalized)
      // Only applies if the player is currently taking their turn (isActive)
-     
-     // NOTE: This checks GLOBAL foulMode. If the player is active, foulMode applies to THEM.
-     if (player.isActive) {
-       if (foulMode == FoulMode.normal) {
-         // Identify if it's the 3rd foul
-         if (foulTracker.threeFoulRuleEnabled && player.consecutiveFouls == 2) {
-            total -= 16; // -1 (current) + -15 (penalty)
-         } else {
-            total -= 1;
-         }
-       } else if (foulMode == FoulMode.severe) {
-         total -= 2;
-       }
-     }
-     
-     // Apply COMMITTED foul penalties (e.g. from previous racks in same inning? 
-     // Usually inning ends on foul, so this is rare, but break foul might allow continuation?)
-     // Actually, in our logic, "Break Foul" ends turn. "Normal Foul" ends turn.
-     // So "pending" is usually the ONLY foul.
-     // However, `inningHasFoul` might be set? 
-     // Let's stick to `foulMode` for the "preview" in the box.
      
      return total;
   }
@@ -842,10 +823,15 @@ class GameState extends ChangeNotifier {
   void _checkWinCondition() {
     // Check ALL players for win (in case of edge cases)
     for (var player in players) {
-      if (player.score >= raceToScore && !gameOver) {
+      // Check PROJECTED score (Current run + Banked) for immediate win
+      if (player.projectedScore >= raceToScore && !gameOver) {
         gameOver = true;
         winner = player;
         _stopTicker();
+        
+        // Finalize the winning inning to lock in the score
+        _finalizeInning(player);
+        
         _logAction('${player.name} WINS! 🎉');
         
         // Check win-related achievements

@@ -11,7 +11,7 @@ class FoulTracker {
       player.consecutiveFouls++;
       if (player.consecutiveFouls >= 3) {
         player.consecutiveFouls = 0; // Reset after penalty
-        return -15; // 3-foul penalty
+        return -16; // 3-foul penalty TOTAL (-1 foul + -15 penalty)
       }
     } else {
       player.consecutiveFouls = 0; // Ensure it doesn't accumulate if disabled?

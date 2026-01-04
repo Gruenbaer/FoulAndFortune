@@ -62,6 +62,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   final GlobalKey<PlayerPlaqueState> _p2PlaqueKey =
       GlobalKey<PlayerPlaqueState>();
 
+  // Screen Shake Controller
+  late AnimationController _screenShakeController;
+  late Animation<Offset> _screenShakeOffset;
+
   // Serial Event Processing - REMOVED (Handled by GameEventOverlay)
 
   // Overlay Entry for Penalty Animation
@@ -213,6 +217,21 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // Enable wakelock to keep screen awake during gameplay
     WakelockPlus.enable();
+
+    // Initialize Global Screen Shake
+    _screenShakeController = AnimationController(
+       vsync: this,
+       duration: const Duration(milliseconds: 500),
+    );
+    // Rapid oscillation for screen shake
+    _screenShakeOffset = TweenSequence<Offset>([
+      TweenSequenceItem(tween: Tween(begin: Offset.zero, end: const Offset(5, 0)), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: const Offset(5, 0), end: const Offset(-5, 0)), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: const Offset(-5, 0), end: const Offset(5, 0)), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: const Offset(5, 0), end: const Offset(-5, 0)), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: const Offset(-5, 0), end: const Offset(4, 0)), weight: 2),
+       TweenSequenceItem(tween: Tween(begin: const Offset(4, 0), end: Offset.zero), weight: 1),
+    ]).animate(_screenShakeController);
   }
 
   @override
@@ -236,6 +255,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _rackAnimationController.dispose();
+    _screenShakeController.dispose();
     // Disable wakelock when leaving game screen
     WakelockPlus.disable();
     super.dispose();
@@ -295,7 +315,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       );
     }
 
-    return Stack(
+    return NotificationListener<ScreenShakeNotification>(
+      onNotification: (notification) {
+        _screenShakeController.forward(from: 0.0);
+        return true;
+      },
+      child: AnimatedBuilder(
+        animation: _screenShakeController,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: _screenShakeOffset.value, // Apply shake here
+            child: child,
+          );
+        },
+        child: Stack(
       children: [
         PopScope(
           canPop: false,
@@ -849,7 +882,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         // Unified Game Event System (Splashes)
         const GameEventOverlay(),
       ],
-    ); // close Stack - this is the return of build()
+    ), // Close Stack
+   )); // Close NotificationListener & AnimatedBuilder
   }
 
   List<Widget> _buildRackFormation(BuildContext context, GameState gameState) {

@@ -234,9 +234,9 @@ class DetailsScreen extends StatelessWidget {
                         _calculateAverage(gameState.players[0]), 
                         _calculateAverage(gameState.players[1])
                       ),
-                      _buildStatRow(
+                       _buildStatRow(
                         colors, 
-                        'HR', // Was 'High Run' 
+                        'High Run', // Was 'HR' 
                         _calculateHighestRun(gameState.players[0]), 
                         _calculateHighestRun(gameState.players[1])
                       ),
@@ -248,7 +248,7 @@ class DetailsScreen extends StatelessWidget {
                       ),
                        _buildStatRow(
                         colors, 
-                        'Saves', 
+                        'Safety', // Was 'Saves'
                         gameState.players[0].saves.toString(), 
                         gameState.players[1].saves.toString()
                       ),
@@ -302,16 +302,19 @@ class DetailsScreen extends StatelessWidget {
           child: Text(
             p1Val,
             textAlign: TextAlign.center,
-            // White text, larger font for readability
-            style: const TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Courier', fontWeight: FontWeight.bold),
+            softWrap: false,
+            overflow: TextOverflow.visible,
+            style: TextStyle(color: colors.textMain, fontSize: 14), // Standardized with no-wrap
           ),
         ),
         Text(
           label.toUpperCase(),
           textAlign: TextAlign.center,
+          softWrap: false,
+          overflow: TextOverflow.visible,
           style: TextStyle(
             color: colors.primaryBright, 
-            fontSize: 11, 
+            fontSize: 10, 
             fontWeight: FontWeight.bold
           ),
         ),
@@ -320,8 +323,9 @@ class DetailsScreen extends StatelessWidget {
           child: Text(
             p2Val,
             textAlign: TextAlign.center,
-            // White text, larger font for readability
-            style: const TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Courier', fontWeight: FontWeight.bold),
+            softWrap: false,
+            overflow: TextOverflow.visible,
+            style: TextStyle(color: colors.textMain, fontSize: 14), // Standardized with no-wrap
           ),
         ),
       ],

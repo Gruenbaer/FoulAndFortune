@@ -62,7 +62,7 @@ class Player {
   }
 
   void incrementInning() {
-    lastRun = currentRun; // Capture run before reset for display
+    // lastRun = currentRun; // Removed: lastRun is set explicitly in _finalizeInning based on net inning score.
     currentInning++;
     currentRun = 0; // Reset run for new inning
     
