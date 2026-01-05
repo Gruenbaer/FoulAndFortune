@@ -6,6 +6,7 @@ Your app is currently in **Draft** mode. To enable Alpha/Beta testing tracks and
 Navigate to **Policy and programs** > **App content** (usually at the bottom of the left menu). You must complete all "To-do" items:
 
 - [ ] **Privacy Policy**: Add a valid URL to your privacy policy.
+    - *Link:* `https://github.com/Gruenbaer/FoulAndFortune/blob/master/PRIVACY_POLICY.md`
 - [ ] **Ads**: Declare if your app contains ads (Yes/No).
 - [ ] **App Access**: Declare if any parts of your app are restricted by login (e.g., "All functionality is available without special access").
 - [ ] **Content Rating**: Fill out the IARC questionnaire.
