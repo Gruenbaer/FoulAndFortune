@@ -1135,6 +1135,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'FOUL'**
   String get foul;
+
+  /// No description provided for @migrationDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Improved Notation System'**
+  String get migrationDialogTitle;
+
+  /// No description provided for @migrationDialogDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This update includes a more robust scoring notation format to ensure accuracy and consistency.'**
+  String get migrationDialogDescription;
+
+  /// No description provided for @migrationDialogWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get migrationDialogWarningTitle;
+
+  /// No description provided for @migrationDialogWarningText.
+  ///
+  /// In en, this message translates to:
+  /// **'Your game history will be automatically upgraded. This is a one-time process. Do NOT downgrade to older versions after updating.'**
+  String get migrationDialogWarningText;
+
+  /// No description provided for @migrationDialogPoint1.
+  ///
+  /// In en, this message translates to:
+  /// **'Game history will be automatically upgraded'**
+  String get migrationDialogPoint1;
+
+  /// No description provided for @migrationDialogPoint2.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a one-time process (1-2 seconds)'**
+  String get migrationDialogPoint2;
+
+  /// No description provided for @migrationDialogPoint3.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not downgrade after updating'**
+  String get migrationDialogPoint3;
+
+  /// No description provided for @migrationDialogLearnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn More'**
+  String get migrationDialogLearnMore;
+
+  /// No description provided for @migrationDialogContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get migrationDialogContinue;
+
+  /// No description provided for @migrationProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrating Game History'**
+  String get migrationProgressTitle;
+
+  /// No description provided for @migrationProgressText.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrating {current} of {total} games...'**
+  String migrationProgressText(int current, int total);
 }
 
 class _AppLocalizationsDelegate

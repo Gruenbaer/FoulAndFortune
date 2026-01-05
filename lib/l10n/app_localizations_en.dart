@@ -544,4 +544,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get foul => 'FOUL';
+
+  @override
+  String get migrationDialogTitle => 'Improved Notation System';
+
+  @override
+  String get migrationDialogDescription =>
+      'This update includes a more robust scoring notation format to ensure accuracy and consistency.';
+
+  @override
+  String get migrationDialogWarningTitle => 'Important';
+
+  @override
+  String get migrationDialogWarningText =>
+      'Your game history will be automatically upgraded. This is a one-time process. Do NOT downgrade to older versions after updating.';
+
+  @override
+  String get migrationDialogPoint1 =>
+      'Game history will be automatically upgraded';
+
+  @override
+  String get migrationDialogPoint2 =>
+      'This is a one-time process (1-2 seconds)';
+
+  @override
+  String get migrationDialogPoint3 => 'Do not downgrade after updating';
+
+  @override
+  String get migrationDialogLearnMore => 'Learn More';
+
+  @override
+  String get migrationDialogContinue => 'Continue';
+
+  @override
+  String get migrationProgressTitle => 'Migrating Game History';
+
+  @override
+  String migrationProgressText(int current, int total) {
+    return 'Migrating $current of $total games...';
+  }
 }

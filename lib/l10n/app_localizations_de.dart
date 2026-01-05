@@ -547,4 +547,42 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get foul => 'FOUL';
+
+  @override
+  String get migrationDialogTitle => 'Verbessertes Notationssystem';
+
+  @override
+  String get migrationDialogDescription =>
+      'Dieses Update enthält ein robusteres Punktenotationsformat für mehr Genauigkeit und Konsistenz.';
+
+  @override
+  String get migrationDialogWarningTitle => 'Wichtig';
+
+  @override
+  String get migrationDialogWarningText =>
+      'Ihr Spielverlauf wird automatisch aktualisiert. Dies ist ein einmaliger Vorgang. Führen Sie NACH dem Update KEIN Downgrade auf ältere Versionen durch.';
+
+  @override
+  String get migrationDialogPoint1 =>
+      'Spielverlauf wird automatisch aktualisiert';
+
+  @override
+  String get migrationDialogPoint2 => 'Einmaliger Vorgang (1-2 Sekunden)';
+
+  @override
+  String get migrationDialogPoint3 => 'Kein Downgrade nach dem Update';
+
+  @override
+  String get migrationDialogLearnMore => 'Mehr erfahren';
+
+  @override
+  String get migrationDialogContinue => 'Fortfahren';
+
+  @override
+  String get migrationProgressTitle => 'Spielverlauf wird migriert';
+
+  @override
+  String migrationProgressText(int current, int total) {
+    return 'Migriere $current von $total Spielen...';
+  }
 }

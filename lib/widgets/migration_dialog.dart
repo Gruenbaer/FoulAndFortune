@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/fortune_theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 /// One-time dialog shown when migrating from legacy notation to canonical V2
 class MigrationDialog extends StatelessWidget {
