@@ -35,7 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _checkActiveGame();
     _loadVersion();
-    _checkAndMigrateNotation();
+    // TODO: Re-enable after fixing build issues
+    // _checkAndMigrateNotation();
   }
 
   Future<void> _checkAndMigrateNotation() async {
