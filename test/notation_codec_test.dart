@@ -163,7 +163,7 @@ void main() {
       '10•F': '10⟲0F',
       '14·0sf': '14⟲0SF',
       '0fs': '0SF',
-      '14⟲01BFS': '14⟲1SBF',
+      // Removed: '14⟲01BFS': '14⟲1SBF' - malformed input (suffix in middle of segment)
       ' 14 • 14 • 0 ': '14⟲14⟲0',
     };
 

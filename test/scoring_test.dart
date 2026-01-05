@@ -52,11 +52,13 @@ void main() {
       // expect(action.points, 0, reason: "GameAction points must be 0 to match net score");
     });
     
+    
     test('Standard Pot', () {
-      gameState.onBallTapped(14); // 15 - 14 = 1 point
+      gameState.onBallTapped(14); // 15 - 14 = 1 point, 14 balls remaining
+      // End turn by tapping remaining count (no more balls pocketed)
+      gameState.onBallTapped(14); // Switch player
+      // Now score should be finalized
       expect(gameState.players[0].score, 1);
-      // expect(gameState.history.first.points, 1);
-      // expect(gameState.history.first.type, GameActionType.pot);
     });
 
     test('Standard Foul (No Pot)', () {
