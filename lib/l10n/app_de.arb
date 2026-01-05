@@ -192,5 +192,16 @@
   "cannotFoulAndDoubleSack": "Kann nicht foulen und den Tisch abräumen (Double Sack)",
   "reRack": "AUFBAU!",
   "safe": "SAFETY",
-  "foul": "FOUL"
+  "foul": "FOUL",
+  "migrationDialogTitle": "Verbessertes Notationssystem",
+  "migrationDialogDescription": "Dieses Update enthält ein robusteres Punktenotationsformat für mehr Genauigkeit und Konsistenz.",
+  "migrationDialogWarningTitle": "Wichtig",
+  "migrationDialogWarningText": "Ihr Spielverlauf wird automatisch aktualisiert. Dies ist ein einmaliger Vorgang. Führen Sie NACH dem Update KEIN Downgrade auf ältere Versionen durch.",
+  "migrationDialogPoint1": "Spielverlauf wird automatisch aktualisiert",
+  "migrationDialogPoint2": "Einmaliger Vorgang (1-2 Sekunden)",
+  "migrationDialogPoint3": "Kein Downgrade nach dem Update",
+  "migrationDialogLearnMore": "Mehr erfahren",
+  "migrationDialogContinue": "Fortfahren",
+  "migrationProgressTitle": "Spielverlauf wird migriert",
+  "migrationProgressText": "Migriere {current} von {total} Spielen..."
 }

@@ -193,5 +193,22 @@
   "cannotFoulAndDoubleSack": "Cannot foul and clear the table (double sack)",
   "reRack": "RE-RACK!",
   "safe": "SAFE",
-  "foul": "FOUL"
+  "foul": "FOUL",
+  "migrationDialogTitle": "Improved Notation System",
+  "migrationDialogDescription": "This update includes a more robust scoring notation format to ensure accuracy and consistency.",
+  "migrationDialogWarningTitle": "Important",
+  "migrationDialogWarningText": "Your game history will be automatically upgraded. This is a one-time process. Do NOT downgrade to older versions after updating.",
+  "migrationDialogPoint1": "Game history will be automatically upgraded",
+  "migrationDialogPoint2": "This is a one-time process (1-2 seconds)",
+  "migrationDialogPoint3": "Do not downgrade after updating",
+  "migrationDialogLearnMore": "Learn More",
+  "migrationDialogContinue": "Continue",
+  "migrationProgressTitle": "Migrating Game History",
+  "migrationProgressText": "Migrating {current} of {total} games...",
+  "@migrationProgressText": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
 }

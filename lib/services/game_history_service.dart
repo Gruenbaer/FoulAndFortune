@@ -2,10 +2,84 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/game_record.dart';
+import '../codecs/notation_codec.dart';
 
 class GameHistoryService {
   static const String _key = 'game_history';
+  static const String _migrationKey = 'notation_v2_migrated';
   static const int _maxGames = 100; // Keep only 100 most recent games
+
+  /// Check if notation V2 migration has been performed
+  Future<bool> isMigrated() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_migrationKey) ?? false;
+  }
+
+  /// Mark notation V2 migration as complete
+  Future<void> markMigrated() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_migrationKey, true);
+  }
+
+  /// Migrate all games from legacy notation to canonical V2
+  /// 
+  /// Returns the number of games migrated.
+  /// Throws [FormatException] if migration fails for any game.
+  Future<int> migrateNotation() async {
+    final games = await getAllGames();
+    int migratedCount = 0;
+
+    for (final game in games) {
+      bool gameMigrated = false;
+
+      // Migrate each inning record
+      for (int i = 0; i < game.inningRecords.length; i++) {
+        final record = game.inningRecords[i];
+        
+        try {
+          // Try to parse as canonical first
+          NotationCodec.parseCanonical(record.notation);
+          // Already canonical, skip
+        } catch (e) {
+          // Not canonical, migrate
+          try {
+            final canonical = NotationCodec.canonicalize(record.notation);
+            final parsed = NotationCodec.parseCanonical(canonical);
+            
+            // Update record with canonical notation
+            game.inningRecords[i] = InningRecord(
+              inning: record.inning,
+              playerName: record.playerName,
+              notation: canonical,
+              runningTotal: record.runningTotal,
+              segments: parsed.segments,
+              safe: parsed.safe,
+              foul: parsed.foul,
+            );
+            
+            gameMigrated = true;
+          } catch (migrationError) {
+            debugPrint('Failed to migrate notation: ${record.notation}');
+            rethrow;
+          }
+        }
+      }
+
+      if (gameMigrated) {
+        migratedCount++;
+      }
+    }
+
+    // Save all games back if any were migrated
+    if (migratedCount > 0) {
+      await _saveGames(games);
+    }
+
+    // Mark migration as complete
+    await markMigrated();
+
+    return migratedCount;
+  }
 
   // Get all game records
   Future<List<GameRecord>> getAllGames() async {
@@ -69,6 +143,7 @@ class GameHistoryService {
   Future<void> clearAllHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_key);
+    await prefs.remove(_migrationKey);
   }
 
   // Get game by ID
