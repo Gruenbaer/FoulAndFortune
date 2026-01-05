@@ -30,65 +30,6 @@ $fullVersion = $versionLine.ToString().Split(":")[1].Trim()
 $version = $fullVersion.Split("+")[0] # Remove build number if present
 Write-Host "   Detected Version: $version" -ForegroundColor Green
 
-# 1b. Ask for Web Deployment
-$deployWeb = Read-Host "Deploy Web to knthlz.de? (y/n) [n]"
-if ($deployWeb -eq 'y') {
-    Write-Host "Building Web Release..." -ForegroundColor Cyan
-    if ($flutterCmd) {
-        & $flutterBin $flutterCmd build web --release
-    }
-    else {
-        & $flutterBin build web --release
-    }
-    if ($LASTEXITCODE -ne 0) { throw "Web Build Failed" }
-
-    Write-Host "Uploading to w01cdf36.kasserver.com..." -ForegroundColor Cyan
-    # Credentials
-    $webUser = "ssh-w0208b4b"
-    $webHost = "w01cdf36.kasserver.com"
-    $webPw = "6zU3RW!6rmbffb95S#"
-    $remotePath = "knthlz.de/" 
-    
-    # Check for pscp
-    if (Get-Command "pscp" -ErrorAction SilentlyContinue) {
-        # Upload contents of build/web/* to remote directory
-        # -r for recursive, -batch to disable interactive prompts
-        # Note: pscp arguments order: [options] source [source...] [user@]host:target
-        
-        Write-Host "   Using pscp to upload..."
-        # We need to upload the CONTENTS of the folder, not the folder itself, or correct the path.
-        # pscp build/web/* ... usually works in shell, but PowerShell globbing might need care.
-        # Easier to copy the folder and rename or just copy contents.
-        # Using -r build/web will create 'web' directory on remote if we are not careful.
-        # We want contents of build/web to go to knthlz.de/
-        
-        # Best way with pscp: upload the directory 'web' to 'knthlz.de' and it might end up as 'knthlz.de/web'
-        # To avoid that, we might need to upload * from inside.
-        
-        # Let's try uploading build/web/ to knthlz.de/ which usually puts 'web' inside.
-        # Alternative: Deploy to knthlz.de/ (expecting it to be empty or root).
-        
-        # Command: pscp -r -pw ... build/web/ user@host:knthlz.de/
-        # This will indeed put 'web' folder there typically.
-        # Workaround: Upload individual files or use a wildcard if pscp supports it on windows source.
-        # pscp build\web\* ... 
-        
-        $webBuildDir = "build\web\*"
-        # Using invoking operator to handle arguments correctly
-        & pscp -r -batch -pw $webPw $webBuildDir "${webUser}@${webHost}:${remotePath}"
-        
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "   Web Deployment Successful!" -ForegroundColor Green
-        }
-        else {
-            Write-Error "   Web Deployment Failed (pscp exit code $LASTEXITCODE)"
-        }
-    }
-    else {
-        Write-Error "   'pscp' (Putty SCP) not found in PATH. Cannot upload files."
-    }
-}
-
 
 # 2. Check if Tag Exists
 $tagExists = git tag -l "v$version"

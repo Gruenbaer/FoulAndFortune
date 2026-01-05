@@ -1,0 +1,42 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and deploy to Google Play closed testing (alpha track)"
+  lane :deploy do
+    # Get the Flutter root directory
+    flutter_root = File.expand_path('../..', Dir.pwd)
+    
+    puts "Building Flutter app bundle..."
+    Dir.chdir(flutter_root) do
+      sh("flutter", "clean")
+      sh("flutter", "pub", "get")
+      sh("flutter", "build", "appbundle", "--release")
+    end
+    
+    puts "Uploading to Play Store..."
+    upload_to_play_store(
+      track: 'alpha',
+      release_status: 'draft',
+      aab: "#{flutter_root}/build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_screenshots: true,
+      skip_upload_images: true,
+      skip_upload_metadata: true
+    )
+    
+    puts "✅ Successfully uploaded to Play Store alpha track (closed testing) as draft"
+  end
+
+  desc "Build release bundle only (no upload)"
+  lane :build do
+    flutter_root = File.expand_path('../..', Dir.pwd)
+    
+    puts "Building Flutter app bundle..."
+    Dir.chdir(flutter_root) do
+      sh("flutter", "clean")
+      sh("flutter", "pub", "get")
+      sh("flutter", "build", "appbundle", "--release")
+    end
+    
+    puts "✅ Build complete: #{flutter_root}/build/app/outputs/bundle/release/app-release.aab"
+  end
+end

@@ -1,0 +1,2 @@
+json_key_file("api-key.json") # Path to the json secret file - Follow instructions in README to configure
+package_name("com.knthlz.foulandfortune") # Your package name
