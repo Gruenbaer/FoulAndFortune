@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/player.dart';
-import '../models/game_state.dart'; // For InningRecord
+import '../codecs/notation_codec.dart'; // For InningRecord
 import '../theme/fortune_theme.dart';
 
 class ScoreCard extends StatelessWidget {

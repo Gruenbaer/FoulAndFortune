@@ -8,7 +8,8 @@ import '../services/achievement_checker.dart';
 import '../codecs/notation_codec.dart';
 
 enum FoulMode { none, normal, severe }
-enum FoulType { normal, breakFoul, threeFouls }
+// FoulType now imported from '../codecs/notation_codec.dart'
+// (includes: none, normal, breakFoul, threeFouls)
 
 // Event System for UI Animations
 abstract class GameEvent {}
@@ -55,33 +56,8 @@ class BreakFoulDecisionEvent extends GameEvent {
 class SafeEvent extends GameEvent {}
 
 // Inning Record for Score Card (replaces log parsing)
-class InningRecord {
-  final int inning;
-  final String playerName;
-  final String notation; // "15", "5.3F", "10S", etc.
-  final int runningTotal; // Player's total score after this inning
-  
-  InningRecord({
-    required this.inning,
-    required this.playerName,
-    required this.notation,
-    required this.runningTotal,
-  });
-  
-  Map<String, dynamic> toJson() => {
-    'inning': inning,
-    'playerName': playerName,
-    'notation': notation,
-    'runningTotal': runningTotal,
-  };
-  
-  factory InningRecord.fromJson(Map<String, dynamic> json) => InningRecord(
-    inning: json['inning'] as int,
-    playerName: json['playerName'] as String,
-    notation: json['notation'] as String,
-    runningTotal: json['runningTotal'] as int,
-  );
-}
+// InningRecord is now imported from '../codecs/notation_codec.dart'
+// (Extended version with segments, safe, foul fields)
 
 class GameState extends ChangeNotifier {
   GameSettings settings;

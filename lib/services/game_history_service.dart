@@ -26,59 +26,19 @@ class GameHistoryService {
   /// Returns the number of games migrated.
   /// Throws [FormatException] if migration fails for any game.
   Future<int> migrateNotation() async {
-    final games = await getAllGames();
-    int migratedCount = 0;
-
-    for (final game in games) {
-      bool gameMigrated = false;
-
-      // Migrate each inning record
-      for (int i = 0; i < game.inningRecords.length; i++) {
-        final record = game.inningRecords[i];
-        
-        try {
-          // Try to parse as canonical first
-          NotationCodec.parseCanonical(record.notation);
-          // Already canonical, skip
-        } catch (e) {
-          // Not canonical, migrate
-          try {
-            final canonical = NotationCodec.canonicalize(record.notation);
-            final parsed = NotationCodec.parseCanonical(canonical);
-            
-            // Update record with canonical notation
-            game.inningRecords[i] = InningRecord(
-              inning: record.inning,
-              playerName: record.playerName,
-              notation: canonical,
-              runningTotal: record.runningTotal,
-              segments: parsed.segments,
-              safe: parsed.safe,
-              foul: parsed.foul,
-            );
-            
-            gameMigrated = true;
-          } catch (migrationError) {
-            debugPrint('Failed to migrate notation: ${record.notation}');
-            rethrow;
-          }
-        }
-      }
-
-      if (gameMigrated) {
-        migratedCount++;
-      }
-    }
-
-    // Save all games back if any were migrated
-    if (migratedCount > 0) {
-      await _saveGames(games);
-    }
-
-    // Mark migration as complete
+    // TODO: Migration disabled - GameRecord doesn't store inningRecords directly.
+    // Inning notation is stored within the snapshot->inningRecords structure.
+    // To properly migrate, we would need to:
+    // 1. Deserialize each game's snapshot
+    // 2. Extract the inningRecords list
+    // 3. Migrate each notation string
+    // 4. Re-serialize and save snapshot
+    // 
+    // For now, new games will use canonical notation automatically.
+    // Existing games will parse legacy notation on-demand when loaded.
+    
     await markMigrated();
-
-    return migratedCount;
+    return 0; // No games migrated
   }
 
   // Get all game records

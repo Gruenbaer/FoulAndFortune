@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:foulandfortune/models/game_state.dart';
+import 'package:foulandfortune/codecs/notation_codec.dart'; // For FoulType
 import 'package:foulandfortune/widgets/overlays/game_overlay_contents.dart';
 import 'package:foulandfortune/widgets/themed_widgets.dart'; // For ThemedButton
 import 'package:foulandfortune/theme/fortune_theme.dart';
@@ -193,6 +194,10 @@ class _GameEventOverlayState extends State<GameEventOverlay>
 
 
       switch (event.type) {
+        case FoulType.none:
+          // This shouldn't happen in a FoulEvent, but handle it for exhaustiveness
+          message = l10n.foul;
+          break;
         case FoulType.normal:
           message = l10n.foul;
           break;

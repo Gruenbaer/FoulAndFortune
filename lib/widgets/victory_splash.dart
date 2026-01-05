@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import '../models/player.dart';
-import '../models/game_state.dart'; // For InningRecord
+import '../codecs/notation_codec.dart'; // For InningRecord
 import '../theme/fortune_theme.dart';
 import 'themed_widgets.dart';
 import 'score_card.dart';
