@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => '14.1 Fortune';
+  String get appTitle => 'Foul & Fortune: Straight Pool';
 
   @override
   String get newGame => 'New Game';
@@ -381,7 +381,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gameRulesContent =>
-      '14.1 Fortune (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -15 points.\n- Severe Foul: -2 points.';
+      'Foul & Fortune: Straight Pool (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -15 points.\n- Severe Foul: -2 points.';
 
   @override
   String get threeFoulPenalty => '3-Foul Penalty!';
@@ -485,7 +485,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gotIt => 'Got it';
 
   @override
-  String get straightPool => 'Straight Pool';
+  String get straightPool => '14.1 Straight Pool';
 
   @override
   String get inning => 'Inning';
