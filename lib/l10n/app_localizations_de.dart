@@ -9,7 +9,7 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get appTitle => '14.1 Fortune';
+  String get appTitle => 'Foul & Fortune: Straight Pool';
 
   @override
   String get newGame => 'Neues Spiel';
@@ -383,7 +383,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get gameRulesContent =>
-      '14.1 Fortune (Modifiziert)\n\n1. Spielziel\nDas Ziel ist es, die festgelegte Punktzahl zu erreichen (Rennen bis X).\n\n2. Punktevergabe\nEine versenkte Kugel bringt Punkte gleich (15 - Kugelnummer).\nBeispiel: Kugel 14 = 1 Punkt. Kugel 1 = 14 Punkte.\n\n3. Spezielle Kugeln\n- Kugel 1: Bringt 14 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\n- Doppel-Sack (Spielball): Bringt 15 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\n\n4. Fouls\n- Normales Foul: -1 Punkt. 3 aufeinanderfolgende Fouls = -15 Punkte.\n- Schweres Foul: -2 Punkte.';
+      'Foul & Fortune: Straight Pool (Modifiziert)\n\n1. Spielziel\nDas Ziel ist es, die festgelegte Punktzahl zu erreichen (Rennen bis X).\n\n2. Punktevergabe\nEine versenkte Kugel bringt Punkte gleich (15 - Kugelnummer).\nBeispiel: Kugel 14 = 1 Punkt. Kugel 1 = 14 Punkte.\n\n3. Spezielle Kugeln\n- Kugel 1: Bringt 14 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\n- Doppel-Sack (Spielball): Bringt 15 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\n\n4. Fouls\n- Normales Foul: -1 Punkt. 3 aufeinanderfolgende Fouls = -15 Punkte.\n- Schweres Foul: -2 Punkte.';
 
   @override
   String get threeFoulPenalty => '3-Foul-Strafe!';
@@ -488,7 +488,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get gotIt => 'Verstanden';
 
   @override
-  String get straightPool => 'Straight Pool';
+  String get straightPool => '14.1 Straight Pool';
 
   @override
   String get inning => 'Aufnahme';

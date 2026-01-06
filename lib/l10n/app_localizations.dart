@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'14.1 Fortune'**
+  /// **'Foul & Fortune: Straight Pool'**
   String get appTitle;
 
   /// No description provided for @newGame.
@@ -821,7 +821,7 @@ abstract class AppLocalizations {
   /// No description provided for @gameRulesContent.
   ///
   /// In en, this message translates to:
-  /// **'14.1 Fortune (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -15 points.\n- Severe Foul: -2 points.'**
+  /// **'Foul & Fortune: Straight Pool (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -15 points.\n- Severe Foul: -2 points.'**
   String get gameRulesContent;
 
   /// No description provided for @threeFoulPenalty.
@@ -1025,7 +1025,7 @@ abstract class AppLocalizations {
   /// No description provided for @straightPool.
   ///
   /// In en, this message translates to:
-  /// **'Straight Pool'**
+  /// **'14.1 Straight Pool'**
   String get straightPool;
 
   /// No description provided for @inning.
