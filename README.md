@@ -2,9 +2,12 @@
 
 Eine professionelle Flutter-basierte Scoring-Anwendung für 14.1 Straight Pool (14.1 Continuous).
 
-## 🎱 Über
+##  🎱 Über
 
 FoulAndFortune ist eine professionelle Scoring-App für 14.1 Straight Pool mit präziser Regelüberwachung, Spielerstatistiken, Erfolgen und umfassender Spielhistorie.
+
+**Scoring:** Siehe `GAME_RULES.md` für die kanonische Spezifikation (One-Page Canonical Spec / Remaining-Count Model).
+
 
 ## 🛠️ Entwicklungs-Setup
 

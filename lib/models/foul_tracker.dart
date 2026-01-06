@@ -1,41 +1,48 @@
 import 'player.dart';
 
+// ═══════════════════════════════════════════════════════════════
+// CANONICAL SCORING LOGIC - DO NOT MODIFY WITHOUT SPEC UPDATE
+// Spec: Foul & Fortune 14.1 One-Page Canonical Spec
+// Last verified: 2026-01-06
+// ═══════════════════════════════════════════════════════════════
+
 class FoulTracker {
   bool threeFoulRuleEnabled;
 
   FoulTracker({this.threeFoulRuleEnabled = true});
 
-  /// Returns penalty points. -16 if 3-foul triggered, -1 otherwise
-  /// ballsPocketed: Number of balls pocketed during this shot
+  /// Returns penalty points: -16 if TF triggered, -1 otherwise.
+  ///
+  /// CANONICAL STREAK RULE (Foul & Fortune 14.1 Spec):
+  /// - Any inning with made balls (ballsPocketed > 0) resets foul streak to 0.
+  /// - A foul in such an inning does NOT count toward the 3-foul chain.
+  /// - Only PURE fouls (ballsPocketed == 0) increment the streak.
   int applyNormalFoul(Player player, int ballsPocketed) {
-    if (threeFoulRuleEnabled) {
-      // Logic Update: Test vectors imply fouls always increment streak, 
-      // even if points were scored in the same inning (C34).
-      player.consecutiveFouls++;
-      
-      if (player.consecutiveFouls >= 3) {
-        player.consecutiveFouls = 0; // Reset after penalty
-        return -16; // 3-foul penalty TOTAL (-1 foul + -15 penalty)
-      }
-    } else {
-      player.consecutiveFouls = 0; // Ensure it doesn't accumulate if disabled
+    if (!threeFoulRuleEnabled) {
+      player.consecutiveFouls = 0;
+      return -1;
     }
+
+    // Made balls reset the foul chain completely (canonical rule)
+    if (ballsPocketed > 0) {
+      player.consecutiveFouls = 0;
+      return -1;
+    }
+
+    // Pure foul increments the chain
+    player.consecutiveFouls++;
+    
+    if (player.consecutiveFouls >= 3) {
+      player.consecutiveFouls = 0; // Reset after TF
+      return -16; // TF total: -1 + -15
+    }
+    
     return -1;
   }
 
   /// Severe (Break) Foul: -2 points, does NOT count toward 3-foul rule
   int applySevereFoul(Player player) {
-    // Break foul shouldn't reset normal foul count? Or does it?
-    // Rules say Break Foul is separate. Assuming it doesn't break consecutive Normal fouls chain?
-    // Or does it?
-    // "Consecutive fouls" usually implies *any* foul.
-    // But this app has specific "Normal" vs "Severe".
-    // Severe is -2. If I foul -1, then Break Foul -2, then Foul -1. Is that 3 fouls?
-    // User request: "3 foul rule not always working you need a counter for each player."
-    // Usually 3 consecutive fouls of ANY kind in 14.1.
-    // If Break Foul is a foul, it should count?
-    // But existing code had `applySevereFoul` returning -2 and NOT touching counter.
-    // Keep it as is for now unless user specifies.
+    // Break foul: separate category, does not affect 3-foul chain
     return -2;
   }
 

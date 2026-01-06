@@ -321,35 +321,7 @@ class GameState extends ChangeNotifier {
     _redoStack.clear(); // clear redo on new action
   }
 
-  // Explicitly end inning (Miss, Safe, Foul)
-  void endInning({required String reason, FoulType foulType = FoulType.none}) {
-    // reason: MISS, SAFE, FOUL
-    if (reason == 'SAFE') {
-       if (!isSafeMode) onSafe(); 
-       onSafe(); // Commit
-    } else if (reason == 'FOUL') {
-       if (foulType == FoulType.normal) {
-         setFoulMode(FoulMode.normal);
-         currentPlayer.inningHasFoul = true;
-         currentPlayer.setFoulPenalty(-1);
-         eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
-         _finalizeInning(currentPlayer);
-         _switchTurn();
-       } else if (foulType == FoulType.breakFoul) {
-          setFoulMode(FoulMode.severe);
-          currentPlayer.inningHasBreakFoul = true;
-          currentPlayer.setFoulPenalty(-2);
-          eventQueue.add(FoulEvent(currentPlayer, -2, FoulType.breakFoul));
-          _finalizeInning(currentPlayer);
-          _switchTurn();
-       }
-    } else {
-       // MISS (Standard)
-       _finalizeInning(currentPlayer);
-       _switchPlayer(); 
-    }
-    notifyListeners();
-  }
+
 
   void undo() {
     if (!canUndo) return;
@@ -555,9 +527,8 @@ class GameState extends ChangeNotifier {
     _logAction('${currentPlayer.name}: Cleared table');
   } else {
     // Any other number (2-14, 15):
-    // Standard 14.1 Continuous: Turn continues until Miss/Safe/Foul.
-    // Turn does NOT end on standard pot.
-    turnEnded = false;
+    // CANONICAL MODEL A: Single decisive tap ends inning
+    turnEnded = true;
   }
   
   // Exception: If Foul or Safe, turn always ends (unless Break Foul where we might continue? No, BF logic returns earlier).
@@ -758,7 +729,8 @@ class GameState extends ChangeNotifier {
       // Add 3-foul event if triggered
       if (willTriggerThreeFouls) {
         player.inningHasThreeFouls = true; // Mark for notation "TF"
-        eventQueue.add(FoulEvent(player, -15, FoulType.threeFouls));
+        eventQueue.add(FoulEvent(player, -16, FoulType.threeFouls, 
+          positivePoints: 0, penalty: -16));
       }
     } else {
       // Valid shot (no foul) resets consecutive fouls
