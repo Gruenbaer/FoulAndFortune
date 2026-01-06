@@ -496,7 +496,8 @@ class GameState extends ChangeNotifier {
       
       eventQueue.add(ReRackEvent("reRack"));
       _logAction('${currentPlayer.name}: Re-rack');
-      _updateRackCount(newBallCount);
+      // CANONICAL: rem resets to 15 immediately after re-rack
+      _updateRackCount(15);
     } else {
       _updateRackCount(newBallCount);
     }
