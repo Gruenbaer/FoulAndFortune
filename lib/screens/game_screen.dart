@@ -356,6 +356,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           child: Scaffold(
             extendBodyBehindAppBar: true,
             appBar: AppBar(
+              iconTheme: IconThemeData(color: colors.primary),
               title: Text(
                 l10n.straightPool,
                 style: theme.textTheme.titleMedium?.copyWith(

@@ -1,9 +1,9 @@
-# Technical Documentation: 14.1 Fortune
+# Technical Documentation: Foul & Fortune: Straight Pool
 
-This document provides a comprehensive technical overview of the **14.1 Fortune** application, designed to help developers understand its architecture, core logic, and implementation details.
+This document provides a comprehensive technical overview of the **Foul & Fortune: Straight Pool** application, designed to help developers understand its architecture, core logic, and implementation details.
 
 ## 1. Overview
-**14.1 Fortune** is a specialized scoring application for **Straight Pool (14.1 Continuous)** billiards. It features **multiple visual themes** (Cyberpunk, Steampunk, and Ghibli/Whimsy) and handles complex rule enforcement including safe shots, break fouls, the 3-foul rule, and game history tracking.
+**Foul & Fortune: Straight Pool** is a specialized scoring application for **Straight Pool (14.1 Continuous)** billiards. It features **multiple visual themes** (Cyberpunk, Steampunk, and Ghibli/Whimsy) and handles complex rule enforcement including safe shots, break fouls, the 3-foul rule, and game history tracking.
 
 ## 2. Technology Stack
 *   **Framework**: [Flutter](https://flutter.dev/) (Dart SDK >=3.0.0 <4.0.0)

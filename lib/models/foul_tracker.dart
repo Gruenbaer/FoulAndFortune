@@ -9,15 +9,9 @@ class FoulTracker {
   /// ballsPocketed: Number of balls pocketed during this shot
   int applyNormalFoul(Player player, int ballsPocketed) {
     if (threeFoulRuleEnabled) {
-      // CRITICAL: Only increment for PURE fouls (no balls pocketed)
-      // If balls were pocketed, reset to 1 instead
-      if (ballsPocketed > 0) {
-        // Pocketed balls + foul: Reset counter to 1
-        player.consecutiveFouls = 1;
-      } else {
-        // Pure foul (no balls): Increment counter
-        player.consecutiveFouls++;
-      }
+      // Logic Update: Test vectors imply fouls always increment streak, 
+      // even if points were scored in the same inning (C34).
+      player.consecutiveFouls++;
       
       if (player.consecutiveFouls >= 3) {
         player.consecutiveFouls = 0; // Reset after penalty

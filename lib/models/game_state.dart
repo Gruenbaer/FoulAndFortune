@@ -321,6 +321,36 @@ class GameState extends ChangeNotifier {
     _redoStack.clear(); // clear redo on new action
   }
 
+  // Explicitly end inning (Miss, Safe, Foul)
+  void endInning({required String reason, FoulType foulType = FoulType.none}) {
+    // reason: MISS, SAFE, FOUL
+    if (reason == 'SAFE') {
+       if (!isSafeMode) onSafe(); 
+       onSafe(); // Commit
+    } else if (reason == 'FOUL') {
+       if (foulType == FoulType.normal) {
+         setFoulMode(FoulMode.normal);
+         currentPlayer.inningHasFoul = true;
+         currentPlayer.setFoulPenalty(-1);
+         eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
+         _finalizeInning(currentPlayer);
+         _switchTurn();
+       } else if (foulType == FoulType.breakFoul) {
+          setFoulMode(FoulMode.severe);
+          currentPlayer.inningHasBreakFoul = true;
+          currentPlayer.setFoulPenalty(-2);
+          eventQueue.add(FoulEvent(currentPlayer, -2, FoulType.breakFoul));
+          _finalizeInning(currentPlayer);
+          _switchTurn();
+       }
+    } else {
+       // MISS (Standard)
+       _finalizeInning(currentPlayer);
+       _switchPlayer(); 
+    }
+    notifyListeners();
+  }
+
   void undo() {
     if (!canUndo) return;
     final currentSnapshot = GameSnapshot.fromState(this);
@@ -382,6 +412,7 @@ class GameState extends ChangeNotifier {
 
     // Capture state before reset
     final currentFoulMode = foulMode;
+    debugPrint('DEBUG: onBallTapped - Check FoulMode: $currentFoulMode');
     final currentSafeMode = isSafeMode;
     
     // VALIDATION: Check for illegal move combinations
@@ -524,9 +555,9 @@ class GameState extends ChangeNotifier {
     _logAction('${currentPlayer.name}: Cleared table');
   } else {
     // Any other number (2-14, 15):
-    // Means the player stopped with valid balls on table.
-    // Turn ends.
-    turnEnded = true;
+    // Standard 14.1 Continuous: Turn continues until Miss/Safe/Foul.
+    // Turn does NOT end on standard pot.
+    turnEnded = false;
   }
   
   // Exception: If Foul or Safe, turn always ends (unless Break Foul where we might continue? No, BF logic returns earlier).
@@ -681,6 +712,7 @@ class GameState extends ChangeNotifier {
     
     // Calculate points from both parts of the inning (pre and post re-rack)
     // Calculate points from all segments + current
+    debugPrint('DEBUG: _finalizeInning START for ${player.name} (HasFoul: ${player.inningHasFoul})');
     int pointsInInning = player.inningPoints;
     
     int addedPoints = 0;

@@ -1,4 +1,4 @@
-# 14.1 Fortune — Game Rules, Notation & Score Sheet UI (Canonical)
+# Foul & Fortune: Straight Pool — Game Rules, Notation & Score Sheet UI (Canonical)
 
 This document defines the complete rules for scoring, notation, and inning flow in 14.1 Fortune, including strict validation/parsing specifications and test vectors.
 
