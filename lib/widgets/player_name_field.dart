@@ -44,7 +44,10 @@ class _PlayerNameFieldState extends State<PlayerNameField> {
     super.didUpdateWidget(oldWidget);
     // Update controller text if initialValue prop changed
     if (widget.initialValue != oldWidget.initialValue) {
+      // Temporarily remove listener to avoid triggering setState() during build
+      _controller.removeListener(_onTextChanged);
       _controller.text = widget.initialValue;
+      _controller.addListener(_onTextChanged);
     }
   }
 

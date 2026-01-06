@@ -499,34 +499,39 @@ class GameState extends ChangeNotifier {
     }
 
     // DETERMINE IF TURN ENDS
-    // Simple rule: Turn ends on every tap EXCEPT re-rack (ball 1)
-    bool turnEnded = false;
-
-    if (isReRack) {
-      // Re-rack (ball 1): Player continues their run
-      turnEnded = false;
-    } else {
-      // Logic for standard shots:
-      // Turn continues if:
-      // 1. Balls were pocketed (> 0)
-      // 2. NO standard foul
-      // 3. NO safe declared
-      bool isPot = ballsPocketed > 0;
-      bool isFoul = currentPlayer.inningHasFoul;
-      bool isSafe = currentPlayer.inningHasSafe;
-      
-      if (isPot && !isFoul && !isSafe) {
-         turnEnded = false;
-      } else {
-         turnEnded = true; 
-         
-          // Log explicit Miss if no points scored and not Safe/Foul
-          if (ballsPocketed == 0 && !isSafe && !isFoul) {
-             _logAction('${currentPlayer.name}: Miss (0 pts)');
-          }
-      }
-    }
-
+  // Logic update (Inning Scorer Model):
+  // Checks "State of table when leaving".
+  // Turn ENDS on tap, UNLESS it is a continuation event (Re-rack).
+  
+  bool turnEnded = true; // Default to ending turn
+  
+  // Scenarios where turn continues:
+  // 1. Re-rack (Left 1 ball) -> Handled by isReRack flag above
+  // 2. Clear Table (Left 0 balls) -> Handled here
+  
+  if (isReRack) { // Ball 1
+    turnEnded = false;
+  } else if (newBallCount == 0) {
+    // Cleared table (Ball 0). This acts like a re-rack 
+    // Trigger re-rack event if not already done?
+    // User said: "taps 0, gets 15 points, rerack, he continues".
+    // We need to ensure we trigger the re-rack logic same as Ball 1?
+    // Or just let them continue knowing they will tap 'Re-rack' button or we auto-rack?
+    // Let's assume we allow continue.
+    turnEnded = false;
+    _updateRackCount(15); // Auto-fill for next run?
+    eventQueue.add(ReRackEvent("tableCleared")); // Optional: specific event
+    _logAction('${currentPlayer.name}: Cleared table');
+  } else {
+    // Any other number (2-14, 15):
+    // Means the player stopped with valid balls on table.
+    // Turn ends.
+    turnEnded = true;
+  }
+  
+  // Exception: If Foul or Safe, turn always ends (unless Break Foul where we might continue? No, BF logic returns earlier).
+  // Actually, if I clear table (0) but fouled? "Penalized Perfection".
+  // Logic at top of function catches "Cannot foul and tap 0". So we are safe.
     // LOGGING
     if (ballsPocketed != 0 || currentFoulMode != FoulMode.none) {
       String foulText = currentFoulMode == FoulMode.normal ? ' (Foul)' : '';

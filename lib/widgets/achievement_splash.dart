@@ -153,10 +153,12 @@ class _AchievementSplashState extends State<AchievementSplash>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // Header with trophies on same height
+                            // Header with trophies on left/right and 2-line text
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                // Left Icon
                                 Text(
                                   '🏆',
                                   style: TextStyle(
@@ -165,18 +167,37 @@ class _AchievementSplashState extends State<AchievementSplash>
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                Text(
-                                  'ACHIEVEMENT UNLOCKED!',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    color: FortuneColors.of(context).success,
-                                    letterSpacing: 2,
-                                    fontFamily: 'Orbitron',
-                                  ),
-                                  textAlign: TextAlign.center,
+                                // Centered Text Stack
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'ACHIEVEMENT',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                        color: FortuneColors.of(context).success,
+                                        letterSpacing: 2,
+                                        fontFamily: 'Orbitron',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      'UNLOCKED!',
+                                      style: TextStyle(
+                                        fontSize: 20, // Same size for consistency
+                                        fontWeight: FontWeight.w900,
+                                        color: FortuneColors.of(context).success,
+                                        letterSpacing: 2,
+                                        fontFamily: 'Orbitron',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(width: 12),
+                                // Right Icon
                                 Text(
                                   '🏆',
                                   style: TextStyle(

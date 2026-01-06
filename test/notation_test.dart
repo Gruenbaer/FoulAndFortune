@@ -35,9 +35,9 @@ void main() {
        // P1 pots 1 ball (tap 14)
        gameState.onBallTapped(14); 
        
-       // End P1 turn (simple miss -> tap remaining count)
-       int remaining = gameState.activeBalls.length; // 14
-       gameState.onBallTapped(remaining);
+       // End P1 turn (Tap 14 means "Left 14 on table" -> Potted 1 -> Turn Ends)
+       // int remaining = gameState.activeBalls.length; // 14
+       // gameState.onBallTapped(remaining);
        
        // Check the notation in the record
        // Expected: 14 balls -> '14', re-rack -> '⟲', 1 point after -> '1'  => "14⟲1"
@@ -59,8 +59,9 @@ void main() {
        
        gameState.finalizeReRack(); // Reset to 15
        
-       // P1 misses immediately after re-rack
-       gameState.onBallTapped(15); // Tap 15 (0 pocketed)
+        // P1 misses immediately after re-rack (Tap 15 balls left -> 0 potted)
+        // Or actually, if they tapped 15, they say "I left 15 balls" -> 0 points.
+        gameState.onBallTapped(15);
        
        // Expected: "5⟲0" (canonical requires explicit 0 for empty segment)
        final lastRecord = gameState.inningRecords.last;
@@ -76,8 +77,10 @@ void main() {
        // Pot 2 more (15 -> 13)
        gameState.onBallTapped(13);
        
-       // Miss (13 -> 13)
-        gameState.onBallTapped(13);
+        // Tap 13 -> "I left 13 balls". Start was 15.
+        // So Potted = 2.
+        // Turn Ends automatically.
+        // gameState.onBallTapped(13); // REMOVED explicit miss
        
        // Expected: "5⟲2"
        final lastRecord = gameState.inningRecords.last;
@@ -91,7 +94,10 @@ void main() {
     // Setup Player: needs 2 fouls. BUT we are about to score points, which SHOULD reset this to 0.
     gameState.currentPlayer.consecutiveFouls = 2;
     
-    // 1. Double Sack (15 points) -> Adds 15 to history
+    // 1. Double Sack (15 balls)
+    // Tap 0 (Clear table) -> This keeps turn? 
+    // Wait. My onBallTapped logic for 0 DOES NOT add points if called directly?
+    // onDoubleSack adds points manually.
     gameState.onDoubleSack();
     
     // 2. Break (14 points) -> Adds 14 to history
@@ -105,34 +111,24 @@ void main() {
     // Now history is [15, 14]. Points 0.
     // Rack has 1 ball.
     
-    // 3. 5 Points in new rack
+    // 3. 5 Points in new rack AND Safe + Foul
     // Simulate user refilling rack to 15 balls.
     gameState.activeBalls = Set.from(List.generate(15, (i) => i + 1));
     
-    // Now 15 balls. Pot 5 -> Leave 10.
-    gameState.onBallTapped(10);
-    // 15 - 10 = 5 pocketed.
-    // inningPoints = 5.
-    
-    // 4. End with Safe + Foul
+    // Setup Safe + Foul BEFORE tapping
     gameState.onSafe(); // Toggle safe mode ON
     gameState.setFoulMode(FoulMode.normal); // Set foul mode
     
-    // Pass CURRENT remaining balls (10) to signify Miss
-    int remaining = gameState.activeBalls.length; // 10
-    gameState.onBallTapped(remaining); 
+    // Tap 10 -> Left 10 balls. Start 15. Potted 5.
+    // Safe + Foul modes are active.
+    // Turn Ends.
+    gameState.onBallTapped(10); 
     
     // Verify Foul Streak Reset
     // Because points were scored (15 + 14 + 5), consecutive fouls should have reset to 0.
     // The final foul makes it 1.
     expect(gameState.players[0].consecutiveFouls, 1);
     
-    // Check notation
-    print('Inning records count: ${gameState.inningRecords.length}');
-    if (gameState.inningRecords.isNotEmpty) {
-        print('Last Record Notation: ${gameState.inningRecords.last.notation}');
-    }
-
     // Check notation
     String notation = gameState.inningRecords.last.notation;
     // Expected: 15 (doublesack) ⟲ 14 (break) ⟲ 5 (current) S (Safe) F (Normal Foul)
