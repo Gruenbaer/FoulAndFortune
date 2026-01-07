@@ -70,7 +70,23 @@ class GameState extends ChangeNotifier {
   bool gameStarted = false;
   bool gameOver = false;
   Player? winner;
+  
+  void concedeGame(Player assignedWinner) {
+    _pushState(); // Save state before ending
+    
+    // Finalize the current inning to commit any pending points/fouls
+    // This ensures the scorecard on Victory screen matches the board
+    _finalizeInning(currentPlayer);
+    
+    winner = assignedWinner;
+    gameOver = true;
+    _logAction('Game Conceded. Winner: ${assignedWinner.name}');
+    notifyListeners();
+    onSaveRequired?.call();
+  }
+
   String? lastAction;
+
   bool showThreeFoulPopup = false;
   bool showTwoFoulWarning = false;
 
@@ -107,6 +123,9 @@ class GameState extends ChangeNotifier {
   // Available if explicitly in sequence OR if game hasn't really started (log empty)
   bool get canBreakFoul => inBreakSequence || matchLog.isEmpty;
   bool get canRedo => _redoStack.isNotEmpty;
+  
+  // Auto-Save Callback
+  VoidCallback? onSaveRequired;
 
   // Game Clock
   final Stopwatch _gameTimer = Stopwatch();
@@ -202,6 +221,7 @@ class GameState extends ChangeNotifier {
       raceToScore = settings.raceToScore;
       somethingChanged = true;
       _logAction('Race to Score changed to $raceToScore');
+      onSaveRequired?.call();
     }
 
     // Update 3-Foul Rule
@@ -304,11 +324,13 @@ class GameState extends ChangeNotifier {
   void dismissThreeFoulPopup() {
     showThreeFoulPopup = false;
     notifyListeners();
+    onSaveRequired?.call();
   }
 
   void dismissTwoFoulWarning() {
     showTwoFoulWarning = false;
     notifyListeners();
+    onSaveRequired?.call();
   }
 
   void _resetRack() {
@@ -316,9 +338,15 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void manualPushState() {
+    _pushState();
+  }
+
   void _pushState() {
     _undoStack.add(GameSnapshot.fromState(this));
     _redoStack.clear(); // clear redo on new action
+    // State pushed means something is about to change, so we save AFTER the change usually. 
+    // But methods calling _pushState will call notifyListeners (and should call onSaveRequired).
   }
 
 
@@ -330,7 +358,16 @@ class GameState extends ChangeNotifier {
 
     final snapshot = _undoStack.removeLast();
     snapshot.restore(this);
+    
+    // If we're undoing from a won game, reset the game-over state
+    // so the game can continue or re-detect victory
+    if (gameOver) {
+      gameOver = false;
+      winner = null;
+    }
+    
     notifyListeners();
+    onSaveRequired?.call();
   }
 
   void redo() {
@@ -341,6 +378,7 @@ class GameState extends ChangeNotifier {
     final snapshot = _redoStack.removeLast();
     snapshot.restore(this);
     notifyListeners();
+    onSaveRequired?.call();
   }
 
   void setFoulMode(FoulMode mode) {
@@ -483,6 +521,7 @@ class GameState extends ChangeNotifier {
     if (currentSafeMode) {
       currentPlayer.inningHasSafe = true;
       currentPlayer.incrementSaves();
+      eventQueue.add(SafeEvent()); // Show safe splash
     }
 
     // HANDLE RE-RACK
@@ -496,41 +535,30 @@ class GameState extends ChangeNotifier {
       
       eventQueue.add(ReRackEvent("reRack"));
       _logAction('${currentPlayer.name}: Re-rack');
-      // CANONICAL: rem resets to 15 immediately after re-rack
-      _updateRackCount(15);
+      // CANONICAL: For regular re-rack (Ball 1), show ONLY the 1 ball.
+      // Refill to 15 happens in finalizeReRack() after animation.
+      _updateRackCount(1);
     } else {
       _updateRackCount(newBallCount);
     }
 
     // DETERMINE IF TURN ENDS
-  // Logic update (Inning Scorer Model):
-  // Checks "State of table when leaving".
-  // Turn ENDS on tap, UNLESS it is a continuation event (Re-rack).
+    // Logic update (Inning Scorer Model):
+    // Turn ENDS on tap, UNLESS it is a continuation event (Re-rack).
+    bool turnEnded = true; // Default to ending turn
   
-  bool turnEnded = true; // Default to ending turn
-  
-  // Scenarios where turn continues:
-  // 1. Re-rack (Left 1 ball) -> Handled by isReRack flag above
-  // 2. Clear Table (Left 0 balls) -> Handled here
-  
-  if (isReRack) { // Ball 1
-    turnEnded = false;
-  } else if (newBallCount == 0) {
-    // Cleared table (Ball 0). This acts like a re-rack 
-    // Trigger re-rack event if not already done?
-    // User said: "taps 0, gets 15 points, rerack, he continues".
-    // We need to ensure we trigger the re-rack logic same as Ball 1?
-    // Or just let them continue knowing they will tap 'Re-rack' button or we auto-rack?
-    // Let's assume we allow continue.
-    turnEnded = false;
-    _updateRackCount(15); // Auto-fill for next run?
-    eventQueue.add(ReRackEvent("tableCleared")); // Optional: specific event
-    _logAction('${currentPlayer.name}: Cleared table');
-  } else {
-    // Any other number (2-14, 15):
-    // CANONICAL MODEL A: Single decisive tap ends inning
-    turnEnded = true;
-  }
+    if (isReRack) { // Ball 1
+      turnEnded = false;
+    } else if (newBallCount == 0) {
+      // Cleared table (Ball 0 Double Sack)
+      turnEnded = false;
+      _updateRackCount(0); // Clear immediately so balls vanish
+      eventQueue.add(ReRackEvent("tableCleared"));
+      _logAction('${currentPlayer.name}: Cleared table');
+    } else {
+      // Any other number (2-14, 15):
+      turnEnded = true;
+    }
   
   // Exception: If Foul or Safe, turn always ends (unless Break Foul where we might continue? No, BF logic returns earlier).
   // Actually, if I clear table (0) but fouled? "Penalized Perfection".
@@ -546,9 +574,9 @@ class GameState extends ChangeNotifier {
 
     _checkWinCondition();
 
-    _checkWinCondition();
-
-    if (turnEnded) {
+    // Only switch players if the game hasn't ended
+    // (prevents double-finalization of winning inning)
+    if (turnEnded && !gameOver) {
       _switchPlayer();
       // Check again after switching - score update happens in _finalizeInning
       _checkWinCondition();
@@ -648,10 +676,11 @@ class GameState extends ChangeNotifier {
     }
     // If no foul, player continues (inning stays open for next shot)
     
-    // Explicitly Clear Balls and Trigger Re-Rack Animation
-    // Reset rack to 15 balls for next shot
-    _resetRack(); 
+    // Explicitly Clear Balls BEFORE Re-Rack Animation
+    // So balls disappear immediately when white is tapped
+    _updateRackCount(0);
     eventQueue.add(ReRackEvent('reRack'));
+    // Reset rack to 15 balls happens in finalizeReRack() after animation
     
     notifyListeners();
   }
@@ -667,6 +696,7 @@ class GameState extends ChangeNotifier {
     lastAction = logEntry;
     matchLog.insert(0, logEntry); // Newest first
     notifyListeners();
+    onSaveRequired?.call();
   }
 
   // Finalize the current player's inning: calculate score, apply multipliers/fouls, generate notation
@@ -726,6 +756,13 @@ class GameState extends ChangeNotifier {
       
       foulPenalty = foulTracker.applyNormalFoul(player, totalRawPoints);
       totalInningPoints += foulPenalty; // foulPenalty is negative
+      
+      // CRITICAL FIX: Trigger "2 Fouls" Warning
+      // check if we are on 2 fouls AFTER applying the current foul
+      if (player.consecutiveFouls == 2 && foulTracker.threeFoulRuleEnabled) {
+        showTwoFoulWarning = true; // State flag (legacy?)
+        eventQueue.add(TwoFoulsWarningEvent());
+      }
       
       // Add 3-foul event if triggered
       if (willTriggerThreeFouls) {
@@ -842,23 +879,33 @@ class GameState extends ChangeNotifier {
   }
 
   void _switchPlayer() {
-    // Finalize current player's inning before switching
-    _finalizeInning(currentPlayer);
-    currentPlayer.isActive = false;
-    currentPlayer.incrementInning();
+    // 1. Capture references before switching logical index
+    final oldPlayer = currentPlayer;
+    final newPlayerIndex = 1 - currentPlayerIndex;
+    final newPlayer = players[newPlayerIndex];
 
-    // Switch
-    currentPlayerIndex = 1 - currentPlayerIndex;
+    // 2. Finalize inning (uses current/old player)
+    _finalizeInning(oldPlayer);
+    oldPlayer.incrementInning();
+    
+    // 3. Switch logical control immediately
+    currentPlayerIndex = newPlayerIndex;
+    
+    // 4. Delayed Visual Switch (Active State)
+    // Keep oldPlayer.isActive = true during the delay so they stay "lit"
+    // while the LR badge animates.
+    Future.delayed(const Duration(milliseconds: 800), () {
+      oldPlayer.isActive = false;
+      newPlayer.isActive = true;
+      notifyListeners();
+    });
 
-    currentPlayer.isActive = true;
-
-    // Check for 2-Foul Warning upon entering turn
+    // Check for 2-Foul Warning upon entering turn (Logical check on new player)
     if (foulTracker.threeFoulRuleEnabled &&
-        currentPlayer.consecutiveFouls == 2) {
-      // Replaced showTwoFoulWarning flag with Event
+        newPlayer.consecutiveFouls == 2) {
       eventQueue.add(TwoFoulsWarningEvent());
     }
-
+    
     notifyListeners();
   }
 
@@ -903,8 +950,9 @@ class GameState extends ChangeNotifier {
         winner = player;
         _stopTicker();
         
-        // Finalize the winning inning to lock in the score
-        _finalizeInning(player);
+        // DO NOT call _finalizeInning here - it's already been called before this check
+        // and projectedScore already includes the winning points.
+        // Calling it again would double-add the points!
         
         _logAction('${player.name} WINS! 🎉');
         

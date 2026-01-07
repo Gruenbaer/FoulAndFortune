@@ -14,8 +14,8 @@ import '../l10n/app_localizations.dart';
 import '../models/game_record.dart';
 import '../services/game_history_service.dart';
 import 'settings_screen.dart';
+import 'new_game_settings_screen.dart';
 import 'details_screen.dart';
-import '../theme/steampunk_theme.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart';
 import '../widgets/victory_splash.dart';
@@ -45,7 +45,6 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
-  Achievement? _achievementToShow;
   final GameHistoryService _historyService = GameHistoryService();
   late String _gameId; // Unique ID for this game
   DateTime? _gameStartTime; // Track when game started
@@ -181,29 +180,50 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     if (widget.resumeGame != null) {
       _gameId = widget.resumeGame!.id;
       _gameStartTime = widget.resumeGame!.startTime;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final gameState = Provider.of<GameState>(context, listen: false);
-        if (widget.resumeGame!.snapshot != null) {
-          gameState.loadFromJson(widget.resumeGame!.snapshot!);
-        }
-
-      });
     } else {
       _gameId = DateTime.now().millisecondsSinceEpoch.toString();
       _gameStartTime = DateTime.now();
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-
-      });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final gameState = Provider.of<GameState>(context, listen: false);
+      
+      // 1. Load data if resuming
+      if (widget.resumeGame != null && widget.resumeGame!.snapshot != null) {
+        gameState.loadFromJson(widget.resumeGame!.snapshot!);
+      }
+      
+      // 2. Attach auto-save listener (ALWAYS)
+      gameState.onSaveRequired = () {
+        if (mounted) {
+          _saveInProgressGame(gameState);
+        }
+      };
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final achievementManager =
           Provider.of<AchievementManager>(context, listen: false);
       achievementManager.onAchievementUnlocked = (achievement) {
-        setState(() {
-          _achievementToShow = achievement;
+        // Defer navigation until after build completes
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Show achievement as modal route for proper z-index
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  AchievementSplash(
+                achievement: achievement,
+                onDismiss: () => Navigator.of(context).pop(),
+              ),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+            ),
+          );
         });
       };
         });
@@ -271,19 +291,91 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       showZoomDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(l10n.restartGame),
-          content: Text(l10n.restartGameMessage),
+          backgroundColor: colors.backgroundCard, // Ensure themed background
+          title: Text(l10n.restartGame, style: TextStyle(color: colors.primary)),
+          content: Text(l10n.restartGameMessage, style: TextStyle(color: colors.textMain)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel),
+              child: Text(l10n.cancel, style: TextStyle(color: colors.textMain)),
             ),
             TextButton(
               onPressed: () {
                 gameState.resetGame();
                 Navigator.pop(context);
               },
-              child: Text(l10n.undo), // Using 'undo' for 'restart'
+              child: Text(l10n.restart, style: TextStyle(color: colors.danger)), // "Neu starten"
+            ),
+          ],
+        ),
+      );
+    }
+    
+    void concedeGameTo(Player winner) {
+      // Use the robust method in GameState that finalizes the inning first
+      gameState.concedeGame(winner);
+      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+          _saveCompletedGame(gameState);
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => VictorySplash(
+                player1: gameState.players[0],
+                player2: gameState.players[1],
+                winner: winner,
+                raceToScore: gameState.raceToScore,
+                inningRecords: gameState.inningRecords,
+                elapsedDuration: gameState.elapsedDuration,
+                onUndo: () {
+                   gameState.undo();
+                   Navigator.of(context).pop(); 
+                },
+                onNewGame: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                onExit: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                 return FadeTransition(opacity: animation, child: child);
+              }
+            ),
+          );
+      });
+    }
+
+    void showGiveUpConfirmation() {
+      Navigator.pop(context); // Close drawer
+      showZoomDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: colors.backgroundCard,
+          title: Text(l10n.whoWonTitle, style: TextStyle(color: colors.primary)), // "Who won?"
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+               ThemedButton(
+                 label: gameState.players[0].name,
+                 onPressed: () {
+                   Navigator.pop(context);
+                   concedeGameTo(gameState.players[0]);
+                 },
+               ),
+               const SizedBox(height: 12),
+               ThemedButton(
+                 label: gameState.players[1].name,
+                 onPressed: () {
+                   Navigator.pop(context);
+                   concedeGameTo(gameState.players[1]);
+                 },
+               ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel, style: TextStyle(color: colors.textMain)),
             ),
           ],
         ),
@@ -465,32 +557,42 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               ],
             ),
             drawer: Drawer(
+              elevation: 100, // High elevation to appear above overlays
+              backgroundColor: colors.backgroundMain, // Themed background
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
                   DrawerHeader(
-                    decoration: const BoxDecoration(
-                      color: SteampunkTheme.mahoganyDark,
+                    decoration: BoxDecoration(
+                      color: colors.backgroundCard, // Themed header background
                     ),
                     child: Center(
                       child: Text(
                         l10n.appTitle,
-                        style: SteampunkTheme.themeData.textTheme.displayMedium,
+                        style: theme.textTheme.displayMedium?.copyWith(
+                          color: colors.primary, // Themed text
+                          fontSize: 24,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.refresh,
-                        color: SteampunkTheme.brassPrimary),
+                    leading: Icon(Icons.refresh, color: colors.primary),
                     title: Text(l10n.restartGame,
-                        style: SteampunkTheme.themeData.textTheme.bodyLarge),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
                     onTap: showRestartConfirmation,
                   ),
                   ListTile(
-                    leading: const Icon(Icons.menu_book,
-                        color: SteampunkTheme.brassPrimary),
+                    leading: Icon(Icons.flag_outlined, color: colors.warning), // Warning color for giving up
+                    title: Text(l10n.giveUp,
+                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
+                    onTap: showGiveUpConfirmation,
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.menu_book, color: colors.primary),
                     title: Text(l10n.gameRules,
-                        style: SteampunkTheme.themeData.textTheme.bodyLarge),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
                     onTap: showRulesPopup,
                   ),
                 ],
@@ -501,14 +603,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 child: Consumer<GameState>(
                   builder: (context, gameState, child) {
                     // Game Events moved to GameEventOverlay
+                    
+                    // Reset completion flag if game is no longer over (after undo)
+                    if (!gameState.gameOver && _isCompletedSaved) {
+                      _isCompletedSaved = false;
+                    }
 
-                    final hasWinner = gameState.players
-                        .any((p) => p.score >= gameState.raceToScore);
-                    if (hasWinner && !_isCompletedSaved) {
+                    // Check gameOver flag, not scores (prevents re-trigger after undo)
+                    if (gameState.gameOver && gameState.winner != null && !_isCompletedSaved) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _saveCompletedGame(gameState);
+                        _saveCompletedGame(gameState);
                         // Navigate to victory screen with Zoom Transition
-                        Navigator.of(context).pushReplacement(
+                        // Use PUSH instead of PUSH REPLACEMENT to preserve GameState/Undo Stack
+                        Navigator.of(context).push(
                           PageRouteBuilder(
                             pageBuilder:
                                 (context, animation, secondaryAnimation) =>
@@ -519,9 +627,46 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               raceToScore: gameState.raceToScore,
                               inningRecords: gameState.inningRecords,
                               elapsedDuration: gameState.elapsedDuration,
+                              onUndo: () {
+                                 // Undo the winning shot
+                                 gameState.undo();
+                                 Navigator.of(context).pop(); 
+                              },
                               onNewGame: () {
-                                Navigator.of(context)
-                                    .popUntil((route) => route.isFirst);
+                                // Pop until home, then show new game settings
+                                Navigator.of(context).popUntil((route) => route.isFirst);
+                                // Use post-frame callback to show modal after navigation settles
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  final homeContext = Navigator.of(context).context;
+                                  // Access HomeScreen's showNewGameSettings method
+                                  // Note: We can't directly call it, so we'll replicate the modal logic
+                                  final achievementManager = Provider.of<AchievementManager>(homeContext, listen: false);
+                                  showModalBottomSheet(
+                                    context: homeContext,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (modalContext) => NewGameSettingsScreen(
+                                      onStartGame: (settings) {
+                                        Navigator.pop(modalContext);
+                                        Navigator.push(
+                                          homeContext,
+                                          MaterialPageRoute(
+                                            builder: (context) => ChangeNotifierProvider(
+                                              create: (_) => GameState(
+                                                settings: settings,
+                                                achievementManager: achievementManager,
+                                              ),
+                                              child: GameScreen(
+                                                settings: settings,
+                                                onSettingsChanged: (newSettings) {},
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                });
                               },
                               onExit: () {
                                 Navigator.of(context)
@@ -611,7 +756,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                             ),
                                             TextSpan(
                                               text:
-                                                  '${gameState.players.firstWhere((p) => p.isActive).currentInning}',
+                                                  '${gameState.currentPlayer.currentInning}',
                                               style: theme
                                                   .textTheme.headlineSmall
                                                   ?.copyWith(
@@ -670,55 +815,66 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 )
                               : const SizedBox.shrink(),
                         ),
-                        // 1. Players & Scores Header
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: colors.backgroundCard,
-                            border: Border(
-                                bottom: BorderSide(
-                                    color: colors.primary, width: 2)),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: PlayerPlaque(
-                                    key: _p1PlaqueKey,
-                                    player: gameState.players[0],
-                                    raceToScore: gameState.raceToScore,
-                                    isLeft: true),
+                        // Z-INDEX FIX: Use VerticalDirection.up to paint Clock FIRST, then Plaques ON TOP
+                        // Layout: Bottom (First Child in List) -> Top (Last Child in List) in placement?
+                        // No: Column with VerticalDirection.up places children from bottom to top.
+                        // Order in List: [Clock, Plaques]
+                        // Layout: Clock at Bottom, Plaques above it.
+                        // Paint Order: Clock (index 0) paints first. Plaques (index 1) paints second.
+                        // Result: Plaques paint ON TOP of Clock.
+                        Column(
+                          verticalDirection: VerticalDirection.up,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // CLOCK (Bottom position, painted first)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: GameClock(),
+                            ),
+
+                            // 1. Players & Scores Header (Top position, painted second)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: colors.backgroundCard,
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: colors.primary, width: 2)),
                               ),
-                              // Switch Button or Spacer
-                              if (!gameState.gameStarted &&
-                                  gameState.matchLog.isEmpty)
-                                IconButton(
-                                  icon: const Icon(Icons.swap_horiz, size: 28),
-                                  color: colors.accent,
-                                  onPressed: gameState.swapStartingPlayer,
-                                  tooltip: 'Swap Sides',
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                )
-                              else
-                                const SizedBox(width: 12),
-                              Expanded(
-                                child: PlayerPlaque(
-                                    key: _p2PlaqueKey,
-                                    player: gameState.players[1],
-                                    raceToScore: gameState.raceToScore,
-                                    isLeft: false),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: PlayerPlaque(
+                                        key: _p1PlaqueKey,
+                                        player: gameState.players[0],
+                                        raceToScore: gameState.raceToScore,
+                                        isLeft: true),
+                                  ),
+                                  // Switch Button or Spacer
+                                  if (!gameState.gameStarted &&
+                                      gameState.matchLog.isEmpty)
+                                    IconButton(
+                                      icon: const Icon(Icons.swap_horiz, size: 28),
+                                      color: colors.accent,
+                                      onPressed: gameState.swapStartingPlayer,
+                                      tooltip: 'Swap Sides',
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    )
+                                  else
+                                    const SizedBox(width: 12),
+                                  Expanded(
+                                    child: PlayerPlaque(
+                                        key: _p2PlaqueKey,
+                                        player: gameState.players[1],
+                                        raceToScore: gameState.raceToScore,
+                                        isLeft: false),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-
-
-
-                        // CLOCK
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: GameClock(),
+                            ),
+                          ],
                         ),
 
                         // 4. Notification / Last Action (Overlay)
@@ -757,8 +913,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             alignment: Alignment.center,
                             children: [
                               // Decorative Gears behind the rack
-                              if (colors.backgroundMain ==
-                                  SteampunkTheme.mahoganyDark)
+                              if (colors.themeId == 'steampunk')
                                 Opacity(
                                   opacity: 0.1,
                                   child: Image.asset(
@@ -854,16 +1009,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           ),
         ),
 
-        // Achievement Splash Overlay
-        if (_achievementToShow != null)
-          AchievementSplash(
-            achievement: _achievementToShow!,
-            onDismiss: () {
-              setState(() {
-                _achievementToShow = null;
-              });
-            },
-          ),
+        // Achievement Splash now shown via Navigator.push (see initState)
 
         // Pause Overlay
         const PauseOverlay(),

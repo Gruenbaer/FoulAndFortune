@@ -128,9 +128,11 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
     final isCyberpunk = colors.themeId == 'cyberpunk';
     
     // Determine Text Color (Normal or Flash)
-    return AnimatedBuilder(
-      animation: _effectController,
-      builder: (context, child) {
+    return Opacity(
+      opacity: isActive ? 1.0 : 0.4,
+      child: AnimatedBuilder(
+        animation: _effectController,
+        builder: (context, child) {
         // Score Color: Always Golden (no flash)
         final nameColor = isActive ? colors.primaryBright : colors.primary;
         const scoreColor = Color(0xFFFFD700); // Standard Gold always
@@ -306,7 +308,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                                     'LR',
                                     style: GoogleFonts.nunito(
                                       textStyle: theme.textTheme.bodySmall,
-                                      color: const Color(0xFFB0B0B0), // Light Grey
+                                      color: Colors.white70, // Lighter for readability
                                       fontSize: 8, 
                                       letterSpacing: 0.5,
                                     ),
@@ -405,7 +407,8 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                 ],
               ),
             );
-      }
+      },
+    ),
     );
   }
 }

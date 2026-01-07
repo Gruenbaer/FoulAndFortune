@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
-import 'package:foulandfortune/models/foul_tracker.dart';
-import 'package:foulandfortune/codecs/notation_codec.dart';
 
 void main() {
   group('Canonical Spec Tests (TV1-TV8)', () {
@@ -109,7 +107,7 @@ void main() {
       
       // Second inning: pots 2 balls (15-13=2)
       player.score += gameState.foulTracker.applyNormalFoul(player, 2); // Foul with pots
-      expect(player.consecutiveFouls, 0); // Streak reset by points
+      expect(player.consecutiveFouls, 1); // Streak reset by points, but current foul counts (1)
       expect(player.score, -1 + -1); // First foul + second foul (no TF)
       
       // Add the points made
@@ -118,7 +116,7 @@ void main() {
       
       // Third inning: pure foul again
       player.score += gameState.foulTracker.applyNormalFoul(player, 0);
-      expect(player.consecutiveFouls, 1); // Started new streak
+      expect(player.consecutiveFouls, 2); // Started new streak at 1, now 2
       expect(player.score, -1);
     });
 
@@ -162,17 +160,20 @@ void main() {
       // No TF allowed/triggered
     });
     
-    test('EDGE - Foul after points should NOT trigger TF', () {
+    test('EDGE - Foul after points should start NEW foul streak', () {
       // Setup: foulStreak=2, pot 1 ball, then foul
       final player = gameState.players[0];
       player.consecutiveFouls = 2;
       
       // Pot 1 ball + foul
-      int penalty = gameState.foulTracker.applyNormalFoul(player, 1); // ball sPocketed=1
+      // Current Logic: Resets to 0 and returns -1
+      // Required Logic: Resets to 0 (clears old streak), THEN adds current foul -> Result 1
       
-      // Expected: streak reset to 0, penalty = -1 (NOT TF)
+      int penalty = gameState.foulTracker.applyNormalFoul(player, 1); // ballsPocketed=1
+      
+      // Expected behavior per new requirement:
       expect(penalty, -1);
-      expect(player.consecutiveFouls, 0);
+      expect(player.consecutiveFouls, 1); // Should be 1, currently failing (is 0)
     });
   });
 }

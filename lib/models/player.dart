@@ -18,7 +18,6 @@ class Player {
   // Inning-based tracking (new for proper point counting)
   int inningPoints; // Points accumulated in CURRENT active segment of the inning
   List<int> inningHistory; // List of completed segments (runs) in this inning (e.g. [14, 14])
-  // int reRackPoints; // DEPRECATED - replaced by inningHistory
   bool inningHasFoul; // Whether current inning has a normal foul
   bool inningHasThreeFouls; // Whether current inning triggered 3-foul penalty
   bool inningHasBreakFoul; // Whether current inning has a break foul (-2)
@@ -62,12 +61,9 @@ class Player {
          highestRun = currentRun;
       }
     }
-    // Negative points don't affect current run (e.g. foul), 
-    // but the run ends when inning increments.
   }
 
   void incrementInning() {
-    // lastRun = currentRun; // Removed: lastRun is set explicitly in _finalizeInning based on net inning score.
     currentInning++;
     currentRun = 0; // Reset run for new inning
     

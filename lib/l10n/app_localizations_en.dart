@@ -397,6 +397,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetGameMessage => 'Are you sure you want to reset the game?';
 
   @override
+  String get giveUp => 'Give Up?';
+
+  @override
+  String get whoWonTitle => 'Who won?';
+
+  @override
+  String get restart => 'Restart';
+
+  @override
   String get reset => 'Reset';
 
   @override

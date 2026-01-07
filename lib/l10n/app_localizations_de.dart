@@ -393,10 +393,19 @@ class AppLocalizationsDe extends AppLocalizations {
       'Spieler hat 3 aufeinanderfolgende Fouls begangen.\n\nStrafe: -15 Punkte\n\nDer Foulzähler wurde zurückgesetzt.';
 
   @override
-  String get resetGame => 'Spiel zurücksetzen';
+  String get resetGame => 'Spiel zurücksetzen?';
 
   @override
-  String get resetGameMessage => 'Möchten Sie das Spiel wirklich zurücksetzen?';
+  String get resetGameMessage => 'Möchten Sie das Spiel wirklich neu starten?';
+
+  @override
+  String get giveUp => 'Schenken?';
+
+  @override
+  String get whoWonTitle => 'Wer hat gewonnen?';
+
+  @override
+  String get restart => 'Neu starten';
 
   @override
   String get reset => 'Zurücksetzen';

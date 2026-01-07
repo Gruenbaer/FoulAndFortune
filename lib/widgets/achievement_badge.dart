@@ -25,30 +25,32 @@ class AchievementBadge extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           // 1. The Asset Image (with ColorFilter if locked)
-          ColorFiltered(
-            colorFilter: isUnlocked 
-                ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply) // No-op
-                : const ColorFilter.matrix(<double>[
-                    0.2126, 0.7152, 0.0722, 0, 0,
-                    0.2126, 0.7152, 0.0722, 0, 0,
-                    0.2126, 0.7152, 0.0722, 0, 0,
-                    0,      0,      0,      1, 0,
-                  ]), // Standard Greyscale
+          ClipOval(
             child: ColorFiltered(
-               // Add Sepia tone on top of greyscale for "Rusty" look if locked
-               colorFilter: isUnlocked
-                   ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
-                   : const ColorFilter.mode(Color(0xFF704214), BlendMode.overlay), 
-               child: Image.asset(
-                 _getAssetPath(id),
-                 width: size,
-                 height: size,
-                 fit: BoxFit.contain,
-                 errorBuilder: (context, error, stackTrace) {
-                   // Fallback if image missing: Show generic shield (or just handle gracefully)
-                   return Icon(Icons.broken_image, size: size * 0.5, color: Colors.grey);
-                 },
-               ),
+              colorFilter: isUnlocked 
+                  ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply) // No-op
+                  : const ColorFilter.matrix(<double>[
+                      0.2126, 0.7152, 0.0722, 0, 0,
+                      0.2126, 0.7152, 0.0722, 0, 0,
+                      0.2126, 0.7152, 0.0722, 0, 0,
+                      0,      0,      0,      1, 0,
+                    ]), // Standard Greyscale
+              child: ColorFiltered(
+                 // Add Sepia tone on top of greyscale for "Rusty" look if locked
+                 colorFilter: isUnlocked
+                     ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
+                     : const ColorFilter.mode(Color(0xFF704214), BlendMode.overlay), 
+                 child: Image.asset(
+                   _getAssetPath(id),
+                   width: size,
+                   height: size,
+                   fit: BoxFit.cover, // Cover fits and crops to fill the circular area
+                   errorBuilder: (context, error, stackTrace) {
+                     // Fallback if image missing: Show generic shield
+                     return Icon(Icons.broken_image, size: size * 0.5, color: Colors.grey);
+                   },
+                 ),
+              ),
             ),
           ),
           
