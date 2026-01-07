@@ -886,12 +886,17 @@ class GameState extends ChangeNotifier {
 
     // 2. Finalize inning (uses current/old player)
     _finalizeInning(oldPlayer);
+    
+    // 3. Set lastRun from currentRun BEFORE incrementInning resets it to 0
+    //    This preserves the run value for the LR badge display
+    oldPlayer.lastRun = oldPlayer.currentRun;
+    
     oldPlayer.incrementInning();
     
-    // 3. Switch logical control immediately
+    // 4. Switch logical control immediately
     currentPlayerIndex = newPlayerIndex;
     
-    // 4. Delayed Visual Switch (Active State)
+    // 5. Delayed Visual Switch (Active State)
     // Keep oldPlayer.isActive = true during the delay so they stay "lit"
     // while the LR badge animates.
     Future.delayed(const Duration(milliseconds: 800), () {

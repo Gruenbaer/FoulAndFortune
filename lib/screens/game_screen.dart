@@ -1136,6 +1136,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       final bool isOnTable = gameState.activeBalls.contains(rows[r][c]);
                       final bool isInteractable = !gameState.gameOver &&
                           isOnTable &&
+                          gameState.eventQueue.isEmpty && // Disable during animations
                           (gameState.foulMode != FoulMode.severe || rows[r][c] == 15);
                       
                       final double targetOpacity = !isOnTable ? 0.15 : (isInteractable ? 1.0 : 0.5);

@@ -36,6 +36,9 @@ class _GameEventOverlayState extends State<GameEventOverlay>
   GameState?
       _currentGameState; // Store reference to avoid Provider lookup in callbacks
   GameEvent? _currentEvent; // Store current event for post-animation logic
+  
+  // Public getter for game screen to check if animations are playing
+  bool get isAnimating => _isAnimating;
 
   @override
   void initState() {
