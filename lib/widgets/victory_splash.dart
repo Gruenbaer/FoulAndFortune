@@ -17,6 +17,7 @@ class VictorySplash extends StatefulWidget {
   final Duration elapsedDuration;
   final VoidCallback onNewGame;
   final VoidCallback onExit;
+  final VoidCallback? onUndo;
 
   const VictorySplash({
     super.key,
@@ -28,6 +29,7 @@ class VictorySplash extends StatefulWidget {
     required this.elapsedDuration,
     required this.onNewGame,
     required this.onExit,
+    this.onUndo,
   });
 
   @override
@@ -70,8 +72,11 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
             tooltip: AppLocalizations.of(context).undo,
             onPressed: () {
               // Undo last action before victory
-              Navigator.of(context).pop();
-              // The game state's undo will be called after popping
+              if (widget.onUndo != null) {
+                widget.onUndo!();
+              } else {
+                 Navigator.of(context).pop();
+              }
             },
           ),
           IconButton(

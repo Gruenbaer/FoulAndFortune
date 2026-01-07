@@ -848,6 +848,24 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to reset the game?'**
   String get resetGameMessage;
 
+  /// No description provided for @giveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Give Up?'**
+  String get giveUp;
+
+  /// No description provided for @whoWonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who won?'**
+  String get whoWonTitle;
+
+  /// No description provided for @restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get restart;
+
   /// No description provided for @reset.
   ///
   /// In en, this message translates to:

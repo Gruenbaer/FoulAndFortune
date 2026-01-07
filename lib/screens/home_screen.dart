@@ -14,10 +14,9 @@ import '../screens/achievements_gallery_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/game_history_screen.dart';
 import '../widgets/themed_widgets.dart';
-import '../theme/steampunk_theme.dart';
+import '../theme/fortune_theme.dart';
 import '../services/game_history_service.dart';
 import '../widgets/video_logo.dart';
-import '../widgets/migration_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,74 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _checkActiveGame();
     _loadVersion();
-    // TODO: Re-enable after fixing build issues
-    // _checkAndMigrateNotation();
-  }
-
-  Future<void> _checkAndMigrateNotation() async {
-    final historyService = GameHistoryService();
-    final bool alreadyMigrated = await historyService.isMigrated();
-
-    if (!alreadyMigrated && mounted) {
-      // Check if there are any games to migrate
-      final games = await historyService.getAllGames();
-      
-      if (games.isEmpty) {
-        // No games to migrate, just mark as complete
-        await historyService.markMigrated();
-        return;
-      }
-
-      // Show migration dialog
-      final bool? proceed = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => MigrationDialog(
-          onConfirm: () => Navigator.of(context).pop(true),
-        ),
-      );
-
-      if (proceed == true && mounted) {
-        // Show progress dialog
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => MigrationProgressDialog(
-            totalGames: games.length,
-            migratedGames: 0,
-          ),
-        );
-
-        try {
-          final migratedCount = await historyService.migrateNotation();
-          
-          if (mounted) {
-            Navigator.of(context).pop(); // Close progress dialog
-            debugPrint('Successfully migrated $migratedCount games to Notation V2');
-          }
-        } catch (e) {
-          if (mounted) {
-            Navigator.of(context).pop(); // Close progress dialog
-            
-            // Show error dialog
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Migration Failed'),
-                content: Text('Failed to migrate game history: $e\n\nPlease contact support.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-            );
-          }
-          debugPrint('Migration error: $e');
-        }
-      }
-    }
   }
 
   Future<void> _loadVersion() async {
@@ -323,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         _version,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: SteampunkTheme.steamWhite.withValues(alpha: 0.7),
+                          color: FortuneColors.of(context).textMain.withValues(alpha: 0.7),
                         ),
                       ),
                   ],

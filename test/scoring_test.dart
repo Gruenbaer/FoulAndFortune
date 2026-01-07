@@ -1,9 +1,7 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
-import 'package:foulandfortune/codecs/notation_codec.dart';
 
 void main() {
   group('Scoring System Water Tightness', () {

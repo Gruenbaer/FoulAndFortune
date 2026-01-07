@@ -1,5 +1,3 @@
-import '../models/game_state.dart';
-
 /// Codec for parsing and serializing canonical notation strings
 /// 
 /// Canonical format: `[Segment0] ⟲ [Segment1] ⟲ ... ⟲ [SegmentN] [Suffixes]`
@@ -187,7 +185,7 @@ class NotationCodec {
 
     String expanded = bodyPart;
     while (expanded.endsWith(separator)) {
-      expanded = expanded.substring(0, expanded.length - 1) + '${separator}0';
+      expanded = '${expanded.substring(0, expanded.length - 1)}${separator}0';
     }
 
     return expanded + suffixPart;

@@ -2,7 +2,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/game_record.dart';
-import '../codecs/notation_codec.dart';
 
 class GameHistoryService {
   static const String _key = 'game_history';

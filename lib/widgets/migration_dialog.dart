@@ -16,7 +16,7 @@ class MigrationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Dialog(
       backgroundColor: colors.backgroundCard,
@@ -195,7 +195,7 @@ class MigrationProgressDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final progress = totalGames > 0 ? migratedGames / totalGames : 0.0;
 
     return Dialog(

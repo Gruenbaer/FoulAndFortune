@@ -25,7 +25,7 @@ class FoulTracker {
 
     // Made balls reset the foul chain completely (canonical rule)
     if (ballsPocketed > 0) {
-      player.consecutiveFouls = 0;
+      player.consecutiveFouls = 1; // Reset previous streak, but count CURRENT foul
       return -1;
     }
 

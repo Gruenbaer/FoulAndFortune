@@ -158,6 +158,12 @@ class _GameEventOverlayState extends State<GameEventOverlay>
       if (message == 'cannotFoulAndLeave1Ball') message = l10n.cannotFoulAndLeave1Ball;
       if (message == 'cannotFoulAndDoubleSack') message = l10n.cannotFoulAndDoubleSack;
       
+      // Mark as animating so queue doesn't process next event
+      setState(() {
+        _isAnimating = true;
+        _currentEvent = event;
+      });
+      
       _showWarningDialog(title, message);
       return;
     }
@@ -210,7 +216,7 @@ class _GameEventOverlayState extends State<GameEventOverlay>
           break;
         case FoulType.threeFouls:
           message = AppLocalizations.of(context).threeFoulsTitle;
-          _triggerScreenShake(); // Screen shake effect
+          _triggerScreenShake(); // Screen shake effect ONLY for triple foul
           break;
       }
 
@@ -274,6 +280,11 @@ class _GameEventOverlayState extends State<GameEventOverlay>
             ThemedButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
+                // Reset animation state before processing next
+                setState(() {
+                  _isAnimating = false;
+                  _currentEvent = null;
+                });
                 _processNext(); // Continue queue
               },
               label: l10n.gotIt,
