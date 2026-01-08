@@ -44,8 +44,11 @@ class GameEventOverlayState extends State<GameEventOverlay>
   static bool isAnyAnimating(BuildContext context) {
     try {
       final state = context.findAncestorStateOfType<GameEventOverlayState>();
-      return state?._isAnimating ?? false;
+      final isAnimating = state?._isAnimating ?? false;
+      debugPrint('[GameEventOverlay] isAnyAnimating check: state=$state, isAnimating=$isAnimating');
+      return isAnimating;
     } catch (e) {
+      debugPrint('[GameEventOverlay] isAnyAnimating ERROR: $e');
       return false;
     }
   }

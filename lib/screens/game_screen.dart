@@ -1135,12 +1135,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       
                       final bool isOnTable = gameState.activeBalls.contains(rows[r][c]);
                       
-                      // Check if any animation is playing
-                      final bool isAnimationPlaying = GameEventOverlayState.isAnyAnimating(context);
+                      // Check if there are queued events (will animate soon)
+                      final bool hasQueuedEvents = gameState.eventQueue.isNotEmpty;
                       
                       final bool isInteractable = !gameState.gameOver &&
                           isOnTable &&
-                          !isAnimationPlaying && // NEW: Disable during splash animations
+                          !hasQueuedEvents && // Disable if events queued
                           (gameState.foulMode != FoulMode.severe || rows[r][c] == 15);
                       
                       final double targetOpacity = !isOnTable ? 0.15 : (isInteractable ? 1.0 : 0.5);
@@ -1203,13 +1203,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   height: diameter,
                     child: Builder(
                       builder: (context) {
-                        // Check if any animation is playing
-                        final bool isAnimationPlaying = GameEventOverlayState.isAnyAnimating(context);
+                        // Check if there are queued events (will animate soon)
+                        final bool hasQueuedEvents = gameState.eventQueue.isNotEmpty;
                         
                         return BallButton(
                         ballNumber: 0,
                         isActive: !gameState.gameOver &&
-                            !isAnimationPlaying && // NEW: Disable during animations
+                            !hasQueuedEvents && // Disable if events queued
                             gameState.foulMode != FoulMode.severe,
                         // Cue Ball always visible if game not over, or handled by rack animation
                         // No separate opacity logic needed as it doesn't get "pocketed" in same way
