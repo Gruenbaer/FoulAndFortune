@@ -35,6 +35,7 @@ void main() {
     // Scenario 4: Player 2 Re-racks (9 -> 1) 
     print('\n--- TEST: P2 Re-racks (9 -> 1) ---');
     gameState.onBallTapped(1);
+    gameState.finalizeReRack(); // Simulate UI callback that resets rack to 15
     // Logic: new=1. isReRack=true. turnEnded=false -> CONTINUES
     expect(gameState.currentPlayerIndex, 1, reason: "P2 continues after re-rack");
     expect(gameState.activeBalls.length, 15, reason: "Should be reset to 15");
