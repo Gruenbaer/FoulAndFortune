@@ -793,12 +793,10 @@ class GameState extends ChangeNotifier {
       foulPenalty = foulTracker.applyNormalFoul(player, totalRawPoints);
       totalInningPoints += foulPenalty; // foulPenalty is negative
       
-      // CRITICAL FIX: Trigger "2 Fouls" Warning
-      // check if we are on 2 fouls AFTER applying the current foul
-      if (player.consecutiveFouls == 2 && foulTracker.threeFoulRuleEnabled) {
-        showTwoFoulWarning = true; // State flag (legacy?)
-        eventQueue.add(TwoFoulsWarningEvent());
-      }
+      
+      // NOTE: 2-foul warning is handled in _switchPlayer() when starting turn
+      // This prevents duplicate warnings and ensures correct timing
+      
       
       // Add 3-foul event if triggered
       if (willTriggerThreeFouls) {
