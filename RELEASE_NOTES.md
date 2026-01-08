@@ -1,3 +1,13 @@
+### v4.0.2 - Test Suite Update 🧪
+
+Internal test fix to ensure code quality.
+
+* **Test Fix:** Updated `debugging_turn_logic_test.dart` to match current event-driven re-rack implementation
+* **Code Quality:** All test scenarios now pass successfully
+* **No user-facing changes** - this is a maintenance release
+
+***
+
 ### v3.9.3 - Notation & Logic Refinement 🔧
 
 Critical fixes for game flow and major enhancements to the score card notation.
