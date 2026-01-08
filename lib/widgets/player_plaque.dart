@@ -269,16 +269,43 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                       // Shows Cumulative Run
                       Builder(
                         builder: (context) {
-                          // Dynamic LR Logic:
-                          // Active: Show Current Inning Net Score (Points - Pending Fouls)
-                          // Inactive: Show Last Completed Run
+                          // ═══════════════════════════════════════════════
+                          // CRITICAL FIX: Use currentPlayerIndex for LR logic
+                          // NOT isActive (which has 800ms visual delay)
+                          // This ensures LR shows correct value even during
+                          // the delayed visual switch window
+                          // ═══════════════════════════════════════════════
                           
-                          int runValue;
+                          // Listen to GameState to trigger rebuilds
                           final gameState = Provider.of<GameState>(context, listen: true);
                           
-                          if (widget.player.isActive) {
-                             runValue = gameState.getDynamicInningScore(widget.player);
+                          // Determine if THIS player is the LOGICAL turn owner
+                          // (not just visually highlighted)
+                          final isLogicallyActive = gameState.currentPlayerIndex == 
+                              (identical(widget.player, gameState.players[0]) ? 0 : 1);
+                          
+                          int runValue;
+                          
+                          if (isLogicallyActive) {
+                             // Logical turn owner: show LIVE run accumulation
+                             // Special case: if currentRun is 0 (just reset) but lastRun != 0
+                             // this means turn just ended, show the completed run
+                             if (widget.player.currentRun == 0 && widget.player.lastRun != 0) {
+                               runValue = widget.player.lastRun;
+                             } else {
+                               // Active turn, showing live accumulation
+                               runValue = widget.player.currentRun;
+                               
+                               // CRITICAL: Apply PENDING foul penalties
+                               // This shows NET run during active play
+                               if (widget.player.inningHasBreakFoul) {
+                                 runValue -= 2; // Break foul penalty
+                               } else if (widget.player.inningHasFoul) {
+                                 runValue -= 1; // Normal foul penalty
+                               }
+                             }
                           } else {
+                             // Not turn owner: show last completed run
                              runValue = widget.player.lastRun;
                           }
 
