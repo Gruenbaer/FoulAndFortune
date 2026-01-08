@@ -18,10 +18,10 @@ class GameEventOverlay extends StatefulWidget {
   const GameEventOverlay({super.key});
 
   @override
-  State<GameEventOverlay> createState() => _GameEventOverlayState();
+  State<GameEventOverlay> createState() => GameEventOverlayState();
 }
 
-class _GameEventOverlayState extends State<GameEventOverlay>
+class GameEventOverlayState extends State<GameEventOverlay>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -39,6 +39,17 @@ class _GameEventOverlayState extends State<GameEventOverlay>
   
   // Public getter for game screen to check if animations are playing
   bool get isAnimating => _isAnimating;
+
+  // Static method to check if any overlay is animating
+  static bool isAnyAnimating(BuildContext context) {
+    try {
+      final state = context.findAncestorStateOfType<GameEventOverlayState>();
+      return state?._isAnimating ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
 
   @override
   void initState() {

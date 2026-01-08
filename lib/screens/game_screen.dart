@@ -1134,9 +1134,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       // 3. On table and active -> 1.0
                       
                       final bool isOnTable = gameState.activeBalls.contains(rows[r][c]);
+                      
+                      // Check if any animation is playing
+                      final bool isAnimationPlaying = GameEventOverlayState.isAnyAnimating(context);
+                      
                       final bool isInteractable = !gameState.gameOver &&
                           isOnTable &&
-                          gameState.eventQueue.isEmpty && // Disable during animations
+                          !isAnimationPlaying && // NEW: Disable during splash animations
                           (gameState.foulMode != FoulMode.severe || rows[r][c] == 15);
                       
                       final double targetOpacity = !isOnTable ? 0.15 : (isInteractable ? 1.0 : 0.5);
@@ -1197,14 +1201,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: diameter,
                   height: diameter,
-                    child: BallButton(
-                    ballNumber: 0,
-                    isActive: !gameState.gameOver &&
-                        gameState.foulMode != FoulMode.severe,
-                    // Cue Ball always visible if game not over, or handled by rack animation
-                    // No separate opacity logic needed as it doesn't get "pocketed" in same way
-                    onTap: () => handleTap(0),
-                  ),
+                    child: Builder(
+                      builder: (context) {
+                        // Check if any animation is playing
+                        final bool isAnimationPlaying = GameEventOverlayState.isAnyAnimating(context);
+                        
+                        return BallButton(
+                        ballNumber: 0,
+                        isActive: !gameState.gameOver &&
+                            !isAnimationPlaying && // NEW: Disable during animations
+                            gameState.foulMode != FoulMode.severe,
+                        // Cue Ball always visible if game not over, or handled by rack animation
+                        // No separate opacity logic needed as it doesn't get "pocketed" in same way
+                        onTap: () => handleTap(0),
+                      );
+                      },
+                    ),
                 ),
                 const SizedBox(height: 4),
                 const Text(
