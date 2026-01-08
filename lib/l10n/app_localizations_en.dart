@@ -140,6 +140,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get english => 'English';
 
   @override
+  String get notationSection => 'Notation';
+
+  @override
+  String get notationFormat => 'Format';
+
+  @override
+  String get canonicalDesc => 'Storage format (⟲ delimiter)';
+
+  @override
+  String get annotatedDesc => 'Display format (flexible delimiters)';
+
+  @override
+  String get delimiterStyle => 'Delimiter Style';
+
+  @override
+  String get delimiterStyleDesc =>
+      'Choose separator symbol for multi-rack innings';
+
+  @override
   String get theme => 'Theme';
 
   @override

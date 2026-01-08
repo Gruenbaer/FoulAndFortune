@@ -1,5 +1,7 @@
 export 'player.dart';
 
+import '../codecs/notation_format.dart';
+
 class GameSettings {
   bool threeFoulRuleEnabled;
   int raceToScore;
@@ -18,6 +20,9 @@ class GameSettings {
   bool hasSeenBreakFoulRules;
   bool hasShown2FoulWarning;
   bool hasShown3FoulWarning;
+  NotationFormat notationFormat;
+  RackDelimiterStyle rackDelimiterStyle;
+  PhaseDelimiterStyle phaseDelimiterStyle;
 
   GameSettings({
     this.threeFoulRuleEnabled = true,
@@ -37,6 +42,9 @@ class GameSettings {
     this.hasSeenBreakFoulRules = false,
     this.hasShown2FoulWarning = false,
     this.hasShown3FoulWarning = false,
+    this.notationFormat = NotationFormat.ff14Canonical,
+    this.rackDelimiterStyle = RackDelimiterStyle.bar,
+    this.phaseDelimiterStyle = PhaseDelimiterStyle.dot,
   });
 
   // Validation helpers
@@ -61,6 +69,9 @@ class GameSettings {
         'hasSeenBreakFoulRules': hasSeenBreakFoulRules,
         'hasShown2FoulWarning': hasShown2FoulWarning,
         'hasShown3FoulWarning': hasShown3FoulWarning,
+        'notationFormat': notationFormat.id,
+        'rackDelimiterStyle': rackDelimiterStyle.name,
+        'phaseDelimiterStyle': phaseDelimiterStyle.name,
       };
 
   factory GameSettings.fromJson(Map<String, dynamic> json) => GameSettings(
@@ -83,6 +94,15 @@ class GameSettings {
         hasSeenBreakFoulRules: json['hasSeenBreakFoulRules'] ?? false,
         hasShown2FoulWarning: json['hasShown2FoulWarning'] ?? false,
         hasShown3FoulWarning: json['hasShown3FoulWarning'] ?? false,
+        notationFormat: json['notationFormat'] != null 
+            ? NotationFormat.fromId(json['notationFormat'])
+            : NotationFormat.ff14Canonical,
+        rackDelimiterStyle: json['rackDelimiterStyle'] != null
+            ? RackDelimiterStyle.fromName(json['rackDelimiterStyle'])
+            : RackDelimiterStyle.bar,
+        phaseDelimiterStyle: json['phaseDelimiterStyle'] != null
+            ? PhaseDelimiterStyle.fromName(json['phaseDelimiterStyle'])
+            : PhaseDelimiterStyle.dot,
       );
 
   GameSettings copyWith({
@@ -103,6 +123,9 @@ class GameSettings {
     bool? hasSeenBreakFoulRules,
     bool? hasShown2FoulWarning,
     bool? hasShown3FoulWarning,
+    NotationFormat? notationFormat,
+    RackDelimiterStyle? rackDelimiterStyle,
+    PhaseDelimiterStyle? phaseDelimiterStyle,
   }) {
     return GameSettings(
       threeFoulRuleEnabled: threeFoulRuleEnabled ?? this.threeFoulRuleEnabled,
@@ -125,6 +148,9 @@ class GameSettings {
           hasSeenBreakFoulRules ?? this.hasSeenBreakFoulRules,
       hasShown2FoulWarning: hasShown2FoulWarning ?? this.hasShown2FoulWarning,
       hasShown3FoulWarning: hasShown3FoulWarning ?? this.hasShown3FoulWarning,
+      notationFormat: notationFormat ?? this.notationFormat,
+      rackDelimiterStyle: rackDelimiterStyle ?? this.rackDelimiterStyle,
+      phaseDelimiterStyle: phaseDelimiterStyle ?? this.phaseDelimiterStyle,
     );
   }
 
@@ -147,7 +173,10 @@ class GameSettings {
         other.languageCode == languageCode &&
         other.isDarkTheme == isDarkTheme &&
         other.themeId == themeId &&
-        other.hasSeenBreakFoulRules == hasSeenBreakFoulRules;
+        other.hasSeenBreakFoulRules == hasSeenBreakFoulRules &&
+        other.notationFormat == notationFormat &&
+        other.rackDelimiterStyle == rackDelimiterStyle &&
+        other.phaseDelimiterStyle == phaseDelimiterStyle;
   }
 
   @override
@@ -166,6 +195,9 @@ class GameSettings {
         languageCode.hashCode ^
         isDarkTheme.hashCode ^
         themeId.hashCode ^
-        hasSeenBreakFoulRules.hashCode;
+        hasSeenBreakFoulRules.hashCode ^
+        notationFormat.hashCode ^
+        rackDelimiterStyle.hashCode ^
+        phaseDelimiterStyle.hashCode;
   }
 }

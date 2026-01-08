@@ -141,6 +141,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String get english => 'Englisch';
 
   @override
+  String get notationSection => 'Notation';
+
+  @override
+  String get notationFormat => 'Format';
+
+  @override
+  String get canonicalDesc => 'Speicherformat (⟲ Trennzeichen)';
+
+  @override
+  String get annotatedDesc => 'Anzeigeformat (flexible Trennzeichen)';
+
+  @override
+  String get delimiterStyle => 'Trennzeichenstil';
+
+  @override
+  String get delimiterStyleDesc =>
+      'Wähle das Trennzeichen für Multi-Rack-Innings';
+
+  @override
   String get theme => 'Design';
 
   @override

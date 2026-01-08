@@ -8,6 +8,7 @@ import '../widgets/themed_widgets.dart';
 import '../widgets/player_name_input_dialog.dart';
 import 'package:provider/provider.dart';
 import '../models/achievement_manager.dart';
+import '../codecs/notation_format.dart';
 
 class SettingsScreen extends StatefulWidget {
   final GameSettings currentSettings;
@@ -317,6 +318,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
+
+              // Notation Format Section
+              buildSectionHeader(l10n.notationSection, Icons.text_fields),
+
+              // Format Selection with Examples
+              buildPanelTile(
+                child: Column(
+                  children: NotationFormat.values.map((format) {
+                    // Example notation for this format
+                    // Canonical: uniform ⟲
+                    // Annotated: MIXED delimiters - rack delimiter after 15, phase delimiter elsewhere
+                    final exampleText = format == NotationFormat.ff14Canonical
+                        ? '15⟲14⟲5F'
+                        : '15|14·5F';  // Shows MIXED: | after 15 (rack), · between 14 and 5 (phase)
+                    
+                    return RadioListTile<NotationFormat>(
+                      title: Text(format.displayName, style: theme.textTheme.bodyMedium),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            format == NotationFormat.ff14Canonical
+                                ? l10n.canonicalDesc
+                                : l10n.annotatedDesc,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Example: $exampleText',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontFamily: 'monospace',
+                                color: fortuneTheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      value: format,
+                      groupValue: _settings.notationFormat,
+                      activeColor: fortuneTheme.secondary,
+                      onChanged: (value) {
+                        setState(() {
+                          _settings = _settings.copyWith(notationFormat: value);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+
+
 
               // Theme Selection
               buildSectionHeader(l10n.theme, Icons.palette),

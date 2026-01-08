@@ -356,6 +356,42 @@ abstract class AppLocalizations {
   /// **'English'**
   String get english;
 
+  /// No description provided for @notationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Notation'**
+  String get notationSection;
+
+  /// No description provided for @notationFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get notationFormat;
+
+  /// No description provided for @canonicalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage format (⟲ delimiter)'**
+  String get canonicalDesc;
+
+  /// No description provided for @annotatedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Display format (flexible delimiters)'**
+  String get annotatedDesc;
+
+  /// No description provided for @delimiterStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delimiter Style'**
+  String get delimiterStyle;
+
+  /// No description provided for @delimiterStyleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose separator symbol for multi-rack innings'**
+  String get delimiterStyleDesc;
+
   /// No description provided for @theme.
   ///
   /// In en, this message translates to:
