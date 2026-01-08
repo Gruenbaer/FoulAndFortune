@@ -394,32 +394,37 @@ class GameEventOverlayState extends State<GameEventOverlay>
 
         if (_currentContent == null) return const SizedBox.shrink();
 
-        return Positioned.fill(
-          child: SlideTransition(
-            position: _shakeOffset,
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                // Interactive content (Dialogs) should block.
-                // Splash content (ReRack, Foul, etc.) should NOT block touches.
-                // We check _currentEvent type.
-                
-                final bool isInteractive = _currentEvent is DecisionEvent || 
-                                         _currentEvent is WarningEvent || 
-                                         _currentEvent is TwoFoulsWarningEvent ||
-                                         _currentEvent is BreakFoulDecisionEvent;
-                
-                return IgnorePointer(
-                  ignoring: !isInteractive,
-                  child: Opacity(
-                    opacity: _opacityAnimation.value,
-                    child: Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: _currentContent, // Display the content
+        // AbsorbPointer blocks ALL touch events during animation
+        // This prevents tapping balls while splashes are showing
+        return AbsorbPointer(
+          absorbing: true, // Always block touches when content is showing
+          child: Positioned.fill(
+            child: SlideTransition(
+              position: _shakeOffset,
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  // Interactive content (Dialogs) should block.
+                  // Splash content (ReRack, Foul, etc.) should NOT block touches.
+                  // We check _currentEvent type.
+                  
+                  final bool isInteractive = _currentEvent is DecisionEvent || 
+                                           _currentEvent is WarningEvent || 
+                                           _currentEvent is TwoFoulsWarningEvent ||
+                                           _currentEvent is BreakFoulDecisionEvent;
+                  
+                  return IgnorePointer(
+                    ignoring: !isInteractive,
+                    child: Opacity(
+                      opacity: _opacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _scaleAnimation.value,
+                        child: _currentContent, // Display the content
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         );
