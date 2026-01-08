@@ -682,9 +682,9 @@ class GameState extends ChangeNotifier {
     // ACCUMULATE POINTS IN INNING (like onBallTapped)
     currentPlayer.addInningPoints(ballsRemaining);
     
-    // Push current points to history (Double Sack completes the rack)
-    currentPlayer.inningHistory.add(currentPlayer.inningPoints);
-    currentPlayer.inningPoints = 0;
+    // NOTE: Do NOT add to history or reset inningPoints here!
+    // _finalizeInning() needs inningPoints to calculate score
+    // The finalization process handles adding to history and resetting
     
     // TRACK FOULS
     if (currentFoulMode == FoulMode.normal) {
