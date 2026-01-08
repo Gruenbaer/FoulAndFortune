@@ -652,6 +652,13 @@ class GameState extends ChangeNotifier {
   }
 
   void onDoubleSack() {
+    // GUARD: Prevent multiple taps while re-rack is queued or animating
+    // This stops rapid taps from creating multiple 0-point innings
+    if (eventQueue.any((e) => e is ReRackEvent)) {
+      debugPrint('onDoubleSack: BLOCKED - ReRackEvent already in queue');
+      return;
+    }
+    
     _pushState();
     if (!gameStarted) {
       gameStarted = true;
