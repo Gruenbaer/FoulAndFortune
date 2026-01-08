@@ -87,9 +87,23 @@ class Player {
   void addInningPoints(int points) {
     inningPoints += points;
     lastAwardedPoints = points;
+    
+    // DEBUG: Log when this is called
+    print('DEBUG addInningPoints: points=$points, currentRun before=$currentRun');
+    
+    // ═══════════════════════════════════════════════
+    // CRITICAL: Update currentRun in real-time for LR display
+    // This makes LR show live points, not just +0
+    // ═══════════════════════════════════════════════
     if (points > 0) {
+      currentRun += points;
+      if (currentRun > highestRun) {
+        highestRun = currentRun;
+      }
       consecutiveFouls = 0; // Legal points break foul streak
     }
+    
+    print('DEBUG addInningPoints: currentRun after=$currentRun');
     updateCount++;
   }
 

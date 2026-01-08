@@ -97,6 +97,10 @@ class GameState extends ChangeNotifier {
 
   // Break Sequence Flag (True at start, false after first valid shot)
   bool inBreakSequence = true;
+  
+  // Break Foul Eligibility Tracking
+  int? breakingPlayerIndex; // Who started the match (can commit break fouls)
+  bool breakFoulStillAvailable = true; // Permanently disabled after first ball potted or player switch
 
   // UI Hint Flag
   bool showBreakFoulHint = false;
@@ -120,8 +124,20 @@ class GameState extends ChangeNotifier {
   bool get canUndo => _undoStack.isNotEmpty;
 
   // Robust check for Break Foul availability
-  // Available if explicitly in sequence OR if game hasn't really started (log empty)
-  bool get canBreakFoul => inBreakSequence || matchLog.isEmpty;
+  // Only available at match start for the breaking player, before any balls potted or player switch
+  bool get canBreakFoul {
+    // Must be in break sequence
+    if (!inBreakSequence) return false;
+    
+    // Must not be permanently disabled
+    if (!breakFoulStillAvailable) return false;
+    
+    // If no breaking player set yet, it's available (first action of game)
+    if (breakingPlayerIndex == null) return true;
+    
+    // Only the breaking player can commit break fouls
+    return breakingPlayerIndex == currentPlayerIndex;
+  }
   bool get canRedo => _redoStack.isNotEmpty;
   
   // Auto-Save Callback
@@ -497,6 +513,16 @@ class GameState extends ChangeNotifier {
 
     // --- CASE 2: NORMAL SHOT ---
     inBreakSequence = false;
+    
+    // Set breaking player on first action if not set
+    if (breakingPlayerIndex == null) {
+      breakingPlayerIndex = currentPlayerIndex;
+    }
+    
+    // Permanently disable break fouls if any balls are potted
+    if (ballsPocketed > 0 && breakFoulStillAvailable) {
+      breakFoulStillAvailable = false;
+    }
 
     // ACCUMULATE POINTS
     // ACCUMULATE POINTS
@@ -507,14 +533,20 @@ class GameState extends ChangeNotifier {
       currentPlayer.inningHasFoul = true;
       currentPlayer.setFoulPenalty(-1);
       
-      // Always add Normal Foul (-1) event first
-      eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
+      // Check if this will trigger 3-foul penalty
+      // If so, DON'T add the -1 event (the -16 event includes it)
+      bool willTriggerThreeFouls = false;
+      if (foulTracker.threeFoulRuleEnabled && ballsPocketed == 0 && currentPlayer.consecutiveFouls == 2) {
+        willTriggerThreeFouls = true;
+      }
+      
+      // Only add -1 FoulEvent if NOT triggering three-foul penalty
+      // (Three-foul event with -16 will be added in _finalizeInning)
+      if (!willTriggerThreeFouls) {
+        eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
+      }
 
-      // Check if this will be the 3rd foul AFTER applying the foul logic
-      // The foul tracker will handle incrementing/resetting based on ballsPocketed
-      // We need to check BEFORE calling applyNormalFoul in _finalizeInning
-      // For now, we'll determine if 3-foul penalty applies based on current count + foul type
-      // This check will be properly done in _finalizeInning where we have all the data
+      // The actual 3-foul logic and -16 event is handled in _finalizeInning
     }
 
     // TRACK SAFE
@@ -593,8 +625,12 @@ class GameState extends ChangeNotifier {
           currentPlayerIndex = selectedIndex; // Set to new player
           players[currentPlayerIndex].isActive = true;
           
+          // Permanently disable break fouls when player switches after break foul
+          breakFoulStillAvailable = false;
+          
           _logAction('Decision: ${currentPlayer.name} will break');
       } else {
+          // Same player re-breaks, keep break fouls available
           _logAction('Decision: ${currentPlayer.name} re-breaks');
       }
       
@@ -779,16 +815,16 @@ class GameState extends ChangeNotifier {
     player.score += totalInningPoints;
     player.lastPoints = totalInningPoints;
     player.lastRun = totalInningPoints; // Persist for "LR" display
-    debugPrint('DEBUG: _finalizeInning - Total: $totalInningPoints, lastRun Set To: ${player.lastRun}, currentRun before: ${player.currentRun}');
+    debugPrint('DEBUG: _finalizeInning - Total: $totalInningPoints, lastRun Set To: ${player.lastRun}, currentRun: ${player.currentRun}');
     player.updateCount++;
     
-    // Update current run
-    if (totalInningPoints > 0) {
-      player.currentRun += totalInningPoints;
-      if (player.currentRun > player.highestRun) {
-        player.highestRun = player.currentRun;
-      }
+    // NOTE: currentRun is now updated in real-time via addInningPoints()
+    // NOT here at finalization to avoid double-counting
+    // Only update highestRun if currentRun exceeded it
+    if (player.currentRun > player.highestRun) {
+      player.highestRun = player.currentRun;
     }
+    
     
     // Generate notation
     String notation = _generateInningNotation(player);
@@ -809,6 +845,12 @@ class GameState extends ChangeNotifier {
 
   // Helper to calculate the REAL-TIME net score of the current inning
   // Used for the "LR" box to show "15 + 14 - 1 = 28"
+  // ═══════════════════════════════════════════════════════════════
+  // CRITICAL: LAST RUN (LR) DISPLAY LOGIC - DO NOT MODIFY
+  // This method is called by PlayerPlaque for real-time LR display
+  // Breaking this will cause LR to show +0 instead of actual values
+  // Last broken: 2026-01-08 (missing foul penalties)
+  // ═══════════════════════════════════════════════════════════════
   int getDynamicInningScore(Player player) {
      // Base Points (Current Rack + Previous Racks in this inning)
      int total = player.inningPoints + player.inningHistory.fold(0, (prev, element) => prev + element);
@@ -818,10 +860,16 @@ class GameState extends ChangeNotifier {
        total = (total * player.handicapMultiplier).round();
      }
      
-     // Apply PENDING foul penalties (if currently selected but not yet finalized)
-     // Only applies if the player is currently taking their turn (isActive)
+     // CRITICAL: Apply PENDING foul penalties (must include or LR shows +0)
+     // This shows the NET score during active play before finalization
+     int penalty = 0;
+     if (player.inningHasBreakFoul) {
+       penalty = -2; // Break foul penalty
+     } else if (player.inningHasFoul) {
+       penalty = -1; // Normal foul penalty
+     }
      
-     return total;
+     return total + penalty;
   }
   
   // Generate score card notation for an inning (Canonical V2 format)
@@ -879,40 +927,47 @@ class GameState extends ChangeNotifier {
   }
 
   void _switchPlayer() {
-    // 1. Capture references before switching logical index
-    final oldPlayer = currentPlayer;
-    final newPlayerIndex = 1 - currentPlayerIndex;
-    final newPlayer = players[newPlayerIndex];
+  // 1. Capture references before switching logical index
+  final oldPlayer = currentPlayer;
+  final newPlayerIndex = 1 - currentPlayerIndex;
+  final newPlayer = players[newPlayerIndex];
 
-    // 2. Finalize inning (uses current/old player)
-    _finalizeInning(oldPlayer);
-    
-    // 3. Set lastRun from currentRun BEFORE incrementInning resets it to 0
-    //    This preserves the run value for the LR badge display
-    oldPlayer.lastRun = oldPlayer.currentRun;
-    
-    oldPlayer.incrementInning();
-    
-    // 4. Switch logical control immediately
-    currentPlayerIndex = newPlayerIndex;
-    
-    // 5. Delayed Visual Switch (Active State)
-    // Keep oldPlayer.isActive = true during the delay so they stay "lit"
-    // while the LR badge animates.
-    Future.delayed(const Duration(milliseconds: 800), () {
-      oldPlayer.isActive = false;
-      newPlayer.isActive = true;
-      notifyListeners();
-    });
-
-    // Check for 2-Foul Warning upon entering turn (Logical check on new player)
-    if (foulTracker.threeFoulRuleEnabled &&
-        newPlayer.consecutiveFouls == 2) {
-      eventQueue.add(TwoFoulsWarningEvent());
-    }
-    
-    notifyListeners();
+  // 2. Finalize inning (uses current/old player)
+  //    This sets lastRun and adds to score
+  _finalizeInning(oldPlayer);
+  
+  debugPrint('DEBUG _switchPlayer: ${oldPlayer.name} lastRun=${oldPlayer.lastRun} currentRun=${oldPlayer.currentRun}');
+  
+  // 3. Reset for next inning (currentRun = 0)
+  oldPlayer.incrementInning();
+  
+  debugPrint('DEBUG _switchPlayer: After incrementInning currentRun=${oldPlayer.currentRun}');
+  
+  // 4. Switch logical control immediately
+  currentPlayerIndex = newPlayerIndex;
+  
+  // 5. Permanently disable break fouls when player switches during normal play
+  if (breakFoulStillAvailable) {
+    breakFoulStillAvailable = false;
   }
+  
+  // 6. Delayed Visual Switch (Active State)
+  // Keep oldPlayer.isActive = true during the delay so they stay "lit"
+  // while the LR badge animates with the CORRECT lastRun value
+  Future.delayed(const Duration(milliseconds: 800), () {
+    oldPlayer.isActive = false;
+    newPlayer.isActive = true;
+    notifyListeners();
+  });
+
+  // Check for 2-Foul Warning upon entering turn (Logical check on new player)
+  if (foulTracker.threeFoulRuleEnabled &&
+      newPlayer.consecutiveFouls == 2) {
+    eventQueue.add(TwoFoulsWarningEvent());
+  }
+  
+  notifyListeners();
+}
 
   // Method to consume events (UI calls this)
   List<GameEvent> consumeEvents() {
@@ -995,6 +1050,8 @@ class GameState extends ChangeNotifier {
     // We do NOT clear undo stack, so reset can be undone!
     resetBreakFoulError();
     inBreakSequence = true; // Reset Break Sequence Logic
+    breakingPlayerIndex = null; // Reset breaking player tracking
+    breakFoulStillAvailable = true; // Re-enable break fouls for new game
     notifyListeners();
   }
 
@@ -1034,6 +1091,8 @@ class GameSnapshot implements UndoState {
   final List<InningRecord> inningRecords; // NEW: For score card
   final String breakFoulHintMessage;
   final bool inBreakSequence;
+  final int? breakingPlayerIndex; // Break foul eligibility tracking
+  final bool breakFoulStillAvailable; // Break foul eligibility tracking
   final int elapsedDurationInSeconds;
 
   GameSnapshot.fromState(GameState state)
@@ -1050,6 +1109,8 @@ class GameSnapshot implements UndoState {
         inningRecords = List.from(state.inningRecords),
         breakFoulHintMessage = state.breakFoulHintMessage,
         inBreakSequence = state.inBreakSequence,
+        breakingPlayerIndex = state.breakingPlayerIndex,
+        breakFoulStillAvailable = state.breakFoulStillAvailable,
         elapsedDurationInSeconds = state.elapsedDuration.inSeconds;
 
   GameSnapshot.fromJson(Map<String, dynamic> json)
@@ -1072,6 +1133,8 @@ class GameSnapshot implements UndoState {
             .toList(),
         breakFoulHintMessage = json['breakFoulHintMessage'] as String,
         inBreakSequence = json['inBreakSequence'] as bool? ?? true,
+        breakingPlayerIndex = json['breakingPlayerIndex'] as int?,
+        breakFoulStillAvailable = json['breakFoulStillAvailable'] as bool? ?? true,
         elapsedDurationInSeconds =
             json['elapsedDurationInSeconds'] as int? ?? 0;
 
@@ -1089,6 +1152,8 @@ class GameSnapshot implements UndoState {
         'inningRecords': inningRecords.map((r) => r.toJson()).toList(),
         'breakFoulHintMessage': breakFoulHintMessage,
         'inBreakSequence': inBreakSequence,
+        'breakingPlayerIndex': breakingPlayerIndex,
+        'breakFoulStillAvailable': breakFoulStillAvailable,
         'elapsedDurationInSeconds': elapsedDurationInSeconds,
       };
 
@@ -1107,6 +1172,8 @@ class GameSnapshot implements UndoState {
     state.lastAction = lastAction;
     state.showThreeFoulPopup = showThreeFoulPopup;
     state.inBreakSequence = inBreakSequence;
+    state.breakingPlayerIndex = breakingPlayerIndex;
+    state.breakFoulStillAvailable = breakFoulStillAvailable;
     state.foulMode = foulMode;
     state.matchLog = List.from(matchLog);
     state.inningRecords = List.from(inningRecords);

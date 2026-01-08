@@ -26,34 +26,36 @@ void main() {
       
       // made = 15-10 = 5 → +5, inning ends
       expect(gameState.players[0].score, 5);
-      expect(gameState.players[0].isActive, false); // Turn should have ended
-      expect(gameState.players[1].isActive, true);
+      // Check logical player switch (currentPlayerIndex updates immediately)
+      expect(gameState.currentPlayerIndex, 1); // Should be Player 2's turn
     });
 
     test('TV2 - Re-rack continuation then end', () {
       // Tokens: R1 R12
       gameState.onBallTapped(1); // Re-rack trigger
-      expect(gameState.players[0].isActive, true); // Turn continues
+      expect(gameState.currentPlayerIndex, 0); // Turn continues (still Player 1)
+      gameState.finalizeReRack(); // Reset rack to 15 balls (simulates UI callback)
       
       gameState.onBallTapped(12); // End with R12
       
       // R1: made=14 → +14, R12: made=3 → +3
       // Total: +17
       expect(gameState.players[0].score, 17);
-      expect(gameState.players[0].isActive, false);
+      expect(gameState.currentPlayerIndex, 1); // Turn ended, switched to Player 2
     });
 
     test('TV3 - Double-sack continuation then end', () {
       // Tokens: R0 R14
       gameState.onDoubleSack(); // R0 (double sack)
-      expect(gameState.players[0].isActive, true); // Turn continues
+      expect(gameState.currentPlayerIndex, 0); // Turn continues (still Player 1)
+      gameState.finalizeReRack(); // Reset rack to 15 balls (simulates UI callback)
       
       gameState.onBallTapped(14); // End with R14
       
       // R0: made=15 → +15, R14: made=1 → +1
       // Total: +16
       expect(gameState.players[0].score, 16);
-      expect(gameState.players[0].isActive, false);
+      expect(gameState.currentPlayerIndex, 1); // Turn ended, switched to Player 2
     });
 
     test('TV4 - Foul only', () {
@@ -174,6 +176,128 @@ void main() {
       // Expected behavior per new requirement:
       expect(penalty, -1);
       expect(player.consecutiveFouls, 1); // Should be 1, currently failing (is 0)
+    });
+  });
+
+  group('Break Foul Restrictions Tests', () {
+    late GameState gameState;
+
+    setUp(() {
+      final settings = GameSettings(
+        player1Name: 'Player 1',
+        player2Name: 'Player 2',
+        raceToScore: 100,
+        player1Handicap: 0,
+        player2Handicap: 0,
+        player1HandicapMultiplier: 1.0,
+        player2HandicapMultiplier: 1.0,
+        threeFoulRuleEnabled: true,
+      );
+      gameState = GameState(settings: settings);
+    });
+
+    test('BF1 - Break foul available at game start', () {
+      // At the very start of the game, break fouls should be available
+      expect(gameState.canBreakFoul, true);
+      expect(gameState.breakingPlayerIndex, null);
+      expect(gameState.breakFoulStillAvailable, true);
+    });
+
+    test('BF2 - Break foul unavailable after any ball is potted', () {
+      // First action: pot some balls (not using break foul)
+      gameState.onBallTapped(10); // Pots 5 balls
+      
+      // Break fouls should now be permanently disabled
+      expect(gameState.canBreakFoul, false);
+      expect(gameState.breakFoulStillAvailable, false);
+      expect(gameState.breakingPlayerIndex, 0); // Player 1 was the breaking player
+    });
+
+    test('BF3 - Break foul unavailable after player switch', () {
+      // Player 1 pots a ball and turn ends
+      gameState.onBallTapped(14); // Pot 1 ball, turn ends
+      
+      // Player should have switched
+      expect(gameState.currentPlayerIndex, 1); // Should be Player 2
+      
+      // Break fouls should be disabled
+      expect(gameState.canBreakFoul, false);
+      expect(gameState.breakFoulStillAvailable, false);
+    });
+
+    test('BF4 - Only breaking player can use break fouls', () {
+      // Simulate Player 2 being the current player from start
+      // (This would happen if they won a coin toss or similar)
+      gameState.currentPlayerIndex = 1;
+      gameState.players[0].isActive = false;
+      gameState.players[1].isActive = true;
+      
+      // Set Player 1 as the breaking player (simulating previous state)
+      gameState.breakingPlayerIndex = 0;
+      
+      // Player 2 should not be able to use break fouls
+      expect(gameState.canBreakFoul, false);
+    });
+
+    test('BF5 - Break foul still available if breaking player re-breaks', () {
+      // Simulate a break foul where same player re-breaks
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15); // Break foul
+      
+      // Choose same player to re-break (Player 1, index 0)
+      gameState.handleBreakFoulDecision(0);
+      
+      // Break fouls should still be available
+      expect(gameState.canBreakFoul, true);
+      expect(gameState.breakFoulStillAvailable, true);
+      expect(gameState.inBreakSequence, true);
+    });
+
+    test('BF6 - Break foul disabled when different player breaks after break foul', () {
+      // Simulate a break foul where different player breaks
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15); // Break foul
+      
+      // Choose different player to break (Player 2, index 1)
+      gameState.handleBreakFoulDecision(1);
+      
+      // Break fouls should be permanently disabled
+      expect(gameState.canBreakFoul, false);
+      expect(gameState.breakFoulStillAvailable, false);
+      expect(gameState.currentPlayerIndex, 1);
+    });
+
+    test('BF7 - Reset game re-enables break fouls', () {
+      // Disable break fouls by potting a ball
+      gameState.onBallTapped(10);
+      expect(gameState.canBreakFoul, false);
+      
+      // Reset the game
+      gameState.resetGame();
+      
+      // Break fouls should be available again
+      expect(gameState.canBreakFoul, true);
+      expect(gameState.breakingPlayerIndex, null);
+      expect(gameState.breakFoulStillAvailable, true);
+      expect(gameState.inBreakSequence, true);
+    });
+
+    test('BF8 - Multiple break fouls by same player before potting balls', () {
+      // First break foul
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15);
+      gameState.handleBreakFoulDecision(0); // Same player re-breaks
+      
+      expect(gameState.canBreakFoul, true);
+      
+      // Second break foul
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15);
+      gameState.handleBreakFoulDecision(0); // Same player re-breaks again
+      
+      // Should still be available
+      expect(gameState.canBreakFoul, true);
+      expect(gameState.breakFoulStillAvailable, true);
     });
   });
 }

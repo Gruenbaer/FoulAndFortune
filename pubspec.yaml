@@ -1,7 +1,7 @@
 name: foulandfortune
 description: "Foul & Fortune: Straight Pool Scoring App"
 publish_to: 'none'
-version: 4.0.0+24
+version: 4.0.1+25
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -60,11 +60,10 @@ flutter:
 
 
 
-flutter_icons:
-  android: "launcher_icon"
+flutter_launcher_icons:
+  android: true
   ios: true
-  image_path: "assets/icon/app_icon_safe_zone.png"
+  image_path: "assets/icon/app_icon.png"
+  # No adaptive icon config - use the full image as-is
   min_sdk_android: 21
-  adaptive_icon_background: "assets/icon/app_icon_safe_zone.png"
-  adaptive_icon_foreground: "assets/icon/transparent_pixel.png"
 
