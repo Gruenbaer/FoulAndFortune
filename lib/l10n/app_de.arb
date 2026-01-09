@@ -125,7 +125,7 @@
   "exitGameMessage": "Spielfortschritt geht verloren. Sind Sie sicher?",
   "restartGame": "Spiel neustarten?",
   "restartGameMessage": "Dies setzt alle Punkte und Verlauf zurück. Sind Sie sicher?",
-  "gameRules": "Voreinstellungen",
+  "gameRules": "Spielregeln",
   "details": "Details",
   "undo": "Rückgängig",
   "redo": "Wiederholen",
