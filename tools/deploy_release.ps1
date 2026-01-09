@@ -52,18 +52,9 @@ $commits = git log --oneline --no-merges "$lastTag..HEAD" | ForEach-Object { "- 
 Write-Host "   Changes since $lastTag :"
 $commits | ForEach-Object { Write-Host "   $_" -ForegroundColor Gray }
 
-Write-Host "`nEdit Changelog (Press Enter to keep, type 'skip' to empty):"
-$customNotes = Read-Host "   Summary/Highlighted Features"
-
-if ($customNotes -eq "") {
-    $releaseNotes = $commits -join "`n"
-}
-elseif ($customNotes -eq "skip") {
-    $releaseNotes = ""
-}
-else {
-    $releaseNotes = "$customNotes`n`nDetails:`n" + ($commits -join "`n")
-}
+# Auto-accept generated changelog
+Write-Host "`nUsing auto-generated changelog" -ForegroundColor Green
+$releaseNotes = $commits -join "`n"
 
 # 4. Build APK
 Write-Host "Building APK (Release Mode)..." -ForegroundColor Cyan
@@ -104,28 +95,34 @@ Write-Host "Release v$version Published!" -ForegroundColor Green
 
 # 6. Messaging Notifications
 Write-Host "Select platforms to announce release:" -ForegroundColor Cyan
-Write-Host "1) WhatsApp ONLY (Default)"
-Write-Host "2) Telegram"
+Write-Host "1) WhatsApp"
+Write-Host "2) Telegram (Default)"
 Write-Host "3) Signal"
 Write-Host "4) All of the above"
-$platformChoice = Read-Host "Choice [1]"
-if ($platformChoice -eq "") { $platformChoice = "1" }
+$platformChoice = Read-Host "Choice [2]"
+if ($platformChoice -eq "") { $platformChoice = "2" }
 
 $repoUrl = "https://github.com/Gruenbaer/141fortune"
 $downloadUrl = "$repoUrl/releases/download/v$version/$versionedApkName"
 
-$notesText = "See GitHub for details"
-if ($customNotes) {
-    $notesText = $customNotes
+# Extract first commit message as feature highlight
+$firstCommit = $commits | Select-Object -First 1
+if ($firstCommit) {
+    # Remove leading "- " and commit hash, keep just the message
+    $notesText = $firstCommit -replace '^- [a-f0-9]+ ', ''
+} else {
+    $notesText = "Bug fixes and improvements"
 }
 
 # --- WhatsApp ---
 if ($platformChoice -match "1|4") {
     Write-Host "Preparing WhatsApp..." -ForegroundColor Cyan
-    $waMessage = "*Fortune 14/2 Update v$version is live!*`n`n"
-    $waMessage += "*Whats New:*`n"
-    $waMessage += "$notesText`n`n"
-    $waMessage += "*Download:* $downloadUrl"
+    # Use simple formatting compatible with both WhatsApp and Telegram
+    $waMessage = "🎱 Foul & Fortune Update v$version ist da!`n`n"
+    $waMessage += "Was ist neu:`n"
+    $waMessage += "• $notesText`n`n"
+    $waMessage += "Download: $downloadUrl`n`n"
+    $waMessage += "Viel Spaß! 🎯"
 
     $encodedWaMsg = [Uri]::EscapeDataString($waMessage)
     $waUrl = "whatsapp://send?text=$encodedWaMsg"
@@ -136,10 +133,12 @@ if ($platformChoice -match "1|4") {
 # --- Telegram ---
 if ($platformChoice -match "2|4") {
     Write-Host "Preparing Telegram..." -ForegroundColor Cyan
-    $tgMessage = "Fortune 14/2 Update v$version is live!`n`n"
-    $tgMessage += "Whats New:`n"
-    $tgMessage += "$notesText"
-    # Telegram 'text' parameter is the message. 'url' is the preview link.
+    # Use same formatting as WhatsApp for consistency
+    $tgMessage = "🎱 Foul & Fortune Update v$version ist da!`n`n"
+    $tgMessage += "Was ist neu:`n"
+    $tgMessage += "• $notesText`n`n"
+    $tgMessage += "Download: $downloadUrl`n`n"
+    $tgMessage += "Viel Spaß! 🎯"
     
     $encodedTgMsg = [Uri]::EscapeDataString($tgMessage)
     $encodedUrl = [Uri]::EscapeDataString($downloadUrl)
