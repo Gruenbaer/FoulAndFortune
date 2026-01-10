@@ -1,6 +1,12 @@
 # Deploy Release Script for Fortune 14/2
 # Automates: Build APK -> GitHub Release -> WhatsApp Notification
 
+param (
+    [string]$Summary = "",
+    [string]$Platform = "1",  # 1=WhatsApp, 2=Telegram, 3=Signal, 4=All
+    [switch]$Force = $false   # Skip confirmation if tag exists
+)
+
 $ErrorActionPreference = "Stop"
 
 # Define Flutter Path (Using Puro first, fallback to standard Flutter)
@@ -35,8 +41,10 @@ Write-Host "   Detected Version: $version" -ForegroundColor Green
 $tagExists = git tag -l "v$version"
 if ($tagExists) {
     Write-Warning "Tag v$version already exists!"
-    $confirm = Read-Host "Continue anyway? (y/n)"
-    if ($confirm -ne 'y') { exit }
+    if (-not $Force) {
+        $confirm = Read-Host "Continue anyway? (y/n)"
+        if ($confirm -ne 'y') { exit }
+    }
 }
 
 # 3. Generate Changelog
@@ -52,8 +60,14 @@ $commits = git log --oneline --no-merges "$lastTag..HEAD" | ForEach-Object { "- 
 Write-Host "   Changes since $lastTag :"
 $commits | ForEach-Object { Write-Host "   $_" -ForegroundColor Gray }
 
-Write-Host "`nEdit Changelog (Press Enter to keep, type 'skip' to empty):"
-$customNotes = Read-Host "   Summary/Highlighted Features"
+$customNotes = ""
+if ($Summary -ne "") {
+    $customNotes = $Summary
+}
+else {
+    Write-Host "`nEdit Changelog (Press Enter to keep, type 'skip' to empty):"
+    $customNotes = Read-Host "   Summary/Highlighted Features"
+}
 
 if ($customNotes -eq "") {
     $releaseNotes = $commits -join "`n"
@@ -103,13 +117,19 @@ if ($LASTEXITCODE -ne 0) { throw "GitHub Release Failed" }
 Write-Host "Release v$version Published!" -ForegroundColor Green
 
 # 6. Messaging Notifications
-Write-Host "Select platforms to announce release:" -ForegroundColor Cyan
-Write-Host "1) WhatsApp ONLY (Default)"
-Write-Host "2) Telegram"
-Write-Host "3) Signal"
-Write-Host "4) All of the above"
-$platformChoice = Read-Host "Choice [1]"
-if ($platformChoice -eq "") { $platformChoice = "1" }
+if ($Summary -ne "") {
+    # If running with summary (automated/CLI), use passed Parameter without prompt
+    $platformChoice = $Platform
+}
+else {
+    Write-Host "Select platforms to announce release:" -ForegroundColor Cyan
+    Write-Host "1) WhatsApp ONLY (Default)"
+    Write-Host "2) Telegram"
+    Write-Host "3) Signal"
+    Write-Host "4) All of the above"
+    $platformChoice = Read-Host "Choice [1]"
+    if ($platformChoice -eq "") { $platformChoice = "1" }
+}
 
 $repoUrl = "https://github.com/Gruenbaer/141fortune"
 $downloadUrl = "$repoUrl/releases/download/v$version/$versionedApkName"
