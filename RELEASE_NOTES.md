@@ -1,3 +1,25 @@
+### v4.0.2 - Stability & Scoring Fixes 🐞
+
+Critical stability update that fixes scoring bugs and crashes.
+
+*   **Scoring Fixes:** Fixed a bug that could double-count points when winning.
+*   **Victory Screen:** Fixed a crash/infinite loop when undoing a winning shot.
+*   **Game Rules:** corrected "Double Sack" scoring logic and disallowed illegal moves (like fouling while tapping the white ball).
+*   **Polish:** Better "Last Run" display and clearer warnings for illegal moves.
+*   **Touch Blocking:** Prevents accidental double-taps during animations.
+
+***
+
+### v4.0.0 - Canonical Spec Implementation 📜
+
+Major milestone: The game now strictly follows the "Canonical Specification" for 14.1 Straight Pool.
+
+*   **Remaining-Count Model:** Scoring is now mathematically rigorous based on balls remaining.
+*   **Unit Tests:** Comprehensive test suite verifies standard scoring and edge cases.
+*   **Code Freeze:** Core logic is now locked for stability.
+
+***
+
 ### v3.9.3 - Notation & Logic Refinement 🔧
 
 Critical fixes for game flow and major enhancements to the score card notation.
