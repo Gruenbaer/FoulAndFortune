@@ -592,4 +592,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String migrationProgressText(int current, int total) {
     return 'Migrating $current of $total games...';
   }
+
+  @override
+  String get actionRestrictedTitle => 'Action Restricted';
+
+  @override
+  String get terminatorExclusionMessage =>
+      'Safe/Foul ends the inning; re-rack actions are disabled.';
 }

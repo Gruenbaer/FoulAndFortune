@@ -477,5 +477,67 @@ class GhibliFramePainter extends CustomPainter {
   }
 }
 
+class GameAlertDialog extends StatelessWidget {
+  final String title;
+  final Widget content;
+  final List<Widget> actions;
+
+  const GameAlertDialog({
+    super.key,
+    required this.title,
+    required this.content,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = FortuneColors.of(context);
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      backgroundColor: colors.backgroundCard,
+      title: Text(title, style: TextStyle(color: colors.primary)),
+      content: DefaultTextStyle(
+        style: theme.textTheme.bodyMedium?.copyWith(color: colors.textMain) ?? 
+               TextStyle(color: colors.textMain),
+        child: content,
+      ),
+      actions: actions,
+    );
+  }
+}
+
+class GuardedIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final bool isGuarded;
+  final String? tooltip;
+  final Color? color;
+  final List<BoxShadow>? shadows;
+
+  const GuardedIconButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.isGuarded = false,
+    this.tooltip,
+    this.color,
+    this.shadows,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        icon,
+        shadows: shadows,
+      ),
+      color: color,
+      tooltip: tooltip,
+      onPressed: isGuarded ? null : onPressed,
+    );
+  }
+}
+
 
 

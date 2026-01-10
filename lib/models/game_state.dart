@@ -441,38 +441,14 @@ class GameState extends ChangeNotifier {
     debugPrint('DEBUG: onBallTapped - Check FoulMode: $currentFoulMode');
     final currentSafeMode = isSafeMode;
     
-    // VALIDATION: Check for illegal move combinations
-    if (currentFoulMode == FoulMode.normal) {
-      // "The Lone Ranger Foul": Cannot foul and leave 1 ball
-      if (ballNumber == 1) {
-        debugPrint('ERROR: Illegal move - cannot foul and tap ball 1');
-        eventQueue.add(WarningEvent(
-          'illegalMoveTitle',
-          'cannotFoulAndLeave1Ball'
-        ));
-        // Reset state and return early
-        foulMode = FoulMode.none;
-        notifyListeners();
-        return;
-      }
-      // "The Penalized Perfection": Cannot foul and clear the table
-      if (ballNumber == 0) {
-        debugPrint('ERROR: Illegal move - cannot foul and tap white ball (0)');
-        eventQueue.add(WarningEvent(
-          'illegalMoveTitle',
-          'cannotFoulAndDoubleSack'
-        ));
-        // Reset state and return early
-        foulMode = FoulMode.none;
-        notifyListeners();
-        return;
-      }
-    }
+    // VALIDATION: Strict Mutual Exclusion (Spec §7.3)
+    if (!_validateInteraction(ballNumber)) return;
     
-    // Reset temporary modes
+    // Reset temporary modes (Regular behavior for valid taps 2-15)
     foulMode = FoulMode.none;
-    isSafeMode = false;
     resetBreakFoulError();
+    // Safety clear: if we tapped 2-15, safe mode naturally clears (statistical only)
+    isSafeMode = false;
 
     // Calculate basic data
     int currentBallCount = activeBalls.length;
@@ -651,6 +627,23 @@ class GameState extends ChangeNotifier {
     _resetRack();
   }
 
+  // Helper to validate interactions against exclusion rules
+  bool _validateInteraction(int ballNumber) {
+    // Continuation actions (0, 1) are disabled if ANY Terminator (Safe, Foul, Break Foul) is active.
+    bool termModeActive = isSafeMode || foulMode != FoulMode.none;
+    if (termModeActive && (ballNumber == 0 || ballNumber == 1)) {
+        debugPrint('ERROR: Mutual Exclusion - Cannot tap 0/1 during Safe/Foul');
+        eventQueue.add(WarningEvent(
+          'actionRestrictedTitle', 
+          'terminatorExclusionMessage' 
+        ));
+        // Do NOT auto-clear modes. Just reject the action.
+        notifyListeners();
+        return false;
+    }
+    return true;
+  }
+
   void onDoubleSack() {
     _pushState();
     if (!gameStarted) {
@@ -659,21 +652,12 @@ class GameState extends ChangeNotifier {
     }
 
     final currentFoulMode = foulMode;
-    
-    // VALIDATION: "The Penalized Perfection" - Cannot foul and clear the table
-    if (currentFoulMode == FoulMode.normal) {
-      debugPrint('ERROR: Illegal move - cannot foul and tap white ball (double sack)');
-      eventQueue.add(WarningEvent(
-        'illegalMoveTitle',
-        'cannotFoulAndDoubleSack'
-      ));
-      // Reset state and return early
-      foulMode = FoulMode.none;
-      notifyListeners();
-      return;
-    }
+
+    // VALIDATION: Strict Mutual Exclusion (Spec §7.3)
+    if (!_validateInteraction(0)) return;
     
     foulMode = FoulMode.none;
+    isSafeMode = false;
     resetBreakFoulError();
 
     // Award points based on actual balls remaining on table

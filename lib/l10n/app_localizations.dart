@@ -1219,6 +1219,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Migrating {current} of {total} games...'**
   String migrationProgressText(int current, int total);
+
+  /// No description provided for @actionRestrictedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Action Restricted'**
+  String get actionRestrictedTitle;
+
+  /// No description provided for @terminatorExclusionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe/Foul ends the inning; re-rack actions are disabled.'**
+  String get terminatorExclusionMessage;
 }
 
 class _AppLocalizationsDelegate

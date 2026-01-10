@@ -9,6 +9,7 @@ class GameControlButton extends StatelessWidget {
   final Color activeColor;
   final bool isActive;
   final bool isDestructive; // For Red styling
+  final bool isGuarded; // NEW: Prevent interaction if true (e.g. animation)
 
   const GameControlButton({
     super.key,
@@ -18,6 +19,7 @@ class GameControlButton extends StatelessWidget {
     required this.activeColor,
     this.isActive = false,
     this.isDestructive = false,
+    this.isGuarded = false,
   });
 
   @override
@@ -35,7 +37,7 @@ class GameControlButton extends StatelessWidget {
 
     return Expanded(
       child: GestureDetector(
-        onTap: onPressed,
+        onTap: isGuarded ? null : onPressed, // Disable if guarded
         child: Container(
           height: 48, // Standard touch target
           decoration: BoxDecoration(

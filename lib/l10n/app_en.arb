@@ -213,5 +213,7 @@
       "current": { "type": "int" },
       "total": { "type": "int" }
     }
-  }
+  },
+  "actionRestrictedTitle": "Action Restricted",
+  "terminatorExclusionMessage": "Safe/Foul ends the inning; re-rack actions are disabled."
 }
