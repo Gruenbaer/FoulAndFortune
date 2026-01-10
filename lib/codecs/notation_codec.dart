@@ -131,6 +131,68 @@ class NotationCodec {
     return s;
   }
 
+  /// Format canonical notation for display (FF14_Annotated)
+  /// 
+  /// Implements Spec §9 Rendering Rule:
+  /// - If previous segment == 15 → rack delimiter ('|')
+  /// - Else → phase delimiter ('·')
+  static String formatForDisplay(String canonical) {
+    if (canonical.isEmpty) return '';
+
+    try {
+      // Parse first to get segments safely
+      final record = parse(canonical);
+      
+      // If only one segment, just return notation (normalized)
+      // Actually, we need to strip suffixes, format segments, re-add suffixes
+      // But we can reconstruct from segments
+      
+      if (record.segments.isEmpty) return canonical;
+
+      final buffer = StringBuffer();
+      
+      for (int i = 0; i < record.segments.length; i++) {
+        final segment = record.segments[i];
+        buffer.write(segment);
+
+        // Add separator if not the last segment
+        if (i < record.segments.length - 1) {
+          // Rule: If THIS segment is 15, use Rack Separator
+          if (segment == 15) {
+            buffer.write('|');
+          } else {
+            buffer.write('·');
+          }
+        }
+      }
+
+      // Add Suffixes
+      // We can extract suffixes from the original string or record properties
+      // Record properties are safer (foul/safe enum)
+      if (record.safe) buffer.write('S');
+      
+      switch (record.foul) {
+        case FoulType.breakFoul:
+          buffer.write('BF');
+          break;
+        case FoulType.threeFouls:
+          buffer.write('TF');
+          break; // Per spec: "TF is shown as only TF (-16)" - no need for extra logic here, Codec handles it
+        case FoulType.normal:
+          buffer.write('F');
+          break;
+        case FoulType.none:
+          break;
+      }
+
+      return buffer.toString();
+
+    } catch (e) {
+      // Fallback: return as-is (e.g. if invalid)
+      return canonical;
+    }
+  }
+
   // === Private Helpers ===
 
   /// Parse a validated canonical notation string

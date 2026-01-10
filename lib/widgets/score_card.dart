@@ -29,6 +29,75 @@ class ScoreCard extends StatelessWidget {
       }
       inningsByNumber[record.inning]![record.playerName] = record;
     }
+
+    // [NEW] Inject Active Inning Data (Real-time updates)
+    for (var player in [player1, player2]) {
+      // Check if player has active data for the CURRENT (unfinished) inning
+      // Conditions:
+      // 1. Has history segments (re-racks)
+      // 2. Has current points (inningPoints > 0)
+      // 3. Has pending flags (Foul, Safe, etc.)
+      bool hasActiveData = player.inningHistory.isNotEmpty || 
+                           player.inningPoints > 0 || 
+                           player.inningHasFoul || 
+                           player.inningHasBreakFoul || 
+                           player.inningHasSafe;
+
+      if (hasActiveData) {
+         // Determine Foul Type
+         FoulType currentFoul = FoulType.none;
+         if (player.inningHasBreakFoul) {
+           currentFoul = FoulType.breakFoul;
+         } else if (player.inningHasThreeFouls) { // Prioritize 3-Foul
+           currentFoul = FoulType.threeFouls;
+         } else if (player.inningHasFoul) {
+           currentFoul = FoulType.normal;
+         }
+
+         // Construct Notation Segments
+         // Combine history + current points
+         // NOTE: only add current points if > 0 OR if it's the only thing (to show '0'?) 
+         // Actually, standard practice: if 14(1) . 0 -> Show 14 . 0
+         List<int> liveSegments = [...player.inningHistory, player.inningPoints];
+         
+         // Create a temporary record
+         try {
+           final tempRecord = InningRecord(
+             inning: player.currentInning,
+             playerName: player.name,
+             notation: '', // Will start empty, serialize below
+             runningTotal: player.projectedScore, // Use projected score for live update
+             segments: liveSegments,
+             safe: player.inningHasSafe,
+             foul: currentFoul,
+           );
+           
+           // Generate the string using the Codec
+           String liveNotation = NotationCodec.serialize(tempRecord);
+           
+           // Re-create record with valid notation string
+           final finalRecord = InningRecord(
+             inning: tempRecord.inning,
+             playerName: tempRecord.playerName,
+             notation: liveNotation,
+             runningTotal: tempRecord.runningTotal,
+             segments: tempRecord.segments,
+             safe: tempRecord.safe,
+             foul: tempRecord.foul
+           );
+
+           // Inject into map (Ensure map exists for this inning)
+           if (!inningsByNumber.containsKey(player.currentInning)) {
+             inningsByNumber[player.currentInning] = {};
+           }
+           inningsByNumber[player.currentInning]![player.name] = finalRecord;
+
+         } catch (e) {
+           // Fallback if logic fails (e.g. valid codec error), just don't show live data
+           print('Error generating live notation: $e');
+         }
+      }
+    }
     
     // Determine max innings
     int maxInnings = player1.currentInning > player2.currentInning 
@@ -201,9 +270,12 @@ class ScoreCard extends StatelessWidget {
 
   Widget _buildNotationText(FortuneColors colors, String notation) {
       if (notation.isEmpty) return const SizedBox.shrink();
-      // No coloring, just plain text as requested (reverting previous change)
+      
+      // Format notation for display (Spec §9: Mixed Delimiters)
+      final displayNotation = NotationCodec.formatForDisplay(notation);
+      
       return Text(
-          notation, 
+          displayNotation, 
           style: TextStyle(color: colors.textMain, fontSize: 14, fontFamily: 'Arial'), 
           textAlign: TextAlign.center
       );
