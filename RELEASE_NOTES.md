@@ -1,3 +1,12 @@
+### v4.1.1 - Score & Timer Hotfix 🚑
+
+Quick fix for accurate victory details.
+
+*   **Fixed:** Victory screen now correctly includes the winning run in the final score (e.g., 112 instead of 98).
+*   **Fixed:** Game Duration timer now correctly resumes after loading a saved game.
+
+***
+
 ### v4.1.0 - Interactive & Responsive ⚡
 
 Significant upgrades to game interactivity and feedback.
