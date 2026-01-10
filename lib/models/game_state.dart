@@ -1003,13 +1003,13 @@ class GameState extends ChangeNotifier {
     for (var player in players) {
       // Check PROJECTED score (Current run + Banked) for immediate win
       if (player.projectedScore >= raceToScore && !gameOver) {
+        // CRITICAL: First finalize the inning to commit the winning run points to the player's total score.
+        // This ensures play.score matches the projectedScore and VictorySplash displays the correct total.
+        _finalizeInning(player);
+
         gameOver = true;
         winner = player;
         _stopTicker();
-        
-        // DO NOT call _finalizeInning here - it's already been called before this check
-        // and projectedScore already includes the winning points.
-        // Calling it again would double-add the points!
         
         _logAction('${player.name} WINS! 🎉');
         
@@ -1059,13 +1059,9 @@ class GameState extends ChangeNotifier {
     snapshot.restore(this);
 
     // Resume timer if game was in progress and we just loaded it
-    // But wait! snapshot restores 'gameStarted'.
-    // Should we auto-resume timer?
-    // Probably yes, but let's pause it initially to be safe?
-    // Or effectively "resume" the stopwatch if it was running?
-    // Since Stopwatch doesn't persist, we rely on 'elapsed' if we persisted it.
-    // Current implementation doesn't persist 'elapsed' yet.
-    // Let's add that to GameSnapshot first.
+    if (gameStarted && !gameOver && !_isPaused) {
+       startGameTimer();
+    }
     notifyListeners();
   }
 }
