@@ -395,13 +395,21 @@ class _GameEventOverlayState extends State<GameEventOverlay>
                                          _currentEvent is TwoFoulsWarningEvent ||
                                          _currentEvent is BreakFoulDecisionEvent;
                 
+                // User Request: Remove overlay blocking.
+                // We use IgnorePointer to let touches pass through to the game (which controls its own interactivity now).
                 return IgnorePointer(
-                  ignoring: !isInteractive,
-                  child: Opacity(
-                    opacity: _opacityAnimation.value,
-                    child: Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: _currentContent, // Display the content
+                  ignoring: true,
+                  child: Container(
+                    color: Colors.transparent, // Catches taps everywhere
+                    width: double.infinity,
+                    height: double.infinity,
+                    alignment: Alignment.center,
+                    child: Opacity(
+                      opacity: _opacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _scaleAnimation.value,
+                        child: _currentContent, // Display the content
+                      ),
                     ),
                   ),
                 );

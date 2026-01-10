@@ -65,13 +65,32 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late AnimationController _screenShakeController;
   late Animation<Offset> _screenShakeOffset;
 
-  // Serial Event Processing - REMOVED (Handled by GameEventOverlay)
+  // Input Locking (Prevent rapid taps breaking state)
+  bool _isInputLocked = false;
+  
+  // Victory State Tracking
+  bool _victoryShown = false;
 
-  // Overlay Entry for Penalty Animation
+  void _handleInteraction(VoidCallback action) {
+    if (_isInputLocked) return;
+    
+    setState(() {
+      _isInputLocked = true;
+    });
 
+    action();
 
-
-
+    // Lock for duration of typical animations (ball fade is 300ms, mostly)
+    // 500ms allows safe buffer for state updates
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isInputLocked = false;
+        });
+      }
+    });
+  }
+ 
   Future<void> _saveInProgressGame(GameState gameState) async {
     // Check if game is completed (score >= raceToScore)
     final p1 = gameState.players[0];
@@ -285,15 +304,62 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
 
-    // Helper functions for Drawer actions
+    // Watch for Game Over state
+    if (gameState.gameOver && gameState.winner != null) {
+      // Use PostFrameCallback to avoid setstate during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Ensure we haven't already shown the victory screen (avoid loop)
+        // Checking if already popped?
+        // Actually, check if we are already showing it?
+        // GameState.gameOver sticks to true.
+        // We need a local flag to know if we've handled it.
+        // Or check if the top route is VictorySplash?
+        // Using a local flag is safest.
+        if (!_victoryShown) {
+           _victoryShown = true;
+           // Reuse the Concede logic which saves and pushes splash
+           // But concede calls finalize, which is already done by checkWinCondition
+           // So we just call the UI part:
+           _saveCompletedGame(gameState);
+           Navigator.of(context).push(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => VictorySplash(
+                player1: gameState.players[0],
+                player2: gameState.players[1],
+                winner: gameState.winner!,
+                raceToScore: gameState.raceToScore,
+                inningRecords: gameState.inningRecords,
+                elapsedDuration: gameState.elapsedDuration,
+                onUndo: () {
+                   gameState.undo();
+                   _victoryShown = false; // Reset flag
+                   Navigator.of(context).pop(); 
+                },
+                onNewGame: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                onExit: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                 return FadeTransition(opacity: animation, child: child);
+              }
+            ),
+          );
+        }
+      });
+    } else {
+        // Reset flag if game is not over (e.g. undo happened)
+        _victoryShown = false;
+    }
     void showRestartConfirmation() {
       Navigator.pop(context); // Close drawer
       showZoomDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: colors.backgroundCard, // Ensure themed background
-          title: Text(l10n.restartGame, style: TextStyle(color: colors.primary)),
-          content: Text(l10n.restartGameMessage, style: TextStyle(color: colors.textMain)),
+        builder: (context) => GameAlertDialog(
+          title: l10n.restartGame,
+          content: Text(l10n.restartGameMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -304,7 +370,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 gameState.resetGame();
                 Navigator.pop(context);
               },
-              child: Text(l10n.restart, style: TextStyle(color: colors.danger)), // "Neu starten"
+              child: Text(l10n.restart, style: TextStyle(color: colors.danger)),
             ),
           ],
         ),
@@ -349,9 +415,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       Navigator.pop(context); // Close drawer
       showZoomDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: colors.backgroundCard,
-          title: Text(l10n.whoWonTitle, style: TextStyle(color: colors.primary)), // "Who won?"
+        builder: (context) => GameAlertDialog(
+          title: l10n.whoWonTitle,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -386,8 +451,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       Navigator.pop(context); // Close drawer
       showZoomDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(l10n.gameRules),
+        builder: (context) => GameAlertDialog(
+          title: l10n.gameRules,
           content: SingleChildScrollView(
             child: Text(
               l10n.gameRulesContent,
@@ -408,8 +473,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         _screenShakeController.forward(from: 0.0);
         return true;
       },
-      child: Stack(
-      children: [
+      child: AbsorbPointer(
+        absorbing: _isInputLocked,
+        child: Stack(
+        children: [
         PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, result) async {
@@ -417,8 +484,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             final l10n = AppLocalizations.of(context);
             final shouldExit = await showZoomDialog<bool>(
               context: context,
-              builder: (context) => AlertDialog(
-                title: Text(l10n.exitGameTitle),
+              builder: (context) => GameAlertDialog(
+                title: l10n.exitGameTitle,
                 content: Text(l10n.exitGameMessage),
                 actions: [
                   TextButton(
@@ -522,37 +589,35 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     );
                   },
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.undo,
-                    shadows: colors.themeId == 'cyberpunk'
-                        ? [
-                            BoxShadow(
-                                color: colors.primary,
-                                blurRadius: 10,
-                                spreadRadius: 2),
-                          ]
-                        : [],
-                  ),
+                GuardedIconButton(
+                  icon: Icons.undo,
+                  shadows: colors.themeId == 'cyberpunk'
+                      ? [
+                          BoxShadow(
+                              color: colors.primary,
+                              blurRadius: 10,
+                              spreadRadius: 2),
+                        ]
+                      : [],
                   color: colors.primary,
                   tooltip: l10n.undo,
                   onPressed: gameState.canUndo ? gameState.undo : null,
+                  isGuarded: gameState.eventQueue.isNotEmpty,
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.redo,
-                    shadows: colors.themeId == 'cyberpunk'
-                        ? [
-                            BoxShadow(
-                                color: colors.primary,
-                                blurRadius: 10,
-                                spreadRadius: 2),
-                          ]
-                        : [],
-                  ),
+                GuardedIconButton(
+                  icon: Icons.redo,
+                  shadows: colors.themeId == 'cyberpunk'
+                      ? [
+                          BoxShadow(
+                              color: colors.primary,
+                              blurRadius: 10,
+                              spreadRadius: 2),
+                        ]
+                      : [],
                   color: colors.primary,
                   tooltip: l10n.redo,
                   onPressed: gameState.canRedo ? gameState.redo : null,
+                  isGuarded: gameState.eventQueue.isNotEmpty,
                 ),
               ],
             ),
@@ -962,7 +1027,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       : '-2'),
                               isActive: gameState.foulMode != FoulMode.none,
                               activeColor: colors.danger,
+                              isGuarded: gameState.eventQueue.isNotEmpty,
                               onPressed: () {
+                                
                                 // Cycle: None -> Normal -> Severe -> None
                                 FoulMode next;
                                 switch (gameState.foulMode) {
@@ -978,7 +1045,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                     next = FoulMode.none;
                                     break;
                                 }
-                                gameState.setFoulMode(next);
+                                _handleInteraction(() => gameState.setFoulMode(next));
                               },
                             ),
                             
@@ -989,10 +1056,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               text: 'SAFE',
                               isActive: gameState.isSafeMode,
                               activeColor: const Color(0xFF4CAF50), // Green for Safe
+                              isGuarded: gameState.eventQueue.isNotEmpty,
                               onPressed: gameState.gameOver
                                   ? () {}
                                   : () {
-                                      gameState.toggleSafeMode();
+                                      _handleInteraction(() => gameState.toggleSafeMode());
                                     },
                             ),
                             ],
@@ -1032,6 +1100,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         const GameEventOverlay(),
       ],
     ), // Close Stack
+    ), // Close AbsorbPointer
    ); // Close NotificationListener
   }
 
@@ -1079,6 +1148,33 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
 
 
+    // Helper to determine if a ball is interactive based on game state
+    bool canInteractWithBall(GameState state, int ballNumber) {
+      if (state.gameOver) return false;
+      if (state.eventQueue.isNotEmpty) return false; // Disable during animations
+
+      // 1. Terminating Actions (Safe, Foul, Break Foul) disable Continuation Actions (0, 1)
+      bool isTerminatorActive = state.isSafeMode || state.foulMode != FoulMode.none;
+      if (isTerminatorActive && (ballNumber == 0 || ballNumber == 1)) {
+        return false;
+      }
+
+      // 2. Break Foul Mode (Severe) disable everything except Ball 15
+      // (Note: Ball 0 and 1 are already caught by Terminator check above)
+      if (state.foulMode == FoulMode.severe && ballNumber != 15) {
+        return false;
+      }
+
+      // 3. Table Presence (for 1-15)
+      // Ball 0 (Double Sack) is virtual/always present unless cleared. 
+      // This check is usually done by caller for opacity, but for interactability:
+      if (ballNumber != 0 && !state.activeBalls.contains(ballNumber)) {
+        return false;
+      }
+
+      return true;
+    }
+
     // Helper to validate and handle taps
     void handleTap(int ballNumber) {
       // Disable all ball interactions if game is over
@@ -1103,9 +1199,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       // Ball 15 during Break Foul is processed normally, no special dialog needed
 
       if (ballNumber == 0) {
-        gameState.onDoubleSack();
+        _handleInteraction(() => gameState.onDoubleSack());
       } else {
-        gameState.onBallTapped(ballNumber);
+        _handleInteraction(() => gameState.onBallTapped(ballNumber));
       }
     }
 
@@ -1128,16 +1224,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   height: diameter,
                   child: Builder(
                     builder: (context) {
-                      // Opacity Logic:
-                      // 1. Not on table -> 0 (Invisible)
-                      // 2. On table but disabled (Break Foul Mode) -> 0.4 (Greyed Out)
-                      // 3. On table and active -> 1.0
+                      final int ballNum = rows[r][c];
+                      final bool isOnTable = gameState.activeBalls.contains(ballNum);
                       
-                      final bool isOnTable = gameState.activeBalls.contains(rows[r][c]);
-                      final bool isInteractable = !gameState.gameOver &&
-                          isOnTable &&
-                          gameState.eventQueue.isEmpty && // Disable during animations
-                          (gameState.foulMode != FoulMode.severe || rows[r][c] == 15);
+                      // Use centralized helper
+                      final bool isInteractable = canInteractWithBall(gameState, ballNum);
                       
                       final double targetOpacity = !isOnTable ? 0.15 : (isInteractable ? 1.0 : 0.5);
 
@@ -1159,25 +1250,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   (end - start))
                               .clamp(0.0, 1.0));
 
-                      // Combine opacities? No, BallButton handles its own opacity logic now.
-                      // But we need the enter animation fade too.
-                      // If BallButton opacity is 0 (invisible), animOpacity doesn't matter.
-                      // If BallButton is visible, we multiply/apply.
-                      // Actually, BallButton takes `opacity`.
-                      // AnimatedBuilder wraps it in Opacity?
-                      // The original code wrapped `child` in `Opacity(opacity: animOpacity)`.
-                      // So we have Outer Opacity (Animation) -> Inner Opacity (BallButton Logic).
-                      
                       return Opacity(
                         opacity: animOpacity,
                         child: child,
                       );
                     },
                     child: BallButton(
-                      ballNumber: rows[r][c],
+                      ballNumber: ballNum,
                       isActive: isInteractable,
                       opacity: targetOpacity, 
-                      onTap: () => handleTap(rows[r][c]),
+                      onTap: () => handleTap(ballNum),
                     ),
                   );
                 },
@@ -1199,8 +1281,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   height: diameter,
                     child: BallButton(
                     ballNumber: 0,
-                    isActive: !gameState.gameOver &&
-                        gameState.foulMode != FoulMode.severe,
+                    isActive: canInteractWithBall(gameState, 0),
                     // Cue Ball always visible if game not over, or handled by rack animation
                     // No separate opacity logic needed as it doesn't get "pocketed" in same way
                     onTap: () => handleTap(0),
