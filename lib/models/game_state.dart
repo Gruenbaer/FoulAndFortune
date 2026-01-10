@@ -702,20 +702,30 @@ class GameState extends ChangeNotifier {
                     : '';
     _logAction('${currentPlayer.name}: Double-sack! $ballsRemaining balls$foulText');
 
-    // CRITICAL: Finalize inning BEFORE checking win condition
-    // This transfers currentRun to score so victory screen shows correct final score
+    // Check win condition using PROJECTED score (Banked + Current Run)
+  bool projectedWin = currentPlayer.projectedScore >= raceToScore;
+  
+  if (projectedWin) {
+    // If winning, we MUST finalize to bake the points into the score
     _finalizeInning(currentPlayer);
     currentPlayer.incrementInning();
-
-    // Check win AFTER score is finalized
-    _checkWinCondition();
-
-    // Double Sack: Player continues turn (unless foul or game over)
-    // Turn ends if there was a foul
-    if (currentFoulMode != FoulMode.none && !gameOver) {
-      _switchPlayer(); // Only switch if game not over (already finalized above)
+    _checkWinCondition(); // Will detect win and set gameOver
+  } else if (currentFoulMode != FoulMode.none) {
+    // If fouled, we MUST finalize and switch
+    // Note: Double Sack + Foul is rare/illegal but handled here
+    _finalizeInning(currentPlayer);
+    currentPlayer.incrementInning();
+    _switchPlayer();
+  } else {
+    // CONTINUE TURN
+    // Do NOT finalize. Do NOT increment Inning.
+    // Allow points to keep accumulating in currentRun for notation "15⟲..."
+    
+    // Safety check: ensure game is not over from some side effect
+    if (!gameOver) {
+       // rack reset handled below
     }
-    // If no foul and game not over, player continues (inning stays open for next shot)
+  }
     
     // Explicitly Clear Balls BEFORE Re-Rack Animation
     // So balls disappear immediately when white is tapped

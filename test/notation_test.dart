@@ -99,6 +99,7 @@ void main() {
     // Wait. My onBallTapped logic for 0 DOES NOT add points if called directly?
     // onDoubleSack adds points manually.
     gameState.onDoubleSack();
+    gameState.finalizeReRack(); // Reset to 15 balls (simulating UI callback)
     
     // 2. Break (14 points) -> Adds 14 to history
     // Double sack resets balls to 15.
