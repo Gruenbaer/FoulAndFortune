@@ -1,3 +1,14 @@
+### v4.1.0 - Interactive & Responsive ⚡
+
+Significant upgrades to game interactivity and feedback.
+
+*   **Real-time Score Card:** The score card now updates instantly as you play the current inning, showing live points and symbols.
+*   **Refined Input Blocking:** Removed the "invisible wall" that blocked taps during animations. Now, only the control buttons themselves are safely disabled ensuring you can tap through splash screens if needed.
+*   **Mixed Notation:** The score card now supports mixed delimiters (`|` for racks, `·` for phases) for better readability.
+*   **Code Quality:** Massive refactoring of UI components (Standardized Dialogs & Buttons) and Logic (Centralized Validation).
+
+***
+
 ### v4.0.2 - Stability & Scoring Fixes 🐞
 
 Critical stability update that fixes scoring bugs and crashes.
