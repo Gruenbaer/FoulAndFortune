@@ -140,26 +140,58 @@ void main() {
       expect(player.score, -2); // -1 -1
     });
 
-    test('TV8 - Break fouls are separate (no 3-foul)', () {
-      // Tokens: BF | BF | BF
+    test('TV8a - Break fouls are separate (no 3-foul)', () {
+      // Tokens: BF
       final player = gameState.players[0];
       
-      // First break foul
-      player.score += gameState.foulTracker.applySevereFoul(player);
+      // Break Foul
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15);
+      
+      // Decision: Switch Player (Standard behavior)
+      gameState.handleBreakFoulDecision(1); // Switch to Player 2
+      
       expect(player.score, -2);
       expect(player.consecutiveFouls, 0); // BF does not affect streak
+      expect(gameState.currentPlayerIndex, 1); // Switched
+    });
+
+    test('TV8b - Stacked Break Fouls (Same Inning)', () {
+      // Tokens: BF | BF | BF (Same player re-breaks twice, then switches)
+      final player = gameState.players[0];
       
-      // Second break foul
-      player.score += gameState.foulTracker.applySevereFoul(player);
-      expect(player.score, -4);
+      // 1. First Break Foul
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15);
+      // Decision: Same Player Re-Breaks
+      gameState.handleBreakFoulDecision(0);
+      
+      // Score not finalized yet (still 0), but dynamic score shows penalty
+      expect(player.score, 0); 
+      expect(gameState.getDynamicInningScore(player), -2);
+      expect(player.inningBreakFoulCount, 1);
+      expect(gameState.currentPlayerIndex, 0); // Still Player 1
+      
+      // 2. Second Break Foul
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15);
+      // Decision: Same Player Re-Breaks
+      gameState.handleBreakFoulDecision(0);
+      
+      expect(gameState.getDynamicInningScore(player), -4);
+      expect(player.inningBreakFoulCount, 2);
+      expect(gameState.currentPlayerIndex, 0);
+      
+      // 3. Third Break Foul (followed by Switch)
+      gameState.setFoulMode(FoulMode.severe);
+      gameState.onBallTapped(15);
+      // Decision: Switch Player
+      gameState.handleBreakFoulDecision(1);
+      
+      // Now finalized
+      expect(player.score, -6); // -2 * 3
+      expect(gameState.currentPlayerIndex, 1); // Switch to Player 2
       expect(player.consecutiveFouls, 0);
-      
-      // Third break foul
-      player.score += gameState.foulTracker.applySevereFoul(player);
-      expect(player.score, -6);
-      expect(player.consecutiveFouls, 0);
-      
-      // No TF allowed/triggered
     });
     
     test('EDGE - Foul after points should start NEW foul streak', () {

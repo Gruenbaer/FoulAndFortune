@@ -59,7 +59,8 @@ If `foulStreak != 2`, reject `TF`.
 ### 3.4 Inning continuity rule (core)
 - **`R0` and `R1`** do not end the inning (player continues).
 - **`Rk` with `k ∈ {2..15}`** ends the inning (player stops), because the player explicitly chose a non-continuation remaining-count.
-- **`F`, `TF`, `S`, `BF`** always end the inning.
+- **`F`, `TF`, `S`** always end the inning.
+- **`BF`** ends the inning *unless* the same player re-breaks (stacking permitted).
 
 *(Your UI rule matches this exactly: the inning ends when the player taps a number different than white (0) or 1.)*
 
@@ -91,7 +92,8 @@ Update `rem` as described:
 - **`F`**: add −1 to totals; inning ends
 - **`TF`**: add −16 to totals; inning ends
 - **`S`**: add 0; inning ends
-- **`BF`**: add `breakFoulPenalty` (config; recommended default −2); inning ends
+- **`BF`**: add `breakFoulPenalty` (config; recommended default −2); inning ends *unless* re-breaking.
+  - If re-breaking, multiple `BF` tokens can exist in one inning (e.g. `14BF2` means 14 points, then 2 break fouls).
 
 ---
 
@@ -167,11 +169,14 @@ After `TF`: `foulStreak` resets to 0
 **Expected:** −1 +0 −1 = −2  
 Foul streak after `S` is 0
 
-### TV8 — Break fouls are separate (no 3-foul)
-**Tokens:** `BF | BF | BF`
-
-**Expected:** −2 −2 −2 = −6 (with default −2)  
+### TV8a — Break fouls are separate (no 3-foul)
+**Tokens:** `BF`
+**Expected:** -2
 No `TF` allowed/triggered.
+
+### TV8b — Stacked Break Fouls (Same Inning)
+**Tokens:** `BF BF BF` (Same player re-breaks twice, then switches)
+**Expected:** -6 for that inning context.
 
 ---
 
@@ -268,7 +273,10 @@ function applyToken(state, token, config) -> State:
   if token == BF:
     // break foul: separate from 3-foul system
     state.scoreTotal += config.breakFoulPenalty   // penalty is negative
-    state.inningActive = false
+    
+    // Check if re-breaking (meta-data or context required in real impl)
+    // If re-breaking: state.inningActive = true
+    // Else: state.inningActive = false
     return state
 ```
 

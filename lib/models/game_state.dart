@@ -458,10 +458,11 @@ class GameState extends ChangeNotifier {
     // --- CASE 1: BREAK FOUL (Severe) ---
     if (currentFoulMode == FoulMode.severe) {
       // Mark as break foul (-2 points)
-      currentPlayer.inningHasBreakFoul = true;
-      currentPlayer.setFoulPenalty(-2);
+      // Increment count (allow stacking)
+      currentPlayer.inningBreakFoulCount++;
+      currentPlayer.setFoulPenalty(currentPlayer.inningBreakFoulCount * -2);
       
-      _logAction('${currentPlayer.name}: Break Foul (-2 pts)');
+      _logAction('${currentPlayer.name}: Break Foul #${currentPlayer.inningBreakFoulCount} (-2 pts)');
       eventQueue.add(FoulEvent(currentPlayer, -2, FoulType.breakFoul));
 
       // Decision: Who breaks next?
@@ -475,12 +476,9 @@ class GameState extends ChangeNotifier {
         }
       ));
       
-      inBreakSequence = true;
-      _updateRackCount(15);
-      
-      // Finalize current inning immediately
-      _finalizeInning(currentPlayer);
-      currentPlayer.incrementInning();
+      // Do NOT finalize here! Wait for decision.
+      // If decision is "Re-Rack" (Same Player), we continue to stack.
+      // If decision is "Switch", we finalize then.
       
       _checkWinCondition();
       notifyListeners();
@@ -596,6 +594,11 @@ class GameState extends ChangeNotifier {
   void handleBreakFoulDecision(int selectedIndex) {
       // selectedIndex: 0 = Player 1, 1 = Player 2 (based on names array)
       if (selectedIndex != currentPlayerIndex) {
+          // SWITCH: Opponent chose to break
+          // Finalize the PREVIOUS player's inning (apply stacked penalties)
+          _finalizeInning(currentPlayer);
+          currentPlayer.incrementInning();
+          
           // Switch active player manually
           players[currentPlayerIndex].isActive = false;
           currentPlayerIndex = selectedIndex; // Set to new player
@@ -606,8 +609,9 @@ class GameState extends ChangeNotifier {
           
           _logAction('Decision: ${currentPlayer.name} will break');
       } else {
-          // Same player re-breaks, keep break fouls available
-          _logAction('Decision: ${currentPlayer.name} re-breaks');
+          // SAME PLAYER: Re-break (Stacking)
+          // Do NOT finalize. Keep inning open.
+          _logAction('Decision: ${currentPlayer.name} re-breaks (Inning Continues)');
       }
       
       inBreakSequence = true;
@@ -674,7 +678,10 @@ class GameState extends ChangeNotifier {
     if (currentFoulMode == FoulMode.normal) {
       currentPlayer.inningHasFoul = true;
     } else if (currentFoulMode == FoulMode.severe) {
-      currentPlayer.inningHasBreakFoul = true;
+       // On double-sack in severe mode? Logic excludes this in _validate, 
+       // but strictly speaking R0 is continuation.
+       // For now, assume R0 is not possible during BF check (covered by _validateInteraction)
+      currentPlayer.inningBreakFoulCount++;
     }
     
     // Mark as re-rack (double sack implies re-rack)
@@ -770,10 +777,16 @@ class GameState extends ChangeNotifier {
     
     // Apply foul penalties
     int foulPenalty = 0;
-    if (player.inningHasBreakFoul) {
-      // Break foul: -2 points, doesn't count toward 3-foul rule
-      foulPenalty = foulTracker.applySevereFoul(player);
-      totalInningPoints += foulPenalty; // foulPenalty is -2
+    if (player.inningBreakFoulCount > 0) {
+      // Break foul: -2 per instance
+      foulPenalty = player.inningBreakFoulCount * -2;
+      // Do NOT use applySevereFoul() from tracker if it only returns fixed -2, 
+      // OR update tracker. But easier to calc here.
+      // tracker.applySevereFoul() usually tracks count/history too?
+      // FoulTracker only tracks consecutive pure fouls. BF is separate.
+      // We should probably tell tracker about it for logging?
+      // Revisit if FoulTracker needs update. For now, calc penalty manually.
+      totalInningPoints += foulPenalty; 
     } else if (player.inningHasFoul) {
       // Normal foul: -1 or -16 (if 3rd consecutive)
       // Calculate total balls pocketed in this inning (pre-rerack + post-rerack)
@@ -860,8 +873,8 @@ class GameState extends ChangeNotifier {
      // CRITICAL: Apply PENDING foul penalties (must include or LR shows +0)
      // This shows the NET score during active play before finalization
      int penalty = 0;
-     if (player.inningHasBreakFoul) {
-       penalty = -2; // Break foul penalty
+     if (player.inningBreakFoulCount > 0) {
+       penalty = player.inningBreakFoulCount * -2; // Stacked BF penalty
      } else if (player.inningHasFoul) {
        penalty = -1; // Normal foul penalty
      }
@@ -899,7 +912,7 @@ class GameState extends ChangeNotifier {
     
     // 3. Determine foul type
     FoulType foulType;
-    if (player.inningHasBreakFoul) {
+    if (player.inningBreakFoulCount > 0) {
       foulType = FoulType.breakFoul;
     } else if (player.inningHasThreeFouls) {
       foulType = FoulType.threeFouls;
@@ -918,6 +931,7 @@ class GameState extends ChangeNotifier {
       segments: segments,
       safe: player.inningHasSafe,
       foul: foulType,
+      foulCount: player.inningBreakFoulCount, // Pass count to notation
     );
     
     return NotationCodec.serialize(record);

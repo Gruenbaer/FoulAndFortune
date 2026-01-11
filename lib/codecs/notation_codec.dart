@@ -10,7 +10,7 @@ class NotationCodec {
   
   /// Canonical regex for validation
   static final RegExp canonicalRegex = RegExp(
-    r'^(?:0|[1-9]\d*)(?:⟲(?:0|[1-9]\d*))*S?(?:BF|TF|F)?$',
+    r'^(?:0|[1-9]\d*)(?:⟲(?:0|[1-9]\d*))*S?(?:BF\d*|TF|F)?$',
     unicode: true,
   );
 
@@ -69,6 +69,9 @@ class NotationCodec {
       switch (record.foul) {
         case FoulType.breakFoul:
           buffer.write('BF');
+          if (record.foulCount > 1) {
+            buffer.write(record.foulCount);
+          }
           break;
         case FoulType.threeFouls:
           buffer.write('TF');
@@ -174,6 +177,9 @@ class NotationCodec {
       switch (record.foul) {
         case FoulType.breakFoul:
           buffer.write('BF');
+          if (record.foulCount > 1) {
+            buffer.write(record.foulCount);
+          }
           break;
         case FoulType.threeFouls:
           buffer.write('TF');
@@ -200,11 +206,18 @@ class NotationCodec {
     String body = notation;
     bool safe = false;
     FoulType foul = FoulType.none;
+    int foulCount = 1;
 
     // Peel foul suffix (longest first)
-    if (body.endsWith('BF')) {
+    // Handle BF with optional count (e.g. BF, BF2, BF3)
+    final bfMatch = RegExp(r'(BF)(\d*)$').firstMatch(body);
+    if (bfMatch != null) {
       foul = FoulType.breakFoul;
-      body = body.substring(0, body.length - 2);
+      final countStr = bfMatch.group(2);
+      if (countStr != null && countStr.isNotEmpty) {
+        foulCount = int.parse(countStr);
+      }
+      body = body.substring(0, body.length - bfMatch.group(0)!.length);
     } else if (body.endsWith('TF')) {
       foul = FoulType.threeFouls;
       body = body.substring(0, body.length - 2);
@@ -231,13 +244,14 @@ class NotationCodec {
       segments: segments,
       safe: safe,
       foul: foul,
+      foulCount: foulCount,
     );
   }
 
   /// Expand trailing separators to explicit 0 segments
   static String _expandTrailingSeparators(String s) {
     // Split by suffixes to avoid expanding inside suffixes
-    final suffixMatch = RegExp(r'(S)?(?:BF|TF|F)?$').firstMatch(s);
+    final suffixMatch = RegExp(r'(S)?(?:BF\d*|TF|F)?$').firstMatch(s);
     if (suffixMatch == null) return s;
 
     final suffixPart = suffixMatch.group(0) ?? '';
@@ -256,7 +270,7 @@ class NotationCodec {
   /// Normalize numeric segments (remove leading zeros)
   static String _normalizeNumericSegments(String s) {
     // Extract body and suffix separately
-    final suffixMatch = RegExp(r'(S)?(?:BF|TF|F)?$').firstMatch(s);
+    final suffixMatch = RegExp(r'(S)?(?:BF\d*|TF|F)?$').firstMatch(s);
     if (suffixMatch == null) return s;
 
     final suffixPart = suffixMatch.group(0) ?? '';
@@ -300,6 +314,7 @@ class InningRecord {
   final List<int> segments;
   final bool safe;
   final FoulType foul;
+  final int foulCount;
 
   InningRecord({
     required this.inning,
@@ -309,6 +324,7 @@ class InningRecord {
     this.segments = const [],
     this.safe = false,
     this.foul = FoulType.none,
+    this.foulCount = 1,
   });
 
   Map<String, dynamic> toJson() => {
@@ -330,6 +346,7 @@ class InningRecord {
       segments: parsed.segments,
       safe: parsed.safe,
       foul: parsed.foul,
+      foulCount: parsed.foulCount,
     );
   }
 }

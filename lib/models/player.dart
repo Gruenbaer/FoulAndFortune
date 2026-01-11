@@ -20,7 +20,7 @@ class Player {
   List<int> inningHistory; // List of completed segments (runs) in this inning (e.g. [14, 14])
   bool inningHasFoul; // Whether current inning has a normal foul
   bool inningHasThreeFouls; // Whether current inning triggered 3-foul penalty
-  bool inningHasBreakFoul; // Whether current inning has a break foul (-2)
+  int inningBreakFoulCount; // Count of break fouls in this inning (can be > 1)
   bool inningHasSafe; // Whether current inning has a safe (statistical)
   bool inningHasReRack; // Whether current inning had a re-rack
 
@@ -42,7 +42,7 @@ class Player {
     List<int>? inningHistory, // Optional param
     this.inningHasFoul = false,
     this.inningHasThreeFouls = false,
-    this.inningHasBreakFoul = false,
+    this.inningBreakFoulCount = 0,
     this.inningHasSafe = false,
     this.inningHasReRack = false,
   }) : handicapMultiplier = handicapMultiplier.clamp(0.1, 10.0),
@@ -72,7 +72,7 @@ class Player {
     inningHistory = [];
     inningHasThreeFouls = false;
     inningHasFoul = false;
-    inningHasBreakFoul = false;
+    inningBreakFoulCount = 0;
     inningHasSafe = false;
     inningHasReRack = false;
   }
@@ -130,7 +130,7 @@ class Player {
     List<int>? inningHistory,
     bool? inningHasFoul,
     bool? inningHasThreeFouls,
-    bool? inningHasBreakFoul,
+    int? inningBreakFoulCount,
     bool? inningHasSafe,
     bool? inningHasReRack,
   }) {
@@ -152,7 +152,7 @@ class Player {
       inningHistory: inningHistory ?? List.from(this.inningHistory),
       inningHasFoul: inningHasFoul ?? this.inningHasFoul,
       inningHasThreeFouls: inningHasThreeFouls ?? this.inningHasThreeFouls,
-      inningHasBreakFoul: inningHasBreakFoul ?? this.inningHasBreakFoul,
+      inningBreakFoulCount: inningBreakFoulCount ?? this.inningBreakFoulCount,
       inningHasSafe: inningHasSafe ?? this.inningHasSafe,
       inningHasReRack: inningHasReRack ?? this.inningHasReRack,
     );
@@ -174,7 +174,7 @@ class Player {
     'inningHistory': inningHistory,
     'inningHasFoul': inningHasFoul,
     'inningHasThreeFouls': inningHasThreeFouls,
-    'inningHasBreakFoul': inningHasBreakFoul,
+    'inningBreakFoulCount': inningBreakFoulCount,
     'inningHasSafe': inningHasSafe,
     'inningHasReRack': inningHasReRack,
   };
@@ -196,7 +196,7 @@ class Player {
     inningHistory: (json['inningHistory'] as List?)?.map((e) => e as int).toList() ?? [],
     inningHasFoul: json['inningHasFoul'] as bool? ?? false,
     inningHasThreeFouls: json['inningHasThreeFouls'] as bool? ?? false,
-    inningHasBreakFoul: json['inningHasBreakFoul'] as bool? ?? false,
+    inningBreakFoulCount: json['inningBreakFoulCount'] as int? ?? 0,
     inningHasSafe: json['inningHasSafe'] as bool? ?? false,
     inningHasReRack: json['inningHasReRack'] as bool? ?? false,
   );
@@ -206,8 +206,8 @@ class Player {
     int projected = score + inningPoints + totalHistory;
     
     // Apply penalties
-    if (inningHasBreakFoul) {
-      projected -= 2; // Break foul is always -2
+    if (inningBreakFoulCount > 0) {
+      projected -= (2 * inningBreakFoulCount); // Break foul is always -2 per instance
     }
     
     if (inningHasFoul) {
@@ -223,4 +223,7 @@ class Player {
     
     return projected;
   }
+  
+  // Compatibility getter
+  bool get inningHasBreakFoul => inningBreakFoulCount > 0;
 }
