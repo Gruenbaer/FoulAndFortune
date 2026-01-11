@@ -338,6 +338,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get exitGame => 'Spiel beenden?';
 
   @override
+  String get actionLeave => 'Spiel verlassen';
+
+  @override
+  String get actionCancel => 'Abbrechen';
+
+  @override
   String get exitGameMessage =>
       'Spielfortschritt geht verloren. Sind Sie sicher?';
 

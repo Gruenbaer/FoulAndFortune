@@ -827,7 +827,15 @@ class GameState extends ChangeNotifier {
 
   // Method to consume events (UI calls this)
   List<GameEvent> consumeEvents() {
+<<<<<<< HEAD
     return _events.consumeAll();
+=======
+    final events = List<GameEvent>.from(eventQueue);
+    eventQueue.clear();
+    // Signal start of processing for these events (Input Locked)
+    _processingEventsCount += events.length;
+    return events;
+>>>>>>> 5ed6842 (fix: state-based input blocking (v4.2.3))
   }
 
   // Allow swapping starting player before game starts

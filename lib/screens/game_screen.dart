@@ -69,7 +69,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   
   // Victory State Tracking
   bool _victoryShown = false;
-  int _lastTapTime = 0; // For debounce
 
   void _handleInteraction(VoidCallback action) {
     if (_isInputLocked) return;
@@ -1366,15 +1365,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // Helper to validate and handle taps
     void handleTap(int ballNumber) {
+      // STATE-BASED LOCK: Check if GameState is processing events
+      if (gameState.isInputLocked) {
+         return;
+      }
+      
+      // Secondary check: Local _isInputLocked (legacy/animation safeguard)
       if (_isInputLocked) return;
       
-      // DEBOUNCE: Stringent check to prevent multi-tap
-      final now = DateTime.now().millisecondsSinceEpoch;
-      if (now - _lastTapTime < 250) { // 250ms debounce
-         return; 
-      }
-      _lastTapTime = now;
-
       // Disable all ball interactions if game is over
       if (gameState.gameOver) return;
 
