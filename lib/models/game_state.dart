@@ -903,6 +903,7 @@ class GameState extends ChangeNotifier {
     showTwoFoulWarning = false;
     foulMode = FoulMode.none;
     matchLog.clear();
+    inningRecords.clear(); // Fix: Clear score card
     // We do NOT clear undo stack, so reset can be undone!
     resetBreakFoulError();
     inBreakSequence = true; // Reset Break Sequence Logic

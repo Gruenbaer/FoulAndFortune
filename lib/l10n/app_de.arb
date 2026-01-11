@@ -120,6 +120,8 @@
   "luckySevenDesc": "Die 7 ist deine Lieblingskugel! Du hast sie in 7 aufeinanderfolgenden Aufnahmen versenkt.",
   "winner": "Gewinner",
   "exitGame": "Spiel beenden?",
+  "actionLeave": "Spiel verlassen",
+  "actionCancel": "Abbrechen",
   "exitGameMessage": "Spielfortschritt geht verloren. Sind Sie sicher?",
   "restartGame": "Spiel neustarten?",
   "restartGameMessage": "Dies setzt alle Punkte und Verlauf zurück. Sind Sie sicher?",

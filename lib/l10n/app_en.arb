@@ -120,6 +120,8 @@
   "luckySevenDesc": "The 7 is your favorite ball! You sank it in 7 consecutive innings.",
   "winner": "Winner",
   "exitGame": "Exit Game?",
+  "actionLeave": "Leave Game",
+  "actionCancel": "Cancel",
   "exitGameMessage": "Game progress will be lost. Are you sure?",
   "restartGame": "Restart Game?",
   "restartGameMessage": "This will reset all scores and history. Are you sure?",
