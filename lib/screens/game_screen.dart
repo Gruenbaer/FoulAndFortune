@@ -1365,6 +1365,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // Helper to validate and handle taps
     void handleTap(int ballNumber) {
+      if (_isInputLocked) return;
+
       // Disable all ball interactions if game is over
       if (gameState.gameOver) return;
 

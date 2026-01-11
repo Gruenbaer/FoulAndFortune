@@ -298,8 +298,8 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                                
                                // CRITICAL: Apply PENDING foul penalties
                                // This shows NET run during active play
-                               if (widget.player.inningHasBreakFoul) {
-                                 runValue -= 2; // Break foul penalty
+                               if (widget.player.inningBreakFoulCount > 0) {
+                                 runValue -= (2 * widget.player.inningBreakFoulCount); // Stacked BF penalty
                                } else if (widget.player.inningHasFoul) {
                                  runValue -= 1; // Normal foul penalty
                                }

@@ -33,11 +33,15 @@ Technische Verbesserungen und Fehlerbehebungen.
 
 ### v4.2.0 - Stacked Break Fouls 🎱
 
-The canonical scoring rules have been updated to support "Stacked Break Fouls".
+*   **Fix:** Resolved score mismatch bug where stats showed half the actual score on victory.
+*   **Fix:** Fixed "Last Run" (LR) display to correctly show stacked Break Foul penalties.
+*   **Fix:** Fixed input blocking issue where balls could be tapped during animations.
 
-*   **Stacked Break Fouls:** If a player commits a Break Foul and re-breaks (by opponent decision), the inning now continues in the same frame.
-*   **Multiple Penalties:** Committing multiple Break Fouls in a single inning now correctly stacks the penalties (e.g., -2, -4, -6).
-*   **Notation Support:** The score card now logs stacked fouls properly (e.g., `BF2` for two break fouls).
+## v4.2.0 (Previously Released)
+
+*   **Feature:** Stacked Break Fouls! You can now commit multiple Break Fouls in a single inning if you choose to re-rack yourself.
+*   **Feature:** Added `BF2`, `BF3` notation support.
+*   **Fix:** Fixed bug where Break Foul would end turn immediately even if re-rack was chosen.
 *   **Fix:** Play Store deployment configuration updated (internal track).
 
 ***

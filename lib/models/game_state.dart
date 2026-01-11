@@ -628,6 +628,16 @@ class GameState extends ChangeNotifier {
     if (achievementManager != null) {
       AchievementChecker.checkAfterInning(player, achievementManager!);
     }
+    
+    // CRITICAL FIX: Clear inning buffers after finalization 
+    // This prevents double-counting if _finalizeInning is called again (e.g. on win check)
+    player.inningPoints = 0;
+    player.inningHistory = [];
+    player.inningBreakFoulCount = 0;
+    player.inningHasFoul = false;
+    player.inningHasThreeFouls = false;
+    player.inningHasSafe = false;
+    player.inningHasReRack = false;
   }
 
   // Helper to calculate the REAL-TIME net score of the current inning
