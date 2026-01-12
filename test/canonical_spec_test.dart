@@ -3,7 +3,7 @@ import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
 
 void main() {
-  group('Canonical Spec Tests (TV1-TV8)', () {
+  group('FF14 Canonical Notation Tests (TV1-TV8)', () {
     late GameState gameState;
 
     setUp(() {
@@ -21,7 +21,7 @@ void main() {
     });
 
     test('TV1 - Simple inning, ends by non-continuation number', () {
-      // Tokens: R10
+      // Notation: "5" (5 balls potted)
       gameState.onBallTapped(10); // Tap "10 remaining"
       
       // made = 15-10 = 5 → +5, inning ends
@@ -31,7 +31,7 @@ void main() {
     });
 
     test('TV2 - Re-rack continuation then end', () {
-      // Tokens: R1 R12
+      // Notation: "14⟲3" (14 balls, re-rack, 3 balls)
       gameState.onBallTapped(1); // Re-rack trigger
       expect(gameState.currentPlayerIndex, 0); // Turn continues (still Player 1)
       gameState.finalizeReRack(); // Reset rack to 15 balls (simulates UI callback)
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('TV3 - Double-sack continuation then end', () {
-      // Tokens: R0 R14
+      // Notation: "15⟲1" (double sack, re-rack, 1 ball)
       gameState.onDoubleSack(); // R0 (double sack)
       expect(gameState.currentPlayerIndex, 0); // Turn continues (still Player 1)
       gameState.finalizeReRack(); // Reset rack to 15 balls (simulates UI callback)
@@ -59,7 +59,7 @@ void main() {
     });
 
     test('TV4 - Foul only', () {
-      // Tokens: F
+      // Notation: "F" (pure foul, no balls potted)
       gameState.setFoulMode(FoulMode.normal);
       // In canonical spec, foul requires an action, but we can use Safe or similar
       // Actually, "foul only" means no balls potted + foul
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('TV5 - Three consecutive fouls', () {
-      // Tokens: F | F | TF (across three innings)
+      // Notation across innings: "F" | "F" | "TF"
       final player = gameState.players[0];
       
       // First foul (pure)
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('TV6 - Foul streak resets by scoring', () {
-      // Tokens: F | R13 | F
+      // Notation across innings: "F" | "2" | "F"
       final player = gameState.players[0];
       
       // First foul
@@ -123,7 +123,7 @@ void main() {
     });
 
     test('TV7 - Safety resets foul streak', () {
-      // Tokens: F | S | F
+      // Notation across innings: "F" | "S" | "F"
       final player = gameState.players[0];
       
       // First foul
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('TV8a - Break fouls are separate (no 3-foul)', () {
-      // Tokens: BF
+      // Notation: "BF" (break foul)
       final player = gameState.players[0];
       
       // Break Foul
@@ -157,7 +157,7 @@ void main() {
     });
 
     test('TV8b - Stacked Break Fouls (Same Inning)', () {
-      // Tokens: BF | BF | BF (Same player re-breaks twice, then switches)
+      // Notation: "BF" "BF" "BF" (stacked in same inning context)
       final player = gameState.players[0];
       
       // 1. First Break Foul
