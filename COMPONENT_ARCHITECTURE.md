@@ -1,167 +1,125 @@
-# Fortune 14/1 - Component Encapsulation & Reusability Strategy
+﻿# Fortune 14/1 - Component Encapsulation & Reusability Strategy
 
-## 🎯 Core Principle
+## Core Principle
 **"Change it once, use it everywhere"** - Every UI element, setting control, and player interaction should be extracted into reusable widgets/components. No duplicate code, consistent behavior across the entire app.
 
 ---
 
-## 📦 Component Categories
+## Component Categories
 
 ### 1. **Player Interactions**
-**Status**: ✅ PlayerNameInputDialog created (v3.7.0)
+**Status**: Partial (player name input extracted; other player widgets still inline)
 
-**What we have:**
-- `PlayerNameInputDialog` - unified player name input with autocomplete, create button, checkmark
-
-**What we need:**
+**Still needed:**
 - `PlayerSelectorWidget` - dropdown/list for selecting players
 - `PlayerStatsCard` - reusable card showing player stats
 - `PlayerAvatar` - consistent player avatar/icon display
 - `PlayerComparisonWidget` - side-by-side player stats
 
 ### 2. **Settings Controls**
-**Status**: ❌ Needs extraction
+**Status**: Not extracted (still inline in settings/new-game screens)
 
-**Current problem:** Each screen builds its own sliders, toggle buttons, number pickers
-
-**Extract to widgets:**
-- **`SettingsSlider`** 
+**Needed widgets:**
+- **`SettingsSlider`**
   - Props: `label`, `value`, `min`, `max`, `divisions`, `onChanged`, `unit`
   - Handles: Theme-aware colors, label formatting, value display
   - Example: Race-to slider, max innings slider
-  
 - **`QuickButtonGroup`**
   - Props: `values`, `currentValue`, `onChanged`, `label`
   - Renders: Row of outlined buttons with active/inactive states
   - Example: 25/50/100 race buttons, 25/50/100 innings buttons
-  
 - **`SettingsToggle`**
   - Props: `title`, `subtitle`, `value`, `onChanged`, `icon`
   - Renders: Themed SwitchListTile with consistent styling
   - Example: 3-foul rule, sound toggle, league game toggle
-  
 - **`NumberPicker`**
   - Props: `label`, `value`, `min`, `max`, `step`, `onChanged`
   - Renders: +/- buttons with value display
   - Example: Handicap adjustments
 
 ### 3. **Game Screen Elements**
-**Status**: ❌ Scattered across game_screen.dart
+**Status**: Partially extracted (some widgets exist, main layout still monolithic)
 
-**Extract to widgets:**
+**Still needed:**
 - **`ScoreDisplay`** - Player score with theme, animations
 - **`BallRackWidget`** - Reusable ball rack (current/max display)
 - **`InningsCounter`** - Consistent innings display
-- **`GameControlButtons`** - Foul, undo, menu buttons
-- **`FoulButton`** - Standardized foul button with states
+- **`GameControls`** - Container for foul/safe/undo/menu controls
 
 ### 4. **Dialogs & Overlays**
-**Status**: ⚠️ Mix of inline and extracted
+**Status**: Mix of inline and extracted
 
-**Current widgets:**
-- ✅ `PlayerNameInputDialog`
-- ✅ `ReRackOverlay`
-- ✅ `FoulOverlays` (foul_overlays.dart)
-- ✅ `PauseOverlay`
-
-**Need extraction:**
+**Still needed:**
 - **`ConfirmationDialog`** - Standard yes/no dialogs
 - **`InfoDialog`** - Rule explanations, help text
 - **`AchievementDialog`** - Achievement unlock notifications
 
 ### 5. **Theme Components**
-**Status**: ⚠️ Partially theme-aware
-
-**Current system:**
-- `FortuneColors` extension in `fortune_theme.dart`
-- Individual themes: `SteampunkTheme`, `CyberpunkTheme`
-
-**Problems:**
-- Some screens hardcode `SteampunkTheme` instead of using active theme
-- Inconsistent color access (`SteampunkTheme.brassPrimary` vs `FortuneColors.of(context).primary`)
+**Status**: Partially theme-aware (FortuneColors used widely; hardcoded Colors remain)
 
 **Action needed:**
-- **Audit all files** - Search for `SteampunkTheme` references
-- **Replace with** `FortuneColors.of(context)`
-- **Create helper widgets** that auto-fetch theme:
-  - `ThemedCard` - Card with correct theme colors
-  - `ThemedButton` - Button with theme-aware styling
-  - `ThemedIcon` - Icon with theme color
+- Audit remaining `Colors.*` usage in screens/widgets and move to `FortuneColors`
+- Create helper widgets where repeated patterns exist:
+  - `ThemedCard`
+  - `ThemedIcon`
 
 ---
 
-## 🔧 Refactoring Roadmap
+## Refactoring Roadmap
 
-### Phase 1: Settings Widgets ⏳ Next
+### Phase 1: Settings Widgets
 **Goal:** Eliminate duplication in `new_game_settings_screen.dart` and `settings_screen.dart`
 
-**Tasks:**
+**Tasks remaining:**
 1. Create `lib/widgets/settings/`:
    - `settings_slider.dart`
    - `quick_button_group.dart`
    - `settings_toggle.dart`
    - `number_picker_widget.dart`
-
 2. Refactor screens to use new widgets
 3. Ensure all use `FortuneColors` for theming
-
-**Benefit:** Change slider appearance once, affects both screens
 
 ### Phase 2: Game Screen Components
 **Goal:** Break down the 1000+ line `game_screen.dart`
 
-**Tasks:**
+**Tasks remaining:**
 1. Create `lib/widgets/game/`:
    - `score_display.dart`
    - `ball_rack_widget.dart`
    - `innings_counter.dart`
    - `game_controls.dart`
-
-2. Extract score/rack/innings logic into widgets
-3. Game screen becomes composition of smaller widgets
-
-**Benefit:** Easier to test, modify, and maintain game UI
+2. Extract score/rack/innings/control logic into widgets
 
 ### Phase 3: Theme Consistency
 **Goal:** 100% theme-aware, no hardcoded colors
 
-**Tasks:**
-1. Search & replace all `SteampunkTheme.*` with `FortuneColors.of(context).*`
-2. Map property names:
-   - `brassPrimary` → `primary`
-   - `brassDark` → `secondary`
-   - `amberGlow` → `accent`
+**Tasks remaining:**
+1. Audit hardcoded `Colors.*` across screens/widgets
+2. Replace with `FortuneColors.of(context).*`
 3. Test theme switching in every screen
-
-**Benefit:** Smooth theme transitions, easy to add new themes
 
 ### Phase 4: Player Widgets Suite
 **Goal:** Complete player interaction toolkit
 
-**Tasks:**
+**Tasks remaining:**
 1. Create `lib/widgets/player/`:
    - `player_selector.dart`
    - `player_stats_card.dart`
    - `player_avatar.dart`
    - `player_comparison.dart`
-
 2. Use in players screen, game screen, history
-
-**Benefit:** Consistent player presentation everywhere
 
 ### Phase 5: Dialog Standardization
 **Goal:** All dialogs use theme-aware base components
 
-**Tasks:**
+**Tasks remaining:**
 1. Create `ThemedDialog` base class
-2. Migrate all `showDialog` calls to use themed versions
-3. Create dialog builder functions
-
-**Benefit:** Dialogs automatically adapt to theme changes
+2. Create `ConfirmationDialog`, `InfoDialog`, `AchievementDialog`
+3. Migrate all `showDialog`/`AlertDialog` usage to themed versions
 
 ---
 
-## 📋 Component Design Principles
+## Component Design Principles
 
 ### 1. **Self-Contained**
 Each widget should:
@@ -217,7 +175,7 @@ Each widget does ONE thing well:
 
 ---
 
-## 🎨 Example: Slider Refactoring
+## Example: Slider Refactoring
 
 ### Before (Duplicated in 2+ places):
 ```dart
@@ -298,71 +256,67 @@ class SettingsSlider extends StatelessWidget {
 
 ---
 
-## 🐛 Known Issues to Fix During Refactoring
+## Known Issues to Fix During Refactoring
 
 1. **Background video sound** - Plays even when sound disabled
    - Fix: Mute video player, respect settings.soundEnabled
-   
-2. **Settings screen theme** - Hardcoded Steampunk colors
-   - Fix: Use FortuneColors throughout
-   
+2. **Theme cleanup** - Remaining hardcoded Colors in screens/widgets
+   - Fix: Replace with FortuneColors (esp. new game, players, achievements)
 3. **Re-rack animation** - Balls instantly reappear
    - Enhancement: Animate balls flying in from edges
-   
 4. **Hamburger menu** - Still appears in some TextFields
    - Fix: Add `contextMenuBuilder: (_,__) => SizedBox.shrink()` everywhere
 
 ---
 
-## ✅ Success Criteria
+## Success Criteria
 
 When refactoring is complete:
 - [ ] No duplicate slider/button code between screens
-- [ ] All widgets use `FortuneColors.of(context)` (no hardcoded themes)
+- [ ] All widgets use `FortuneColors.of(context)` (no hardcoded colors)
 - [ ] Can change slider appearance in ONE place
 - [ ] Can add new theme in `fortune_theme.dart` and it works everywhere
-- [ ] Game screen < 500 lines (currently 1000+)
+- [ ] Game screen < 500 lines
 - [ ] Settings screens use identical components
-- [ ] All player inputs use `PlayerNameInputDialog`
+- [x] All player inputs use `PlayerNameInputDialog`
 - [ ] Every reusable element is in `lib/widgets/`
 
 ---
 
-## 📁 Recommended File Structure
+## Recommended File Structure
 
 ```
 lib/
-├── widgets/
-│   ├── player/
-│   │   ├── player_name_input_dialog.dart ✅
-│   │   ├── player_selector.dart
-│   │   ├── player_stats_card.dart
-│   │   └── player_avatar.dart
-│   ├── settings/
-│   │   ├── settings_slider.dart
-│   │   ├── quick_button_group.dart
-│   │   ├── settings_toggle.dart
-│   │   └── number_picker_widget.dart
-│   ├── game/
-│   │   ├── score_display.dart
-│   │   ├── ball_rack_widget.dart
-│   │   ├── innings_counter.dart
-│   │   └── game_controls.dart
-│   ├── dialogs/
-│   │   ├── themed_dialog.dart
-│   │   ├── confirmation_dialog.dart
-│   │   └── info_dialog.dart
-│   └── steampunk_widgets.dart ✅
-├── theme/
-│   ├── fortune_theme.dart ✅
-│   └── steampunk_theme.dart ✅
-└── screens/
-    └── (screens only compose widgets)
+  widgets/
+    player/
+      player_name_input_dialog.dart
+      player_selector.dart
+      player_stats_card.dart
+      player_avatar.dart
+    settings/
+      settings_slider.dart
+      quick_button_group.dart
+      settings_toggle.dart
+      number_picker_widget.dart
+    game/
+      score_display.dart
+      ball_rack_widget.dart
+      innings_counter.dart
+      game_controls.dart
+    dialogs/
+      themed_dialog.dart
+      confirmation_dialog.dart
+      info_dialog.dart
+  theme/
+    fortune_theme.dart
+    steampunk_theme.dart
+  screens/
+    (screens only compose widgets)
 ```
 
 ---
 
-## 🔄 Migration Strategy
+## Migration Strategy
 
 **For each duplicated pattern:**
 1. **Identify** - Find all places pattern is used
@@ -380,7 +334,7 @@ rg "Slider\(" lib/screens/
 # (code SettingsSlider)
 
 # 3. Replace in new_game_settings_screen.dart
-# 4. Replace in settings_screen.dart  
+# 4. Replace in settings_screen.dart
 # 5. Test both screens
 
 # 6. Commit
@@ -390,7 +344,7 @@ git commit -m "refactor: Extract SettingsSlider widget"
 
 ---
 
-## 📝 Notes
+## Notes
 
 - **Start small**: Don't try to refactor everything at once
 - **Test frequently**: After each widget extraction, test affected screens
