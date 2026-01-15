@@ -1,3 +1,14 @@
+## v4.1.2 - Code-Qualität & Aufräumen 🧹
+
+Technische Verbesserungen und Fehlerbehebungen.
+
+*   **Refactoring:** Einstellungs-Widgets extrahiert – über 150 Zeilen duplizierter Code entfernt
+*   **Übersetzungen:** 4 fehlende deutsche Texte hinzugefügt
+*   **Aufräumen:** 5 ungenutzte Abhängigkeiten entfernt (kleinere App-Größe)
+*   **Dokumentation:** Veraltete Bug-Berichte aus der Dokumentation entfernt
+
+***
+
 ## v5.0.0 - FF14 Canonical Notation Specification 📜
 
 Major documentation update: New canonical notation specification.
