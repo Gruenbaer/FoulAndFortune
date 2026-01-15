@@ -258,14 +258,10 @@ class SettingsSlider extends StatelessWidget {
 
 ## Known Issues to Fix During Refactoring
 
-1. **Background video sound** - Plays even when sound disabled
-   - Fix: Mute video player, respect settings.soundEnabled
-2. **Theme cleanup** - Remaining hardcoded Colors in screens/widgets
+1. **Theme cleanup** - Remaining hardcoded Colors in screens/widgets
    - Fix: Replace with FortuneColors (esp. new game, players, achievements)
-3. **Re-rack animation** - Balls instantly reappear
+2. **Re-rack animation** - Balls instantly reappear
    - Enhancement: Animate balls flying in from edges
-4. **Hamburger menu** - Still appears in some TextFields
-   - Fix: Add `contextMenuBuilder: (_,__) => SizedBox.shrink()` everywhere
 
 ---
 
