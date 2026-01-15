@@ -188,8 +188,9 @@
   "innings": "Aufnahmen",
   "saves": "Safety-Shots",
   "average": "Durchschnitt",
-  "generalAverage": "Durchschnitt",
+  "generalAverage": "Gesamtdurchschnitt",
   "rivalryHistory": "Rivalen-Historie",
+  "highestRun": "Höchste Serie",
   "illegalMoveTitle": "Unzulässiger Zug",
   "cannotFoulAndLeave1Ball": "Kann nicht foulen und 1 Kugel auf dem Tisch lassen",
   "cannotFoulAndDoubleSack": "Kann nicht foulen und den Tisch abräumen (Double Sack)",
@@ -206,5 +207,13 @@
   "migrationDialogLearnMore": "Mehr erfahren",
   "migrationDialogContinue": "Fortfahren",
   "migrationProgressTitle": "Spielverlauf wird migriert",
-  "migrationProgressText": "Migriere {current} von {total} Spielen..."
+  "migrationProgressText": "Migriere {current} von {total} Spielen...",
+  "@migrationProgressText": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "actionRestrictedTitle": "Aktion eingeschränkt",
+  "terminatorExclusionMessage": "Safety/Foul beendet die Aufnahme; Neuaufbau-Aktionen sind deaktiviert."
 }
