@@ -5,6 +5,7 @@ Technische Verbesserungen und Fehlerbehebungen.
 *   **Refactoring:** Einstellungs-Widgets extrahiert – über 150 Zeilen duplizierter Code entfernt
 *   **Übersetzungen:** 4 fehlende deutsche Texte hinzugefügt
 *   **Aufräumen:** 5 ungenutzte Abhängigkeiten entfernt (kleinere App-Größe)
+*   **Foul-Bug behoben:** Dokumentation korrigiert – Foul-Zähler verhält sich jetzt wie im Code (Streak = 1 bei Fouls mit Bällen)
 *   **Dokumentation:** Veraltete Bug-Berichte aus der Dokumentation entfernt
 
 ***
