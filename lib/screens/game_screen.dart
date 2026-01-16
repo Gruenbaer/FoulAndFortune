@@ -78,17 +78,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       _isInputLocked = true;
     });
 
-    action();
-
-    // Lock for duration of typical animations (ball fade is 300ms, mostly)
-    // 500ms allows safe buffer for state updates
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _isInputLocked = false;
-        });
-      }
-    });
+    try {
+      action();
+    } finally {
+      // Lock for duration of typical animations (ball fade is 300ms, mostly)
+      // 500ms allows safe buffer for state updates
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            _isInputLocked = false;
+          });
+        }
+      });
+    }
   }
  
   Future<void> _saveInProgressGame(GameState gameState) async {
@@ -602,7 +604,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   color: colors.primary,
                   tooltip: l10n.undo,
                   onPressed: gameState.canUndo ? gameState.undo : null,
-                  isGuarded: gameState.eventQueue.isNotEmpty,
+                  isGuarded: _isInputLocked,
                 ),
                 GuardedIconButton(
                   icon: Icons.redo,
@@ -617,7 +619,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   color: colors.primary,
                   tooltip: l10n.redo,
                   onPressed: gameState.canRedo ? gameState.redo : null,
-                  isGuarded: gameState.eventQueue.isNotEmpty,
+                  isGuarded: _isInputLocked,
                 ),
               ],
             ),
@@ -1027,7 +1029,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       : '-2'),
                               isActive: gameState.foulMode != FoulMode.none,
                               activeColor: colors.danger,
-                              isGuarded: gameState.eventQueue.isNotEmpty,
+                              isGuarded: _isInputLocked,
                               onPressed: () {
                                 
                                 // Cycle: None -> Normal -> Severe -> None
@@ -1056,7 +1058,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               text: 'SAFE',
                               isActive: gameState.isSafeMode,
                               activeColor: const Color(0xFF4CAF50), // Green for Safe
-                              isGuarded: gameState.eventQueue.isNotEmpty,
+                              isGuarded: _isInputLocked,
                               onPressed: gameState.gameOver
                                   ? () {}
                                   : () {
@@ -1151,7 +1153,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Helper to determine if a ball is interactive based on game state
     bool canInteractWithBall(GameState state, int ballNumber) {
       if (state.gameOver) return false;
-      if (state.eventQueue.isNotEmpty) return false; // Disable during animations
 
       // 1. Terminating Actions (Safe, Foul, Break Foul) disable Continuation Actions (0, 1)
       bool isTerminatorActive = state.isSafeMode || state.foulMode != FoulMode.none;

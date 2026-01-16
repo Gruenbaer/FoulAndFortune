@@ -473,7 +473,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get score => 'Punkte';
 
   @override
-  String get generalAverage => 'Durchschnitt';
+  String get generalAverage => 'Gesamtdurchschnitt';
 
   @override
   String get rivalryHistory => 'Rivalen-Historie';
@@ -596,9 +596,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get actionRestrictedTitle => 'Action Restricted';
+  String get actionRestrictedTitle => 'Aktion eingeschränkt';
 
   @override
   String get terminatorExclusionMessage =>
-      'Safe/Foul ends the inning; re-rack actions are disabled.';
+      'Safety/Foul beendet die Aufnahme; Neuaufbau-Aktionen sind deaktiviert.';
 }

@@ -10,15 +10,7 @@ Technische Verbesserungen und Fehlerbehebungen.
 
 ***
 
-## v5.0.0 - FF14 Canonical Notation Specification 📜
 
-Major documentation update: New canonical notation specification.
-
-*   **Documentation:** Updated scoring specification from Remaining-Count Model to FF14 Canonical Notation.
-*   **Backward Compatibility:** Old specification archived in `docs/legacy/` for reference.
-*   **Clarity:** New notation better explains segment-based scoring, re-rack logic, and foul handling.
-
-***
 
 ### v4.2.0 - Stacked Break Fouls 🎱
 

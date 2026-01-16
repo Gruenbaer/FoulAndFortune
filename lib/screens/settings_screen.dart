@@ -8,6 +8,8 @@ import '../widgets/themed_widgets.dart';
 import '../widgets/player_name_input_dialog.dart';
 import 'package:provider/provider.dart';
 import '../models/achievement_manager.dart';
+import '../widgets/settings/settings_slider.dart';
+import '../widgets/settings/settings_toggle.dart';
 
 class SettingsScreen extends StatefulWidget {
   final GameSettings currentSettings;
@@ -165,16 +167,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // 3-Foul Rule Toggle
               buildPanelTile(
-                child: ListTile(
-                  title: Text(l10n.threeFoulRule, style: theme.textTheme.bodyLarge),
-                  subtitle: Text(l10n.threeFoulRuleSubtitle, style: theme.textTheme.bodySmall),
-                  trailing: Switch(
-                    value: _settings.threeFoulRuleEnabled,
-                    onChanged: (value) => setState(() => _settings = _settings.copyWith(threeFoulRuleEnabled: value)),
-                    activeThumbColor: fortuneTheme.secondary,
-                    inactiveThumbColor: fortuneTheme.disabled,
-                    inactiveTrackColor: fortuneTheme.primaryDark.withValues(alpha: 0.5),
-                  ),
+                child: SettingsToggle(
+                  title: l10n.threeFoulRule,
+                  subtitle: l10n.threeFoulRuleSubtitle,
+                  value: _settings.threeFoulRuleEnabled,
+                  onChanged: (value) => setState(() => _settings = _settings.copyWith(threeFoulRuleEnabled: value)),
                 ),
               ),
 
@@ -199,38 +196,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Max Innings Slider
               buildPanelTile(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 12, right: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Max Innings', style: theme.textTheme.bodyLarge),
-                          Text(
-                            '${_settings.maxInnings}',
-                            style: theme.textTheme.displaySmall?.copyWith(fontSize: 20),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Slider(
-                      value: _settings.maxInnings.toDouble(),
-                      min: 10,
-                      max: 100,
-                      divisions: 18, // Steps of 5 (approx)
-                      label: '${_settings.maxInnings}',
-                      activeColor: fortuneTheme.secondary,
-                      inactiveColor: fortuneTheme.primaryDark.withValues(alpha: 0.3),
-                      thumbColor: fortuneTheme.primary,
-                      onChanged: (value) {
-                        setState(() {
-                          _settings = _settings.copyWith(maxInnings: value.round());
-                        });
-                      },
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SettingsSlider(
+                    label: 'Max Innings',
+                    value: _settings.maxInnings.toDouble(),
+                    min: 10,
+                    max: 100,
+                    divisions: 18,
+                    onChanged: (value) {
+                      setState(() {
+                        _settings = _settings.copyWith(maxInnings: value.round());
+                      });
+                    },
+                  ),
                 ),
               ),
 
@@ -248,10 +227,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Text('Point Multiplier', style: theme.textTheme.bodySmall),
                         ],
                       ),
-                      _buildMultiplierSelector(
-                        _settings.player1HandicapMultiplier,
-                        (val) => setState(() => _settings = _settings.copyWith(player1HandicapMultiplier: val)),
-                        fortuneTheme,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: fortuneTheme.primary.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [1.0, 2.0, 3.0].map((val) {
+                            final isSelected = _settings.player1HandicapMultiplier == val;
+                            return GestureDetector(
+                              onTap: () => setState(() => _settings = _settings.copyWith(player1HandicapMultiplier: val)),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? fortuneTheme.secondary : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                child: Text(
+                                  '${val.toInt()}x',
+                                  style: TextStyle(
+                                    color: isSelected ? fortuneTheme.textContrast : fortuneTheme.primary,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ],
                   ),
@@ -272,10 +276,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Text('Point Multiplier', style: theme.textTheme.bodySmall),
                         ],
                       ),
-                      _buildMultiplierSelector(
-                        _settings.player2HandicapMultiplier,
-                        (val) => setState(() => _settings = _settings.copyWith(player2HandicapMultiplier: val)),
-                        fortuneTheme,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: fortuneTheme.primary.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [1.0, 2.0, 3.0].map((val) {
+                            final isSelected = _settings.player2HandicapMultiplier == val;
+                            return GestureDetector(
+                              onTap: () => setState(() => _settings = _settings.copyWith(player2HandicapMultiplier: val)),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? fortuneTheme.secondary : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                child: Text(
+                                  '${val.toInt()}x',
+                                  style: TextStyle(
+                                    color: isSelected ? fortuneTheme.textContrast : fortuneTheme.primary,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ],
                   ),
@@ -525,36 +554,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Widget _buildMultiplierSelector(double current, Function(double) onChanged, FortuneColors themeColors) {
-    return Container(
-      decoration: BoxDecoration(
-        color: themeColors.primaryDark.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: themeColors.primary.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [1.0, 2.0, 3.0].map((val) {
-          final isSelected = current == val;
-          return GestureDetector(
-            onTap: () => onChanged(val),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected ? themeColors.secondary : Colors.transparent,
-                borderRadius: BorderRadius.circular(2),
-              ),
-              child: Text(
-                '${val.toInt()}x',
-                style: TextStyle(
-                  color: isSelected ? themeColors.textContrast : themeColors.primary,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
+
 }
