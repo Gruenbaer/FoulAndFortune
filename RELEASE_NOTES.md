@@ -1,4 +1,4 @@
-## v4.1.2 - Code-Qualität & Aufräumen 🧹
+## v4.2.4 - Code-Qualität & Aufräumen 🧹
 
 Technische Verbesserungen und Fehlerbehebungen.
 
