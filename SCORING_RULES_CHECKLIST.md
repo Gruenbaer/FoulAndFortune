@@ -9,8 +9,8 @@ All changes to scoring logic MUST go through this checklist before merge.
 ## Pre-Merge Requirements
 
 - [ ] **No changes to `FoulTracker.applyNormalFoul`** without spec update
-  - Canonical rule: Points reset streak; only pure fouls increment
-  - Verify: `if (ballsPocketed > 0) { player.consecutiveFouls = 0; return -1; }`
+  - Canonical rule: Points reset streak to 1 (counts current foul); only pure fouls increment beyond 1
+  - Verify: `if (ballsPocketed > 0) { player.consecutiveFouls = 1; return -1; }`
 
 - [ ] **No changes to `GameState` turn continuity logic** without spec update
   - Canonical rule: R0/R1 continue, R2-R15 end inning
@@ -26,7 +26,7 @@ All changes to scoring logic MUST go through this checklist before merge.
   - No new test failures in existing test suite
 
 - [ ] **Manual verification of foul scenarios**
-  - Test 1: Pot 2 balls, enable foul, tap number → Verify foul streak = 0 (NOT incremented)
+  - Test 1: Pot 2 balls, enable foul, tap number → Verify foul streak = 1 (counts current foul but resets previous)
   - Test 2: Pure foul × 3 → Verify TF triggers on 3rd
   - Test 3: Tap "10" → Verify turn switches immediately (R2-R15 ends inning)
   - Test 4: Tap "1" → Verify turn continues (R1 re-rack)
