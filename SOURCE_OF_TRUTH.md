@@ -48,6 +48,7 @@ code or update this document and any referenced specs together.
 - Player stats: `PlayerService` -> `players` table.
 - Achievements: `AchievementManager` -> `achievements` table.
 - Sync scaffolding: `sync_outbox` + `sync_state` tables (no remote sync yet).
+- Supabase schema (future sync backend): `supabase/schema.sql`.
 - Prefs migration: `PrefsMigrationService` imports legacy `SharedPreferences` data on first launch.
 - SharedPreferences now only used for device id and migration flags.
 - Notation migration: `GameHistoryService.migrateNotation` is currently a stub; existing records rely on lazy parsing.
