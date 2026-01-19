@@ -219,10 +219,10 @@ class _AchievementSplashState extends State<AchievementSplash>
                             // Title (Two lines allowed)
                             Text(
                               widget.achievement.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24, // Reduced from 32
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: FortuneColors.of(context).textPrimary,
                                 fontFamily: 'Orbitron',
                               ),
                               textAlign: TextAlign.center,
@@ -234,9 +234,9 @@ class _AchievementSplashState extends State<AchievementSplash>
                             // Description (Flexible)
                             Text(
                               widget.achievement.description,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.white70,
+                                color: FortuneColors.of(context).textSecondary,
                                 height: 1.4,
                               ),
                               textAlign: TextAlign.center,
@@ -264,9 +264,9 @@ class _AchievementSplashState extends State<AchievementSplash>
                             // How to unlock explanation
                             Text(
                               widget.achievement.howToUnlock,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.white60,
+                                color: FortuneColors.of(context).textSecondary.withValues(alpha: 0.8),
                                 fontStyle: FontStyle.italic,
                               ),
                               textAlign: TextAlign.center,
@@ -277,9 +277,9 @@ class _AchievementSplashState extends State<AchievementSplash>
                               const SizedBox(height: 8),
                               Text(
                                 'Unlocked by: ${widget.achievement.unlockedBy.last}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.white38,
+                                  color: FortuneColors.of(context).textSecondary.withValues(alpha: 0.6),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
