@@ -26,9 +26,18 @@ class GameHistoryService {
     await prefs.setBool(_migrationKey, true);
   }
 
+  /// Notation V2 Migration (FF14 Canonical Notation)
+  /// 
+  /// This is intentionally a no-op stub. Migration is not needed because:
+  /// 1. `NotationCodec.parse()` already handles legacy formats via fallback parsing
+  /// 2. Old notation is converted on-the-fly when games are loaded
+  /// 3. New saves automatically use the canonical format
+  /// 
+  /// The migration flag simply indicates the app has been launched with V2 support,
+  /// preventing unnecessary migration prompts to the user.
   Future<int> migrateNotation() async {
     await markMigrated();
-    return 0;
+    return 0; // No records migrated (lazy parsing handles conversion)
   }
 
   Future<List<GameRecord>> getAllGames() async {

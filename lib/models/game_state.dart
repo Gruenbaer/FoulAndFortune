@@ -317,8 +317,6 @@ class GameState extends ChangeNotifier {
         breakFoulHintMessage = "ALEX...die 15!";
       } else {
         breakFoulHintMessage = EasterEggs.getRandomBreakFoulMessage();
-
-        breakFoulHintMessage = EasterEggs.getRandomBreakFoulMessage();
       }
     } else {
       breakFoulHintMessage = EasterEggs.getRandomBreakFoulMessage();
@@ -746,11 +744,6 @@ class GameState extends ChangeNotifier {
     // Even if no points/fouls/safe occurred, if this method is called (via _switchPlayer),
     // it implies the turn has ended (e.g. a Miss). 
     // We MUST proceed to reset consecutive fouls and record the inning.
-    /*
-    if (player.inningPoints == 0 && !player.inningHasFoul && !player.inningHasBreakFoul && !player.inningHasSafe) {
-      return;
-    }
-    */
     
     // Calculate points from both parts of the inning (pre and post re-rack)
     // Calculate points from all segments + current
