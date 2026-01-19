@@ -19,5 +19,4 @@ This file is the entrypoint for working on FoulAndFortune. It is also a condense
 - Spec mismatch: checklist says fouls with balls reset streak to 0, but code/tests expect streak to become 1. Reconcile before changing.
 - Migration: notation migration in `GameHistoryService` is currently a stub; old games parse legacy notation on demand.
 - Conflict artifacts exist (`*_conflict_current.*` and conflict build folders). Treat them as non-authoritative.
-- Unused deps in `pubspec.yaml`: `drift`, `drift_flutter`, `go_router`, `uuid`.
 - Canonical separator is `\u27F2` (see `lib/codecs/notation_codec.dart`), while docs contain mojibake.

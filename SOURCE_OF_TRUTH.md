@@ -15,6 +15,7 @@ code or update this document and any referenced specs together.
 - Running on emulator: `puro flutter run` (automatically downloads packages and builds).
 - SDK targets: Dart >=3.0.0 <4.0.0 (per `pubspec.yaml`).
 - Lints: `analysis_options.yaml` (flutter_lints default).
+- DB codegen: `puro flutter pub run build_runner build --delete-conflicting-outputs`.
 
 ## Canonical Rules and Scoring
 - Canonical spec: `GAME_RULES.md` (FF14 Canonical Notation v1.0).
@@ -41,10 +42,14 @@ code or update this document and any referenced specs together.
 - Inning data recorded as `InningRecord` via `NotationCodec`.
 
 ### Persistence
-- Settings: `SettingsService` -> `SharedPreferences` key `game_settings`.
-- Game history: `GameHistoryService` -> `SharedPreferences` key `game_history`.
-- Player stats: `PlayerService` -> `SharedPreferences` key `players`.
-- Achievements: `AchievementManager` -> `SharedPreferences` key `achievements`.
+- Local database: Drift (SQLite/IndexedDB) via `lib/data/app_database.dart`.
+- Settings: `SettingsService` -> `settings` table (single row id `default`).
+- Game history: `GameHistoryService` -> `games` table (max 100 recent).
+- Player stats: `PlayerService` -> `players` table.
+- Achievements: `AchievementManager` -> `achievements` table.
+- Sync scaffolding: `sync_outbox` + `sync_state` tables (no remote sync yet).
+- Prefs migration: `PrefsMigrationService` imports legacy `SharedPreferences` data on first launch.
+- SharedPreferences now only used for device id and migration flags.
 - Notation migration: `GameHistoryService.migrateNotation` is currently a stub; existing records rely on lazy parsing.
 
 ## Strict API Contracts
@@ -154,7 +159,6 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 
 ## Repo Hygiene and Risks
 - Conflict artifacts exist (`*_conflict_current.*` and conflict build folders). Treat as non-authoritative.
-- Unused deps in `pubspec.yaml`: `drift`, `drift_flutter`, `go_router`, `uuid` (not referenced in `lib/`).
 - Encoding issues appear in docs and strings (mojibake). Keep separators consistent with `NotationCodec`.
 
 ## What To Update Together
