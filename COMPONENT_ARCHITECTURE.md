@@ -1,4 +1,4 @@
-﻿# Fortune 14/1 - Component Encapsulation & Reusability Strategy
+﻿# Foul & Fortune - Component Encapsulation & Reusability Strategy
 
 ## Core Principle
 **"Change it once, use it everywhere"** - Every UI element, setting control, and player interaction should be extracted into reusable widgets/components. No duplicate code, consistent behavior across the entire app.

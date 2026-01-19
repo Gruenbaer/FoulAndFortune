@@ -1,4 +1,4 @@
-# Deploy Release Script for Fortune 14/2
+# Deploy Release Script for Foul & Fortune
 # Automates: Build APK -> GitHub Release -> WhatsApp Notification
 
 param (
@@ -102,7 +102,7 @@ Copy-Item $apkPath $versionedApkPath -Force
 # 5. Create GitHub Release
 Write-Host "Publishing to GitHub..." -ForegroundColor Cyan
 $notesFile = [System.IO.Path]::GetTempFileName()
-Set-Content -Path $notesFile -Value $releaseNotes
+Set-Content -Path $notesFile -Value $releaseNotes -Encoding UTF8
 
 try {
     # GH CLI usually in PATH
@@ -142,7 +142,7 @@ if ($customNotes) {
 # --- WhatsApp ---
 if ($platformChoice -match "1|4") {
     Write-Host "Preparing WhatsApp..." -ForegroundColor Cyan
-    $waMessage = "*Fortune 14/2 Update v$version is live!*`n`n"
+    $waMessage = "*Foul & Fortune Update v$version is live!*`n`n"
     $waMessage += "*Whats New:*`n"
     $waMessage += "$notesText`n`n"
     $waMessage += "*Download:* $downloadUrl"
@@ -156,7 +156,7 @@ if ($platformChoice -match "1|4") {
 # --- Telegram ---
 if ($platformChoice -match "2|4") {
     Write-Host "Preparing Telegram..." -ForegroundColor Cyan
-    $tgMessage = "Fortune 14/2 Update v$version is live!`n`n"
+    $tgMessage = "Foul & Fortune Update v$version is live!`n`n"
     $tgMessage += "Whats New:`n"
     $tgMessage += "$notesText"
     # Telegram 'text' parameter is the message. 'url' is the preview link.
@@ -173,7 +173,7 @@ if ($platformChoice -match "2|4") {
 # --- Signal ---
 if ($platformChoice -match "3|4") {
     Write-Host "Preparing Signal..." -ForegroundColor Cyan
-    $sigMessage = "Fortune 14/2 Update v$version is live!`n`n"
+    $sigMessage = "Foul & Fortune Update v$version is live!`n`n"
     $sigMessage += "Whats New:`n"
     $sigMessage += "$notesText`n`n"
     $sigMessage += "Download: $downloadUrl"

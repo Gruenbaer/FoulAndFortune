@@ -54,24 +54,12 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     try {
       final currentSettings = Provider.of<GameSettings>(context, listen: false);
 
-      // Only load last used names if current settings are empty (they will be initially)
-      // and provider has non-empty names
-      if (_settings.player1Name.isEmpty &&
-          currentSettings.player1Name.isNotEmpty) {
-        setState(() {
-          _settings =
-              _settings.copyWith(player1Name: currentSettings.player1Name);
-        });
-      }
-
-      if (_settings.player2Name.isEmpty &&
-          currentSettings.player2Name.isNotEmpty) {
-        setState(() {
-          _settings =
-              _settings.copyWith(player2Name: currentSettings.player2Name);
-        });
-      }
-
+      // Initialize from provider settings to preserve theme, language, sound, etc.
+      // This ensures global preferences are maintained when starting a new game
+      setState(() {
+        _settings = currentSettings.copyWith();
+        _raceSliderValue = _settings.raceToScore.toDouble();
+      });
 
     } catch (e) {
       // Provider not available, ignore
