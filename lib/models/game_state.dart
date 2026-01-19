@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'foul_tracker.dart';
 import '../core/game_timer.dart';
+import '../core/game_history.dart';
 import 'achievement_manager.dart';
 import '../data/messages.dart';
 import 'game_settings.dart';
@@ -114,14 +115,13 @@ class GameState extends ChangeNotifier {
   // Inning Records for Score Card (structured data, no parsing needed)
   List<InningRecord> inningRecords = [];
 
-  // Undo/Redo Stacks
-  final List<GameSnapshot> _undoStack = [];
-  final List<GameSnapshot> _redoStack = [];
+  // Undo/Redo History (extracted to GameHistory)
+  final GameHistory<GameSnapshot> _history = GameHistory<GameSnapshot>();
 
   // UI Event Queue (Consumed by UI)
   final List<GameEvent> eventQueue = [];
 
-  bool get canUndo => _undoStack.isNotEmpty;
+  bool get canUndo => _history.canUndo;
 
   // Robust check for Break Foul availability
   // Only available at match start for the breaking player, before any balls potted or player switch
@@ -138,7 +138,7 @@ class GameState extends ChangeNotifier {
     // Only the breaking player can commit break fouls
     return breakingPlayerIndex == currentPlayerIndex;
   }
-  bool get canRedo => _redoStack.isNotEmpty;
+  bool get canRedo => _history.canRedo;
   
   // Auto-Save Callback
   VoidCallback? onSaveRequired;
@@ -332,8 +332,7 @@ class GameState extends ChangeNotifier {
   }
 
   void _pushState() {
-    _undoStack.add(GameSnapshot.fromState(this));
-    _redoStack.clear(); // clear redo on new action
+    _history.push(GameSnapshot.fromState(this));
     // State pushed means something is about to change, so we save AFTER the change usually. 
     // But methods calling _pushState will call notifyListeners (and should call onSaveRequired).
   }
@@ -343,31 +342,33 @@ class GameState extends ChangeNotifier {
   void undo() {
     if (!canUndo) return;
     final currentSnapshot = GameSnapshot.fromState(this);
-    _redoStack.add(currentSnapshot);
-
-    final snapshot = _undoStack.removeLast();
-    snapshot.restore(this);
+    final snapshot = _history.undo(currentSnapshot);
     
-    // If we're undoing from a won game, reset the game-over state
-    // so the game can continue or re-detect victory
-    if (gameOver) {
-      gameOver = false;
-      winner = null;
+    if (snapshot != null) {
+      snapshot.restore(this);
+      
+      // If we're undoing from a won game, reset the game-over state
+      // so the game can continue or re-detect victory
+      if (gameOver) {
+        gameOver = false;
+        winner = null;
+      }
+      
+      notifyListeners();
+      onSaveRequired?.call();
     }
-    
-    notifyListeners();
-    onSaveRequired?.call();
   }
 
   void redo() {
     if (!canRedo) return;
     final currentSnapshot = GameSnapshot.fromState(this);
-    _undoStack.add(currentSnapshot);
-
-    final snapshot = _redoStack.removeLast();
-    snapshot.restore(this);
-    notifyListeners();
-    onSaveRequired?.call();
+    final snapshot = _history.redo(currentSnapshot);
+    
+    if (snapshot != null) {
+      snapshot.restore(this);
+      notifyListeners();
+      onSaveRequired?.call();
+    }
   }
 
   void setFoulMode(FoulMode mode) {
