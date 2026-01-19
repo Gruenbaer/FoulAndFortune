@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../models/player.dart';
 import '../codecs/notation_codec.dart'; // For InningRecord
 import '../theme/fortune_theme.dart';
@@ -94,7 +95,9 @@ class ScoreCard extends StatelessWidget {
 
          } catch (e) {
            // Fallback if logic fails (e.g. valid codec error), just don't show live data
-           print('Error generating live notation: $e');
+           if (kDebugMode) {
+             debugPrint('Error generating live notation: $e');
+           }
          }
       }
     }

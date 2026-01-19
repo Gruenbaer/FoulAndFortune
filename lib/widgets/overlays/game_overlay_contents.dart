@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../theme/fortune_theme.dart';
 import 'splash_content.dart';
 import '../../l10n/app_localizations.dart';
@@ -37,7 +35,7 @@ class SafeSplashContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: 280,
         height: 320,
         child: CustomPaint(
@@ -51,8 +49,8 @@ class SafeSplashContent extends StatelessWidget {
 class GlowingShieldPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final glowColor = const Color(0xFF4DA21C);
-    final brightGreen = const Color(0xFF7FFF5D); // Even brighter
+    const glowColor = Color(0xFF4DA21C);
+    const brightGreen = Color(0xFF7FFF5D); // Even brighter
     final width = size.width;
     final height = size.height;
     

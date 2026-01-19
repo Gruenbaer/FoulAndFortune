@@ -38,7 +38,7 @@ class SettingsToggle extends StatelessWidget {
       subtitle: subtitle != null ? Text(subtitle!) : null,
       value: value,
       onChanged: onChanged,
-      activeColor: theme.secondary,
+      activeThumbColor: theme.secondary,
       activeTrackColor: theme.secondary.withValues(alpha: 0.5),
       inactiveThumbColor: theme.disabled,
       inactiveTrackColor: theme.primaryDark.withValues(alpha: 0.5),

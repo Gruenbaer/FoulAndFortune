@@ -386,15 +386,6 @@ class _GameEventOverlayState extends State<GameEventOverlay>
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
-                // Interactive content (Dialogs) should block.
-                // Splash content (ReRack, Foul, etc.) should NOT block touches.
-                // We check _currentEvent type.
-                
-                final bool isInteractive = _currentEvent is DecisionEvent || 
-                                         _currentEvent is WarningEvent || 
-                                         _currentEvent is TwoFoulsWarningEvent ||
-                                         _currentEvent is BreakFoulDecisionEvent;
-                
                 // User Request: Remove overlay blocking.
                 // We use IgnorePointer to let touches pass through to the game (which controls its own interactivity now).
                 return IgnorePointer(

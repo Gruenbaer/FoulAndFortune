@@ -5,7 +5,6 @@ import '../models/game_state.dart';
 // Explicit import needed after aliasing player_service
 import '../models/game_settings.dart';
 import '../models/achievement_manager.dart';
-import '../models/achievement.dart';
 import '../widgets/ball_button.dart';
 import '../widgets/player_plaque.dart';
 import '../widgets/hint_bubble.dart';

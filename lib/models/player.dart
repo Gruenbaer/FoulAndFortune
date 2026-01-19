@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class Player {
   final String name;
   int score;
@@ -89,7 +91,11 @@ class Player {
     lastAwardedPoints = points;
     
     // DEBUG: Log when this is called
-    print('DEBUG addInningPoints: points=$points, currentRun before=$currentRun');
+    if (kDebugMode) {
+      debugPrint(
+        'DEBUG addInningPoints: points=$points, currentRun before=$currentRun',
+      );
+    }
     
     // ═══════════════════════════════════════════════
     // CRITICAL: Update currentRun in real-time for LR display
@@ -103,7 +109,9 @@ class Player {
       consecutiveFouls = 0; // Legal points break foul streak
     }
     
-    print('DEBUG addInningPoints: currentRun after=$currentRun');
+    if (kDebugMode) {
+      debugPrint('DEBUG addInningPoints: currentRun after=$currentRun');
+    }
     updateCount++;
   }
 

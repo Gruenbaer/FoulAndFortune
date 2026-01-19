@@ -489,9 +489,7 @@ class GameState extends ChangeNotifier {
     inBreakSequence = false;
     
     // Set breaking player on first action if not set
-    if (breakingPlayerIndex == null) {
-      breakingPlayerIndex = currentPlayerIndex;
-    }
+    breakingPlayerIndex ??= currentPlayerIndex;
     
     // Permanently disable break fouls if any balls are potted
     if (ballsPocketed > 0 && breakFoulStillAvailable) {
