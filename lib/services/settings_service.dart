@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import '../data/app_database.dart';
 import '../data/device_id_service.dart';
 import '../data/outbox_service.dart';
@@ -15,15 +16,20 @@ class SettingsService {
   final OutboxService _outbox;
 
   Future<GameSettings> loadSettings() async {
-    final row = await (_db.select(_db.settings)
-          ..where((settings) => settings.id.equals(_settingsId)))
-        .getSingleOrNull();
-    if (row == null) {
-      final defaults = GameSettings();
-      await saveSettings(defaults);
-      return defaults;
+    try {
+      final row = await (_db.select(_db.settings)
+            ..where((settings) => settings.id.equals(_settingsId)))
+          .getSingleOrNull();
+      if (row == null) {
+        final defaults = GameSettings();
+        await saveSettings(defaults);
+        return defaults;
+      }
+      return _fromRow(row);
+    } catch (e) {
+      debugPrint('Error loading settings: $e');
+      return GameSettings();
     }
-    return _fromRow(row);
   }
 
   Future<void> saveSettings(GameSettings settings) async {

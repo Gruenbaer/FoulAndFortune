@@ -4,7 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/achievement.dart';
 import '../models/game_record.dart';
-import '../models/game_settings.dart';
+import '../models/game_settings.dart' hide Player;
 import '../services/player_service.dart';
 import 'app_database.dart';
 
