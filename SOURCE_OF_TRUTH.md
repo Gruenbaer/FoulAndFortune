@@ -81,19 +81,21 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 - `serialize()` requires at least one segment and throws `ArgumentError` otherwise.
 
 ### GameHistoryService / GameRecord
-- Storage key: `game_history`. `saveGame()` upserts by `id`, keeps max 100 games.
-- `getAllGames()` sorts by `startTime` descending.
+- Persistence: `games` table keyed by `id` (string). `saveGame()` upserts by `id`, keeps max 100 non-deleted games.
+- `getAllGames()` sorts by `startTime` descending; `getActiveGames()` and `getCompletedGames()` filter by `isCompleted`.
 - `snapshot` stores `GameState.toJson()` for in-progress games only; completed games should have `snapshot` null.
+- Queries ignore rows where `deletedAt` is set; current deletes remove rows outright.
 
 ### SettingsService
-- Storage key: `game_settings`. Invalid or missing data falls back to defaults.
+- Persistence: `settings` table with a single row id `default`. Invalid or missing data falls back to defaults.
 
 ### PlayerService
-- Storage key: `players`. Player names must be unique case-insensitively.
+- Persistence: `players` table keyed by `id` (UUID string).
+- Player names must be unique case-insensitively among non-deleted rows.
 - This Player model is different from the in-game `Player` in `lib/models/player.dart`.
 
 ### AchievementManager
-- Storage key: `achievements`. `unlock()` persists and triggers `onAchievementUnlocked` if set.
+- Persistence: `achievements` table keyed by definition id. `unlock()` persists and triggers `onAchievementUnlocked` if set.
 
 ### GameEventOverlay (lib/widgets/game_event_overlay.dart)
 - Consumes `GameState` events via `consumeEvents()` and drives overlays.
@@ -166,3 +168,4 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 - Scoring logic changes must update `GAME_RULES.md`, tests, and `SCORING_RULES_CHECKLIST.md`.
 - Notation changes must update `NotationCodec`, tests, and any docs referencing the format.
 - Theme or widget refactors should update `COMPONENT_ARCHITECTURE.md` if they change the plan.
+- Database schema changes must update `lib/data/app_database.dart`, migrations, `supabase/schema.sql` (if sync schema mirrors local), and regenerate `lib/data/app_database.g.dart`.

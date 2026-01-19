@@ -9,7 +9,7 @@ This document provides a comprehensive technical overview of the **Foul & Fortun
 *   **Framework**: [Flutter](https://flutter.dev/) (Dart SDK >=3.0.0 <4.0.0)
 *   **Environment Management**: [Puro](https://puro.dev/) is used for Flutter version management.
 *   **State Management**: `provider` (ChangeNotifier pattern)
-*   **Persistence**: `shared_preferences` (Local storage for settings and game history)
+*   **Persistence**: `drift` + `drift_flutter` (SQLite/IndexedDB). `shared_preferences` only for device id and migration flags.
 *   **Localization**: `flutter_localizations`, `intl`
 *   **Assets**: `flutter_svg` (Vector graphics)
 *   **Fonts**: `google_fonts`
@@ -26,15 +26,21 @@ The project follows a standard scalable Flutter architecture separation concerns
     *   `player.dart`: Model for player statistics and score.
     *   `game_settings.dart`: Configuration model (Race to score, rules).
     *   `achievement_manager.dart`: Handles unlocking achievements based on game events.
+*   **`data/`**: Drift database, migration, and sync scaffolding.
+    *   `app_database.dart`: Drift schema and database instance.
+    *   `db_converters.dart`: JSON/list converters for Drift.
+    *   `device_id_service.dart`: Stable device identifier for sync metadata.
+    *   `outbox_service.dart`: Local outbox for future cloud sync.
+    *   `prefs_migration_service.dart`: Imports legacy `SharedPreferences` data.
 *   **`screens/`**: Full-page widgets.
     *   `game_screen.dart`: Main scoring interface.
     *   `home_screen.dart`: Landing page / Menu.
     *   `settings_screen.dart`: Configuration UI.
     *   `details_screen.dart`: Match statistics view.
 *   **`services/`**: Data persistence and helper logic.
-    *   `game_history_service.dart`: Handles saving/loading games via `SharedPreferences`.
-    *   `settings_service.dart`: Persists user preferences.
-    *   `player_service.dart`: Aggregates long-term player stats.
+    *   `game_history_service.dart`: Reads/writes `games` via Drift.
+    *   `settings_service.dart`: Persists `GameSettings` in `settings`.
+    *   `player_service.dart`: Aggregates player stats in `players`.
 *   **`widgets/`**: Reusable UI components.
     *   `steampunk_widgets.dart`: Legacy themed widgets (migrating to `FortuneTheme` system).
     *   `ball_button.dart`: Interactive billiard ball widget.
@@ -73,9 +79,14 @@ Implemented using the **Memento Pattern**.
 *   **Action**: Every state-changing action pushes a snapshot before mutating state.
 
 ### 4.4 Data Persistence
-The app uses a dual-layer persistence strategy:
-1.  **Preferences**: `SettingsService` saves `GameSettings` (JSON).
-2.  **History**: `GameHistoryService` manages `GameRecord` objects serialized as JSON.
+The app uses a local database via Drift:
+1.  **Settings**: `SettingsService` stores a single row in `settings` (id `default`).
+2.  **History**: `GameHistoryService` manages `games` (max 100 recent).
+3.  **Players**: `PlayerService` stores stats in `players`.
+4.  **Achievements**: `AchievementManager` persists `achievements`.
+5.  **Migration**: `PrefsMigrationService` imports legacy `SharedPreferences` data once.
+6.  **Sync Scaffolding**: `sync_outbox` and `sync_state` tables support future cloud sync.
+7.  **Supabase**: Draft cloud schema lives in `supabase/schema.sql`.
 
 ## 5. UI/UX Details
 The app supports **multiple visual themes** managed through `FortuneTheme`:
@@ -101,5 +112,5 @@ The app supports **multiple visual themes** managed through `FortuneTheme`:
 4.  `GameState.loadFromJson` hydrates the state.
 
 ## 7. Future Considerations
-*   **Database**: Migrating `SharedPreferences` to `sqlite` (drift/sqflite) is recommended for large histories.
-*   **Stats API**: Migration to UUIDs for players.
+*   **Cloud Sync**: Process the outbox and wire a backend (Supabase schema in `supabase/schema.sql`).
+*   **Schema Migrations**: Add Drift migrations as the DB evolves.

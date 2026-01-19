@@ -71,7 +71,9 @@ puro flutter doctor
 
 Die wichtigsten Abhängigkeiten werden in `pubspec.yaml` verwaltet:
 - `provider` - Zustandsverwaltung
-- `shared_preferences` - Lokaler Speicher
+- `drift` + `drift_flutter` - Lokale Datenbank (SQLite/IndexedDB)
+- `sqlite3_flutter_libs` - SQLite bindings
+- `shared_preferences` - Device ID + Legacy-Migrationsflags
 - `google_fonts` - Individuelle Typografie
 - `confetti` - Erfolgsanimationen
 - `audioplayers` - Soundeffekte
