@@ -1,5 +1,8 @@
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
+import '../data/app_database.dart';
+import '../data/device_id_service.dart';
+import '../data/outbox_service.dart';
 
 class Player {
   final String id;
@@ -95,82 +98,189 @@ class Player {
 }
 
 class PlayerService {
-  static const String _key = 'players';
+  PlayerService({AppDatabase? db, OutboxService? outbox})
+      : _db = db ?? appDatabase,
+        _outbox = outbox ?? OutboxService(db: db ?? appDatabase);
+
+  final AppDatabase _db;
+  final OutboxService _outbox;
 
   Future<List<Player>> getAllPlayers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? playersJson = prefs.getString(_key);
-    
-    if (playersJson == null) return [];
-    
-    final List<dynamic> decoded = json.decode(playersJson);
-    return decoded.map((json) => Player.fromJson(json)).toList();
+    final rows = await (_db.select(_db.players)
+          ..where((player) => player.deletedAt.isNull())
+          ..orderBy([(player) => OrderingTerm.desc(player.createdAt)]))
+        .get();
+    return rows.map(_fromRow).toList();
   }
 
   Future<void> savePlayers(List<Player> players) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String encoded = json.encode(players.map((p) => p.toJson()).toList());
-    await prefs.setString(_key, encoded);
+    for (final player in players) {
+      await _upsertPlayer(player, recordOutbox: false);
+    }
   }
 
   Future<Player> createPlayer(String name) async {
-    final players = await getAllPlayers();
-    
-    // Check if player already exists
-    if (players.any((p) => p.name.toLowerCase() == name.toLowerCase())) {
+    final exists = await _getPlayerByName(name);
+    if (exists != null) {
       throw Exception('Player with this name already exists');
     }
-    
+
     final newPlayer = Player(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       name: name,
     );
-    
-    players.add(newPlayer);
-    await savePlayers(players);
-    
+
+    await _upsertPlayer(newPlayer, recordOutbox: true);
     return newPlayer;
   }
 
   Future<void> deletePlayer(String id) async {
-    final players = await getAllPlayers();
-    players.removeWhere((p) => p.id == id);
-    await savePlayers(players);
+    final existing = await (_db.select(_db.players)
+          ..where((player) => player.id.equals(id)))
+        .getSingleOrNull();
+    if (existing == null) {
+      return;
+    }
+
+    final now = DateTime.now();
+    final deviceId = await DeviceIdService.instance.getDeviceId();
+    final revision = existing.revision + 1;
+    final entry = PlayersCompanion(
+      deletedAt: Value(now),
+      updatedAt: Value(now),
+      deviceId: Value(deviceId),
+      revision: Value(revision),
+    );
+    await (_db.update(_db.players)..where((player) => player.id.equals(id)))
+        .write(entry);
+
+    await _outbox.record(
+      entityType: 'player',
+      entityId: id,
+      operation: 'delete',
+    );
   }
 
   Future<void> updatePlayer(Player player) async {
-    final players = await getAllPlayers();
-    final index = players.indexWhere((p) => p.id == player.id);
-    
-    if (index != -1) {
-      players[index] = player;
-      await savePlayers(players);
-    }
+    await _upsertPlayer(player, recordOutbox: true);
   }
 
   Future<void> updatePlayerName(String id, String newName) async {
-    final players = await getAllPlayers();
-    
-    // Check if another player already has this name
-    if (players.any((p) => p.id != id && p.name.toLowerCase() == newName.toLowerCase())) {
+    final lowerName = newName.toLowerCase();
+    final duplicate = await (_db.select(_db.players)
+          ..where((player) =>
+              player.name.lower().equals(lowerName) &
+              player.id.equals(id).not() &
+              player.deletedAt.isNull()))
+        .getSingleOrNull();
+    if (duplicate != null) {
       throw Exception('Player with this name already exists');
     }
-    
-    final index = players.indexWhere((p) => p.id == id);
-    if (index != -1) {
-      players[index] = players[index].copyWith(name: newName);
-      await savePlayers(players);
+
+    final existing = await (_db.select(_db.players)
+          ..where((player) => player.id.equals(id)))
+        .getSingleOrNull();
+    if (existing == null) {
+      return;
     }
+
+    final now = DateTime.now();
+    final deviceId = await DeviceIdService.instance.getDeviceId();
+    final revision = existing.revision + 1;
+    final entry = PlayersCompanion(
+      name: Value(newName),
+      updatedAt: Value(now),
+      deviceId: Value(deviceId),
+      revision: Value(revision),
+    );
+    await (_db.update(_db.players)..where((player) => player.id.equals(id)))
+        .write(entry);
+
+    await _outbox.record(
+      entityType: 'player',
+      entityId: id,
+      operation: 'upsert',
+      payload: {
+        'id': id,
+        'name': newName,
+      },
+    );
   }
 
   Future<Player?> getPlayerByName(String name) async {
-    final players = await getAllPlayers();
-    try {
-      return players.firstWhere(
-        (p) => p.name.toLowerCase() == name.toLowerCase(),
-      );
-    } catch (e) {
+    return _getPlayerByName(name);
+  }
+
+  Future<Player?> _getPlayerByName(String name) async {
+    final lowerName = name.toLowerCase();
+    final row = await (_db.select(_db.players)
+          ..where((player) =>
+              player.name.lower().equals(lowerName) &
+              player.deletedAt.isNull()))
+        .getSingleOrNull();
+    if (row == null) {
       return null;
     }
+    return _fromRow(row);
+  }
+
+  Future<void> _upsertPlayer(Player player,
+      {required bool recordOutbox}) async {
+    final now = DateTime.now();
+    final deviceId = await DeviceIdService.instance.getDeviceId();
+    final existing = await (_db.select(_db.players)
+          ..where((row) => row.id.equals(player.id)))
+        .getSingleOrNull();
+    final createdAt = existing?.createdAt ?? player.createdAt;
+    final revision = (existing?.revision ?? 0) + 1;
+
+    final entry = PlayersCompanion(
+      id: Value(player.id),
+      name: Value(player.name),
+      createdAt: Value(createdAt),
+      updatedAt: Value(now),
+      deletedAt: const Value.absent(),
+      deviceId: Value(deviceId),
+      revision: Value(revision),
+      gamesPlayed: Value(player.gamesPlayed),
+      gamesWon: Value(player.gamesWon),
+      totalPoints: Value(player.totalPoints),
+      totalInnings: Value(player.totalInnings),
+      totalFouls: Value(player.totalFouls),
+      totalSaves: Value(player.totalSaves),
+      highestRun: Value(player.highestRun),
+    );
+
+    if (existing == null) {
+      await _db.into(_db.players).insert(entry);
+    } else {
+      await (_db.update(_db.players)
+            ..where((row) => row.id.equals(player.id)))
+          .write(entry);
+    }
+
+    if (recordOutbox) {
+      await _outbox.record(
+        entityType: 'player',
+        entityId: player.id,
+        operation: 'upsert',
+        payload: player.toJson(),
+      );
+    }
+  }
+
+  Player _fromRow(PlayerRow row) {
+    return Player(
+      id: row.id,
+      name: row.name,
+      createdAt: row.createdAt,
+      gamesPlayed: row.gamesPlayed,
+      gamesWon: row.gamesWon,
+      totalPoints: row.totalPoints,
+      totalInnings: row.totalInnings,
+      totalFouls: row.totalFouls,
+      totalSaves: row.totalSaves,
+      highestRun: row.highestRun,
+    );
   }
 }

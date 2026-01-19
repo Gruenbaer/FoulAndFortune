@@ -1,139 +1,165 @@
+import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import '../data/app_database.dart';
+import '../data/device_id_service.dart';
+import '../data/outbox_service.dart';
 import '../models/game_record.dart';
 
 class GameHistoryService {
-  static const String _key = 'game_history';
   static const String _migrationKey = 'notation_v2_migrated';
-  static const int _maxGames = 100; // Keep only 100 most recent games
+  static const int _maxGames = 100;
 
-  /// Check if notation V2 migration has been performed
+  GameHistoryService({AppDatabase? db, OutboxService? outbox})
+      : _db = db ?? appDatabase,
+        _outbox = outbox ?? OutboxService(db: db ?? appDatabase);
+
+  final AppDatabase _db;
+  final OutboxService _outbox;
+
   Future<bool> isMigrated() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_migrationKey) ?? false;
   }
 
-  /// Mark notation V2 migration as complete
   Future<void> markMigrated() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_migrationKey, true);
   }
 
-  /// Migrate all games from legacy notation to canonical V2
-  /// 
-  /// Returns the number of games migrated.
-  /// Throws [FormatException] if migration fails for any game.
   Future<int> migrateNotation() async {
-    // TODO: Migration disabled - GameRecord doesn't store inningRecords directly.
-    // Inning notation is stored within the snapshot->inningRecords structure.
-    // To properly migrate, we would need to:
-    // 1. Deserialize each game's snapshot
-    // 2. Extract the inningRecords list
-    // 3. Migrate each notation string
-    // 4. Re-serialize and save snapshot
-    // 
-    // For now, new games will use canonical notation automatically.
-    // Existing games will parse legacy notation on-demand when loaded.
-    
     await markMigrated();
-    return 0; // No games migrated
+    return 0;
   }
 
-  // Get all game records
   Future<List<GameRecord>> getAllGames() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? historyJson = prefs.getString(_key);
-    
-    if (historyJson == null) return [];
-    
-    try {
-      final List<dynamic> decoded = json.decode(historyJson);
-      final games = decoded.map((json) => GameRecord.fromJson(json)).toList();
-      
-      // Sort by start time (newest first)
-      games.sort((a, b) => b.startTime.compareTo(a.startTime));
-      return games;
-    } catch (e) {
-      debugPrint('Error loading game history: \$e');
-      return [];
-    }
+    final rows = await (_db.select(_db.games)
+          ..where((game) => game.deletedAt.isNull())
+          ..orderBy([(game) => OrderingTerm.desc(game.startTime)]))
+        .get();
+    return rows.map(_fromRow).toList();
   }
 
-  // Get only active (in-progress) games
   Future<List<GameRecord>> getActiveGames() async {
-    final allGames = await getAllGames();
-    return allGames.where((game) => !game.isCompleted).toList();
+    final rows = await (_db.select(_db.games)
+          ..where((game) =>
+              game.isCompleted.equals(false) & game.deletedAt.isNull())
+          ..orderBy([(game) => OrderingTerm.desc(game.startTime)]))
+        .get();
+    return rows.map(_fromRow).toList();
   }
 
-  // Get only completed games
   Future<List<GameRecord>> getCompletedGames() async {
-    final allGames = await getAllGames();
-    return allGames.where((game) => game.isCompleted).toList();
+    final rows = await (_db.select(_db.games)
+          ..where(
+              (game) => game.isCompleted.equals(true) & game.deletedAt.isNull())
+          ..orderBy([(game) => OrderingTerm.desc(game.startTime)]))
+        .get();
+    return rows.map(_fromRow).toList();
   }
 
-  // Save a game record
   Future<void> saveGame(GameRecord game) async {
-    final games = await getAllGames();
-    
-    // Check if game already exists (update it)
-    final existingIndex = games.indexWhere((g) => g.id == game.id);
-    if (existingIndex != -1) {
-      games[existingIndex] = game;
+    final now = DateTime.now();
+    final deviceId = await DeviceIdService.instance.getDeviceId();
+    final existing = await (_db.select(_db.games)
+          ..where((row) => row.id.equals(game.id)))
+        .getSingleOrNull();
+    final createdAt = existing?.createdAt ?? now;
+    final revision = (existing?.revision ?? 0) + 1;
+    final player1Id =
+        existing?.player1Id ?? await _findPlayerIdByName(game.player1Name);
+    final player2Id =
+        existing?.player2Id ?? await _findPlayerIdByName(game.player2Name);
+
+    final entry = GamesCompanion(
+      id: Value(game.id),
+      player1Id: Value(player1Id),
+      player2Id: Value(player2Id),
+      player1Name: Value(game.player1Name),
+      player2Name: Value(game.player2Name),
+      player1Score: Value(game.player1Score),
+      player2Score: Value(game.player2Score),
+      startTime: Value(game.startTime),
+      endTime: Value(game.endTime),
+      isCompleted: Value(game.isCompleted),
+      winner: Value(game.winner),
+      raceToScore: Value(game.raceToScore),
+      player1Innings: Value(game.player1Innings),
+      player2Innings: Value(game.player2Innings),
+      player1HighestRun: Value(game.player1HighestRun),
+      player2HighestRun: Value(game.player2HighestRun),
+      player1Fouls: Value(game.player1Fouls),
+      player2Fouls: Value(game.player2Fouls),
+      activeBalls: Value(game.activeBalls),
+      player1IsActive: Value(game.player1IsActive),
+      snapshot: Value(game.snapshot),
+      createdAt: Value(createdAt),
+      updatedAt: Value(now),
+      deletedAt: const Value.absent(),
+      deviceId: Value(deviceId),
+      revision: Value(revision),
+    );
+
+    if (existing == null) {
+      await _db.into(_db.games).insert(entry);
     } else {
-      games.insert(0, game); // Add to beginning (newest first)
+      await (_db.update(_db.games)..where((row) => row.id.equals(game.id)))
+          .write(entry);
     }
-    
-    // Cleanup old games if exceeded max
-    await _cleanup(games);
-    
-    // Save to SharedPreferences
-    await _saveGames(games);
+
+    await _cleanup();
+    await _outbox.record(
+      entityType: 'game',
+      entityId: game.id,
+      operation: 'upsert',
+      payload: _gamePayload(game,
+          player1Id: player1Id, player2Id: player2Id),
+    );
   }
 
-  // Delete a specific game
   Future<void> deleteGame(String id) async {
-    final games = await getAllGames();
-    games.removeWhere((g) => g.id == id);
-    await _saveGames(games);
+    final now = DateTime.now();
+    final deleted = await (_db.delete(_db.games)
+          ..where((row) => row.id.equals(id)))
+        .go();
+    if (deleted == 0) {
+      return;
+    }
+    await _outbox.record(
+      entityType: 'game',
+      entityId: id,
+      operation: 'delete',
+      payload: {'deletedAt': now.toIso8601String()},
+    );
   }
 
-  // Clear all game history
   Future<void> clearAllHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
-    await prefs.remove(_migrationKey);
+    final rows = await (_db.select(_db.games)).get();
+    if (rows.isEmpty) {
+      return;
+    }
+
+    await _db.delete(_db.games).go();
+    final now = DateTime.now();
+    for (final row in rows) {
+      await _outbox.record(
+        entityType: 'game',
+        entityId: row.id,
+        operation: 'delete',
+        payload: {'deletedAt': now.toIso8601String()},
+      );
+    }
   }
 
-  // Get game by ID
   Future<GameRecord?> getGameById(String id) async {
-    final games = await getAllGames();
-    try {
-      return games.firstWhere((g) => g.id == id);
-    } catch (e) {
-      return null;
-    }
+    final row = await (_db.select(_db.games)
+          ..where((game) =>
+              game.id.equals(id) & game.deletedAt.isNull()))
+        .getSingleOrNull();
+    return row == null ? null : _fromRow(row);
   }
 
-  // Private: Save games to storage
-  Future<void> _saveGames(List<GameRecord> games) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String encoded = json.encode(games.map((g) => g.toJson()).toList());
-    await prefs.setString(_key, encoded);
-  }
-
-  // Private: Auto-cleanup old games (keep only max number)
-  Future<void> _cleanup(List<GameRecord> games) async {
-    if (games.length > _maxGames) {
-      // Remove oldest games beyond the limit
-      games.removeRange(_maxGames, games.length);
-    }
-  }
-
-  // Get statistics summary
   Future<Map<String, dynamic>> getStatsSummary() async {
     final games = await getCompletedGames();
-    
     if (games.isEmpty) {
       return {
         'totalGames': 0,
@@ -154,5 +180,72 @@ class GameHistoryService {
         milliseconds: totalDuration.inMilliseconds ~/ games.length,
       ),
     };
+  }
+
+  GameRecord _fromRow(GameRow row) {
+    return GameRecord(
+      id: row.id,
+      player1Name: row.player1Name,
+      player2Name: row.player2Name,
+      player1Score: row.player1Score,
+      player2Score: row.player2Score,
+      startTime: row.startTime,
+      endTime: row.endTime,
+      isCompleted: row.isCompleted,
+      winner: row.winner,
+      raceToScore: row.raceToScore,
+      player1Innings: row.player1Innings,
+      player2Innings: row.player2Innings,
+      player1HighestRun: row.player1HighestRun,
+      player2HighestRun: row.player2HighestRun,
+      player1Fouls: row.player1Fouls,
+      player2Fouls: row.player2Fouls,
+      activeBalls: row.activeBalls,
+      player1IsActive: row.player1IsActive,
+      snapshot: row.snapshot,
+    );
+  }
+
+  Future<void> _cleanup() async {
+    final rows = await (_db.select(_db.games)
+          ..where((game) => game.deletedAt.isNull())
+          ..orderBy([(game) => OrderingTerm.desc(game.startTime)]))
+        .get();
+    if (rows.length <= _maxGames) {
+      return;
+    }
+
+    final toRemove = rows.sublist(_maxGames);
+    for (final row in toRemove) {
+      await _db.delete(_db.games).delete(row);
+      await _outbox.record(
+        entityType: 'game',
+        entityId: row.id,
+        operation: 'delete',
+        payload: {'deletedAt': DateTime.now().toIso8601String()},
+      );
+    }
+  }
+
+  Future<String?> _findPlayerIdByName(String name) async {
+    final lowerName = name.toLowerCase();
+    final row = await (_db.select(_db.players)
+          ..where((player) =>
+              player.name.lower().equals(lowerName) &
+              player.deletedAt.isNull()))
+        .getSingleOrNull();
+    return row?.id;
+  }
+
+  Map<String, dynamic> _gamePayload(GameRecord game,
+      {String? player1Id, String? player2Id}) {
+    final payload = Map<String, dynamic>.from(game.toJson());
+    if (player1Id != null) {
+      payload['player1Id'] = player1Id;
+    }
+    if (player2Id != null) {
+      payload['player2Id'] = player2Id;
+    }
+    return payload;
   }
 }
