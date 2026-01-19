@@ -1,7 +1,7 @@
 # Multi-Game Refactor - Execution Log
 
 **Started**: 2026-01-19  
-**Status**: IN PROGRESS - Phase 0  
+**Status**: IN PROGRESS - Phase 1.2  
 **Current Developer**: Antigravity AI
 
 ---
@@ -12,7 +12,8 @@
 |-------|--------|---------|-----------|---------|
 | Phase 0 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (95bf76a) |
 | Phase 1.1 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (6c6ef29) |
-| Phase 1.2-1.4 | ⏸️ NOT STARTED | - | - | 0 |
+| Phase 1.2 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (10d58e0) |
+| Phase 1.3-1.4 | ⏸️ NOT STARTED | - | - | 0 |
 | Phase 2 | ⏸️ NOT STARTED | - | - | 0 |
 | Phase 3 | ⏸️ NOT STARTED | - | - | 0 |
 | Phase 4 | ⏸️ NOT STARTED | - | - | 0 |
@@ -101,11 +102,23 @@
 - Bugs fixed: ✅ 2/2
 - Ready for Phase 1.2-1.4
 
+#### Phase 1.2 - Extract GameHistory (COMPLETE)
+**Evening:**
+- Integrated existing `lib/core/game_history.dart` (was already created with generic design)
+- Replaced `_undoStack` and `_redoStack` with `GameHistory<GameSnapshot>` instance
+- Delegated `canUndo`/`canRedo`/`undo()`/`redo()` to `_history`
+- Fixed `VoidCallback` typedef conflict (removed duplicate from game_history.dart)
+- All 82 tests passing
+- Commit: 10d58e0
+
+**Key Changes:**
+- `lib/models/game_state.dart`: Removed 8 lines of stack management, added delegation
+- `lib/core/game_history.dart`: Removed duplicate VoidCallback typedef
+- Zero behavioral changes - undo/redo works identically
+
 #### Next Steps
-- Phase 1.2: Extract GameHistory (undo/redo) - ON HOLD
-- Phase 1.3: Extract EventManager - ON HOLD  
-- Phase 1.4: Extract TableState - ON HOLD
-- User to test on emulator before continuing
+- Phase 1.3: Extract EventManager - READY
+- Phase 1.4: Extract TableState - READY
 
 ---
 

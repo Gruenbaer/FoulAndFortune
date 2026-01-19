@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:foulandfortune/models/game_state.dart';
+import 'package:foulandfortune/core/events/game_event.dart'; // Event classes
 import 'package:foulandfortune/codecs/notation_codec.dart'; // For FoulType
 import 'package:foulandfortune/widgets/overlays/game_overlay_contents.dart';
 import 'package:foulandfortune/widgets/themed_widgets.dart'; // For ThemedButton

@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'foul_tracker.dart';
 import '../core/game_timer.dart';
 import '../core/game_history.dart';
+import '../core/event_manager.dart';
+import '../core/events/game_event.dart';
 import 'achievement_manager.dart';
 import '../data/messages.dart';
 import 'game_settings.dart';
@@ -11,54 +13,7 @@ import '../codecs/notation_codec.dart';
 enum FoulMode { none, normal, severe }
 // FoulType now imported from '../codecs/notation_codec.dart'
 // (includes: none, normal, breakFoul, threeFouls)
-
-// Event System for UI Animations
-abstract class GameEvent {}
-
-class FoulEvent extends GameEvent {
-  final Player player;
-  final int points;
-  final FoulType type;
-  final int? positivePoints; // Optional: balls pocketed for breakdown display
-  final int? penalty; // Optional: foul penalty for breakdown display
-
-  FoulEvent(this.player, this.points, this.type,
-      {this.positivePoints, this.penalty});
-}
-
-class TwoFoulsWarningEvent extends GameEvent {}
-
-class WarningEvent extends GameEvent {
-  final String title;
-  final String message;
-  WarningEvent(this.title, this.message);
-}
-
-class ReRackEvent extends GameEvent {
-  final String type; // "14.1 Continuous", "After Foul", "Auto/Safe"
-  ReRackEvent(this.type);
-}
-
-class DecisionEvent extends GameEvent {
-  final String title;
-  final String message;
-  final List<String> options;
-  final Function(int) onOptionSelected;
-
-  DecisionEvent(this.title, this.message, this.options, this.onOptionSelected);
-}
-
-class BreakFoulDecisionEvent extends GameEvent {
-    final List<String> options;
-    final Function(int) onOptionSelected;
-    BreakFoulDecisionEvent(this.options, this.onOptionSelected);
-}
-
-class SafeEvent extends GameEvent {}
-
-// Inning Record for Score Card (replaces log parsing)
-// InningRecord is now imported from '../codecs/notation_codec.dart'
-// (Extended version with segments, safe, foul fields)
+// GameEvent classes now imported from '../core/events/game_event.dart'
 
 class GameState extends ChangeNotifier {
   GameSettings settings;
@@ -118,8 +73,8 @@ class GameState extends ChangeNotifier {
   // Undo/Redo History (extracted to GameHistory)
   final GameHistory<GameSnapshot> _history = GameHistory<GameSnapshot>();
 
-  // UI Event Queue (Consumed by UI)
-  final List<GameEvent> eventQueue = [];
+  // UI Event Manager (extracted to EventManager)
+  final EventManager _events = EventManager();
 
   bool get canUndo => _history.canUndo;
 
@@ -397,7 +352,7 @@ class GameState extends ChangeNotifier {
       isSafeMode = false; // Reset mode
       resetBreakFoulError();
 
-      eventQueue.add(SafeEvent()); // Queue animation
+      _events.add(SafeEvent()); // Queue animation
       _switchPlayer(); // This will call _finalizeInning
       notifyListeners();
     }
@@ -437,13 +392,13 @@ class GameState extends ChangeNotifier {
       currentPlayer.setFoulPenalty(currentPlayer.inningBreakFoulCount * -2);
       
       _logAction('${currentPlayer.name}: Break Foul #${currentPlayer.inningBreakFoulCount} (-2 pts)');
-      eventQueue.add(FoulEvent(currentPlayer, -2, FoulType.breakFoul));
+      _events.add(FoulEvent(currentPlayer, -2, FoulType.breakFoul));
 
       // Decision: Who breaks next?
       final p1 = players[0];
       final p2 = players[1];
       
-      eventQueue.add(BreakFoulDecisionEvent(
+      _events.add(BreakFoulDecisionEvent(
         [p1.name, p2.name],
         (selectedIndex) {
              handleBreakFoulDecision(selectedIndex);
@@ -489,7 +444,7 @@ class GameState extends ChangeNotifier {
       // Only add -1 FoulEvent if NOT triggering three-foul penalty
       // (Three-foul event with -16 will be added in _finalizeInning)
       if (!willTriggerThreeFouls) {
-        eventQueue.add(FoulEvent(currentPlayer, -1, FoulType.normal));
+        _events.add(FoulEvent(currentPlayer, -1, FoulType.normal));
       }
 
       // The actual 3-foul logic and -16 event is handled in _finalizeInning
@@ -499,7 +454,7 @@ class GameState extends ChangeNotifier {
     if (currentSafeMode) {
       currentPlayer.inningHasSafe = true;
       currentPlayer.incrementSaves();
-      eventQueue.add(SafeEvent()); // Show safe splash
+      _events.add(SafeEvent()); // Show safe splash
     }
 
     // HANDLE RE-RACK
@@ -511,7 +466,7 @@ class GameState extends ChangeNotifier {
       currentPlayer.inningPoints = 0; 
       currentPlayer.inningHasReRack = true;
       
-      eventQueue.add(ReRackEvent("reRack"));
+      _events.add(ReRackEvent("reRack"));
       _logAction('${currentPlayer.name}: Re-rack');
       // CANONICAL: For regular re-rack (Ball 1), show ONLY the 1 ball.
       // Refill to 15 happens in finalizeReRack() after animation.
@@ -531,7 +486,7 @@ class GameState extends ChangeNotifier {
       // Cleared table (Ball 0 Double Sack)
       turnEnded = false;
       _updateRackCount(0); // Clear immediately so balls vanish
-      eventQueue.add(ReRackEvent("tableCleared"));
+      _events.add(ReRackEvent("tableCleared"));
       _logAction('${currentPlayer.name}: Cleared table');
     } else {
       // Any other number (2-14, 15):
@@ -609,7 +564,7 @@ class GameState extends ChangeNotifier {
     bool termModeActive = isSafeMode || foulMode != FoulMode.none;
     if (termModeActive && (ballNumber == 0 || ballNumber == 1)) {
         debugPrint('ERROR: Mutual Exclusion - Cannot tap 0/1 during Safe/Foul');
-        eventQueue.add(WarningEvent(
+        _events.add(WarningEvent(
           'actionRestrictedTitle', 
           'terminatorExclusionMessage' 
         ));
@@ -693,7 +648,7 @@ class GameState extends ChangeNotifier {
     // Explicitly Clear Balls BEFORE Re-Rack Animation
     // So balls disappear immediately when white is tapped
     _updateRackCount(0);
-    eventQueue.add(ReRackEvent('reRack'));
+    _events.add(ReRackEvent('reRack'));
     // Reset rack to 15 balls happens in finalizeReRack() after animation
     
     notifyListeners();
@@ -780,7 +735,7 @@ class GameState extends ChangeNotifier {
       // Add 3-foul event if triggered
       if (willTriggerThreeFouls) {
         player.inningHasThreeFouls = true; // Mark for notation "TF"
-        eventQueue.add(FoulEvent(player, -16, FoulType.threeFouls, 
+        _events.add(FoulEvent(player, -16, FoulType.threeFouls, 
           positivePoints: 0, penalty: -16));
       }
     } else {
@@ -941,7 +896,7 @@ class GameState extends ChangeNotifier {
   // Check for 2-Foul Warning upon entering turn (Logical check on new player)
   if (foulTracker.threeFoulRuleEnabled &&
       newPlayer.consecutiveFouls == 2) {
-    eventQueue.add(TwoFoulsWarningEvent());
+    _events.add(TwoFoulsWarningEvent());
   }
   
   notifyListeners();
@@ -949,9 +904,7 @@ class GameState extends ChangeNotifier {
 
   // Method to consume events (UI calls this)
   List<GameEvent> consumeEvents() {
-    final events = List<GameEvent>.from(eventQueue);
-    eventQueue.clear();
-    return events;
+    return _events.consumeAll();
   }
 
   // Allow swapping starting player before game starts
