@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'dart:async';
 import 'foul_tracker.dart';
+import '../core/game_timer.dart';
 import 'achievement_manager.dart';
 import '../data/messages.dart';
 import 'game_settings.dart';
@@ -143,65 +143,35 @@ class GameState extends ChangeNotifier {
   // Auto-Save Callback
   VoidCallback? onSaveRequired;
 
-  // Game Clock
-  final Stopwatch _gameTimer = Stopwatch();
-  Duration _savedDuration = Duration.zero; // For persistence
+  // Game Clock (extracted to GameTimer)
+  final GameTimer _gameTimer = GameTimer();
 
-  Timer? _ticker;
-  bool _isPaused = false;
-
-  bool get isPaused => _isPaused;
-  Duration get elapsedDuration => _savedDuration + _gameTimer.elapsed;
+  bool get isPaused => _gameTimer.isPaused;
+  Duration get elapsedDuration => _gameTimer.elapsedDuration;
 
   void startGameTimer() {
     if (!gameStarted) return;
-    if (!_gameTimer.isRunning && !_isPaused) {
-      _gameTimer.start();
-      _startTicker();
-    }
+    _gameTimer.start();
   }
 
   void pauseGame() {
-    if (_gameTimer.isRunning) {
-      _gameTimer.stop();
-      _isPaused = true;
-      _stopTicker();
-      notifyListeners();
-    }
+    _gameTimer.pause();
+    notifyListeners();
   }
 
   void resumeGame() {
-    if (_isPaused) {
-      _gameTimer.start();
-      _isPaused = false;
-      _startTicker();
-      notifyListeners();
-    }
+    _gameTimer.resume();
+    notifyListeners();
   }
 
   void togglePause() {
-    if (_isPaused) {
-      resumeGame();
-    } else {
-      pauseGame();
-    }
-  }
-
-  void _startTicker() {
-    _ticker?.cancel();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
-      notifyListeners(); // Update UI every second
-    });
-  }
-
-  void _stopTicker() {
-    _ticker?.cancel();
-    _ticker = null;
+    _gameTimer.toggle();
+    notifyListeners();
   }
 
   @override
   void dispose() {
-    _stopTicker();
+    _gameTimer.dispose();
     super.dispose();
   }
 
@@ -226,6 +196,11 @@ class GameState extends ChangeNotifier {
     foulTracker =
         FoulTracker(threeFoulRuleEnabled: settings.threeFoulRuleEnabled);
     _resetRack();
+    
+    // Setup timer tick callback
+    _gameTimer.onTick = () {
+      notifyListeners(); // UI updates every second
+    };
   }
 
   // Update settings mid-game
@@ -1014,7 +989,7 @@ class GameState extends ChangeNotifier {
 
         gameOver = true;
         winner = player;
-        _stopTicker();
+        _gameTimer.pause(); // Stop timer when game ends
         
         _logAction('${player.name} WINS! 🎉');
         
@@ -1064,7 +1039,7 @@ class GameState extends ChangeNotifier {
     snapshot.restore(this);
 
     // Resume timer if game was in progress and we just loaded it
-    if (gameStarted && !gameOver && !_isPaused) {
+    if (gameStarted && !gameOver && !isPaused) {
        startGameTimer();
     }
     notifyListeners();
@@ -1178,7 +1153,7 @@ class GameSnapshot implements UndoState {
     state.breakFoulHintMessage = breakFoulHintMessage;
 
     // Restore Timer
-    state._savedDuration = Duration(seconds: elapsedDurationInSeconds);
+    state._gameTimer.loadSavedDuration(Duration(seconds: elapsedDurationInSeconds));
     state._gameTimer.reset();
   }
 }
