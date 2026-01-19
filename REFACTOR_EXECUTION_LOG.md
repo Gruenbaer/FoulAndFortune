@@ -71,16 +71,41 @@
 
 **Developer**: Antigravity AI
 
-#### Morning
-- Created execution log
-- Starting Phase 0 documentation
+#### Phase 0 - Alignment (COMPLETE)
+- Created execution log, refactor plan, parity checklist
+- Updated SOURCE_OF_TRUTH.md and AGENTS.md with refactor notices
+- Commit: 95bf76a
 
-#### Actions Taken
-- (Log each significant action here)
+#### Phase 1.1 - Extract GameTimer (COMPLETE)
+**Morning/Afternoon:**
+- Created `lib/core/game_timer.dart` (88 LOC)
+- Extracted timer logic from GameState
+- All 82 tests passing
+- Commit: 6c6ef29
+
+**Bug Fixes:**
+1. **Achievement text contrast** (pre-existing bug found during testing)
+   - Fixed invisible white text on white background
+   - Changed to FortuneColors.textMain
+   - Commit: c8041bf
+
+2. **Timer reset regression** (caused by refactor)
+   - Timer was resetting to 0 when navigating
+   - Added `GameTimer.resetStopwatch()` method
+   - Fixed snapshot restoration
+   - Commit: b6ba7c8
+
+**Final Status:**
+- GameTimer extraction: ✅ COMPLETE
+- All tests passing: ✅ 82/82
+- Bugs fixed: ✅ 2/2
+- Ready for Phase 1.2-1.4
 
 #### Next Steps
-- Complete Phase 0 documents
-- First commit
+- Phase 1.2: Extract GameHistory (undo/redo) - ON HOLD
+- Phase 1.3: Extract EventManager - ON HOLD  
+- Phase 1.4: Extract TableState - ON HOLD
+- User to test on emulator before continuing
 
 ---
 
