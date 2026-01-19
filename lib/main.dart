@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'models/achievement_manager.dart';
+import 'data/database_bootstrapper.dart';
 import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
 import 'models/game_settings.dart';
@@ -15,7 +16,9 @@ import 'theme/ghibli_theme.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseBootstrapper().initialize();
   runApp(const MyApp());
 }
 
