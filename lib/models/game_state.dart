@@ -1154,6 +1154,7 @@ class GameSnapshot implements UndoState {
 
     // Restore Timer
     state._gameTimer.loadSavedDuration(Duration(seconds: elapsedDurationInSeconds));
-    state._gameTimer.reset();
+    // Reset only the stopwatch counter (preserves savedDuration)
+    state._gameTimer.resetStopwatch();
   }
 }

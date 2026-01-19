@@ -222,7 +222,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                               style: TextStyle(
                                 fontSize: 24, // Reduced from 32
                                 fontWeight: FontWeight.bold,
-                                color: FortuneColors.of(context).textPrimary,
+                                color: FortuneColors.of(context).textMain,
                                 fontFamily: 'Orbitron',
                               ),
                               textAlign: TextAlign.center,
@@ -236,7 +236,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                               widget.achievement.description,
                               style: TextStyle(
                                 fontSize: 16,
-                                color: FortuneColors.of(context).textSecondary,
+                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.8),
                                 height: 1.4,
                               ),
                               textAlign: TextAlign.center,
@@ -266,7 +266,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                               widget.achievement.howToUnlock,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: FortuneColors.of(context).textSecondary.withValues(alpha: 0.8),
+                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.6),
                                 fontStyle: FontStyle.italic,
                               ),
                               textAlign: TextAlign.center,
@@ -279,7 +279,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 'Unlocked by: ${widget.achievement.unlockedBy.last}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: FortuneColors.of(context).textSecondary.withValues(alpha: 0.6),
+                                  color: FortuneColors.of(context).textMain.withValues(alpha: 0.4),
                                 ),
                                 textAlign: TextAlign.center,
                               ),

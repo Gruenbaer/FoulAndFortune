@@ -59,6 +59,13 @@ class GameTimer {
     }
   }
   
+  /// Reset only the stopwatch (keeps savedDuration for restoration)
+  void resetStopwatch() {
+    _stopwatch.reset();
+    _isPaused = false;
+    _stopTicker();
+  }
+  
   /// Reset the timer to zero
   void reset() {
     _stopwatch.reset();
