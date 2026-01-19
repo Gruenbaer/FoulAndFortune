@@ -4,10 +4,22 @@ This document is the canonical technical reference for the FoulAndFortune projec
 It should be read before making changes. If this doc conflicts with code, fix the
 code or update this document and any referenced specs together.
 
+## ⚠️ MULTI-GAME REFACTOR IN PROGRESS
+
+**Status**: Phase 0 Complete - Documentation Ready  
+**Plan**: See `REFACTOR_PLAN.md` for condensed execution plan  
+**Progress**: See `REFACTOR_EXECUTION_LOG.md` for current status  
+**Parity**: See `REFACTOR_14.1_PARITY.md` for what must not change
+
+**If you're working on this codebase during the refactor:**
+1. Check `REFACTOR_EXECUTION_LOG.md` first for current phase
+2. Do NOT make changes that conflict with the refactor plan
+3. Coordinate with refactor team before modifying `lib/models/game_state.dart`
+
 ## Project Identity
-- Product: Foul & Fortune: Straight Pool
+- Product: Foul & Fortune: Straight Pool (evolving to multi-game billiards app)
 - Platform: Flutter app (Android, iOS, Windows, macOS, Linux, Web)
-- Domain: 14.1 Straight Pool scoring, notation, and stats
+- Domain: 14.1 Straight Pool scoring, notation, and stats (expanding to 8/9/10-ball, 1-Pocket, Cowboy, Training)
 - Versioning: see `pubspec.yaml`
 
 ## Build and Tooling
