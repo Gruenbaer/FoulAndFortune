@@ -48,12 +48,12 @@ enum FoulSeverity {
 
 /// User made a break foul decision (re-break or switch player).
 class BreakFoulDecisionAction extends GameAction {
-  final int selectedIndex; // 0 = re-break, 1 = switch
+  final int selectedPlayerIndex; // Player index who will break next
   
-  const BreakFoulDecisionAction(this.selectedIndex);
+  const BreakFoulDecisionAction(this.selectedPlayerIndex);
   
   @override
-  String toString() => 'BreakFoulDecision(index: $selectedIndex)';
+  String toString() => 'BreakFoulDecision(index: $selectedPlayerIndex)';
 }
 
 /// Finalize re-rack after animation (internal action).

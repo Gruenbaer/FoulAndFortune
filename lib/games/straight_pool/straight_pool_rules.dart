@@ -226,8 +226,65 @@ class StraightPoolRules implements GameRules {
     CoreState core,
     StraightPoolState state,
   ) {
-    // TODO: Implement double-sack logic
-    throw UnimplementedError('DoubleSackAction not yet implemented');
+    final currentPlayer = core.players[core.activePlayerIndex];
+    final ballsRemaining = core.activeBalls.length;
+    
+    final List<StateMutation> mutations = [
+      SaveSegmentMutation(state.currentInningPoints + ballsRemaining),
+      const MarkInningReRackMutation(),
+    ];
+    final List<EventDescriptor> events = [
+      const ReRackEventDescriptor('reRack'),
+    ];
+    
+    // Track foul if present
+    FoulClassification? foulClass;
+    if (state.pendingFoulMode == FoulMode.normal) {
+      mutations.add(const MarkInningFoulMutation());
+      foulClass = const FoulClassification(type: FoulType.normal, penalty: -1);
+    } else if (state.pendingFoulMode == FoulMode.severe) {
+      mutations.add(const IncrementBreakFoulCountMutation());
+      foulClass = const FoulClassification(type: FoulType.breakFoul, penalty: -2);
+    }
+    
+    // Check if player will win (projected score check)
+    // Note: GameState applies handicap multipliers, rules work with raw points
+    final rawSegmentTotal = state.currentInningSegments.fold(0, (sum, p) => sum + p);
+    final rawInningTotal = rawSegmentTotal + state.currentInningPoints + ballsRemaining;
+    final projectedScore = currentPlayer.score + rawInningTotal; // Handicap applied by GameState
+    final projectedWin = projectedScore >= state.raceToScore;
+    
+    // Determine turn directive
+    TurnDirective turnDirective;
+    bool endsInning;
+    if (projectedWin) {
+      turnDirective = TurnDirective.gameOver;
+      endsInning = true;
+    } else if (state.pendingFoulMode != FoulMode.none) {
+      turnDirective = TurnDirective.endTurn;
+      endsInning = true;
+    } else {
+      turnDirective = TurnDirective.continueTurn;
+      endsInning = false;
+    }
+    
+    // Log message
+    final foulText = state.pendingFoulMode == FoulMode.normal ? ' (Foul)' 
+                   : state.pendingFoulMode == FoulMode.severe ? ' (Break Foul)' 
+                   : '';
+    final logMessage = '${currentPlayer.name}: Double-sack! $ballsRemaining balls$foulText';
+    
+    return RuleOutcome(
+      rawPointsDelta: ballsRemaining,
+      turnDirective: turnDirective,
+      tableDirective: TableDirective.clearRack,
+      foul: foulClass,
+      notationTokens: [ballsRemaining.toString()],
+      endsInning: endsInning,
+      stateMutations: mutations,
+      events: events,
+      logMessage: logMessage,
+    );
   }
   
   RuleOutcome _handleSafe(
@@ -235,8 +292,35 @@ class StraightPoolRules implements GameRules {
     CoreState core,
     StraightPoolState state,
   ) {
-    // TODO: Implement safe logic
-    throw UnimplementedError('SafeAction not yet implemented');
+    final currentPlayer = core.players[core.activePlayerIndex];
+    
+    // Safe action behavior depends on whether safe mode is already active
+    if (!state.pendingSafeMode) {
+      // ENTER safe mode - just toggle, don't end turn yet
+      // This is handled by GameState setting the mode
+      return const RuleOutcome(
+        rawPointsDelta: 0,
+        turnDirective: TurnDirective.continueTurn,
+        notationTokens: [],
+        endsInning: false,
+        stateMutations: [], // GameState handles mode toggle
+      );
+    } else {
+      // CONFIRM standard safe - end turn without ball tap
+      return RuleOutcome(
+        rawPointsDelta: 0,
+        turnDirective: TurnDirective.endTurn,
+        notationTokens: const [],
+        endsInning: true,
+        stateMutations: const [
+          MarkInningSafeMutation(),
+        ],
+        events: const [
+          SafeEventDescriptor(),
+        ],
+        logMessage: '${currentPlayer.name}: Safe (Standard)',
+      );
+    }
   }
   
   RuleOutcome _handleFoul(
@@ -244,8 +328,15 @@ class StraightPoolRules implements GameRules {
     CoreState core,
     StraightPoolState state,
   ) {
-    // TODO: Implement foul logic
-    throw UnimplementedError('FoulAction not yet implemented');
+    // Foul action just sets the pending mode
+    // GameState handles the toggle, rules just acknowledge
+    return const RuleOutcome(
+      rawPointsDelta: 0,
+      turnDirective: TurnDirective.continueTurn,
+      notationTokens: [],
+      endsInning: false,
+      stateMutations: [], // GameState handles foulMode toggle
+    );
   }
   
   RuleOutcome _handleBreakFoulDecision(
@@ -253,8 +344,41 @@ class StraightPoolRules implements GameRules {
     CoreState core,
     StraightPoolState state,
   ) {
-    // TODO: Implement break foul decision logic
-    throw UnimplementedError('BreakFoulDecisionAction not yet implemented');
+    final currentPlayer = core.players[core.activePlayerIndex];
+    final selectedIndex = action.selectedPlayerIndex;
+    
+    List<StateMutation> mutations = [];
+    TurnDirective turnDirective;
+    bool endsInning;
+    String logMessage;
+    
+    if (selectedIndex != core.activePlayerIndex) {
+      // SWITCH: Opponent chose to break
+      // Finalize current player's inning, switch to selected player
+      mutations.add(const DisableBreakFoulsMutation());
+      turnDirective = TurnDirective.endTurn; // Switch player
+      endsInning = true;
+      logMessage = 'Decision: ${core.players[selectedIndex].name} will break';
+    } else {
+      // SAME PLAYER: Re-break (Stacking)
+      // Do NOT finalize. Keep inning open.
+      turnDirective = TurnDirective.continueTurn;
+      endsInning = false;
+      logMessage = 'Decision: ${currentPlayer.name} re-breaks (Inning Continues)';
+    }
+    
+    // Re-enter break sequence
+    // Table resets to 15 handled by GameState
+    
+    return RuleOutcome(
+      rawPointsDelta: 0,
+      turnDirective: turnDirective,
+      tableDirective: TableDirective.reRack,
+      notationTokens: const [],
+      endsInning: endsInning,
+      stateMutations: mutations,
+      logMessage: logMessage,
+    );
   }
   
   RuleOutcome _handleFinalizeReRack(
@@ -262,7 +386,14 @@ class StraightPoolRules implements GameRules {
     CoreState core,
     StraightPoolState state,
   ) {
-    // TODO: Implement finalize re-rack logic
-    throw UnimplementedError('FinalizeReRackAction not yet implemented');
+    // Finalize re-rack is purely infrastructure (table reset after animation)
+    // No game logic decisions needed
+    return const RuleOutcome(
+      rawPointsDelta: 0,
+      turnDirective: TurnDirective.continueTurn,
+      tableDirective: TableDirective.reRack,
+      notationTokens: [],
+      endsInning: false,
+    );
   }
 }
