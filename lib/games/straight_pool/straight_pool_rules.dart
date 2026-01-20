@@ -27,6 +27,7 @@ class StraightPoolRules implements GameRules {
       foulTracker: FoulTracker(
         threeFoulRuleEnabled: settings.threeFoulRuleEnabled,
       ),
+      raceToScore: settings.raceToScore,
     );
   }
   
@@ -52,8 +53,20 @@ class StraightPoolRules implements GameRules {
   
   @override
   WinResult? checkWin(CoreState core, RulesState rules) {
-    // TODO: Implement win condition check
-    return null;
+    final state = rules as StraightPoolState;
+    
+    // Check all players for win condition
+    for (var i = 0; i < core.players.length; i++) {
+      final player = core.players[i];
+      if (player.score >= state.raceToScore) {
+        return WinResult(
+          winningPlayerIndex: i,
+          reason: "Reached ${state.raceToScore} points",
+        );
+      }
+    }
+    
+    return null; // Game continues
   }
   
   @override

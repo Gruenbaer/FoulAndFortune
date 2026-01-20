@@ -7,6 +7,9 @@ class StraightPoolState extends RulesState {
   /// Tracks consecutive fouls for the 3-foul rule.
   final FoulTracker foulTracker;
   
+  /// Win condition: race to this score.
+  final int raceToScore;
+  
   /// Pending foul mode (normal, breakFoul, or none).
   FoulMode pendingFoulMode;
   
@@ -27,6 +30,7 @@ class StraightPoolState extends RulesState {
   
   StraightPoolState({
     required this.foulTracker,
+    required this.raceToScore,
     this.pendingFoulMode = FoulMode.none,
     this.pendingSafeMode = false,
     this.breakingPlayerIndex,
@@ -42,6 +46,7 @@ class StraightPoolState extends RulesState {
   @override
   Map<String, dynamic> toJson() => {
     'threeFoulRuleEnabled': foulTracker.threeFoulRuleEnabled,
+    'raceToScore': raceToScore,
     'pendingFoulMode': pendingFoulMode.index,
     'pendingSafeMode': pendingSafeMode,
     'breakingPlayerIndex': breakingPlayerIndex,
@@ -59,6 +64,7 @@ class StraightPoolState extends RulesState {
       foulTracker: FoulTracker(
         threeFoulRuleEnabled: json['threeFoulRuleEnabled'] ?? true,
       ),
+      raceToScore: json['raceToScore'] ?? 100,
       pendingFoulMode: FoulMode.values[json['pendingFoulMode'] ?? 0],
       pendingSafeMode: json['pendingSafeMode'] ?? false,
       breakingPlayerIndex: json['breakingPlayerIndex'],
@@ -79,6 +85,7 @@ class StraightPoolState extends RulesState {
       foulTracker: FoulTracker(
         threeFoulRuleEnabled: foulTracker.threeFoulRuleEnabled,
       ),
+      raceToScore: raceToScore,
       pendingFoulMode: pendingFoulMode,
       pendingSafeMode: pendingSafeMode,
       breakingPlayerIndex: breakingPlayerIndex,
