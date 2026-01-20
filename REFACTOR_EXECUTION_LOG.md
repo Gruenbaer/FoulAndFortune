@@ -16,7 +16,7 @@
 | Phase 1.3 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (75a3f7f) |
 | Phase 1.4 | ✅ COMPLETE | 2026-01-20 | 2026-01-20 | 1 (062ed2b) |
 | **Phase 1** | ✅ **COMPLETE** | 2026-01-19 | **2026-01-20** | **5 commits** |
-| Phase 2 | ⏸️ NOT STARTED | - | - | 0 |
+| Phase 2 | 🔄 IN PROGRESS | 2026-01-20 | - | 5 |
 | Phase 3 | ⏸️ NOT STARTED | - | - | 0 |
 | Phase 4 | ⏸️ NOT STARTED | - | - | 0 |
 
@@ -28,13 +28,13 @@
 
 ### Tasks
 - [x] Create execution log (this file)
-- [ ] Create condensed refactor plan
-- [ ] Create 14.1 parity checklist
-- [ ] Document non-goals
-- [ ] Commit Phase 0 documents
+- [x] Create condensed refactor plan
+- [x] Create 14.1 parity checklist
+- [x] Document non-goals
+- [x] Commit Phase 0 documents
 
 ### Commits
-- None yet
+- 95bf76a (Phase 0 docs)
 
 ---
 
@@ -138,20 +138,30 @@
 - `test/notation_test.dart`: Updated to use public updateRackCount method
 - Zero behavioral changes - all game logic identical
 
----
+### 2026-01-20 (Afternoon)
 
-### 🎉 Phase 1 Complete (2026-01-19 to 2026-01-20)
+#### Phase 2 - StraightPoolRules Extraction (IN PROGRESS)
+**Status**: Steps 1-5 Complete (Pure Logic Implementation)
 
-**Summary:** Successfully extracted all infrastructure from GameState
-- ✅ GameTimer (88 LOC) - Timer with pause/resume
-- ✅ GameHistory (generic undo/redo stack)
-- ✅ EventManager + 7 event classes (47 LOC removed)
-- ✅ TableState (35 LOC) - Rack state management
+**Completed Steps:**
+1. **Shell**: Created `StraightPoolRules` implementing `GameRules` interface (c7aaab9)
+2. **Win Condition**: Implemented `checkWin` logic (36065ff)
+3. **Notation**: Implemented `generateNotation` using `NotationCodec` (ded6f69)
+4. **Scoring Logic**: Implemented pure `BallTappedAction` (16caaea)
+5. **Actions**: Implemented DoubleSack, Safe, Foul, BreakFoulDecision (edce791)
 
-**Impact:**
-- GameState reduced from 1,186 LOC to ~1,100 LOC
-- Clear separation of concerns
-- Ready for Phase 2 (Rules Seam)
+**Key Architecture Decisions:**
+- **Pure Rules**: Adopted strict separation where Rules plugin returns explicit facts/directives via `RuleOutcome`.
+- **Zero Side Effects**: Rules do not mutate Players, queue events, or touch UI state.
+- **Enhanced RuleOutcome**: Added `StateMutation`, `EventDescriptor`, and `DecisionRequirement` to allow mechanical execution by GameState.
+
+**Remaining Work (Steps 6-9):**
+- Step 6: Integrate `StraightPoolRules` into `GameState` (create `_applyOutcome`)
+- Step 7: Cleanup duplicated logic
+- Step 8: Manual parity testing
+- Step 9: Documentation
+
+**Next Step**: Start Step 6 (Integration) in fresh session.
 
 ---
 
