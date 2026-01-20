@@ -391,7 +391,7 @@ class StraightPoolRules implements GameRules {
     return const RuleOutcome(
       rawPointsDelta: 0,
       turnDirective: TurnDirective.continueTurn,
-      tableDirective: TableDirective.reRack,
+      tableDirective: TableDirective.reset,
       notationTokens: [],
       endsInning: false,
     );

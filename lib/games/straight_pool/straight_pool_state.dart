@@ -36,12 +36,12 @@ class StraightPoolState extends RulesState {
     this.breakingPlayerIndex,
     this.breakFoulStillAvailable = true,
     this.inBreakSequence = true,
-    this.currentInningSegments = const [],
+    List<int>? currentInningSegments, // Changed from this.currentInningSegments = const []
     this.currentInningPoints = 0,
     this.currentInningHasFoul = false,
     this.currentInningHasSafe = false,
     this.currentInningBreakFoulCount = 0,
-  });
+  }) : currentInningSegments = currentInningSegments ?? []; // Create modifiable list
   
   @override
   Map<String, dynamic> toJson() => {
