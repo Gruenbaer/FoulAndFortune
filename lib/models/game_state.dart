@@ -4,6 +4,7 @@ import '../core/game_timer.dart';
 import '../core/game_history.dart';
 import '../core/event_manager.dart';
 import '../core/events/game_event.dart';
+import '../core/table_state.dart';
 import 'achievement_manager.dart';
 import '../data/messages.dart';
 import 'game_settings.dart';
@@ -21,7 +22,6 @@ class GameState extends ChangeNotifier {
   late List<Player> players;
   late FoulTracker foulTracker;
   late AchievementManager? achievementManager;
-  Set<int> activeBalls = {};
   int currentPlayerIndex = 0;
   bool gameStarted = false;
   bool gameOver = false;
@@ -75,6 +75,11 @@ class GameState extends ChangeNotifier {
 
   // UI Event Manager (extracted to EventManager)
   final EventManager _events = EventManager();
+
+  // Table State (extracted to TableState)
+  final TableState _table = TableState();
+
+  Set<int> get activeBalls => _table.activeBalls;
 
   bool get canUndo => _history.canUndo;
 
@@ -150,7 +155,7 @@ class GameState extends ChangeNotifier {
 
     foulTracker =
         FoulTracker(threeFoulRuleEnabled: settings.threeFoulRuleEnabled);
-    _resetRack();
+    _table.resetRack();
     
     // Setup timer tick callback
     _gameTimer.onTick = () {
@@ -278,7 +283,7 @@ class GameState extends ChangeNotifier {
   }
 
   void _resetRack() {
-    activeBalls = Set.from(List.generate(15, (i) => i + 1));
+    _table.resetRack();
     notifyListeners();
   }
 
@@ -470,9 +475,9 @@ class GameState extends ChangeNotifier {
       _logAction('${currentPlayer.name}: Re-rack');
       // CANONICAL: For regular re-rack (Ball 1), show ONLY the 1 ball.
       // Refill to 15 happens in finalizeReRack() after animation.
-      _updateRackCount(1);
+      updateRackCount(1);
     } else {
-      _updateRackCount(newBallCount);
+      updateRackCount(newBallCount);
     }
 
     // DETERMINE IF TURN ENDS
@@ -485,7 +490,7 @@ class GameState extends ChangeNotifier {
     } else if (newBallCount == 0) {
       // Cleared table (Ball 0 Double Sack)
       turnEnded = false;
-      _updateRackCount(0); // Clear immediately so balls vanish
+      updateRackCount(0); // Clear immediately so balls vanish
       _events.add(ReRackEvent("tableCleared"));
       _logAction('${currentPlayer.name}: Cleared table');
     } else {
@@ -542,14 +547,12 @@ class GameState extends ChangeNotifier {
       }
       
       inBreakSequence = true;
-      _updateRackCount(15);
+      updateRackCount(15);
       notifyListeners();
   }
 
-  void _updateRackCount(int count) {
-    if (count < 0) count = 0;
-    if (count > 15) count = 15;
-    activeBalls = Set.from(List.generate(count, (i) => i + 1));
+  void updateRackCount(int count) {
+    _table.updateCount(count);
   }
 
 
@@ -647,7 +650,7 @@ class GameState extends ChangeNotifier {
     
     // Explicitly Clear Balls BEFORE Re-Rack Animation
     // So balls disappear immediately when white is tapped
-    _updateRackCount(0);
+    updateRackCount(0);
     _events.add(ReRackEvent('reRack'));
     // Reset rack to 15 balls happens in finalizeReRack() after animation
     
@@ -1087,7 +1090,8 @@ class GameSnapshot implements UndoState {
   @override
   void restore(GameState state) {
     state.players = players.map((p) => p.copyWith()).toList();
-    state.activeBalls = Set.from(activeBalls);
+    // Restore table state via TableState
+    state._table.loadFromJson({'activeBalls': activeBalls.toList()});
     state.currentPlayerIndex = currentPlayerIndex;
     state.gameStarted = gameStarted;
     state.gameOver = gameOver;

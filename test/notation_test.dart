@@ -48,7 +48,7 @@ void main() {
     test('Notation: Non-14-ball re-rack should show number and ⟲', () {
        // Scenario: Previous player left 6 balls.
        // We manually set state to simulate starting condition
-       gameState.activeBalls = {1, 2, 3, 4, 5, 6}; // Manually set state
+       gameState.updateRackCount(6); // Set to 6 balls
        gameState.currentPlayer.inningPoints = 0; // Reset points for this scenario
        gameState.onBallTapped(1); // Leaves 1 ball. Pocketed 5.
        // Total Inning Points = 5.
@@ -70,7 +70,7 @@ void main() {
     
     test('Notation: Standard break followed by points', () {
        // Scenario: Previous player left 6 balls.
-       gameState.activeBalls = {1, 2, 3, 4, 5, 6};
+       gameState.updateRackCount(6); // Set to 6 balls
        gameState.onBallTapped(1); // Leaves 1. Pocketed 5.
        gameState.finalizeReRack();
        
@@ -114,7 +114,7 @@ void main() {
     
     // 3. 5 Points in new rack AND Safe + Foul
     // Simulate user refilling rack to 15 balls.
-    gameState.activeBalls = Set.from(List.generate(15, (i) => i + 1));
+    gameState.updateRackCount(15); // Reset to 15 balls
     
     // Setup Safe + Foul BEFORE tapping
     gameState.onSafe(); // Toggle safe mode ON
