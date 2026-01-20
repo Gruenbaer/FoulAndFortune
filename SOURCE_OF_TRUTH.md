@@ -6,10 +6,15 @@ code or update this document and any referenced specs together.
 
 ## ⚠️ MULTI-GAME REFACTOR IN PROGRESS
 
-**Status**: Phase 0 Complete - Documentation Ready  
+**Status**: Phase 1.3 Complete - GameTimer, GameHistory, EventManager Extracted  
 **Plan**: See `REFACTOR_PLAN.md` for condensed execution plan  
 **Progress**: See `REFACTOR_EXECUTION_LOG.md` for current status  
 **Parity**: See `REFACTOR_14.1_PARITY.md` for what must not change
+
+**Completed Extractions (2026-01-19):**
+- ✅ Phase 1.1: `lib/core/game_timer.dart` - Timer logic extracted
+- ✅ Phase 1.2: `lib/core/game_history.dart` - Undo/redo stack management
+- ✅ Phase 1.3: `lib/core/event_manager.dart` + `lib/core/events/game_event.dart` - Event queue
 
 **If you're working on this codebase during the refactor:**
 1. Check `REFACTOR_EXECUTION_LOG.md` first for current phase
@@ -49,8 +54,10 @@ code or update this document and any referenced specs together.
 - Providers: `GameSettings`, `AchievementManager`, `Function(GameSettings)` setter.
 
 ### Core State
-- `GameState` is the authoritative game engine (scoring, rack state, undo/redo, event queue).
-- Undo/redo uses snapshot memento (`GameSnapshot`) with full state serialization.
+- `GameState` is the authoritative game engine (scoring, rack state, turn logic).
+- **Timer**: `lib/core/game_timer.dart` - Extracted timer with pause/resume, elapsed tracking.
+- **History**: `lib/core/game_history.dart` - Generic undo/redo using snapshot memento (`GameSnapshot`).
+- **Events**: `lib/core/event_manager.dart` - Event queue management; event types in `lib/core/events/game_event.dart`.
 - Inning data recorded as `InningRecord` via `NotationCodec`.
 
 ### Persistence
@@ -74,8 +81,13 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
   - `onDoubleSack()` represents the cue-ball/double-sack case (remaining count 0).
 - State and event guarantees:
   - Public mutation methods call `notifyListeners` and may call `onSaveRequired`.
-  - `consumeEvents()` returns and clears the event queue; callers must process events in order.
+  - `consumeEvents()` delegates to `EventManager` and returns event list; callers must process events in order.
   - `ReRackEvent` requires the UI to call `finalizeReRack()` after the splash animation to refill the rack.
+- Timer management:
+  - Uses `GameTimer` instance; delegates `pauseTimer()`, `resumeTimer()`, `resetTimer()` to `_timer`.
+  - Snapshot serialization includes `timerElapsedMs` for state restoration.
+- History management:
+  - Uses `GameHistory<GameSnapshot>` for undo/redo; delegates `canUndo`, `canRedo`, `undo()`, `redo()` to `_history`.
 - Turn rules (invariants):
   - Remaining count 1 (re-rack) and 0 (double-sack) continue the turn unless a terminator mode (safe/foul/break foul) is active.
   - Remaining count 2-15 ends the turn.
@@ -108,6 +120,20 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 
 ### AchievementManager
 - Persistence: `achievements` table keyed by definition id. `unlock()` persists and triggers `onAchievementUnlocked` if set.
+
+### GameTimer (lib/core/game_timer.dart)
+- Manages game duration with pause/resume support.
+- Uses `Stopwatch` internally; tracks elapsed time across pause periods.
+- `resetStopwatch(Duration elapsed)` restores timer state from snapshots.
+
+### GameHistory (lib/core/game_history.dart)
+- Generic undo/redo stack manager (`GameHistory<T>`).
+- Supports configurable max size; provides `canUndo`, `canRedo`, `undo()`, `redo()`, `push()`.
+
+### EventManager (lib/core/event_manager.dart)
+- Event queue management; event types defined in `lib/core/events/game_event.dart`.
+- Events: `FoulEvent`, `SafeEvent`, `ReRackEvent`, `WarningEvent`, `InningChangeEvent`, `VictoryEvent`, `TurnEndEvent`.
+- `consumeAll()` returns and clears event queue.
 
 ### GameEventOverlay (lib/widgets/game_event_overlay.dart)
 - Consumes `GameState` events via `consumeEvents()` and drives overlays.
