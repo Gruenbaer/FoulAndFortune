@@ -4,7 +4,7 @@ import '../base/rule_outcome.dart';
 import '../../core/actions/game_action.dart';
 import '../../models/game_settings.dart';
 import '../../models/foul_tracker.dart';
-import '../../codecs/notation_codec.dart';
+import '../../codecs/notation_codec.dart' as codec;
 import 'straight_pool_state.dart';
 
 /// 14.1 Straight Pool rules implementation.
@@ -71,8 +71,40 @@ class StraightPoolRules implements GameRules {
   
   @override
   String generateNotation(InningData inning) {
-    // TODO: Implement notation generation
-    return "";
+    // Build InningRecord for serialization
+    final record = codec.InningRecord(
+      inning: 0, // Not used by serialize()
+      playerName: '', // Not used by serialize()
+      notation: '', // Will be generated
+      runningTotal: 0, // Not used by serialize()
+      segments: inning.segments,
+      safe: inning.isSafe,
+      foul: _parseFoulType(inning.foulSuffix),
+      foulCount: _parseFoulCount(inning.foulSuffix),
+    );
+    
+    return codec.NotationCodec.serialize(record);
+  }
+  
+  // Helper to parse foul type from suffix
+  codec.FoulType _parseFoulType(String? suffix) {
+    if (suffix == null) return codec.FoulType.none;
+    if (suffix.startsWith('BF')) return codec.FoulType.breakFoul;
+    if (suffix == 'TF') return codec.FoulType.threeFouls;
+    if (suffix == 'F') return codec.FoulType.normal;
+    return codec.FoulType.none;
+  }
+  
+  // Helper to parse foul count from suffix
+  int _parseFoulCount(String? suffix) {
+    if (suffix == null || !suffix.startsWith('BF')) return 1;
+    
+    // Extract number from BF suffix (e.g., "BF2" -> 2, "BF" -> 1)
+    final match = RegExp(r'BF(\d+)').firstMatch(suffix);
+    if (match != null && match.group(1) != null) {
+      return int.parse(match.group(1)!);
+    }
+    return 1;
   }
   
   // === Private Handlers ===
