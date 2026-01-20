@@ -6,15 +6,16 @@ code or update this document and any referenced specs together.
 
 ## ⚠️ MULTI-GAME REFACTOR IN PROGRESS
 
-**Status**: Phase 1.3 Complete - GameTimer, GameHistory, EventManager Extracted  
+**Status**: Phase 1 Complete - All Infrastructure Extracted  
 **Plan**: See `REFACTOR_PLAN.md` for condensed execution plan  
 **Progress**: See `REFACTOR_EXECUTION_LOG.md` for current status  
 **Parity**: See `REFACTOR_14.1_PARITY.md` for what must not change
 
-**Completed Extractions (2026-01-19):**
+**Completed Extractions (2026-01-20):**
 - ✅ Phase 1.1: `lib/core/game_timer.dart` - Timer logic extracted
 - ✅ Phase 1.2: `lib/core/game_history.dart` - Undo/redo stack management
 - ✅ Phase 1.3: `lib/core/event_manager.dart` + `lib/core/events/game_event.dart` - Event queue
+- ✅ Phase 1.4: `lib/core/table_state.dart` - Rack state management
 
 **If you're working on this codebase during the refactor:**
 1. Check `REFACTOR_EXECUTION_LOG.md` first for current phase

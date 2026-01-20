@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## ⚠️ MULTI-GAME REFACTOR IN PROGRESS
-**Current Phase**: Phase 0 Complete  
+**Current Phase**: Phase 1 Complete  
 **Before making changes**: Read `REFACTOR_EXECUTION_LOG.md` to check current status  
 **Refactor Plan**: See `REFACTOR_PLAN.md`  
 **DO NOT MODIFY** `lib/models/game_state.dart` without coordinating with refactor team
@@ -26,7 +26,6 @@ This file is the entrypoint for working on FoulAndFortune. It is also a condense
 - **Refactor docs**: `REFACTOR_PLAN.md`, `REFACTOR_EXECUTION_LOG.md`, `REFACTOR_14.1_PARITY.md`.
 
 ## Critical Notes
-- Spec mismatch: checklist says fouls with balls reset streak to 0, but code/tests expect streak to become 1. Reconcile before changing.
 - Migration: notation migration in `GameHistoryService` is currently a stub; old games parse legacy notation on demand.
 - Persistence: Drift DB in `lib/data/app_database.dart` with migration from legacy `SharedPreferences` via `PrefsMigrationService`.
 - SharedPreferences now only store device id and migration flags.
