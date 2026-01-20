@@ -34,3 +34,12 @@ This file is the entrypoint for working on FoulAndFortune. It is also a condense
 - Tests use in-memory DB when `FLUTTER_TEST` is set (so `flutter test` runs without device storage).
 - Conflict artifacts exist (`*_conflict_current.*` and conflict build folders). Treat them as non-authoritative.
 - Canonical separator is `\u27F2` (see `lib/codecs/notation_codec.dart`), while docs contain mojibake.
+
+## ⚠️ CRITICAL IMPLEMENTATION RULE
+**NO PRAGMATIC APPROACHES. NO SHORTCUTS. EVER.**
+- Implement everything correctly and completely
+- Do not assume or simplify complex logic
+- Extract full implementations, not simplified versions
+- If the original code is 159 lines, extract all 159 lines
+- Do not cut corners to save time
+- When in doubt, ask - do not guess
