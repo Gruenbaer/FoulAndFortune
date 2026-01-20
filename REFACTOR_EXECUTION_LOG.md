@@ -1,7 +1,7 @@
 # Multi-Game Refactor - Execution Log
 
 **Started**: 2026-01-19  
-**Status**: IN PROGRESS - Phase 1.2  
+**Status**: COMPLETE - Phase 1 ✅  
 **Current Developer**: Antigravity AI
 
 ---
@@ -13,7 +13,9 @@
 | Phase 0 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (95bf76a) |
 | Phase 1.1 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (6c6ef29) |
 | Phase 1.2 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (10d58e0) |
-| Phase 1.3-1.4 | ⏸️ NOT STARTED | - | - | 0 |
+| Phase 1.3 | ✅ COMPLETE | 2026-01-19 | 2026-01-19 | 1 (75a3f7f) |
+| Phase 1.4 | ✅ COMPLETE | 2026-01-20 | 2026-01-20 | 1 (062ed2b) |
+| **Phase 1** | ✅ **COMPLETE** | 2026-01-19 | **2026-01-20** | **5 commits** |
 | Phase 2 | ⏸️ NOT STARTED | - | - | 0 |
 | Phase 3 | ⏸️ NOT STARTED | - | - | 0 |
 | Phase 4 | ⏸️ NOT STARTED | - | - | 0 |
@@ -118,7 +120,38 @@
 
 #### Next Steps
 - Phase 1.3: Extract EventManager - READY
-- Phase 1.4: Extract TableState - READY
+
+#### Phase 1.4 - Extract TableState (COMPLETE)
+**2026-01-20:**
+- Created `lib/core/table_state.dart` for rack state management
+- Extracted `activeBalls` Set and rack manipulation logic from GameState
+- Updated GameState to delegate to TableState instance via `_table`
+- Made `updateRackCount()` public for test access (was `_updateRackCount`)
+- Updated `GameSnapshot.restore()` to use `_table.loadFromJson()`
+- Fixed test files to use `updateRackCount()` method
+- All 82 tests passing
+- Commit: 062ed2b
+
+**Key Changes:**
+- `lib/core/table_state.dart`: New 35-line component for rack state
+- `lib/models/game_state.dart`: Removed direct activeBalls field, added TableState delegation
+- `test/notation_test.dart`: Updated to use public updateRackCount method
+- Zero behavioral changes - all game logic identical
+
+---
+
+### 🎉 Phase 1 Complete (2026-01-19 to 2026-01-20)
+
+**Summary:** Successfully extracted all infrastructure from GameState
+- ✅ GameTimer (88 LOC) - Timer with pause/resume
+- ✅ GameHistory (generic undo/redo stack)
+- ✅ EventManager + 7 event classes (47 LOC removed)
+- ✅ TableState (35 LOC) - Rack state management
+
+**Impact:**
+- GameState reduced from 1,186 LOC to ~1,100 LOC
+- Clear separation of concerns
+- Ready for Phase 2 (Rules Seam)
 
 ---
 
