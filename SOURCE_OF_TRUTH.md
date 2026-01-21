@@ -38,6 +38,7 @@ code or update this document and any referenced specs together.
 ## Canonical Rules and Scoring
 - Canonical spec: `GAME_RULES.md` (FF14 Canonical Notation v1.0).
 - Frozen scoring checklist: `SCORING_RULES_CHECKLIST.md` (must follow before changing scoring).
+- League-friendly multi-game rules reference: `LEAGUE_RULES_REFERENCE.md` (descriptive; not canonical).
 - Notation format: segments joined by U+27F2 (`\u27F2`) + optional suffixes S, F/BF/TF.
 - Notation serialization/parsing: `lib/codecs/notation_codec.dart`.
 - Core scoring and turn logic: `lib/models/game_state.dart`.
