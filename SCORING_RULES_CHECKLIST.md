@@ -17,8 +17,8 @@ All changes to scoring logic MUST go through this checklist before merge.
   - Verify: `if (newBallCount >= 2 && newBallCount <= 15) { turnEnded = true; }`
 
 - [ ] **No changes to TF penalty calculation** without spec update
-  - Canonical value: `-15` (total penalty)
-  - Verify: `FoulEvent(player, -15, FoulType.threeFouls, ...)`
+  - Canonical value: `-16` (not -15)
+  - Verify: `FoulEvent(player, -16, FoulType.threeFouls, ...)`
 
 - [ ] **All canonical tests pass**
   - Run: `puro flutter test test/canonical_spec_test.dart`

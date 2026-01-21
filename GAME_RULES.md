@@ -168,7 +168,7 @@ A segment is the number of balls potted since the last re-rack.
 | `15⟲14` | Double sack, then 14 balls | 29 | 0 | 29 |
 | `0S` | Safe shot, no balls potted | 0 | 0 | 0 |
 | `3F` | 3 balls potted, then fouled | 3 | -1 | 2 |
-| `TF` | Third consecutive foul | 0 | -15 | -15 |
+| `TF` | Third consecutive foul | 0 | -16 | -16 |
 | `BF` | Break foul | 0 | -2 | -2 |
 | `15⟲15⟲15⟲2F` | Three double sacks, 2 balls, foul | 47 | -1 | 46 |
 | `5SF` | 5 balls, safe called, then fouled | 5 | -1 | 4 |

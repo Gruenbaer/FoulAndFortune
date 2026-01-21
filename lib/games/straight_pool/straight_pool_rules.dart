@@ -11,7 +11,7 @@ import 'straight_pool_state.dart';
 /// 
 /// Implements the canonical FF14 ruleset with:
 /// - Re-rack at ball 1, double-sack at ball 0
-/// - Foul penalties: -1 normal, -2 break, -15 three-consecutive
+/// - Foul penalties: -1 normal, -2 break, -16 three-consecutive
 /// - Break foul sequencing
 /// - Canonical notation generation
 class StraightPoolRules implements GameRules {

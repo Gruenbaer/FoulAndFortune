@@ -58,7 +58,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get twoFoulsMessage =>
-      'Du hast 2 aufeinanderfolgende Fouls.\nEin weiteres Foul führt zu einer Strafe von \n-15 Punkten!';
+      'Du hast 2 aufeinanderfolgende Fouls.\nEin weiteres Foul führt zu einer Strafe von \n-16 Punkten!';
 
   @override
   String get iUnderstand => 'VERSTANDEN';
@@ -107,7 +107,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get threeFoulRuleSubtitle =>
-      '3 aufeinanderfolgende Fouls = -15 Punkte';
+      '3 aufeinanderfolgende Fouls = -16 Punkte';
 
   @override
   String get startGame => 'SPIEL STARTEN';
@@ -383,14 +383,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get gameRulesContent =>
-      'Foul & Fortune: Straight Pool (Modifiziert)\n\n1. Spielziel\nZiel ist es, die Zielpunktzahl zu erreichen (Race to X).\n\n2. Punktevergabe (Restkugeln)\nTippe die Anzahl der Kugeln, die noch auf dem Tisch liegen. Die App vergibt Punkte fuer die Kugeln, die du gerade versenkt hast.\nBeispiel: Rest geht von 15 auf 10 -> 5 Punkte.\n\n3. Sonderfaelle\n- 1 Kugel uebrig: Neuaufbau, Inning laeuft weiter.\n- Double Sack (Spielball/0): Neuaufbau, Inning laeuft weiter.\n\n4. Fouls\n- Normales Foul: -1 Punkt. 3 aufeinanderfolgende Fouls = -15 Punkte gesamt (TF).\n- Break Foul: -2 Punkte.\n\n5. Safeties\n- Safe beendet das Inning und wird als S in der Notation erfasst.';
+      'Foul & Fortune: Straight Pool (Modifiziert)\n\n1. Spielziel\nDas Ziel ist es, die festgelegte Punktzahl zu erreichen (Rennen bis X).\n\n2. Punktevergabe\nEine versenkte Kugel bringt Punkte gleich (15 - Kugelnummer).\nBeispiel: Kugel 14 = 1 Punkt. Kugel 1 = 14 Punkte.\n\n3. Spezielle Kugeln\n- Kugel 1: Bringt 14 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\n- Doppel-Sack (Spielball): Bringt 15 Punkte und führt zu einem Neuaufbau. Spieler macht weiter.\n\n4. Fouls\n- Normales Foul: -1 Punkt. 3 aufeinanderfolgende Fouls = -16 Punkte.\n- Schweres Foul: -2 Punkte.';
 
   @override
   String get threeFoulPenalty => '3-Foul-Strafe!';
 
   @override
   String get threeFoulMessage =>
-      'Spieler hat 3 aufeinanderfolgende Fouls begangen.\n\nStrafe: -15 Punkte\n\nDer Foulzähler wurde zurückgesetzt.';
+      'Spieler hat 3 aufeinanderfolgende Fouls begangen.\n\nStrafe: -16 Punkte\n\nDer Foulzähler wurde zurückgesetzt.';
 
   @override
   String get resetGame => 'Spiel zurücksetzen?';

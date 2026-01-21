@@ -95,7 +95,7 @@ void main() {
       // Third foul (triggers TF)
       int penalty3 = gameState.foulTracker.applyNormalFoul(player, 0);
       player.score += penalty3;
-      expect(player.score, -17); // -1 -1 -15 = -17
+      expect(player.score, -18); // -1 -1 -16 = -18
       expect(player.consecutiveFouls, 0); // Reset after TF
     });
 

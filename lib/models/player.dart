@@ -220,10 +220,10 @@ class Player {
     
     if (inningHasFoul) {
         // Normal foul logic
-        // If consecutive fouls is already 2, this 3rd one triggers -15 total
+        // If consecutive fouls is already 2, this 3rd one triggers -15 extra
         // OR if 3-foul was explicitly flagged
         if (consecutiveFouls >= 2 || inningHasThreeFouls) {
-            projected -= 15; // TF total
+            projected -= 16; // -1 (foul) + -15 (3-foul penalty)
         } else {
             projected -= 1; // Standard foul
         }

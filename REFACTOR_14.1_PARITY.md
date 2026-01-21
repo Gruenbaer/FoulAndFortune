@@ -59,12 +59,12 @@
 ### 5. Three Consecutive Fouls Penalty
 **Test**: Commit 3 fouls in a row without potting a ball  
 **Expected**:
-- Player loses exactly **-15 points** on 3rd foul
+- Player loses exactly **-16 points** on 3rd foul
 - Turn switches to opponent
 - Notation shows `TF` suffix
 - Foul counter resets to 0
 
-**How to verify**: Tap "Foul" 3 times in a row, check -15 penalty
+**How to verify**: Tap "Foul" 3 times in a row, check -16 penalty
 
 ---
 
@@ -155,7 +155,7 @@
 **When short on time, test these 3 critical scenarios:**
 
 1. **Re-rack**: Pot 14 balls → verify re-rack → verify inning continues
-2. **3-Foul**: Tap foul 3 times → verify -15 penalty
+2. **3-Foul**: Tap foul 3 times → verify -16 penalty
 3. **Undo/Redo**: Play 3 actions → undo all → redo all → verify identical state
 
 If these 3 pass, full parity is likely intact. Still run full checklist before phase completion.

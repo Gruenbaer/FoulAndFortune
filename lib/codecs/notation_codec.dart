@@ -183,7 +183,7 @@ class NotationCodec {
           break;
         case FoulType.threeFouls:
           buffer.write('TF');
-          break; // Per spec: "TF is shown as only TF (-15)" - no need for extra logic here, Codec handles it
+          break; // Per spec: "TF is shown as only TF (-16)" - no need for extra logic here, Codec handles it
         case FoulType.normal:
           buffer.write('F');
           break;
