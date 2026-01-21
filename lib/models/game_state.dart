@@ -428,6 +428,11 @@ class GameState extends ChangeNotifier {
     final core = _buildCoreState();
     final outcome = _rules.apply(action, core, _rulesState);
     
+    // Sync rack state for normal taps (2-15). Re-rack/double-sack are handled via table directives.
+    if (ballNumber > 1) {
+      updateRackCount(ballNumber);
+    }
+
     _applyOutcome(outcome);
     
     // Reset Modes

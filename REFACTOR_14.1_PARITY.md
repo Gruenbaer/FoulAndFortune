@@ -170,3 +170,25 @@ If these 3 pass, full parity is likely intact. Still run full checklist before p
 **Phase 4 Exit Gate**: 10/10 scenarios pass
 
 **Zero tolerance** for parity breaks. 14.1 behavior is frozen.
+
+---
+
+## Results Template
+
+### YYYY-MM-DD (Phase N)
+- Build: <branch> @ <commit>
+- Device: <platform/device>
+- Result: <PASS/FAIL>
+- Notes: <only if something was off>
+
+Checklist:
+- [ ] 1 Re-rack at Ball 1
+- [ ] 2 Double-Sack (Ball 0)
+- [ ] 3 Normal Foul Penalty
+- [ ] 4 Break Foul Penalty
+- [ ] 5 Three Consecutive Fouls Penalty
+- [ ] 6 Turn Ends on Pot 2-15 Balls
+- [ ] 7 Turn Continues on Re-rack or Double-Sack
+- [ ] 8 FF14 Canonical Notation Format
+- [ ] 9 Undo/Redo Restores Exact State
+- [ ] 10 Handicap Multipliers Apply Per Segment

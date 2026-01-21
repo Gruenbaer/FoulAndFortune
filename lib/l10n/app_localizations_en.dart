@@ -58,7 +58,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get twoFoulsMessage =>
-      'You are on 2 consecutive fouls.\nOne more foul will result in a \n-15 points penalty!';
+      'You are on 2 consecutive fouls.\nOne more foul will result in a \n-16 points penalty!';
 
   @override
   String get iUnderstand => 'I UNDERSTAND';
@@ -106,7 +106,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get threeFoulRule => '3-Foul Rule';
 
   @override
-  String get threeFoulRuleSubtitle => '3 consecutive fouls = -15 points';
+  String get threeFoulRuleSubtitle => '3 consecutive fouls = -16 points';
 
   @override
   String get startGame => 'START GAME';
@@ -381,14 +381,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gameRulesContent =>
-      'Foul & Fortune: Straight Pool (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -15 points.\n- Severe Foul: -2 points.';
+      'Foul & Fortune: Straight Pool (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -16 points.\n- Severe Foul: -2 points.';
 
   @override
   String get threeFoulPenalty => '3-Foul Penalty!';
 
   @override
   String get threeFoulMessage =>
-      'Player committed 3 consecutive fouls.\n\nPenalty: -15 points\n\nThe foul counter has been reset.';
+      'Player committed 3 consecutive fouls.\n\nPenalty: -16 points\n\nThe foul counter has been reset.';
 
   @override
   String get resetGame => 'Reset Game';
