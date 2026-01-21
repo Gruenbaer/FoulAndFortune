@@ -178,7 +178,7 @@ Each ball scores points equal to its number.
 - No shot clock enforced.
 - Equipment differences are accepted.
 - Rules favor clarity and continuity over referee-only precision.
-- Manual steps are required when prompted by the app; messages indicate what to do (e.g., "RERACK" is imperative).
+- The app does not issue direct real-world instructions; manual player action is required (e.g., re-rack).
 - App tracking replaces verbal warnings and written scorekeeping.
 
 This ruleset is considered league-friendly and suitable for
