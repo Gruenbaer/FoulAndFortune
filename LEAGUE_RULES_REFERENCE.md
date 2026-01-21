@@ -1,185 +1,77 @@
 # League-Friendly Rules Reference
 ## Applicable to Foul & Fortune
 
-This document defines the league-friendly rules used by the app.
-These rules are based on standard WPA/BCA logic but adapted for
-self-officiated league and club play.
+Kurze, klare Regeln fuer Liga- und Clubspiele.
+Fokus: klare Ablaeufe, wenig Ermessensspielraum.
 
-Core principles:
-- No referee required
-- Minimal judgment calls
-- Consistent outcomes
-- Familiar to most league players
-
-Unless explicitly stated, standard pool fouls apply:
-scratch, no rail contact, wrong first contact, ball off table.
-Foul result is ball-in-hand unless a game section says otherwise.
+### App-Spezifika (kurz)
+- Die App bewertet nur deine Eingaben; sie erkennt keine realen Stosse.
+- Manuelle Aktionen bleiben bei den Spielern (z.B. rerack/spotten).
+- 14.1: Eingabe ist verbleibende Objektbaelle; Punkte = Abnahme der verbleibenden Baelle.
+- Break Foul in 14.1: die App fragt, wer den naechsten Break spielt.
 
 ---
 
-## 8-Ball (League-Friendly)
-
-### Objective
-Pocket all balls of your group (solids or stripes), then legally pocket the 8-ball.
-
-### Group Assignment
-- Groups are assigned after the first legally pocketed ball.
-
-### Shot Calling
-- Obvious shots do not need to be called.
-- Non-obvious shots (banks, combos, caroms) should be called.
-- Missed call: no score, turn ends (no foul).
-
-### Fouls
-- Ball-in-hand on all fouls.
-- Cue ball fouls enforced.
-- Object ball fouls ignored unless ball leaves the table.
-
-### 8-Ball Conditions
-- Early 8-ball: loss of game.
-- Scratch on the 8-ball: loss of game.
-- Legal pocket of the 8-ball wins immediately.
+## 8-Ball (Liga-freundlich)
+- Ziel: eigene Gruppe komplett, dann die 8 legal lochen.
+- Gruppen nach erstem legal gelochten Ball.
+- Ansage: nur unklare Stosse ansagen (Bank, Kombi, Carom).
+- Fouls: Ball-in-hand; Objektball-Fouls nur wenn Ball vom Tisch.
+- 8-Ball: frueh oder mit Scratch = Verlust.
 
 ---
 
-## 9-Ball (League-Friendly)
-
-### Objective
-Legally pocket the 9-ball.
-
-### Shot Rules
-- Lowest-numbered ball must be contacted first.
-- Any ball may be pocketed after legal contact.
-
-### Shot Calling
-- No called shots required.
-- Slop counts if lowest ball was contacted first.
-
-### Fouls
-- Ball-in-hand anywhere on the table.
-- Push-out after the break is optional and simplified if enabled.
+## 9-Ball (Liga-freundlich)
+- Ziel: die 9 legal lochen.
+- Niedrigste Kugel zuerst, danach darf jede Kugel fallen.
+- Kein Ansagen; Slop zaehlt wenn zuerst korrekt getroffen.
+- Fouls: Ball-in-hand; Push-out nach dem Break optional (Ligaentscheidung).
 
 ---
 
-## 10-Ball (League-Friendly)
-
-### Objective
-Legally pocket the 10-ball.
-
-### Shot Rules
-- Lowest-numbered ball must be contacted first.
-
-### Shot Calling
-- Non-obvious shots must be called.
-- Obvious shots do not require a call.
-
-### Fouls
-- Ball-in-hand on all fouls.
-- Slop does not count if the called shot was missed.
+## 10-Ball (Liga-freundlich)
+- Ziel: die 10 legal lochen.
+- Niedrigste Kugel zuerst.
+- Ansage bei unklaren Stoessen; Slop zaehlt nicht.
+- Fouls: Ball-in-hand.
 
 ---
 
 ## 14.1 Straight Pool (Continuous)
-
-### Objective
-Reach the target score by pocketing any balls.
-Each legally pocketed ball scores 1 point.
-
-### Scoring Input (App)
-You record how many object balls remain after your shot.
-Points for the shot are the decrease in remaining balls.
-If you clear the table, it is recorded as a Double Sack (15).
-
-### Re-Rack Rule
-- When exactly 1 object ball remains:
-  - The other 14 balls are re-racked.
-  - The remaining ball stays in position.
-  - The inning continues.
-
-### Break Shot
-- Opening break must pocket a ball or drive two balls to a rail.
-- Failure is a foul.
-
-### Fouls
-- Normal foul: -1 and ends the inning.
-- Break foul: -2 and ends the inning.
-- Ball-in-hand is not used in this mode.
-
-### Three-Foul Rule
-- Three consecutive fouls with 0 points scored in each inning triggers Three-Foul (TF).
-- Mandatory warning after second foul (tracked by app).
-- TF ends the inning and scores -16 for that inning (foul -1 plus additional -15).
-- Over three fouls the total is -18.
-- Notation: TF only.
-
-### Shot Calling
-- No called shots enforced.
+- Ziel: Zielscore erreichen; jeder legal gelochte Ball = 1 Punkt.
+- App-Eingabe: verbleibende Objektbaelle; Punkte = Abnahme.
+- Rerack bei 1 Restkugel; Aufnahme laeuft weiter.
+- Break: Ball muss fallen oder 2 Baelle an Bande; sonst Break Foul (-2).
+- Fouls: normal -1, Break Foul -2, TF = drei Fouls ohne Punkte -> -16.
+- Gesamt ueber drei Fouls: -18. Notation: TF.
+- Kein Ball-in-hand in 14.1; Safes erlaubt.
 
 ---
 
-## One Pocket (League-Friendly)
-
-### Objective
-Be the first player to legally pocket the required number of balls
-(typically 8) into your assigned pocket.
-
-### Pocket Assignment
-- Each player owns one pocket only.
-
-### Scoring
-- Only balls pocketed into your own pocket score.
-
-### Fouls
-- Ball-in-hand.
-- Pocketing a ball into the opponent's pocket scores for them.
-- Standard fouls apply.
-
-### Spotting
-- Balls pocketed on fouls are spotted on the foot spot if required.
+## One Pocket (Liga-freundlich)
+- Ziel: eigene Tasche, i.d.R. 8 Baelle.
+- Nur Baelle in eigener Tasche zaehlen.
+- Fouls: Ball-in-hand; Ball in gegnerischer Tasche zaehlt fuer Gegner.
+- Spotting: Fouls koennen Spotten erfordern (Fuss-Punkt).
 
 ---
 
-## Bank Pool (League-Friendly)
-
-### Objective
-Pocket the required number of balls by bank shots only.
-
-### Shot Rules
-- Object ball must contact at least one cushion before pocketing.
-- Ball and pocket must be called.
-
-### Fouls
-- Ball-in-hand.
-- Non-bank pocketed balls do not count and are spotted if required.
+## Bank Pool (Liga-freundlich)
+- Ziel: nur Bankstosse zaehlen.
+- Objektball muss Bande vor Tasche; Ball und Tasche ansagen.
+- Fouls: Ball-in-hand; nicht-bank gelochte Baelle werden gespottet.
 
 ---
 
 ## Rotation (15-Ball Rotation)
-
-### Objective
-Reach the target score (commonly 61 or more).
-Each ball scores points equal to its number.
-
-### Shot Rules
-- Lowest-numbered ball must be contacted first.
-- Higher-numbered balls may be pocketed via combinations or caroms.
-
-### Scoring
-- Points are awarded for all legally pocketed balls.
-
-### Fouls
-- Ball-in-hand.
-- Pocketed balls on a foul are not scored.
+- Ziel: Zielscore (meist 61+), Ballwert = Nummer.
+- Niedrigste Kugel zuerst.
+- Punkte fuer alle legal gelochten Baelle.
+- Fouls: Ball-in-hand; Baelle auf Foul zaehlen nicht.
 
 ---
 
 ## General Notes
-
-- No shot clock enforced.
-- Equipment differences are accepted.
-- Rules favor clarity and continuity over referee-only precision.
-- The app does not issue direct real-world instructions; manual player action is required (e.g., re-rack).
-- App tracking replaces verbal warnings and written scorekeeping.
-
-This ruleset is considered league-friendly and suitable for
-self-scored competitive play.
+- Keine Shotclock.
+- Ausruestung variiert; Regeln bleiben gleich.
+- App ersetzt Zettel und verbale Warnungen, nicht den Tisch.
