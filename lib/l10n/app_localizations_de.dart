@@ -337,7 +337,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dies setzt alle Punkte und Verlauf zurück. Sind Sie sicher?';
 
   @override
-  String get gameRules => 'Voreinstellungen';
+  String get gameRules => 'Spielregeln';
 
   @override
   String get details => 'Details';

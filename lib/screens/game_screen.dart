@@ -354,6 +354,39 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         // Reset flag if game is not over (e.g. undo happened)
         _victoryShown = false;
     }
+
+    Future<void> openSettings() async {
+      final updateSettings =
+          Provider.of<Function(GameSettings)>(context, listen: false);
+      final currentSettings =
+          Provider.of<GameSettings>(context, listen: false);
+
+      // Create a Settings object that reflects the CURRENT game state
+      // This ensures the menu shows real names/scores, not defaults
+      final activeGameSettings = currentSettings.copyWith(
+        player1Name: gameState.players[0].name,
+        player2Name: gameState.players[1].name,
+        raceToScore: gameState.raceToScore,
+        threeFoulRuleEnabled: gameState.foulTracker.threeFoulRuleEnabled,
+      );
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SettingsScreen(
+            currentSettings: activeGameSettings,
+            onSettingsChanged: (newSettings) {
+              // 1. Update Global Settings (Persistence)
+              updateSettings(newSettings);
+
+              // 2. Update Active Game State (In-Game)
+              gameState.updateSettings(newSettings);
+            },
+          ),
+        ),
+      );
+    }
+
     void showRestartConfirmation() {
       Navigator.pop(context); // Close drawer
       showZoomDialog(
@@ -556,39 +589,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   icon: const Icon(Icons.settings),
                   color: colors.primary,
                   tooltip: l10n.settings,
-                  onPressed: () async {
-                    final updateSettings = Provider.of<Function(GameSettings)>(
-                        context,
-                        listen: false);
-                    final currentSettings =
-                        Provider.of<GameSettings>(context, listen: false);
-
-                    // Create a Settings object that reflects the CURRENT game state
-                    // This ensures the menu shows real names/scores, not defaults
-                    final activeGameSettings = currentSettings.copyWith(
-                      player1Name: gameState.players[0].name,
-                      player2Name: gameState.players[1].name,
-                      raceToScore: gameState.raceToScore,
-                      threeFoulRuleEnabled:
-                          gameState.foulTracker.threeFoulRuleEnabled,
-                    );
-
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SettingsScreen(
-                          currentSettings: activeGameSettings,
-                          onSettingsChanged: (newSettings) {
-                            // 1. Update Global Settings (Persistence)
-                            updateSettings(newSettings);
-
-                            // 2. Update Active Game State (In-Game)
-                            gameState.updateSettings(newSettings);
-                          },
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: openSettings,
                 ),
                 GuardedIconButton(
                   icon: Icons.undo,
@@ -660,6 +661,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     title: Text(l10n.gameRules,
                         style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
                     onTap: showRulesPopup,
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings, color: colors.primary),
+                    title: Text(l10n.settings,
+                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await openSettings();
+                    },
                   ),
                 ],
               ),
