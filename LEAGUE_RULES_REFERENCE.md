@@ -99,6 +99,7 @@ If you clear the table, it is recorded as a Double Sack (15).
 ### Break Shot
 - Opening break must pocket a ball or drive two balls to a rail.
 - Failure is a foul.
+- Manual: players judge the break; if it fails, record a break foul in the app.
 
 ### Fouls
 - Normal foul: -1 and ends the inning.
@@ -110,7 +111,7 @@ If you clear the table, it is recorded as a Double Sack (15).
 - Mandatory warning after second foul (tracked by app).
 - TF ends the inning and scores -16 for that inning (foul -1 plus additional -15).
 - Over three fouls the total is -18.
-- Balls are re-racked; opponent breaks.
+- Manual: re-rack the balls and have the opponent break next.
 - Notation: TF only.
 
 ### Shot Calling
