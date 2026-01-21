@@ -11,7 +11,7 @@ class FoulTracker {
 
   FoulTracker({this.threeFoulRuleEnabled = true});
 
-  /// Returns penalty points: -16 if TF triggered, -1 otherwise.
+  /// Returns penalty points: -15 if TF triggered, -1 otherwise.
   ///
   /// CANONICAL STREAK RULE (Foul & Fortune 14.1 Spec):
   /// - Any inning with made balls (ballsPocketed > 0) resets foul streak to 0.
@@ -34,7 +34,7 @@ class FoulTracker {
     
     if (player.consecutiveFouls >= 3) {
       player.consecutiveFouls = 0; // Reset after TF
-      return -16; // TF total: -1 + -15
+      return -15; // TF total: -15
     }
     
     return -1;

@@ -550,7 +550,7 @@ class GameState extends ChangeNotifier {
       // Revisit if FoulTracker needs update. For now, calc penalty manually.
       totalInningPoints += foulPenalty; 
     } else if (player.inningHasFoul) {
-      // Normal foul: -1 or -16 (if 3rd consecutive)
+      // Normal foul: -1 or -15 (if 3rd consecutive)
       // Calculate total balls pocketed in this inning (pre-rerack + post-rerack)
       // Calculate total balls pocketed in this inning (history + current)
       int totalRawPoints = player.inningHistory.fold(0, (sum, p) => sum + p) + pointsInInning;
@@ -575,8 +575,9 @@ class GameState extends ChangeNotifier {
       // Add 3-foul event if triggered
       if (willTriggerThreeFouls) {
         player.inningHasThreeFouls = true; // Mark for notation "TF"
-        _events.add(FoulEvent(player, -16, FoulType.threeFouls, 
-          positivePoints: 0, penalty: -16));
+        _events.add(ThreeFoulsWarningEvent());
+        _events.add(FoulEvent(player, -15, FoulType.threeFouls, 
+          positivePoints: 0, penalty: -15));
       }
     } else {
       // Valid shot (no foul) resets consecutive fouls
@@ -632,14 +633,14 @@ class GameState extends ChangeNotifier {
        total = (total * player.handicapMultiplier).round();
      }
      
-     // CRITICAL: Apply PENDING foul penalties (must include or LR shows +0)
-     // This shows the NET score during active play before finalization
-     int penalty = 0;
-     if (player.inningBreakFoulCount > 0) {
-       penalty = player.inningBreakFoulCount * -2; // Stacked BF penalty
-     } else if (player.inningHasFoul) {
-       penalty = -1; // Normal foul penalty
-     }
+    // CRITICAL: Apply PENDING foul penalties (must include or LR shows +0)
+    // This shows the NET score during active play before finalization
+    int penalty = 0;
+    if (player.inningBreakFoulCount > 0) {
+      penalty = player.inningBreakFoulCount * -2; // Stacked BF penalty
+    } else if (player.inningHasFoul) {
+      penalty = player.inningHasThreeFouls ? -15 : -1;
+    }
      
      return total + penalty;
   }

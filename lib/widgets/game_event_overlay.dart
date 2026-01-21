@@ -182,6 +182,19 @@ class _GameEventOverlayState extends State<GameEventOverlay>
       return;
     }
 
+    // SPECIAL CASE: Three Fouls Warning (Localized Dialog)
+    if (event is ThreeFoulsWarningEvent) {
+      setState(() {
+        _isAnimating = true;
+        _currentEvent = event;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final l10n = AppLocalizations.of(context);
+        _showWarningDialog(l10n.threeFoulPenalty, l10n.threeFoulMessage);
+      });
+      return;
+    }
+
     // SPECIAL CASE: Break Foul Decision (Localized Dialog)
     if (event is BreakFoulDecisionEvent) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

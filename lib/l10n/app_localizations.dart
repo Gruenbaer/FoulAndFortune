@@ -197,7 +197,7 @@ abstract class AppLocalizations {
   /// No description provided for @twoFoulsMessage.
   ///
   /// In en, this message translates to:
-  /// **'You are on 2 consecutive fouls.\nOne more foul will result in a \n-16 points penalty!'**
+  /// **'You are on 2 consecutive fouls.\nOne more foul will result in a \n-15 points penalty!'**
   String get twoFoulsMessage;
 
   /// No description provided for @iUnderstand.
@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @threeFoulRuleSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'3 consecutive fouls = -16 points'**
+  /// **'3 consecutive fouls = -15 points'**
   String get threeFoulRuleSubtitle;
 
   /// No description provided for @startGame.
@@ -821,7 +821,7 @@ abstract class AppLocalizations {
   /// No description provided for @gameRulesContent.
   ///
   /// In en, this message translates to:
-  /// **'Foul & Fortune: Straight Pool (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -16 points.\n- Severe Foul: -2 points.'**
+  /// **'Foul & Fortune: Straight Pool (Modified)\n\n1. Objective\nReach the target score (Race to X).\n\n2. Scoring (Remaining Count)\nTap the number of balls left on the table. The app awards points equal to the balls you just potted.\nExample: Remaining goes from 15 to 10 -> 5 points.\n\n3. Special Cases\n- 1 ball remaining: re-rack, inning continues.\n- Double Sack (cue ball/0): re-rack, inning continues.\n\n4. Fouls\n- Normal foul: -1 point. 3 consecutive fouls = -15 points total (TF).\n- Break foul: -2 points.\n\n5. Safeties\n- Safe ends the inning and is recorded as S in notation.'**
   String get gameRulesContent;
 
   /// No description provided for @threeFoulPenalty.
@@ -833,7 +833,7 @@ abstract class AppLocalizations {
   /// No description provided for @threeFoulMessage.
   ///
   /// In en, this message translates to:
-  /// **'Player committed 3 consecutive fouls.\n\nPenalty: -16 points\n\nThe foul counter has been reset.'**
+  /// **'Player committed 3 consecutive fouls.\n\nPenalty: -15 points\n\nThe foul counter has been reset.'**
   String get threeFoulMessage;
 
   /// No description provided for @resetGame.

@@ -22,6 +22,9 @@ class FoulEvent extends GameEvent {
 /// Event triggered when a player has 2 consecutive fouls (warning).
 class TwoFoulsWarningEvent extends GameEvent {}
 
+/// Event triggered when a player commits the third consecutive foul.
+class ThreeFoulsWarningEvent extends GameEvent {}
+
 /// Event triggered for general warnings to the player.
 class WarningEvent extends GameEvent {
   final String title;
