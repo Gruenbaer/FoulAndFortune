@@ -95,6 +95,7 @@ If you clear the table, it is recorded as a Double Sack (15).
   - The other 14 balls are re-racked.
   - The remaining ball stays in position.
   - The inning continues.
+- Manual: physically re-rack the 14 balls; this only happens on legal shots (fouls end the inning).
 
 ### Break Shot
 - Opening break must pocket a ball or drive two balls to a rail.
