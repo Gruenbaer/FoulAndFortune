@@ -381,7 +381,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gameRulesContent =>
-      'Foul & Fortune: Straight Pool (Modified)\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nPocketing a ball scores points equal to (15 - Ball Number).\nExample: Ball 14 = 1 point. Ball 1 = 14 points.\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point. 3 consecutive fouls = -16 points.\n- Severe Foul: -2 points.';
+      'Foul & Fortune: Straight Pool\nRules follow standard 14.1 Straight Pool (three-foul rule, rerack procedures); the app uses a remaining-balls input method for faster scoring.\n\n1. Object of the Game\nThe goal is to reach the set score (Race to X).\n\n2. Scoring\nYou record how many object balls remain after your shot.\nPoints for the shot are calculated as the decrease in remaining balls.\nWhen 1 ball remains, the rack is reset to 15 and your inning continues.\nIf you clear the table, it is recorded as a Double Sack (15).\n\n3. Special Balls\n- Ball 1: Scores 14 points and causes a Re-Rack. Player continues.\n- Double Sack (Cue Ball): Scores 15 points and causes a Re-Rack. Player continues.\n\n4. Fouls\n- Normal Foul: -1 point.\n- Severe Foul: -2 points.\n- Three-Foul (TF): Three consecutive fouls with 0 points scored in each inning triggers TF. TF ends the inning and scores -16 for that inning (-1 foul plus -15 additional). Over three fouls the total is -18. Notation is TF (no separate F).';
 
   @override
   String get threeFoulPenalty => '3-Foul Penalty!';

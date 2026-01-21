@@ -113,6 +113,7 @@ A segment is the number of balls potted since the last re-rack.
 ### Third Foul (TF)
 - Ends the inning
 - Penalty: −16
+- TF inning penalty is −16 total (foul −1 plus additional −15)
 - Represented as `TF` only
 - No additional `F` is shown
 
