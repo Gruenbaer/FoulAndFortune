@@ -95,12 +95,10 @@ If you clear the table, it is recorded as a Double Sack (15).
   - The other 14 balls are re-racked.
   - The remaining ball stays in position.
   - The inning continues.
-- Manual: physically re-rack the 14 balls; this only happens on legal shots (fouls end the inning).
 
 ### Break Shot
 - Opening break must pocket a ball or drive two balls to a rail.
 - Failure is a foul.
-- Manual: players judge the break; if it fails, record a break foul and follow the app's break-decision prompt.
 
 ### Fouls
 - Normal foul: -1 and ends the inning.
@@ -180,6 +178,7 @@ Each ball scores points equal to its number.
 - No shot clock enforced.
 - Equipment differences are accepted.
 - Rules favor clarity and continuity over referee-only precision.
+- Manual steps are required when prompted by the app; messages indicate what to do (e.g., "RERACK" is imperative).
 - App tracking replaces verbal warnings and written scorekeeping.
 
 This ruleset is considered league-friendly and suitable for
