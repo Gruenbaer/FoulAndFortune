@@ -1,3 +1,13 @@
+## v4.2.5 - Rack Sync & 3-Foul Anzeige
+
+Korrekturen fuer Rack-Status und 3-Foul Meldungen.
+
+*   **Fix:** Rack-Status wird bei normalen Ball-Taps (2-15) korrekt aktualisiert
+*   **Fix:** 3-Foul Texte zeigen jetzt -16 Punkte (TF) statt -15
+*   **Dokumentation:** Parity-Result-Template hinzugefuegt
+
+***
+
 ## v4.2.4 - Code-Qualität & Aufräumen 🧹
 
 Technische Verbesserungen und Fehlerbehebungen.
