@@ -178,6 +178,18 @@
 
 ---
 
+### 2026-01-22
+
+**Developer**: Antigravity AI
+
+- Manual parity checklist completed; results logged in `REFACTOR_14.1_PARITY.md` (PASS).
+- Updated parity scenario #10 to use 2.0x multiplier (supported in UI).
+- Added new-game multiplier selector (1x/2x/3x) in setup UI.
+- Tests: `puro flutter test` (PASS; 98 tests).
+- Commit: f9f4b76
+
+---
+
 ## Notes & Decisions
 
 ### Architecture Decisions
