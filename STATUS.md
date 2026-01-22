@@ -1,6 +1,6 @@
 # Project Status and Handoff
 
-Last updated: 2026-01-22 08:59 (local)
+Last updated: 2026-01-22 09:02 (local)
 Branch: master (tracking origin/master)
 Latest commit: run `git log -1 --oneline`
 
@@ -25,7 +25,8 @@ Update it at the end of every session.
 - `puro flutter test` (PASS, 2026-01-22 08:59). Requires elevated shell due to Puro access restrictions.
 
 ## Open tasks / decisions
-- None confirmed. Manual parity testing is still recommended per `REFACTOR_EXECUTION_LOG.md`.
+- Push current commits to `origin/master` (last attempt failed to connect to github.com).
+- Manual parity testing is still recommended per `REFACTOR_EXECUTION_LOG.md`.
 
 ## Runbook
 - L10n: `puro flutter gen-l10n`
