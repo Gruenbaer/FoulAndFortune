@@ -4,6 +4,7 @@ import '../models/game_settings.dart' hide Player;
 import '../l10n/app_localizations.dart';
 import '../widgets/player_name_field.dart';
 import '../services/player_service.dart';
+import '../theme/fortune_theme.dart';
 import '../widgets/settings/settings_slider.dart';
 import '../widgets/settings/settings_toggle.dart';
 import '../widgets/settings/handicap_picker.dart';
@@ -131,6 +132,62 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final fortuneTheme = FortuneColors.of(context);
+
+    Widget buildMultiplierSelector({
+      required String playerName,
+      required double value,
+      required ValueChanged<double> onChanged,
+    }) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(playerName, style: theme.textTheme.bodyLarge),
+              Text(l10n.pointMultiplier, style: theme.textTheme.bodySmall),
+            ],
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(4),
+              border:
+                  Border.all(color: fortuneTheme.primary.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [1.0, 2.0, 3.0].map((val) {
+                final isSelected = value == val;
+                return GestureDetector(
+                  onTap: () => setState(() => onChanged(val)),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? fortuneTheme.secondary : Colors.transparent,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    child: Text(
+                      '${val.toInt()}x',
+                      style: TextStyle(
+                        color: isSelected
+                            ? fortuneTheme.textContrast
+                            : fortuneTheme.primary,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -270,6 +327,17 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                     },
                   ),
 
+                  const SizedBox(height: 12),
+
+                  buildMultiplierSelector(
+                    playerName: _settings.player1Name,
+                    value: _settings.player1HandicapMultiplier,
+                    onChanged: (value) {
+                      _settings =
+                          _settings.copyWith(player1HandicapMultiplier: value);
+                    },
+                  ),
+
                   const SizedBox(height: 24),
 
                   if (!_settings.isTrainingMode) ...[
@@ -300,6 +368,17 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                         setState(() {
                           _settings = _settings.copyWith(player2Handicap: value);
                         });
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    buildMultiplierSelector(
+                      playerName: _settings.player2Name,
+                      value: _settings.player2HandicapMultiplier,
+                      onChanged: (value) {
+                        _settings = _settings.copyWith(
+                            player2HandicapMultiplier: value);
                       },
                     ),
                   ],

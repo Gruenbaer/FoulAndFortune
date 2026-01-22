@@ -1,4 +1,4 @@
-# 14.1 Straight Pool - Parity Checklist
+﻿# 14.1 Straight Pool - Parity Checklist
 
 **Purpose**: These 10 behaviors MUST remain 100% identical after refactoring.
 
@@ -13,7 +13,7 @@
 **Expected**: 
 - Auto re-rack to 15 balls
 - Inning continues (same player)
-- Notation shows `⟲` symbol
+- Notation shows `âŸ²` symbol
 - Points awarded before re-rack
 
 **How to verify**: Play until 14 balls potted, check re-rack triggers
@@ -95,8 +95,8 @@
 ### 8. FF14 Canonical Notation Format
 **Test**: Play a full inning with re-rack, safe, and foul  
 **Expected**:
-- Format: `15⟲14⟲5SF` (segments⟲inning-end-notation)
-- Re-rack symbol: `⟲`
+- Format: `15âŸ²14âŸ²5SF` (segmentsâŸ²inning-end-notation)
+- Re-rack symbol: `âŸ²`
 - Suffixes: `S` (safe), `F` (foul), `SF` (both), `BF` (break foul), `TF` (3-foul)
 
 **How to verify**: Check game history notation matches canonical format
@@ -117,11 +117,11 @@
 ---
 
 ### 10. Handicap Multipliers Apply Per Segment
-**Test**: Set Player 1 handicap to 1.5x, pot 10 balls in re-rack inning  
+**Test**: Set Player 1 handicap to 2.0x, pot 10 balls in re-rack inning  
 **Expected**:
-- First segment: 14 × 1.5 = 21 points
-- Second segment (after re-rack): 10 × 1.5 = 15 points
-- Total inning: 36 points
+- First segment: 14 x 2.0 = 28 points
+- Second segment (after re-rack): 10 x 2.0 = 20 points
+- Total inning: 48 points
 - Each segment multiplied independently
 
 **How to verify**: Set handicap in settings, play re-rack inning, check score calculation
@@ -154,9 +154,9 @@
 
 **When short on time, test these 3 critical scenarios:**
 
-1. **Re-rack**: Pot 14 balls → verify re-rack → verify inning continues
-2. **3-Foul**: Tap foul 3 times → verify -16 penalty
-3. **Undo/Redo**: Play 3 actions → undo all → redo all → verify identical state
+1. **Re-rack**: Pot 14 balls â†’ verify re-rack â†’ verify inning continues
+2. **3-Foul**: Tap foul 3 times â†’ verify -16 penalty
+3. **Undo/Redo**: Play 3 actions â†’ undo all â†’ redo all â†’ verify identical state
 
 If these 3 pass, full parity is likely intact. Still run full checklist before phase completion.
 
@@ -170,6 +170,28 @@ If these 3 pass, full parity is likely intact. Still run full checklist before p
 **Phase 4 Exit Gate**: 10/10 scenarios pass
 
 **Zero tolerance** for parity breaks. 14.1 behavior is frozen.
+
+---
+
+## Results
+
+### 2026-01-22 (Phase 2)
+- Build: master @ 74a2e14
+- Device: Windows (desktop)
+- Result: PASS
+- Notes: Multiplier test uses 1x/2x/3x options (2.0x verified).
+
+Checklist:
+- [x] 1 Re-rack at Ball 1
+- [x] 2 Double-Sack (Ball 0)
+- [x] 3 Normal Foul Penalty
+- [x] 4 Break Foul Penalty
+- [x] 5 Three Consecutive Fouls Penalty
+- [x] 6 Turn Ends on Pot 2-15 Balls
+- [x] 7 Turn Continues on Re-rack or Double-Sack
+- [x] 8 FF14 Canonical Notation Format
+- [x] 9 Undo/Redo Restores Exact State
+- [x] 10 Handicap Multipliers Apply Per Segment
 
 ---
 
@@ -192,3 +214,4 @@ Checklist:
 - [ ] 8 FF14 Canonical Notation Format
 - [ ] 9 Undo/Redo Restores Exact State
 - [ ] 10 Handicap Multipliers Apply Per Segment
+

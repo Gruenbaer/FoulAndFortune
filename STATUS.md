@@ -1,6 +1,6 @@
 # Project Status and Handoff
 
-Last updated: 2026-01-22 09:02 (local)
+Last updated: 2026-01-22 14:42 (local)
 Branch: master (tracking origin/master)
 Latest commit: run `git log -1 --oneline`
 
@@ -10,23 +10,21 @@ Update it at the end of every session.
 
 ## Current focus
 - Training mode (single-player) UI and settings support.
-- Total fouls tracking in game state and stats persistence.
-- Break foul dialog timing fix and coverage test.
-- Documentation: stats roadmap and dialog testing brief (ASCII).
+- New game multiplier controls (1x/2x/3x) in setup flow.
+- Parity checklist updated and logged PASS for Phase 2.
 
 ## Refactor status
 - Multi-game refactor Phase 2 is marked complete in `REFACTOR_EXECUTION_LOG.md`.
-- Manual parity testing and doc confirmation are still recommended.
+- Manual parity testing completed; results logged in `REFACTOR_14.1_PARITY.md`.
 
 ## Working tree
-- Clean (all changes committed in this snapshot).
+- Dirty (uncommitted changes in `REFACTOR_14.1_PARITY.md` and `lib/screens/new_game_settings_screen.dart`).
 
 ## Tests
-- `puro flutter test` (PASS, 2026-01-22 08:59). Requires elevated shell due to Puro access restrictions.
+- Not run after latest changes. Last: `puro flutter test` (PASS, 2026-01-22 08:59).
 
 ## Open tasks / decisions
-- Push current commits to `origin/master` (last attempt failed to connect to github.com).
-- Manual parity testing is still recommended per `REFACTOR_EXECUTION_LOG.md`.
+- Commit pending: new game multiplier selector + parity doc update.
 
 ## Runbook
 - L10n: `puro flutter gen-l10n`
