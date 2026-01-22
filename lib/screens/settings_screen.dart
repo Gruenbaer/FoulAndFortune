@@ -28,11 +28,38 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late GameSettings _settings;
   final _settingsService = SettingsService();
+  String? _cachedPlayer2Name;
+  int? _cachedPlayer2Handicap;
+  double? _cachedPlayer2Multiplier;
 
   @override
   void initState() {
     super.initState();
     _settings = widget.currentSettings;
+  }
+
+  void _setTrainingMode(bool enabled, AppLocalizations l10n) {
+    setState(() {
+      if (enabled) {
+        _cachedPlayer2Name = _settings.player2Name;
+        _cachedPlayer2Handicap = _settings.player2Handicap;
+        _cachedPlayer2Multiplier = _settings.player2HandicapMultiplier;
+        _settings = _settings.copyWith(
+          isTrainingMode: true,
+          player2Name: l10n.trainingOpponentName,
+          player2Handicap: 0,
+          player2HandicapMultiplier: 1.0,
+        );
+      } else {
+        _settings = _settings.copyWith(
+          isTrainingMode: false,
+          player2Name: _cachedPlayer2Name ?? _settings.player2Name,
+          player2Handicap: _cachedPlayer2Handicap ?? _settings.player2Handicap,
+          player2HandicapMultiplier:
+              _cachedPlayer2Multiplier ?? _settings.player2HandicapMultiplier,
+        );
+      }
+    });
   }
 
   @override
@@ -154,12 +181,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () => _editPlayerName(1),
                 ),
               ),
+              if (!_settings.isTrainingMode)
+                buildPanelTile(
+                  child: ListTile(
+                    title: Text(l10n.player2, style: theme.textTheme.bodyLarge),
+                    subtitle: Text(_settings.player2Name, style: theme.textTheme.displaySmall?.copyWith(fontSize: 18)),
+                    trailing: Icon(Icons.edit, color: fortuneTheme.primary),
+                    onTap: () => _editPlayerName(2),
+                  ),
+                ),
               buildPanelTile(
-                child: ListTile(
-                  title: Text(l10n.player2, style: theme.textTheme.bodyLarge),
-                  subtitle: Text(_settings.player2Name, style: theme.textTheme.displaySmall?.copyWith(fontSize: 18)),
-                  trailing: Icon(Icons.edit, color: fortuneTheme.primary),
-                  onTap: () => _editPlayerName(2),
+                child: SettingsToggle(
+                  title: l10n.trainingMode,
+                  subtitle: l10n.trainingModeSubtitle,
+                  value: _settings.isTrainingMode,
+                  onChanged: (value) => _setTrainingMode(value, l10n),
                 ),
               ),
 
@@ -263,53 +299,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
 
               // Player 2 Handicap
-              buildPanelTile(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(_settings.player2Name, style: theme.textTheme.bodyLarge),
-                          Text('Point Multiplier', style: theme.textTheme.bodySmall),
-                        ],
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: fortuneTheme.primary.withValues(alpha: 0.3)),
+              if (!_settings.isTrainingMode)
+                buildPanelTile(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_settings.player2Name, style: theme.textTheme.bodyLarge),
+                            Text('Point Multiplier', style: theme.textTheme.bodySmall),
+                          ],
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [1.0, 2.0, 3.0].map((val) {
-                            final isSelected = _settings.player2HandicapMultiplier == val;
-                            return GestureDetector(
-                              onTap: () => setState(() => _settings = _settings.copyWith(player2HandicapMultiplier: val)),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? fortuneTheme.secondary : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                                child: Text(
-                                  '${val.toInt()}x',
-                                  style: TextStyle(
-                                    color: isSelected ? fortuneTheme.textContrast : fortuneTheme.primary,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: fortuneTheme.primary.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [1.0, 2.0, 3.0].map((val) {
+                              final isSelected = _settings.player2HandicapMultiplier == val;
+                              return GestureDetector(
+                                onTap: () => setState(() => _settings = _settings.copyWith(player2HandicapMultiplier: val)),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? fortuneTheme.secondary : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                  child: Text(
+                                    '${val.toInt()}x',
+                                    style: TextStyle(
+                                      color: isSelected ? fortuneTheme.textContrast : fortuneTheme.primary,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
+                              );
+                            }).toList(),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
               buildSectionHeader(l10n.language, Icons.language),
 

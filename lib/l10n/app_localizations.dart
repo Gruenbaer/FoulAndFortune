@@ -176,6 +176,30 @@ abstract class AppLocalizations {
   /// **'Track for statistics and rankings'**
   String get leagueGameSubtitle;
 
+  /// No description provided for @trainingMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Mode'**
+  String get trainingMode;
+
+  /// No description provided for @trainingModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Single-player practice with one scoreboard.'**
+  String get trainingModeSubtitle;
+
+  /// No description provided for @trainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get trainingLabel;
+
+  /// No description provided for @trainingOpponentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get trainingOpponentName;
+
   /// No description provided for @breakFoulTitle.
   ///
   /// In en, this message translates to:

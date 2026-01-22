@@ -23,6 +23,9 @@ class NewGameSettingsScreen extends StatefulWidget {
 class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   late GameSettings _settings;
   double _raceSliderValue = 100;
+  String? _cachedPlayer2Name;
+  int? _cachedPlayer2Handicap;
+  double? _cachedPlayer2Multiplier;
 
 
   final PlayerService _playerService = PlayerService();
@@ -64,6 +67,30 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
     } catch (e) {
       // Provider not available, ignore
     }
+  }
+
+  void _setTrainingMode(bool enabled, AppLocalizations l10n) {
+    setState(() {
+      if (enabled) {
+        _cachedPlayer2Name = _settings.player2Name;
+        _cachedPlayer2Handicap = _settings.player2Handicap;
+        _cachedPlayer2Multiplier = _settings.player2HandicapMultiplier;
+        _settings = _settings.copyWith(
+          isTrainingMode: true,
+          player2Name: l10n.trainingOpponentName,
+          player2Handicap: 0,
+          player2HandicapMultiplier: 1.0,
+        );
+      } else {
+        _settings = _settings.copyWith(
+          isTrainingMode: false,
+          player2Name: _cachedPlayer2Name ?? _settings.player2Name,
+          player2Handicap: _cachedPlayer2Handicap ?? _settings.player2Handicap,
+          player2HandicapMultiplier:
+              _cachedPlayer2Multiplier ?? _settings.player2HandicapMultiplier,
+        );
+      }
+    });
   }
 
   Future<void> _loadPlayers() async {
@@ -135,6 +162,12 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                         _settings = _settings.copyWith(isLeagueGame: value);
                       });
                     },
+                  ),
+                  SettingsToggle(
+                    title: l10n.trainingMode,
+                    subtitle: l10n.trainingModeSubtitle,
+                    value: _settings.isTrainingMode,
+                    onChanged: (value) => _setTrainingMode(value, l10n),
                   ),
                 ],
               ),
@@ -239,35 +272,37 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Player 2 Input
-                  PlayerNameField(
-                    key: const ValueKey('player2_input'),
-                    label: l10n.player2,
-                    initialValue: _settings.player2Name,
-                    players: _players,
-                    onChanged: (name) {
-                      setState(() {
-                        _settings = _settings.copyWith(player2Name: name);
-                      });
-                    },
-                    onCreatePlayer: () async {
-                      await _createPlayerInline(_settings.player2Name);
-                    },
-                  ),
+                  if (!_settings.isTrainingMode) ...[
+                    // Player 2 Input
+                    PlayerNameField(
+                      key: const ValueKey('player2_input'),
+                      label: l10n.player2,
+                      initialValue: _settings.player2Name,
+                      players: _players,
+                      onChanged: (name) {
+                        setState(() {
+                          _settings = _settings.copyWith(player2Name: name);
+                        });
+                      },
+                      onCreatePlayer: () async {
+                        await _createPlayerInline(_settings.player2Name);
+                      },
+                    ),
 
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  HandicapPicker(
-                    label: l10n.handicap,
-                    value: _settings.player2Handicap,
-                    step: 5,
-                    minValue: 0,
-                    onChanged: (value) {
-                      setState(() {
-                        _settings = _settings.copyWith(player2Handicap: value);
-                      });
-                    },
-                  ),
+                    HandicapPicker(
+                      label: l10n.handicap,
+                      value: _settings.player2Handicap,
+                      step: 5,
+                      minValue: 0,
+                      onChanged: (value) {
+                        setState(() {
+                          _settings = _settings.copyWith(player2Handicap: value);
+                        });
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),

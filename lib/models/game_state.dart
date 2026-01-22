@@ -222,53 +222,68 @@ class GameState extends ChangeNotifier {
   }
 
   // Update settings mid-game
-  void updateSettings(dynamic settings) {
+  void updateSettings(GameSettings newSettings) {
     bool somethingChanged = false;
 
     // Update Race to Score
-    if (raceToScore != settings.raceToScore) {
-      raceToScore = settings.raceToScore;
+    if (raceToScore != newSettings.raceToScore) {
+      raceToScore = newSettings.raceToScore;
       somethingChanged = true;
       _logAction('Race to Score changed to $raceToScore');
       onSaveRequired?.call();
     }
 
     // Update 3-Foul Rule
-    if (foulTracker.threeFoulRuleEnabled != settings.threeFoulRuleEnabled) {
-      foulTracker.threeFoulRuleEnabled = settings.threeFoulRuleEnabled;
+    if (foulTracker.threeFoulRuleEnabled != newSettings.threeFoulRuleEnabled) {
+      foulTracker.threeFoulRuleEnabled = newSettings.threeFoulRuleEnabled;
       somethingChanged = true;
       _logAction(
-          '3-Foul Rule ${settings.threeFoulRuleEnabled ? "Enabled" : "Disabled"}');
+          '3-Foul Rule ${newSettings.threeFoulRuleEnabled ? "Enabled" : "Disabled"}');
     }
 
     // Update Player Names (if changed)
-    if (players[0].name != settings.player1Name) {
-      players[0] = players[0].copyWith(name: settings.player1Name);
+    if (players[0].name != newSettings.player1Name) {
+      players[0] = players[0].copyWith(name: newSettings.player1Name);
       somethingChanged = true;
-      _logAction('Player 1 renamed to ${settings.player1Name}');
+      _logAction('Player 1 renamed to ${newSettings.player1Name}');
     }
 
-    if (players[1].name != settings.player2Name) {
-      players[1] = players[1].copyWith(name: settings.player2Name);
+    if (players[1].name != newSettings.player2Name) {
+      players[1] = players[1].copyWith(name: newSettings.player2Name);
       somethingChanged = true;
-      _logAction('Player 2 renamed to ${settings.player2Name}');
+      _logAction('Player 2 renamed to ${newSettings.player2Name}');
     }
 
     // Update Handicap Multipliers
-    if (players[0].handicapMultiplier != settings.player1HandicapMultiplier) {
+    if (players[0].handicapMultiplier != newSettings.player1HandicapMultiplier) {
       players[0] = players[0]
-          .copyWith(handicapMultiplier: settings.player1HandicapMultiplier);
+          .copyWith(handicapMultiplier: newSettings.player1HandicapMultiplier);
       somethingChanged = true;
       _logAction(
-          'Player 1 Handicap changed to ${settings.player1HandicapMultiplier}x');
+          'Player 1 Handicap changed to ${newSettings.player1HandicapMultiplier}x');
     }
 
-    if (players[1].handicapMultiplier != settings.player2HandicapMultiplier) {
+    if (players[1].handicapMultiplier != newSettings.player2HandicapMultiplier) {
       players[1] = players[1]
-          .copyWith(handicapMultiplier: settings.player2HandicapMultiplier);
+          .copyWith(handicapMultiplier: newSettings.player2HandicapMultiplier);
       somethingChanged = true;
       _logAction(
-          'Player 2 Handicap changed to ${settings.player2HandicapMultiplier}x');
+          'Player 2 Handicap changed to ${newSettings.player2HandicapMultiplier}x');
+    }
+
+    if (settings.isTrainingMode != newSettings.isTrainingMode) {
+      settings = newSettings;
+      somethingChanged = true;
+      if (newSettings.isTrainingMode) {
+        currentPlayerIndex = 0;
+        players[0].isActive = true;
+        players[1].isActive = false;
+        _logAction('Training Mode enabled');
+      } else {
+        _logAction('Training Mode disabled');
+      }
+    } else {
+      settings = newSettings;
     }
 
     // Check win condition if score limit was lowered
@@ -643,6 +658,47 @@ class GameState extends ChangeNotifier {
      
      return total + penalty;
   }
+
+  int getTotalFoulsForPlayer(Player player, {bool includeCurrent = false}) {
+    int total = 0;
+    for (final record in inningRecords) {
+      if (record.playerName != player.name) continue;
+      total += _countFoulsFromNotation(record.notation);
+    }
+
+    if (includeCurrent && !gameOver) {
+      total += _countCurrentInningFouls(player);
+    }
+
+    return total;
+  }
+
+  int _countFoulsFromNotation(String notation) {
+    try {
+      final parsed = NotationCodec.parse(notation);
+      switch (parsed.foul) {
+        case FoulType.breakFoul:
+          return parsed.foulCount;
+        case FoulType.normal:
+        case FoulType.threeFouls:
+          return 1;
+        case FoulType.none:
+          return 0;
+      }
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  int _countCurrentInningFouls(Player player) {
+    if (player.inningBreakFoulCount > 0) {
+      return player.inningBreakFoulCount;
+    }
+    if (player.inningHasThreeFouls || player.inningHasFoul) {
+      return 1;
+    }
+    return 0;
+  }
   
   // Generate score card notation for an inning (Canonical V2 format)
   String _generateInningNotation(Player player) {
@@ -698,8 +754,6 @@ class GameState extends ChangeNotifier {
   void _switchPlayer() {
   // 1. Capture references before switching logical index
   final oldPlayer = currentPlayer;
-  final newPlayerIndex = 1 - currentPlayerIndex;
-  final newPlayer = players[newPlayerIndex];
 
   // 2. Finalize inning (uses current/old player)
   //    This sets lastRun and adds to score
@@ -711,6 +765,26 @@ class GameState extends ChangeNotifier {
   oldPlayer.incrementInning();
   
   debugPrint('DEBUG _switchPlayer: After incrementInning currentRun=${oldPlayer.currentRun}');
+
+  if (settings.isTrainingMode) {
+    if (breakFoulStillAvailable) {
+      breakFoulStillAvailable = false;
+      if (_rulesState is sp_state.StraightPoolState) {
+          (_rulesState as sp_state.StraightPoolState).breakFoulStillAvailable = false;
+      }
+    }
+
+    if (foulTracker.threeFoulRuleEnabled &&
+        oldPlayer.consecutiveFouls == 2) {
+      _events.add(TwoFoulsWarningEvent());
+    }
+
+    notifyListeners();
+    return;
+  }
+  
+  final newPlayerIndex = 1 - currentPlayerIndex;
+  final newPlayer = players[newPlayerIndex];
   
   // 4. Switch logical control immediately
   currentPlayerIndex = newPlayerIndex;
@@ -748,6 +822,7 @@ class GameState extends ChangeNotifier {
 
   // Allow swapping starting player before game starts
   void swapStartingPlayer() {
+    if (settings.isTrainingMode) return;
     if (gameStarted || matchLog.isNotEmpty) return; // Only allow at start
 
     _pushState();
@@ -896,10 +971,14 @@ class GameState extends ChangeNotifier {
          if (outcome.decisionRequirement != null) {
             final req = outcome.decisionRequirement!;
             if (req.type == 'breakFoulDecision') {
-                 _events.add(BreakFoulDecisionEvent(
-                    req.options, 
-                    (selectedIndex) => handleBreakFoulDecision(selectedIndex)
-                 ));
+                 if (settings.isTrainingMode) {
+                   handleBreakFoulDecision(currentPlayerIndex);
+                 } else {
+                   _events.add(BreakFoulDecisionEvent(
+                      req.options, 
+                      (selectedIndex) => handleBreakFoulDecision(selectedIndex)
+                   ));
+                 }
             }
          }
          break;

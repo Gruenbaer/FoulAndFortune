@@ -5,6 +5,7 @@ class GameSettings {
   int raceToScore;
   String player1Name;
   String player2Name;
+  bool isTrainingMode;
   bool isLeagueGame;
   int player1Handicap;
   int player2Handicap;
@@ -24,6 +25,7 @@ class GameSettings {
     this.raceToScore = 100,
     this.player1Name = '',
     this.player2Name = '',
+    this.isTrainingMode = false,
     this.isLeagueGame = false,
     this.player1Handicap = 0,
     this.player2Handicap = 0,
@@ -41,13 +43,15 @@ class GameSettings {
 
   // Validation helpers
   bool get hasValidPlayers => 
-      player1Name.trim().isNotEmpty && player2Name.trim().isNotEmpty;
+      player1Name.trim().isNotEmpty &&
+      (isTrainingMode || player2Name.trim().isNotEmpty);
 
   Map<String, dynamic> toJson() => {
         'threeFoulRuleEnabled': threeFoulRuleEnabled,
         'raceToScore': raceToScore,
         'player1Name': player1Name,
         'player2Name': player2Name,
+        'isTrainingMode': isTrainingMode,
         'isLeagueGame': isLeagueGame,
         'player1Handicap': player1Handicap,
         'player2Handicap': player2Handicap,
@@ -68,6 +72,7 @@ class GameSettings {
         raceToScore: json['raceToScore'] ?? 100,
         player1Name: json['player1Name'] ?? '',
         player2Name: json['player2Name'] ?? '',
+        isTrainingMode: json['isTrainingMode'] ?? false,
         isLeagueGame: json['isLeagueGame'] ?? false,
         player1Handicap: json['player1Handicap'] ?? 0,
         player2Handicap: json['player2Handicap'] ?? 0,
@@ -90,6 +95,7 @@ class GameSettings {
     int? raceToScore,
     String? player1Name,
     String? player2Name,
+    bool? isTrainingMode,
     bool? isLeagueGame,
     int? player1Handicap,
     int? player2Handicap,
@@ -109,6 +115,7 @@ class GameSettings {
       raceToScore: raceToScore ?? this.raceToScore,
       player1Name: player1Name ?? this.player1Name,
       player2Name: player2Name ?? this.player2Name,
+      isTrainingMode: isTrainingMode ?? this.isTrainingMode,
       isLeagueGame: isLeagueGame ?? this.isLeagueGame,
       player1Handicap: player1Handicap ?? this.player1Handicap,
       player2Handicap: player2Handicap ?? this.player2Handicap,
@@ -137,6 +144,7 @@ class GameSettings {
         other.raceToScore == raceToScore &&
         other.player1Name == player1Name &&
         other.player2Name == player2Name &&
+        other.isTrainingMode == isTrainingMode &&
         other.isLeagueGame == isLeagueGame &&
         other.player1Handicap == player1Handicap &&
         other.player2Handicap == player2Handicap &&
@@ -156,6 +164,7 @@ class GameSettings {
         raceToScore.hashCode ^
         player1Name.hashCode ^
         player2Name.hashCode ^
+        isTrainingMode.hashCode ^
         isLeagueGame.hashCode ^
         player1Handicap.hashCode ^
         player2Handicap.hashCode ^

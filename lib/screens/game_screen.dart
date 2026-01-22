@@ -96,6 +96,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Check if game is completed (score >= raceToScore)
     final p1 = gameState.players[0];
     final p2 = gameState.players[1];
+    final player1Fouls =
+        gameState.getTotalFoulsForPlayer(p1, includeCurrent: true);
+    final player2Fouls =
+        gameState.getTotalFoulsForPlayer(p2, includeCurrent: true);
     final winner = (p1.score >= gameState.raceToScore)
         ? p1
         : (p2.score >= gameState.raceToScore ? p2 : null);
@@ -114,8 +118,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       raceToScore: gameState.raceToScore,
       player1Innings: p1.currentInning,
       player2Innings: p2.currentInning,
-      player1Fouls: 0, // Not exposed in Player model yet
-      player2Fouls: 0, // Not exposed in Player model yet
+      player1Fouls: player1Fouls,
+      player2Fouls: player2Fouls,
       activeBalls: gameState.activeBalls.toList(),
       player1IsActive: p1.isActive,
       snapshot: gameState.toJson(),
@@ -132,6 +136,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     final p1 = gameState.players[0];
     final p2 = gameState.players[1];
+    final player1Fouls = gameState.getTotalFoulsForPlayer(p1);
+    final player2Fouls = gameState.getTotalFoulsForPlayer(p2);
     final winner = gameState.winner;
     // If winner is null for some reason, determine by score
     final effectiveWinner = winner ??
@@ -154,8 +160,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       winner: effectiveWinner.name,
       player1Innings: p1.currentInning,
       player2Innings: p2.currentInning,
-      player1Fouls: 0,
-      player2Fouls: 0,
+      player1Fouls: player1Fouls,
+      player2Fouls: player2Fouls,
       activeBalls: [], // Cleared
       player1IsActive: false,
       snapshot: null, // Don't save snapshot for completed game
@@ -171,7 +177,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       final playerService = stats.PlayerService();
 
       // Helper to update a single player
-      Future<void> updatePlayerStats(Player gamePlayer, bool isWinner) async {
+      Future<void> updatePlayerStats(Player gamePlayer, int gameFouls, bool isWinner) async {
         final existingPlayer =
             await playerService.getPlayerByName(gamePlayer.name);
         if (existingPlayer != null) {
@@ -181,16 +187,183 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           existingPlayer.totalPoints += gamePlayer.score;
           existingPlayer.totalInnings += gamePlayer.currentInning;
           existingPlayer.totalSaves += gamePlayer.saves;
+          existingPlayer.totalFouls += gameFouls;
 
           await playerService.updatePlayer(existingPlayer);
         }
       }
 
-      await updatePlayerStats(p1, p1 == effectiveWinner);
-      await updatePlayerStats(p2, p2 == effectiveWinner);
+      await updatePlayerStats(p1, player1Fouls, p1 == effectiveWinner);
+      await updatePlayerStats(p2, player2Fouls, p2 == effectiveWinner);
     } catch (e) {
       debugPrint('Error updating player stats: \$e');
     }
+  }
+
+  Widget _buildTrainingStatsPanel(BuildContext context, GameState gameState) {
+    final colors = FortuneColors.of(context);
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final player = gameState.players[0];
+    final isCyberpunk = colors.themeId == 'cyberpunk';
+    final totalFouls = gameState.getTotalFoulsForPlayer(
+      player,
+      includeCurrent: !gameState.gameOver,
+    );
+
+    final labelStyle = theme.textTheme.labelSmall?.copyWith(
+          color: colors.primaryDark,
+          fontSize: 10,
+          letterSpacing: 1.2,
+          fontWeight: FontWeight.bold,
+        ) ??
+        TextStyle(
+          color: colors.primaryDark,
+          fontSize: 10,
+          letterSpacing: 1.2,
+          fontWeight: FontWeight.bold,
+        );
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
+          color: colors.textMain,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ) ??
+        TextStyle(
+          color: colors.textMain,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: ShapeDecoration(
+        shape: isCyberpunk
+            ? BeveledRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: colors.primaryDark,
+                  width: 2,
+                ),
+              )
+            : RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                  color: colors.primaryDark,
+                  width: 2,
+                ),
+              ),
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.6),
+            offset: const Offset(0, 4),
+            blurRadius: 6,
+          ),
+        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colors.backgroundCard,
+            Color.lerp(colors.backgroundCard, Colors.black, 0.4)!,
+          ],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            l10n.trainingLabel.toUpperCase(),
+            textAlign: TextAlign.end,
+            style: theme.textTheme.labelLarge?.copyWith(
+                  color: colors.accent,
+                  fontSize: 12,
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.bold,
+                ) ??
+                TextStyle(
+                  color: colors.accent,
+                  fontSize: 12,
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Table(
+            columnWidths: const {
+              0: FlexColumnWidth(),
+              1: IntrinsicColumnWidth(),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              _buildTrainingStatRow(
+                'LR',
+                _formatSigned(gameState.getDynamicInningScore(player)),
+                labelStyle,
+                valueStyle,
+              ),
+              _buildTrainingStatRow(
+                'HR',
+                player.highestRun.toString(),
+                labelStyle,
+                valueStyle,
+              ),
+              _buildTrainingStatRow(
+                'AVG',
+                _formatAverage(player),
+                labelStyle,
+                valueStyle,
+              ),
+              _buildTrainingStatRow(
+                'SAVES',
+                _formatZeroDash(player.saves),
+                labelStyle,
+                valueStyle,
+              ),
+              _buildTrainingStatRow(
+                'FOULS',
+                _formatZeroDash(totalFouls),
+                labelStyle,
+                valueStyle,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  TableRow _buildTrainingStatRow(
+    String label,
+    String value,
+    TextStyle labelStyle,
+    TextStyle valueStyle,
+  ) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Text(label, style: labelStyle),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Text(value, style: valueStyle),
+        ),
+      ],
+    );
+  }
+
+  String _formatAverage(Player player) {
+    final innings = player.currentInning > 0 ? player.currentInning : 1;
+    return (player.score / innings).toStringAsFixed(1);
+  }
+
+  String _formatSigned(int value) {
+    return value >= 0 ? '+$value' : '$value';
+  }
+
+  String _formatZeroDash(int value) {
+    return value == 0 ? '-' : value.toString();
   }
 
   @override
@@ -304,6 +477,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final colors = FortuneColors.of(context);
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
+    final isTrainingMode = gameState.settings.isTrainingMode;
 
     // Watch for Game Over state
     if (gameState.gameOver && gameState.winner != null) {
@@ -368,6 +542,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         player2Name: gameState.players[1].name,
         raceToScore: gameState.raceToScore,
         threeFoulRuleEnabled: gameState.foulTracker.threeFoulRuleEnabled,
+        isTrainingMode: gameState.settings.isTrainingMode,
       );
 
       await Navigator.push(
@@ -928,7 +1103,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                         isLeft: true),
                                   ),
                                   // Switch Button or Spacer
-                                  if (!gameState.gameStarted &&
+                                  if (!isTrainingMode &&
+                                      !gameState.gameStarted &&
                                       gameState.matchLog.isEmpty)
                                     IconButton(
                                       icon: const Icon(Icons.swap_horiz, size: 28),
@@ -941,11 +1117,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   else
                                     const SizedBox(width: 12),
                                   Expanded(
-                                    child: PlayerPlaque(
-                                        key: _p2PlaqueKey,
-                                        player: gameState.players[1],
-                                        raceToScore: gameState.raceToScore,
-                                        isLeft: false),
+                                    child: isTrainingMode
+                                        ? _buildTrainingStatsPanel(context, gameState)
+                                        : PlayerPlaque(
+                                            key: _p2PlaqueKey,
+                                            player: gameState.players[1],
+                                            raceToScore: gameState.raceToScore,
+                                            isLeft: false),
                                   ),
                                 ],
                               ),

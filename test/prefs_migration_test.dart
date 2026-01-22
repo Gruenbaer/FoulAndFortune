@@ -29,6 +29,7 @@ void main() {
         raceToScore: 75,
         player1Name: 'Alice',
         player2Name: 'Bob',
+        isTrainingMode: true,
         languageCode: 'en',
       );
 
@@ -98,6 +99,7 @@ void main() {
       expect(settingsRow.raceToScore, 75);
       expect(settingsRow.player1Name, 'Alice');
       expect(settingsRow.player2Name, 'Bob');
+      expect(settingsRow.isTrainingMode, true);
 
       final playerRows = await db.select(db.players).get();
       expect(playerRows.length, 2);

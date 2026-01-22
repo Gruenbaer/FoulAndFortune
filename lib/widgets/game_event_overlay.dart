@@ -184,11 +184,13 @@ class _GameEventOverlayState extends State<GameEventOverlay>
 
     // SPECIAL CASE: Break Foul Decision (Localized Dialog)
     if (event is BreakFoulDecisionEvent) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final l10n = AppLocalizations.of(context);
-        _showDecisionDialogHelper(l10n.breakFoulTitle, l10n.whoBreaksNext,
-            event.options, event.onOptionSelected);
+      setState(() {
+        _isAnimating = true;
+        _currentEvent = event;
       });
+      final l10n = AppLocalizations.of(context);
+      _showDecisionDialogHelper(
+          l10n.breakFoulTitle, l10n.whoBreaksNext, event.options, event.onOptionSelected);
       return;
     }
 
@@ -325,6 +327,10 @@ class _GameEventOverlayState extends State<GameEventOverlay>
                 onPressed: () {
                   Navigator.of(context).pop();
                   onSelected(0);
+                  setState(() {
+                    _isAnimating = false;
+                    _currentEvent = null;
+                  });
                   _processNext(); // Continue queue
                 },
                 label: options[0],
@@ -334,6 +340,10 @@ class _GameEventOverlayState extends State<GameEventOverlay>
                 onPressed: () {
                   Navigator.of(context).pop();
                   onSelected(1);
+                  setState(() {
+                    _isAnimating = false;
+                    _currentEvent = null;
+                  });
                   _processNext(); // Continue queue
                 },
                 label: options[1],

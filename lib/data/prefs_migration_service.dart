@@ -134,6 +134,7 @@ class PrefsMigrationService {
       raceToScore: Value(settings.raceToScore),
       player1Name: Value(settings.player1Name),
       player2Name: Value(settings.player2Name),
+      isTrainingMode: Value(settings.isTrainingMode),
       isLeagueGame: Value(settings.isLeagueGame),
       player1Handicap: Value(settings.player1Handicap),
       player2Handicap: Value(settings.player2Handicap),

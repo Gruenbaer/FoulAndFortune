@@ -10,6 +10,7 @@ code or update this document and any referenced specs together.
 **Plan**: See `REFACTOR_PLAN.md` for condensed execution plan  
 **Progress**: See `REFACTOR_EXECUTION_LOG.md` for current status  
 **Parity**: See `REFACTOR_14.1_PARITY.md` for what must not change
+**Work status**: See `STATUS.md` for the current handoff snapshot
 
 **Completed Extractions (2026-01-20):**
 - ✅ Phase 1.1: `lib/core/game_timer.dart` - Timer logic extracted
@@ -73,6 +74,8 @@ code or update this document and any referenced specs together.
 - Prefs migration: `PrefsMigrationService` imports legacy `SharedPreferences` data on first launch.
 - SharedPreferences now only used for device id and migration flags.
 - Notation migration: `GameHistoryService.migrateNotation` is currently a stub; existing records rely on lazy parsing.
+- Statistics roadmap (planned): `STATISTICS_SYSTEM_PLAN.md` (games context + innings table).
+- Dialog testing architecture (planned): `docs/DIALOG_TESTING_ARCHITECTURE_BRIEF.md`.
 
 ## Strict API Contracts
 This section defines stable behaviors relied upon by UI, tests, and persistence. If you change any contract, update tests and this document.

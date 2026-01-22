@@ -37,6 +37,7 @@ void main() {
         raceToScore: 50,
         player1Name: 'Alice',
         player2Name: 'Bob',
+        isTrainingMode: true,
         languageCode: 'en',
         themeId: 'steampunk',
       );
@@ -47,6 +48,7 @@ void main() {
       expect(loaded.raceToScore, 50);
       expect(loaded.player1Name, 'Alice');
       expect(loaded.player2Name, 'Bob');
+      expect(loaded.isTrainingMode, true);
       expect(loaded.languageCode, 'en');
       expect(loaded.themeId, 'steampunk');
 
@@ -59,6 +61,7 @@ void main() {
       expect(outboxRows.single.operation, 'upsert');
       final payload = jsonDecode(outboxRows.single.payload!) as Map<String, dynamic>;
       expect(payload['raceToScore'], 50);
+      expect(payload['isTrainingMode'], true);
     });
 
     test('PlayerService create/update/delete persists and records outbox', () async {

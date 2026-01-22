@@ -48,6 +48,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leagueGameSubtitle => 'Track for statistics and rankings';
 
   @override
+  String get trainingMode => 'Training Mode';
+
+  @override
+  String get trainingModeSubtitle =>
+      'Single-player practice with one scoreboard.';
+
+  @override
+  String get trainingLabel => 'Training';
+
+  @override
+  String get trainingOpponentName => 'Training';
+
+  @override
   String get breakFoulTitle => 'BREAK FOUL';
 
   @override

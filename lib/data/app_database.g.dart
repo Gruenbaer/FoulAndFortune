@@ -2379,6 +2379,15 @@ class $SettingsTable extends Settings
   late final GeneratedColumn<String> player2Name = GeneratedColumn<String>(
       'player2_name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _isTrainingModeMeta =
+      const VerificationMeta('isTrainingMode');
+  @override
+  late final GeneratedColumn<bool> isTrainingMode = GeneratedColumn<bool>(
+      'is_training_mode', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_training_mode" IN (0, 1))'));
   static const VerificationMeta _isLeagueGameMeta =
       const VerificationMeta('isLeagueGame');
   @override
@@ -2512,6 +2521,7 @@ class $SettingsTable extends Settings
         raceToScore,
         player1Name,
         player2Name,
+        isTrainingMode,
         isLeagueGame,
         player1Handicap,
         player2Handicap,
@@ -2577,6 +2587,14 @@ class $SettingsTable extends Settings
               data['player2_name']!, _player2NameMeta));
     } else if (isInserting) {
       context.missing(_player2NameMeta);
+    }
+    if (data.containsKey('is_training_mode')) {
+      context.handle(
+          _isTrainingModeMeta,
+          isTrainingMode.isAcceptableOrUnknown(
+              data['is_training_mode']!, _isTrainingModeMeta));
+    } else if (isInserting) {
+      context.missing(_isTrainingModeMeta);
     }
     if (data.containsKey('is_league_game')) {
       context.handle(
@@ -2727,6 +2745,8 @@ class $SettingsTable extends Settings
           .read(DriftSqlType.string, data['${effectivePrefix}player1_name'])!,
       player2Name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}player2_name'])!,
+      isTrainingMode: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_training_mode'])!,
       isLeagueGame: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_league_game'])!,
       player1Handicap: attachedDatabase.typeMapping
@@ -2781,6 +2801,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   final int raceToScore;
   final String player1Name;
   final String player2Name;
+  final bool isTrainingMode;
   final bool isLeagueGame;
   final int player1Handicap;
   final int player2Handicap;
@@ -2805,6 +2826,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       required this.raceToScore,
       required this.player1Name,
       required this.player2Name,
+      required this.isTrainingMode,
       required this.isLeagueGame,
       required this.player1Handicap,
       required this.player2Handicap,
@@ -2831,6 +2853,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     map['race_to_score'] = Variable<int>(raceToScore);
     map['player1_name'] = Variable<String>(player1Name);
     map['player2_name'] = Variable<String>(player2Name);
+    map['is_training_mode'] = Variable<bool>(isTrainingMode);
     map['is_league_game'] = Variable<bool>(isLeagueGame);
     map['player1_handicap'] = Variable<int>(player1Handicap);
     map['player2_handicap'] = Variable<int>(player2Handicap);
@@ -2865,6 +2888,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       raceToScore: Value(raceToScore),
       player1Name: Value(player1Name),
       player2Name: Value(player2Name),
+      isTrainingMode: Value(isTrainingMode),
       isLeagueGame: Value(isLeagueGame),
       player1Handicap: Value(player1Handicap),
       player2Handicap: Value(player2Handicap),
@@ -2900,6 +2924,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       raceToScore: serializer.fromJson<int>(json['raceToScore']),
       player1Name: serializer.fromJson<String>(json['player1Name']),
       player2Name: serializer.fromJson<String>(json['player2Name']),
+      isTrainingMode: serializer.fromJson<bool>(json['isTrainingMode']),
       isLeagueGame: serializer.fromJson<bool>(json['isLeagueGame']),
       player1Handicap: serializer.fromJson<int>(json['player1Handicap']),
       player2Handicap: serializer.fromJson<int>(json['player2Handicap']),
@@ -2934,6 +2959,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'raceToScore': serializer.toJson<int>(raceToScore),
       'player1Name': serializer.toJson<String>(player1Name),
       'player2Name': serializer.toJson<String>(player2Name),
+      'isTrainingMode': serializer.toJson<bool>(isTrainingMode),
       'isLeagueGame': serializer.toJson<bool>(isLeagueGame),
       'player1Handicap': serializer.toJson<int>(player1Handicap),
       'player2Handicap': serializer.toJson<int>(player2Handicap),
@@ -2963,6 +2989,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           int? raceToScore,
           String? player1Name,
           String? player2Name,
+          bool? isTrainingMode,
           bool? isLeagueGame,
           int? player1Handicap,
           int? player2Handicap,
@@ -2987,6 +3014,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         raceToScore: raceToScore ?? this.raceToScore,
         player1Name: player1Name ?? this.player1Name,
         player2Name: player2Name ?? this.player2Name,
+        isTrainingMode: isTrainingMode ?? this.isTrainingMode,
         isLeagueGame: isLeagueGame ?? this.isLeagueGame,
         player1Handicap: player1Handicap ?? this.player1Handicap,
         player2Handicap: player2Handicap ?? this.player2Handicap,
@@ -3021,6 +3049,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           data.player1Name.present ? data.player1Name.value : this.player1Name,
       player2Name:
           data.player2Name.present ? data.player2Name.value : this.player2Name,
+      isTrainingMode: data.isTrainingMode.present
+          ? data.isTrainingMode.value
+          : this.isTrainingMode,
       isLeagueGame: data.isLeagueGame.present
           ? data.isLeagueGame.value
           : this.isLeagueGame,
@@ -3072,6 +3103,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('raceToScore: $raceToScore, ')
           ..write('player1Name: $player1Name, ')
           ..write('player2Name: $player2Name, ')
+          ..write('isTrainingMode: $isTrainingMode, ')
           ..write('isLeagueGame: $isLeagueGame, ')
           ..write('player1Handicap: $player1Handicap, ')
           ..write('player2Handicap: $player2Handicap, ')
@@ -3101,6 +3133,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         raceToScore,
         player1Name,
         player2Name,
+        isTrainingMode,
         isLeagueGame,
         player1Handicap,
         player2Handicap,
@@ -3129,6 +3162,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.raceToScore == this.raceToScore &&
           other.player1Name == this.player1Name &&
           other.player2Name == this.player2Name &&
+          other.isTrainingMode == this.isTrainingMode &&
           other.isLeagueGame == this.isLeagueGame &&
           other.player1Handicap == this.player1Handicap &&
           other.player2Handicap == this.player2Handicap &&
@@ -3155,6 +3189,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<int> raceToScore;
   final Value<String> player1Name;
   final Value<String> player2Name;
+  final Value<bool> isTrainingMode;
   final Value<bool> isLeagueGame;
   final Value<int> player1Handicap;
   final Value<int> player2Handicap;
@@ -3180,6 +3215,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.raceToScore = const Value.absent(),
     this.player1Name = const Value.absent(),
     this.player2Name = const Value.absent(),
+    this.isTrainingMode = const Value.absent(),
     this.isLeagueGame = const Value.absent(),
     this.player1Handicap = const Value.absent(),
     this.player2Handicap = const Value.absent(),
@@ -3206,6 +3242,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     required int raceToScore,
     required String player1Name,
     required String player2Name,
+    required bool isTrainingMode,
     required bool isLeagueGame,
     required int player1Handicap,
     required int player2Handicap,
@@ -3230,6 +3267,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
         raceToScore = Value(raceToScore),
         player1Name = Value(player1Name),
         player2Name = Value(player2Name),
+        isTrainingMode = Value(isTrainingMode),
         isLeagueGame = Value(isLeagueGame),
         player1Handicap = Value(player1Handicap),
         player2Handicap = Value(player2Handicap),
@@ -3252,6 +3290,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<int>? raceToScore,
     Expression<String>? player1Name,
     Expression<String>? player2Name,
+    Expression<bool>? isTrainingMode,
     Expression<bool>? isLeagueGame,
     Expression<int>? player1Handicap,
     Expression<int>? player2Handicap,
@@ -3279,6 +3318,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       if (raceToScore != null) 'race_to_score': raceToScore,
       if (player1Name != null) 'player1_name': player1Name,
       if (player2Name != null) 'player2_name': player2Name,
+      if (isTrainingMode != null) 'is_training_mode': isTrainingMode,
       if (isLeagueGame != null) 'is_league_game': isLeagueGame,
       if (player1Handicap != null) 'player1_handicap': player1Handicap,
       if (player2Handicap != null) 'player2_handicap': player2Handicap,
@@ -3312,6 +3352,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       Value<int>? raceToScore,
       Value<String>? player1Name,
       Value<String>? player2Name,
+      Value<bool>? isTrainingMode,
       Value<bool>? isLeagueGame,
       Value<int>? player1Handicap,
       Value<int>? player2Handicap,
@@ -3337,6 +3378,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       raceToScore: raceToScore ?? this.raceToScore,
       player1Name: player1Name ?? this.player1Name,
       player2Name: player2Name ?? this.player2Name,
+      isTrainingMode: isTrainingMode ?? this.isTrainingMode,
       isLeagueGame: isLeagueGame ?? this.isLeagueGame,
       player1Handicap: player1Handicap ?? this.player1Handicap,
       player2Handicap: player2Handicap ?? this.player2Handicap,
@@ -3380,6 +3422,9 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     }
     if (player2Name.present) {
       map['player2_name'] = Variable<String>(player2Name.value);
+    }
+    if (isTrainingMode.present) {
+      map['is_training_mode'] = Variable<bool>(isTrainingMode.value);
     }
     if (isLeagueGame.present) {
       map['is_league_game'] = Variable<bool>(isLeagueGame.value);
@@ -3454,6 +3499,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('raceToScore: $raceToScore, ')
           ..write('player1Name: $player1Name, ')
           ..write('player2Name: $player2Name, ')
+          ..write('isTrainingMode: $isTrainingMode, ')
           ..write('isLeagueGame: $isLeagueGame, ')
           ..write('player1Handicap: $player1Handicap, ')
           ..write('player2Handicap: $player2Handicap, ')
@@ -5405,6 +5451,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   required int raceToScore,
   required String player1Name,
   required String player2Name,
+  required bool isTrainingMode,
   required bool isLeagueGame,
   required int player1Handicap,
   required int player2Handicap,
@@ -5431,6 +5478,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> raceToScore,
   Value<String> player1Name,
   Value<String> player2Name,
+  Value<bool> isTrainingMode,
   Value<bool> isLeagueGame,
   Value<int> player1Handicap,
   Value<int> player2Handicap,
@@ -5476,6 +5524,10 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<String> get player2Name => $composableBuilder(
       column: $table.player2Name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isTrainingMode => $composableBuilder(
+      column: $table.isTrainingMode,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isLeagueGame => $composableBuilder(
       column: $table.isLeagueGame, builder: (column) => ColumnFilters(column));
@@ -5563,6 +5615,10 @@ class $$SettingsTableOrderingComposer
 
   ColumnOrderings<String> get player2Name => $composableBuilder(
       column: $table.player2Name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isTrainingMode => $composableBuilder(
+      column: $table.isTrainingMode,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<bool> get isLeagueGame => $composableBuilder(
       column: $table.isLeagueGame,
@@ -5653,6 +5709,9 @@ class $$SettingsTableAnnotationComposer
   GeneratedColumn<String> get player2Name => $composableBuilder(
       column: $table.player2Name, builder: (column) => column);
 
+  GeneratedColumn<bool> get isTrainingMode => $composableBuilder(
+      column: $table.isTrainingMode, builder: (column) => column);
+
   GeneratedColumn<bool> get isLeagueGame => $composableBuilder(
       column: $table.isLeagueGame, builder: (column) => column);
 
@@ -5736,6 +5795,7 @@ class $$SettingsTableTableManager extends RootTableManager<
             Value<int> raceToScore = const Value.absent(),
             Value<String> player1Name = const Value.absent(),
             Value<String> player2Name = const Value.absent(),
+            Value<bool> isTrainingMode = const Value.absent(),
             Value<bool> isLeagueGame = const Value.absent(),
             Value<int> player1Handicap = const Value.absent(),
             Value<int> player2Handicap = const Value.absent(),
@@ -5762,6 +5822,7 @@ class $$SettingsTableTableManager extends RootTableManager<
             raceToScore: raceToScore,
             player1Name: player1Name,
             player2Name: player2Name,
+            isTrainingMode: isTrainingMode,
             isLeagueGame: isLeagueGame,
             player1Handicap: player1Handicap,
             player2Handicap: player2Handicap,
@@ -5788,6 +5849,7 @@ class $$SettingsTableTableManager extends RootTableManager<
             required int raceToScore,
             required String player1Name,
             required String player2Name,
+            required bool isTrainingMode,
             required bool isLeagueGame,
             required int player1Handicap,
             required int player2Handicap,
@@ -5814,6 +5876,7 @@ class $$SettingsTableTableManager extends RootTableManager<
             raceToScore: raceToScore,
             player1Name: player1Name,
             player2Name: player2Name,
+            isTrainingMode: isTrainingMode,
             isLeagueGame: isLeagueGame,
             player1Handicap: player1Handicap,
             player2Handicap: player2Handicap,

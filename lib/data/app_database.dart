@@ -83,6 +83,7 @@ class Settings extends Table {
   IntColumn get raceToScore => integer()();
   TextColumn get player1Name => text()();
   TextColumn get player2Name => text()();
+  BoolColumn get isTrainingMode => boolean()();
   BoolColumn get isLeagueGame => boolean()();
   IntColumn get player1Handicap => integer()();
   IntColumn get player2Handicap => integer()();
@@ -148,14 +149,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (migrator) async {
           await migrator.createAll();
         },
-        onUpgrade: (migrator, from, to) async {},
+        onUpgrade: (migrator, from, to) async {
+          if (from < 2) {
+            await migrator.addColumn(settings, settings.isTrainingMode);
+          }
+        },
       );
 }
 

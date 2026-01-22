@@ -112,6 +112,7 @@ create table if not exists public.settings (
   race_to_score integer not null default 100,
   player1_name text not null default '',
   player2_name text not null default '',
+  is_training_mode boolean not null default false,
   is_league_game boolean not null default false,
   player1_handicap integer not null default 0,
   player2_handicap integer not null default 0,

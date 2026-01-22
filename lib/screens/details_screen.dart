@@ -255,8 +255,8 @@ class DetailsScreen extends StatelessWidget {
                        _buildStatRow(
                         colors, 
                         'Fouls', 
-                        gameState.players[0].consecutiveFouls.toString(), 
-                        gameState.players[1].consecutiveFouls.toString()
+                        gameState.getTotalFoulsForPlayer(gameState.players[0]).toString(), 
+                        gameState.getTotalFoulsForPlayer(gameState.players[1]).toString()
                       ),
                     ],
                   ),
