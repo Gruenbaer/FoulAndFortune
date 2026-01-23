@@ -1,3 +1,12 @@
+## v4.2.5+31 - Multiplikator im Spielstart
+
+Punkt-Multiplikator (1x/2x/3x) ist jetzt im "Neues Spiel"-Setup verfuegbar.
+
+*   **Neu:** Punkt-Multiplikator direkt im Setup auswahlen (1x/2x/3x)
+*   **Dokumentation:** Parity-Checklist aktualisiert und Ergebnis geloggt
+
+***
+
 ## v4.2.5 - Rack Sync & 3-Foul Anzeige
 
 Korrekturen fuer Rack-Status und 3-Foul Meldungen.
