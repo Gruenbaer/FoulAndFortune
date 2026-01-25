@@ -587,11 +587,10 @@ class GameState extends ChangeNotifier {
       // This prevents duplicate warnings and ensures correct timing
       
       
-      // Add 3-foul event if triggered
+      // Mark for notation "TF" if triggered (no splash message needed)
       if (willTriggerThreeFouls) {
         player.inningHasThreeFouls = true; // Mark for notation "TF"
-        _events.add(FoulEvent(player, -16, FoulType.threeFouls, 
-          positivePoints: 0, penalty: -16));
+        // Penalty already applied via foulTracker.applyNormalFoul() above
       }
     } else {
       // Valid shot (no foul) resets consecutive fouls

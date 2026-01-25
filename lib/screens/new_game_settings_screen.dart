@@ -27,6 +27,7 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   String? _cachedPlayer2Name;
   int? _cachedPlayer2Handicap;
   double? _cachedPlayer2Multiplier;
+  bool _hasLoadedFromProvider = false;
 
 
   final PlayerService _playerService = PlayerService();
@@ -36,38 +37,38 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize with default settings
+    // Initialize with default settings (will be replaced in didChangeDependencies)
     _settings = GameSettings();
     _raceSliderValue = _settings.raceToScore.toDouble();
     _loadPlayers();
+  }
 
-    // Defer loading initial values from provider until after the first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadInitialSettingsFromProvider();
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Load settings from provider once when dependencies are available
+    if (!_hasLoadedFromProvider) {
+      _hasLoadedFromProvider = true;
+      
+      try {
+        final currentSettings = Provider.of<GameSettings>(context, listen: false);
+        
+        // Initialize from provider settings to preserve player names and all preferences
+        // This ensures global settings (including player names) are populated
+        setState(() {
+          _settings = currentSettings.copyWith();
+          _raceSliderValue = _settings.raceToScore.toDouble();
+        });
+      } catch (e) {
+        // Provider not available, keep defaults
+      }
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-  }
-
-  void _loadInitialSettingsFromProvider() {
-    if (!mounted) return;
-
-    try {
-      final currentSettings = Provider.of<GameSettings>(context, listen: false);
-
-      // Initialize from provider settings to preserve theme, language, sound, etc.
-      // This ensures global preferences are maintained when starting a new game
-      setState(() {
-        _settings = currentSettings.copyWith();
-        _raceSliderValue = _settings.raceToScore.toDouble();
-      });
-
-    } catch (e) {
-      // Provider not available, ignore
-    }
   }
 
   void _setTrainingMode(bool enabled, AppLocalizations l10n) {
