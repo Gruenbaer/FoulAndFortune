@@ -726,6 +726,16 @@ class $GamesTable extends Games with TableInfo<$GamesTable, GameRow> {
   late final GeneratedColumn<String> player2Name = GeneratedColumn<String>(
       'player2_name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _isTrainingModeMeta =
+      const VerificationMeta('isTrainingMode');
+  @override
+  late final GeneratedColumn<bool> isTrainingMode = GeneratedColumn<bool>(
+      'is_training_mode', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_training_mode" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _player1ScoreMeta =
       const VerificationMeta('player1Score');
   @override
@@ -863,6 +873,7 @@ class $GamesTable extends Games with TableInfo<$GamesTable, GameRow> {
         player2Id,
         player1Name,
         player2Name,
+        isTrainingMode,
         player1Score,
         player2Score,
         startTime,
@@ -923,6 +934,12 @@ class $GamesTable extends Games with TableInfo<$GamesTable, GameRow> {
               data['player2_name']!, _player2NameMeta));
     } else if (isInserting) {
       context.missing(_player2NameMeta);
+    }
+    if (data.containsKey('is_training_mode')) {
+      context.handle(
+          _isTrainingModeMeta,
+          isTrainingMode.isAcceptableOrUnknown(
+              data['is_training_mode']!, _isTrainingModeMeta));
     }
     if (data.containsKey('player1_score')) {
       context.handle(
@@ -1069,6 +1086,8 @@ class $GamesTable extends Games with TableInfo<$GamesTable, GameRow> {
           .read(DriftSqlType.string, data['${effectivePrefix}player1_name'])!,
       player2Name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}player2_name'])!,
+      isTrainingMode: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_training_mode'])!,
       player1Score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}player1_score'])!,
       player2Score: attachedDatabase.typeMapping
@@ -1137,6 +1156,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
   final String? player2Id;
   final String player1Name;
   final String player2Name;
+  final bool isTrainingMode;
   final int player1Score;
   final int player2Score;
   final DateTime startTime;
@@ -1164,6 +1184,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
       this.player2Id,
       required this.player1Name,
       required this.player2Name,
+      required this.isTrainingMode,
       required this.player1Score,
       required this.player2Score,
       required this.startTime,
@@ -1197,6 +1218,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
     }
     map['player1_name'] = Variable<String>(player1Name);
     map['player2_name'] = Variable<String>(player2Name);
+    map['is_training_mode'] = Variable<bool>(isTrainingMode);
     map['player1_score'] = Variable<int>(player1Score);
     map['player2_score'] = Variable<int>(player2Score);
     map['start_time'] = Variable<DateTime>(startTime);
@@ -1248,6 +1270,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
           : Value(player2Id),
       player1Name: Value(player1Name),
       player2Name: Value(player2Name),
+      isTrainingMode: Value(isTrainingMode),
       player1Score: Value(player1Score),
       player2Score: Value(player2Score),
       startTime: Value(startTime),
@@ -1294,6 +1317,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
       player2Id: serializer.fromJson<String?>(json['player2Id']),
       player1Name: serializer.fromJson<String>(json['player1Name']),
       player2Name: serializer.fromJson<String>(json['player2Name']),
+      isTrainingMode: serializer.fromJson<bool>(json['isTrainingMode']),
       player1Score: serializer.fromJson<int>(json['player1Score']),
       player2Score: serializer.fromJson<int>(json['player2Score']),
       startTime: serializer.fromJson<DateTime>(json['startTime']),
@@ -1326,6 +1350,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
       'player2Id': serializer.toJson<String?>(player2Id),
       'player1Name': serializer.toJson<String>(player1Name),
       'player2Name': serializer.toJson<String>(player2Name),
+      'isTrainingMode': serializer.toJson<bool>(isTrainingMode),
       'player1Score': serializer.toJson<int>(player1Score),
       'player2Score': serializer.toJson<int>(player2Score),
       'startTime': serializer.toJson<DateTime>(startTime),
@@ -1356,6 +1381,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
           Value<String?> player2Id = const Value.absent(),
           String? player1Name,
           String? player2Name,
+          bool? isTrainingMode,
           int? player1Score,
           int? player2Score,
           DateTime? startTime,
@@ -1383,6 +1409,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
         player2Id: player2Id.present ? player2Id.value : this.player2Id,
         player1Name: player1Name ?? this.player1Name,
         player2Name: player2Name ?? this.player2Name,
+        isTrainingMode: isTrainingMode ?? this.isTrainingMode,
         player1Score: player1Score ?? this.player1Score,
         player2Score: player2Score ?? this.player2Score,
         startTime: startTime ?? this.startTime,
@@ -1416,6 +1443,9 @@ class GameRow extends DataClass implements Insertable<GameRow> {
           data.player1Name.present ? data.player1Name.value : this.player1Name,
       player2Name:
           data.player2Name.present ? data.player2Name.value : this.player2Name,
+      isTrainingMode: data.isTrainingMode.present
+          ? data.isTrainingMode.value
+          : this.isTrainingMode,
       player1Score: data.player1Score.present
           ? data.player1Score.value
           : this.player1Score,
@@ -1469,6 +1499,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
           ..write('player2Id: $player2Id, ')
           ..write('player1Name: $player1Name, ')
           ..write('player2Name: $player2Name, ')
+          ..write('isTrainingMode: $isTrainingMode, ')
           ..write('player1Score: $player1Score, ')
           ..write('player2Score: $player2Score, ')
           ..write('startTime: $startTime, ')
@@ -1501,6 +1532,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
         player2Id,
         player1Name,
         player2Name,
+        isTrainingMode,
         player1Score,
         player2Score,
         startTime,
@@ -1532,6 +1564,7 @@ class GameRow extends DataClass implements Insertable<GameRow> {
           other.player2Id == this.player2Id &&
           other.player1Name == this.player1Name &&
           other.player2Name == this.player2Name &&
+          other.isTrainingMode == this.isTrainingMode &&
           other.player1Score == this.player1Score &&
           other.player2Score == this.player2Score &&
           other.startTime == this.startTime &&
@@ -1561,6 +1594,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
   final Value<String?> player2Id;
   final Value<String> player1Name;
   final Value<String> player2Name;
+  final Value<bool> isTrainingMode;
   final Value<int> player1Score;
   final Value<int> player2Score;
   final Value<DateTime> startTime;
@@ -1589,6 +1623,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
     this.player2Id = const Value.absent(),
     this.player1Name = const Value.absent(),
     this.player2Name = const Value.absent(),
+    this.isTrainingMode = const Value.absent(),
     this.player1Score = const Value.absent(),
     this.player2Score = const Value.absent(),
     this.startTime = const Value.absent(),
@@ -1618,6 +1653,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
     this.player2Id = const Value.absent(),
     required String player1Name,
     required String player2Name,
+    this.isTrainingMode = const Value.absent(),
     required int player1Score,
     required int player2Score,
     required DateTime startTime,
@@ -1663,6 +1699,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
     Expression<String>? player2Id,
     Expression<String>? player1Name,
     Expression<String>? player2Name,
+    Expression<bool>? isTrainingMode,
     Expression<int>? player1Score,
     Expression<int>? player2Score,
     Expression<DateTime>? startTime,
@@ -1692,6 +1729,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
       if (player2Id != null) 'player2_id': player2Id,
       if (player1Name != null) 'player1_name': player1Name,
       if (player2Name != null) 'player2_name': player2Name,
+      if (isTrainingMode != null) 'is_training_mode': isTrainingMode,
       if (player1Score != null) 'player1_score': player1Score,
       if (player2Score != null) 'player2_score': player2Score,
       if (startTime != null) 'start_time': startTime,
@@ -1723,6 +1761,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
       Value<String?>? player2Id,
       Value<String>? player1Name,
       Value<String>? player2Name,
+      Value<bool>? isTrainingMode,
       Value<int>? player1Score,
       Value<int>? player2Score,
       Value<DateTime>? startTime,
@@ -1751,6 +1790,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
       player2Id: player2Id ?? this.player2Id,
       player1Name: player1Name ?? this.player1Name,
       player2Name: player2Name ?? this.player2Name,
+      isTrainingMode: isTrainingMode ?? this.isTrainingMode,
       player1Score: player1Score ?? this.player1Score,
       player2Score: player2Score ?? this.player2Score,
       startTime: startTime ?? this.startTime,
@@ -1793,6 +1833,9 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
     }
     if (player2Name.present) {
       map['player2_name'] = Variable<String>(player2Name.value);
+    }
+    if (isTrainingMode.present) {
+      map['is_training_mode'] = Variable<bool>(isTrainingMode.value);
     }
     if (player1Score.present) {
       map['player1_score'] = Variable<int>(player1Score.value);
@@ -1873,6 +1916,7 @@ class GamesCompanion extends UpdateCompanion<GameRow> {
           ..write('player2Id: $player2Id, ')
           ..write('player1Name: $player1Name, ')
           ..write('player2Name: $player2Name, ')
+          ..write('isTrainingMode: $isTrainingMode, ')
           ..write('player1Score: $player1Score, ')
           ..write('player2Score: $player2Score, ')
           ..write('startTime: $startTime, ')
@@ -4730,6 +4774,7 @@ typedef $$GamesTableCreateCompanionBuilder = GamesCompanion Function({
   Value<String?> player2Id,
   required String player1Name,
   required String player2Name,
+  Value<bool> isTrainingMode,
   required int player1Score,
   required int player2Score,
   required DateTime startTime,
@@ -4759,6 +4804,7 @@ typedef $$GamesTableUpdateCompanionBuilder = GamesCompanion Function({
   Value<String?> player2Id,
   Value<String> player1Name,
   Value<String> player2Name,
+  Value<bool> isTrainingMode,
   Value<int> player1Score,
   Value<int> player2Score,
   Value<DateTime> startTime,
@@ -4805,6 +4851,10 @@ class $$GamesTableFilterComposer extends Composer<_$AppDatabase, $GamesTable> {
 
   ColumnFilters<String> get player2Name => $composableBuilder(
       column: $table.player2Name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isTrainingMode => $composableBuilder(
+      column: $table.isTrainingMode,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get player1Score => $composableBuilder(
       column: $table.player1Score, builder: (column) => ColumnFilters(column));
@@ -4904,6 +4954,10 @@ class $$GamesTableOrderingComposer
   ColumnOrderings<String> get player2Name => $composableBuilder(
       column: $table.player2Name, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isTrainingMode => $composableBuilder(
+      column: $table.isTrainingMode,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get player1Score => $composableBuilder(
       column: $table.player1Score,
       builder: (column) => ColumnOrderings(column));
@@ -5001,6 +5055,9 @@ class $$GamesTableAnnotationComposer
   GeneratedColumn<String> get player2Name => $composableBuilder(
       column: $table.player2Name, builder: (column) => column);
 
+  GeneratedColumn<bool> get isTrainingMode => $composableBuilder(
+      column: $table.isTrainingMode, builder: (column) => column);
+
   GeneratedColumn<int> get player1Score => $composableBuilder(
       column: $table.player1Score, builder: (column) => column);
 
@@ -5095,6 +5152,7 @@ class $$GamesTableTableManager extends RootTableManager<
             Value<String?> player2Id = const Value.absent(),
             Value<String> player1Name = const Value.absent(),
             Value<String> player2Name = const Value.absent(),
+            Value<bool> isTrainingMode = const Value.absent(),
             Value<int> player1Score = const Value.absent(),
             Value<int> player2Score = const Value.absent(),
             Value<DateTime> startTime = const Value.absent(),
@@ -5124,6 +5182,7 @@ class $$GamesTableTableManager extends RootTableManager<
             player2Id: player2Id,
             player1Name: player1Name,
             player2Name: player2Name,
+            isTrainingMode: isTrainingMode,
             player1Score: player1Score,
             player2Score: player2Score,
             startTime: startTime,
@@ -5153,6 +5212,7 @@ class $$GamesTableTableManager extends RootTableManager<
             Value<String?> player2Id = const Value.absent(),
             required String player1Name,
             required String player2Name,
+            Value<bool> isTrainingMode = const Value.absent(),
             required int player1Score,
             required int player2Score,
             required DateTime startTime,
@@ -5182,6 +5242,7 @@ class $$GamesTableTableManager extends RootTableManager<
             player2Id: player2Id,
             player1Name: player1Name,
             player2Name: player2Name,
+            isTrainingMode: isTrainingMode,
             player1Score: player1Score,
             player2Score: player2Score,
             startTime: startTime,
