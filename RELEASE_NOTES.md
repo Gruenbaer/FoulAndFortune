@@ -1,3 +1,13 @@
+## v4.3.0+32 - Foundation & Training Mode Prep 🏗️
+
+Internal refactoring and preparation for Single Player Training Mode.
+
+*   **Structural Update:** Massive internal refactoring to separate GameState logic (Phase 1 Complete).
+*   **Database:** Added `isTrainingMode` support for upcoming Single Player features.
+*   **Merged:** Includes all fixes from v4.2.5 (Rack Sync, 3-Foul Fixes) and v4.2.3 (Input Blocking).
+
+***
+
 ## v4.2.5+31 - Multiplikator im Spielstart
 
 Punkt-Multiplikator (1x/2x/3x) ist jetzt im "Neues Spiel"-Setup verfuegbar.
