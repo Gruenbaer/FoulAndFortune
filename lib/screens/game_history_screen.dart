@@ -306,6 +306,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                         raceToScore: game.raceToScore,
                         player1Name: game.player1Name,
                         player2Name: game.player2Name,
+                        isTrainingMode: game.isTrainingMode,
                       ),
                       achievementManager: Provider.of<AchievementManager>(
                           context,
@@ -327,6 +328,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   raceToScore: game.raceToScore,
                   player1Name: game.player1Name,
                   player2Name: game.player2Name,
+                  isTrainingMode: game.isTrainingMode,
                 ),
                 achievementManager:
                     Provider.of<AchievementManager>(context, listen: false),
@@ -367,6 +369,23 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                 '${_formatDate(game.startTime)} • ${game.getFormattedDuration()}',
                 style: theme.textTheme.bodySmall,
               ),
+              if (game.isTrainingMode) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black38,
+                    border: Border.all(color: colors.primaryBright),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    l10n.trainingLabel,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                        color: colors.primaryBright, fontSize: 14),
+                  ),
+                ),
+              ],
               if (game.isCompleted && game.winner != null) ...[
                 const SizedBox(height: 8),
                 Container(

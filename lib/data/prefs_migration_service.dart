@@ -218,6 +218,7 @@ class PrefsMigrationService {
         player2Name: Value(game.player2Name),
         player1Score: Value(game.player1Score),
         player2Score: Value(game.player2Score),
+        isTrainingMode: Value(game.isTrainingMode),
         startTime: Value(game.startTime),
         endTime: Value(game.endTime),
         isCompleted: Value(game.isCompleted),

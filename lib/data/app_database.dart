@@ -32,6 +32,8 @@ class Games extends Table {
   TextColumn get player2Id => text().nullable()();
   TextColumn get player1Name => text()();
   TextColumn get player2Name => text()();
+  BoolColumn get isTrainingMode =>
+      boolean().withDefault(const Constant(false))();
   IntColumn get player1Score => integer()();
   IntColumn get player2Score => integer()();
   DateTimeColumn get startTime => dateTime()();
@@ -149,7 +151,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -159,6 +161,9 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (migrator, from, to) async {
           if (from < 2) {
             await migrator.addColumn(settings, settings.isTrainingMode);
+          }
+          if (from < 3) {
+            await migrator.addColumn(games, games.isTrainingMode);
           }
         },
       );

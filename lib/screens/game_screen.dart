@@ -116,6 +116,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       startTime: _gameStartTime!,
       isCompleted: false,
       raceToScore: gameState.raceToScore,
+      isTrainingMode: gameState.settings.isTrainingMode,
       player1Innings: p1.currentInning,
       player2Innings: p2.currentInning,
       player1Fouls: player1Fouls,
@@ -157,6 +158,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       endTime: DateTime.now(),
       isCompleted: true,
       raceToScore: gameState.raceToScore,
+      isTrainingMode: gameState.settings.isTrainingMode,
       winner: effectiveWinner.name,
       player1Innings: p1.currentInning,
       player2Innings: p2.currentInning,
@@ -194,7 +196,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       }
 
       await updatePlayerStats(p1, player1Fouls, p1 == effectiveWinner);
-      await updatePlayerStats(p2, player2Fouls, p2 == effectiveWinner);
+      if (!gameState.settings.isTrainingMode) {
+        await updatePlayerStats(p2, player2Fouls, p2 == effectiveWinner);
+      }
     } catch (e) {
       debugPrint('Error updating player stats: \$e');
     }
@@ -699,11 +703,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.actionCancel, style: TextStyle(color: colors.textMain)),
+                    child: Text(l10n.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.actionLeave, style: TextStyle(color: colors.primary)),
+                    child: Text(l10n.exit),
                   ),
                 ],
               ),
@@ -1365,14 +1369,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // Helper to validate and handle taps
     void handleTap(int ballNumber) {
-      // STATE-BASED LOCK: Check if GameState is processing events
-      if (gameState.isInputLocked) {
-         return;
-      }
-      
-      // Secondary check: Local _isInputLocked (legacy/animation safeguard)
-      if (_isInputLocked) return;
-      
       // Disable all ball interactions if game is over
       if (gameState.gameOver) return;
 

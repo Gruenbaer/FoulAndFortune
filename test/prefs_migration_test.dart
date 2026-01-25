@@ -69,6 +69,7 @@ void main() {
         isCompleted: true,
         winner: 'Alice',
         raceToScore: 75,
+        isTrainingMode: true,
         player1Innings: 12,
         player2Innings: 12,
         player1HighestRun: 14,
@@ -111,6 +112,7 @@ void main() {
       expect(gameRows.single.player1Id, 'p1');
       expect(gameRows.single.player2Id, 'p2');
       expect(gameRows.single.winner, 'Alice');
+      expect(gameRows.single.isTrainingMode, true);
 
       final achievementRows = await db.select(db.achievements).get();
       expect(achievementRows.length, 1);

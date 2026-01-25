@@ -628,16 +628,6 @@ class GameState extends ChangeNotifier {
     if (achievementManager != null) {
       AchievementChecker.checkAfterInning(player, achievementManager!);
     }
-    
-    // CRITICAL FIX: Clear inning buffers after finalization 
-    // This prevents double-counting if _finalizeInning is called again (e.g. on win check)
-    player.inningPoints = 0;
-    player.inningHistory = [];
-    player.inningBreakFoulCount = 0;
-    player.inningHasFoul = false;
-    player.inningHasThreeFouls = false;
-    player.inningHasSafe = false;
-    player.inningHasReRack = false;
   }
 
   // Helper to calculate the REAL-TIME net score of the current inning
@@ -827,15 +817,7 @@ class GameState extends ChangeNotifier {
 
   // Method to consume events (UI calls this)
   List<GameEvent> consumeEvents() {
-<<<<<<< HEAD
     return _events.consumeAll();
-=======
-    final events = List<GameEvent>.from(eventQueue);
-    eventQueue.clear();
-    // Signal start of processing for these events (Input Locked)
-    _processingEventsCount += events.length;
-    return events;
->>>>>>> 5ed6842 (fix: state-based input blocking (v4.2.3))
   }
 
   // Allow swapping starting player before game starts
@@ -911,7 +893,6 @@ class GameState extends ChangeNotifier {
     showTwoFoulWarning = false;
     foulMode = FoulMode.none;
     matchLog.clear();
-    inningRecords.clear(); // Fix: Clear score card
     // We do NOT clear undo stack, so reset can be undone!
     resetBreakFoulError();
     inBreakSequence = true; // Reset Break Sequence Logic

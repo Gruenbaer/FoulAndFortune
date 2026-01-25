@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game_state.dart';
 import '../models/game_settings.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/score_card.dart';
 
@@ -64,6 +65,7 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
+    final l10n = AppLocalizations.of(context);
     final settings = Provider.of<GameSettings>(context, listen: false);
 
     // Identify current leader/winner for highlighting
@@ -132,6 +134,30 @@ class DetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
+            if (gameState.settings.isTrainingMode) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: colors.backgroundCard.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colors.primary),
+                  ),
+                  child: Text(
+                    l10n.trainingLabel.toUpperCase(),
+                    style: TextStyle(
+                      color: colors.primaryBright,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
             
             const SizedBox(height: 24),
             

@@ -94,6 +94,7 @@ void main() {
         required String id,
         required DateTime startTime,
         bool isCompleted = false,
+        bool isTrainingMode = false,
       }) {
         return GameRecord(
           id: id,
@@ -106,6 +107,7 @@ void main() {
           isCompleted: isCompleted,
           winner: isCompleted ? 'Alice' : null,
           raceToScore: 100,
+          isTrainingMode: isTrainingMode,
           player1Innings: 10,
           player2Innings: 9,
           player1HighestRun: 12,
@@ -120,7 +122,12 @@ void main() {
 
       final now = DateTime(2026, 1, 1, 12, 0, 0);
       await gameHistoryService.saveGame(
-        buildGame(id: 'active-1', startTime: now, isCompleted: false),
+        buildGame(
+          id: 'active-1',
+          startTime: now,
+          isCompleted: false,
+          isTrainingMode: true,
+        ),
       );
       await gameHistoryService.saveGame(
         buildGame(id: 'done-1', startTime: now.add(const Duration(minutes: 5)), isCompleted: true),
@@ -132,6 +139,7 @@ void main() {
       final activeGames = await gameHistoryService.getActiveGames();
       expect(activeGames.length, 1);
       expect(activeGames.single.id, 'active-1');
+      expect(activeGames.single.isTrainingMode, true);
 
       final completedGames = await gameHistoryService.getCompletedGames();
       expect(completedGames.length, 1);

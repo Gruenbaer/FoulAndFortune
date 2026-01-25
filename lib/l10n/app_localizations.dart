@@ -734,18 +734,6 @@ abstract class AppLocalizations {
   /// **'Exit Game?'**
   String get exitGame;
 
-  /// No description provided for @actionLeave.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave Game'**
-  String get actionLeave;
-
-  /// No description provided for @actionCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get actionCancel;
-
   /// No description provided for @exitGameMessage.
   ///
   /// In en, this message translates to:

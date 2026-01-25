@@ -70,6 +70,7 @@ create table if not exists public.games (
   player2_id uuid references public.players(id) on delete set null,
   player1_name text not null,
   player2_name text not null,
+  is_training_mode boolean not null default false,
   player1_score integer not null default 0,
   player2_score integer not null default 0,
   start_time timestamptz not null,

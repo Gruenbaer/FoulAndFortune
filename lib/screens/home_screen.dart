@@ -64,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
               raceToScore: record.raceToScore,
               player1Name: record.player1Name,
               player2Name: record.player2Name,
+              isTrainingMode: record.isTrainingMode,
               // Reconstruct other settings from record or defaults if missing in record
               // Assuming GameRecord stores standard settings:
               // threeFoulRuleEnabled, etc. might need to be added to GameRecord or defaulted.

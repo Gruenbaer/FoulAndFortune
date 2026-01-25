@@ -9,6 +9,7 @@ class GameRecord {
   final bool isCompleted;
   final String? winner;
   final int raceToScore;
+  final bool isTrainingMode;
   final int player1Innings;
   final int player2Innings;
   final int player1HighestRun;
@@ -31,6 +32,7 @@ class GameRecord {
     required this.isCompleted,
     this.winner,
     required this.raceToScore,
+    this.isTrainingMode = false,
     this.player1Innings = 0,
     this.player2Innings = 0,
     this.player1HighestRun = 0,
@@ -73,6 +75,7 @@ class GameRecord {
       'isCompleted': isCompleted,
       'winner': winner,
       'raceToScore': raceToScore,
+      'isTrainingMode': isTrainingMode,
       'player1Innings': player1Innings,
       'player2Innings': player2Innings,
       'player1HighestRun': player1HighestRun,
@@ -97,6 +100,7 @@ class GameRecord {
       isCompleted: json['isCompleted'],
       winner: json['winner'],
       raceToScore: json['raceToScore'],
+      isTrainingMode: json['isTrainingMode'] ?? false,
       player1Innings: json['player1Innings'] ?? 0,
       player2Innings: json['player2Innings'] ?? 0,
       player1HighestRun: json['player1HighestRun'] ?? 0,
@@ -126,6 +130,7 @@ class GameRecord {
       isCompleted: true,
       winner: winnerName,
       raceToScore: raceToScore,
+      isTrainingMode: isTrainingMode,
       player1Innings: player1Innings,
       player2Innings: player2Innings,
       player1HighestRun: player1HighestRun,

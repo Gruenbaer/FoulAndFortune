@@ -118,9 +118,6 @@ class _GameEventOverlayState extends State<GameEventOverlay>
       }
     }
 
-    // NEW: Signal completion of event processing to unlock input
-    _currentGameState?.signalEventCompleted();
-
     setState(() {
       _currentContent = null;
       _isAnimating = false;
@@ -289,9 +286,6 @@ class _GameEventOverlayState extends State<GameEventOverlay>
             ThemedButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                // Signal completion
-                Provider.of<GameState>(context, listen: false).signalEventCompleted();
-                
                 // Reset animation state before processing next
                 setState(() {
                   _isAnimating = false;
@@ -332,7 +326,6 @@ class _GameEventOverlayState extends State<GameEventOverlay>
               ThemedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Provider.of<GameState>(context, listen: false).signalEventCompleted();
                   onSelected(0);
                   setState(() {
                     _isAnimating = false;
@@ -346,7 +339,6 @@ class _GameEventOverlayState extends State<GameEventOverlay>
               ThemedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Provider.of<GameState>(context, listen: false).signalEventCompleted();
                   onSelected(1);
                   setState(() {
                     _isAnimating = false;

@@ -338,12 +338,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exitGame => 'Exit Game?';
 
   @override
-  String get actionLeave => 'Leave Game';
-
-  @override
-  String get actionCancel => 'Cancel';
-
-  @override
   String get exitGameMessage => 'Game progress will be lost. Are you sure?';
 
   @override
