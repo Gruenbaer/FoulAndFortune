@@ -9,6 +9,7 @@ class ScoreCard extends StatelessWidget {
   final Player player2;
   final List<InningRecord> inningRecords;
   final String? winnerName;
+  final bool isTrainingMode;
 
   const ScoreCard({
     super.key,
@@ -16,6 +17,7 @@ class ScoreCard extends StatelessWidget {
     required this.player2,
     required this.inningRecords,
     this.winnerName,
+    this.isTrainingMode = false,
   });
 
   @override
@@ -126,7 +128,7 @@ class ScoreCard extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: isTrainingMode ? 5 : 4,
                   child: Text(
                     player1.name.toUpperCase(),
                     style: TextStyle(
@@ -140,25 +142,26 @@ class ScoreCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const Expanded(
-                  flex: 1,
-                  child: SizedBox(), // Spacer for Inning column
-                ),
                 Expanded(
-                  flex: 4,
-                  child: Text(
-                    player2.name.toUpperCase(),
-                    style: TextStyle(
-                      color: player2.name == winnerName 
-                          ? colors.primaryBright 
-                          : colors.textMain,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Arial',
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  flex: 1,
+                  child: const SizedBox(), // Spacer for Inning column
                 ),
+                if (!isTrainingMode)
+                  Expanded(
+                    flex: 4,
+                    child: Text(
+                      player2.name.toUpperCase(),
+                      style: TextStyle(
+                        color: player2.name == winnerName 
+                            ? colors.primaryBright 
+                            : colors.textMain,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Arial',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -171,8 +174,10 @@ class ScoreCard extends StatelessWidget {
                 Expanded(flex: 2, child: _buildHeaderLabel(colors, 'POINTS')),
                 Expanded(flex: 2, child: _buildHeaderLabel(colors, 'TOTAL')),
                 Expanded(flex: 1, child: _buildHeaderLabel(colors, 'INN')),
-                Expanded(flex: 2, child: _buildHeaderLabel(colors, 'TOTAL')),
-                Expanded(flex: 2, child: _buildHeaderLabel(colors, 'POINTS')),
+                if (!isTrainingMode) ...[
+                  Expanded(flex: 2, child: _buildHeaderLabel(colors, 'TOTAL')),
+                  Expanded(flex: 2, child: _buildHeaderLabel(colors, 'POINTS')),
+                ],
               ],
             ),
           ),
@@ -248,24 +253,26 @@ class ScoreCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
-          // P2 Total
-          Expanded(
-            flex: 2,
-             child: Text(
-              p2Total,
-              style: TextStyle(
-                color: colors.primaryBright,
-                fontSize: 14,
-                fontFamily: 'Arial',
+          // P2 Total and Notation (hidden in training mode)
+          if (!isTrainingMode) ...[
+            Expanded(
+              flex: 2,
+               child: Text(
+                p2Total,
+                style: TextStyle(
+                  color: colors.primaryBright,
+                  fontSize: 14,
+                  fontFamily: 'Arial',
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
-          // P2 Notation
-          Expanded(
-            flex: 2, // FIXED: from 3 to 2 to match Header
-            child: Center(child: _buildNotationText(colors, p2Notation)),
-          ),
+            // P2 Notation
+            Expanded(
+              flex: 2,
+              child: Center(child: _buildNotationText(colors, p2Notation)),
+            ),
+          ],
         ],
       ),
     );

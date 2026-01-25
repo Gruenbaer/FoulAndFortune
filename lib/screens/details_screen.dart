@@ -161,7 +161,7 @@ class DetailsScreen extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Player Comparison (Left vs Right)
+            // Player Comparison (Left vs Right) or Single Player (Training)
             Container(
               decoration: BoxDecoration(
                 color: colors.backgroundCard.withValues(alpha: 0.5),
@@ -169,125 +169,9 @@ class DetailsScreen extends StatelessWidget {
                 border: Border.all(color: colors.primaryDark),
               ),
               padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Names & Totals
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // P1
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              gameState.players[0].name.toUpperCase(),
-                              style: TextStyle(
-                                color: gameState.players[0].name == leaderName 
-                                    ? colors.primaryBright 
-                                    : colors.textMain,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              gameState.players[0].score.toString(),
-                              style: TextStyle(
-                                color: colors.accent,
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // VS
-                      Text(
-                        'VS', 
-                        style: TextStyle(
-                          color: colors.primaryDark, 
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
-                        )
-                      ),
-                      // P2
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              gameState.players[1].name.toUpperCase(),
-                              style: TextStyle(
-                                color: gameState.players[1].name == leaderName 
-                                    ? colors.primaryBright 
-                                    : colors.textMain,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              gameState.players[1].score.toString(),
-                              style: TextStyle(
-                                color: colors.accent,
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  const Divider(color: Colors.white24),
-                  const SizedBox(height: 16),
-                  
-                  // Detailed Stats Table
-                   Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(1), // Label centered
-                      2: FlexColumnWidth(1),
-                    },
-                    children: [
-                      _buildStatRow(
-                        colors, 
-                        'Ø', // Was 'Avg' 
-                        _calculateAverage(gameState.players[0]), 
-                        _calculateAverage(gameState.players[1])
-                      ),
-                       _buildStatRow(
-                        colors, 
-                        'High Run', // Was 'HR' 
-                        _calculateHighestRun(gameState.players[0]), 
-                        _calculateHighestRun(gameState.players[1])
-                      ),
-                       _buildStatRow(
-                        colors, 
-                        'Innings', 
-                        gameState.players[0].currentInning.toString(), 
-                        gameState.players[1].currentInning.toString()
-                      ),
-                       _buildStatRow(
-                        colors, 
-                        'Safety', // Was 'Saves'
-                        gameState.players[0].saves.toString(), 
-                        gameState.players[1].saves.toString()
-                      ),
-                       _buildStatRow(
-                        colors, 
-                        'Fouls', 
-                        gameState.getTotalFoulsForPlayer(gameState.players[0]).toString(), 
-                        gameState.getTotalFoulsForPlayer(gameState.players[1]).toString()
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              child: gameState.settings.isTrainingMode
+                  ? _buildTrainingStats(colors, gameState)
+                  : _buildVsComparison(colors, gameState, leaderName),
             ),
             
             const SizedBox(height: 32),
@@ -311,6 +195,7 @@ class DetailsScreen extends StatelessWidget {
               player2: gameState.players[1],
               inningRecords: gameState.inningRecords,
               winnerName: leaderName,
+              isTrainingMode: gameState.settings.isTrainingMode,
             ),
             
             const SizedBox(height: 16),
@@ -337,6 +222,198 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
+  // Training Mode: Single Player Stats
+  Widget _buildTrainingStats(FortuneColors colors, GameState gameState) {
+    final player = gameState.players[0];
+    return Column(
+      children: [
+        // Player Name & Score
+        Text(
+          player.name.toUpperCase(),
+          style: TextStyle(
+            color: colors.primaryBright,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          player.score.toString(),
+          style: TextStyle(
+            color: colors.accent,
+            fontSize: 48,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 24),
+        const Divider(color: Colors.white24),
+        const SizedBox(height: 16),
+        // Stats Grid
+        Wrap(
+          spacing: 32,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
+          children: [
+            _buildSingleStat(colors, 'Ø', _calculateAverage(player)),
+            _buildSingleStat(colors, 'High Run', _calculateHighestRun(player)),
+            _buildSingleStat(colors, 'Innings', player.currentInning.toString()),
+            _buildSingleStat(colors, 'Safety', player.saves.toString()),
+            _buildSingleStat(colors, 'Fouls', gameState.getTotalFoulsForPlayer(player).toString()),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // VS Mode: Two Player Comparison
+  Widget _buildVsComparison(FortuneColors colors, GameState gameState, String? leaderName) {
+    return Column(
+      children: [
+        // Names & Totals
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // P1
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    gameState.players[0].name.toUpperCase(),
+                    style: TextStyle(
+                      color: gameState.players[0].name == leaderName 
+                          ? colors.primaryBright 
+                          : colors.textMain,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    gameState.players[0].score.toString(),
+                    style: TextStyle(
+                      color: colors.accent,
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // VS
+            Text(
+              'VS', 
+              style: TextStyle(
+                color: colors.primaryDark, 
+                fontWeight: FontWeight.w900,
+                fontSize: 20,
+              )
+            ),
+            // P2
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    gameState.players[1].name.toUpperCase(),
+                    style: TextStyle(
+                      color: gameState.players[1].name == leaderName 
+                          ? colors.primaryBright 
+                          : colors.textMain,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    gameState.players[1].score.toString(),
+                    style: TextStyle(
+                      color: colors.accent,
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        const Divider(color: Colors.white24),
+        const SizedBox(height: 16),
+        
+        // Detailed Stats Table
+         Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: const {
+            0: FlexColumnWidth(1),
+            1: FlexColumnWidth(1), // Label centered
+            2: FlexColumnWidth(1),
+          },
+          children: [
+            _buildStatRow(
+              colors, 
+              'Ø',
+              _calculateAverage(gameState.players[0]), 
+              _calculateAverage(gameState.players[1])
+            ),
+             _buildStatRow(
+              colors, 
+              'High Run',
+              _calculateHighestRun(gameState.players[0]), 
+              _calculateHighestRun(gameState.players[1])
+            ),
+             _buildStatRow(
+              colors, 
+              'Innings', 
+              gameState.players[0].currentInning.toString(), 
+              gameState.players[1].currentInning.toString()
+            ),
+             _buildStatRow(
+              colors, 
+              'Safety',
+              gameState.players[0].saves.toString(), 
+              gameState.players[1].saves.toString()
+            ),
+             _buildStatRow(
+              colors, 
+              'Fouls', 
+              gameState.getTotalFoulsForPlayer(gameState.players[0]).toString(), 
+              gameState.getTotalFoulsForPlayer(gameState.players[1]).toString()
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Single stat display for training mode
+  Widget _buildSingleStat(FortuneColors colors, String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: colors.primaryBright,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: colors.textMain,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   TableRow _buildStatRow(FortuneColors colors, String label, String p1Val, String p2Val) {
     return TableRow(
       children: [
@@ -347,7 +424,7 @@ class DetailsScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             softWrap: false,
             overflow: TextOverflow.visible,
-            style: TextStyle(color: colors.textMain, fontSize: 14), // Standardized with no-wrap
+            style: TextStyle(color: colors.textMain, fontSize: 14),
           ),
         ),
         Text(
@@ -368,7 +445,7 @@ class DetailsScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             softWrap: false,
             overflow: TextOverflow.visible,
-            style: TextStyle(color: colors.textMain, fontSize: 14), // Standardized with no-wrap
+            style: TextStyle(color: colors.textMain, fontSize: 14),
           ),
         ),
       ],
