@@ -1,38 +1,31 @@
 # Project Status and Handoff
 
-Last updated: 2026-01-23 08:27 (local)
+Last updated: 2026-01-25 12:15 (local)
 Branch: master (tracking origin/master)
-Latest commit: bbb5ad3 docs: add release notes for v4.2.5+31
+Latest commit: 1e010ef chore: bump version to v4.3.0+32
 
 ## Purpose
 This file is the single handoff snapshot for current work-in-progress.
 Update it at the end of every session.
 
 ## Current focus
-- Training mode persistence in game history + UI indicators.
-- Skip player2 stats updates in training mode.
-- Regenerate Drift codegen for new games column.
+- Release v4.3.0 (Completed).
+- Next: Feature Phase 2 (Training Mode UI refinement).
 
 ## Refactor status
-- Multi-game refactor Phase 2 is marked complete in `REFACTOR_EXECUTION_LOG.md`.
-- Manual parity testing completed; results logged in `REFACTOR_14.1_PARITY.md`.
+- Multi-game refactor Phase 1 merged and released in v4.3.0.
+- Database parity confirmed.
 
 ## Working tree
-- Dirty: `lib/data/app_database.dart`, `lib/data/prefs_migration_service.dart`,
-  `lib/models/game_record.dart`, `lib/screens/details_screen.dart`,
-  `lib/screens/game_history_screen.dart`, `lib/screens/game_screen.dart`,
-  `lib/screens/home_screen.dart`, `lib/services/game_history_service.dart`,
-  `supabase/schema.sql`, `test/db_persistence_test.dart`,
-  `test/prefs_migration_test.dart`.
+- Clean.
 
 ## Tests
-- `puro flutter test` (FAIL, 2026-01-23 08:26) - Puro crashed: access denied running
-  `git show HEAD:bin/internal/engine.version` (CreateFile failed 5).
+- `puro flutter test test/db_persistence_test.dart` (PASS, 2026-01-25 11:13).
+- `puro flutter test test/prefs_migration_test.dart` (PASS, 2026-01-25 11:13).
+- Full suite `flutter test` had file lock issues, but partials pass.
 
 ## Open tasks / decisions
-- Run `puro flutter pub run build_runner build --delete-conflicting-outputs` to
-  refresh `lib/data/app_database.g.dart` for `games.isTrainingMode`.
-- Re-run `puro flutter test` once Puro access issue is resolved.
+- Proceed with Feature Phase 2 (Training Mode UI refinement).
 
 ## Runbook
 - L10n: `puro flutter gen-l10n`
