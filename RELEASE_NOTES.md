@@ -1,3 +1,14 @@
+### v4.3.1+33 - Bugfixes & Training Mode Polish 🎯
+
+Kleinere Verbesserungen und Fehlerbehebungen.
+
+*   **Fix:** 3-Foul-Meldung entfernt (Strafe wird weiterhin korrekt angewendet)
+*   **Fix:** Spielernamen werden jetzt korrekt aus den Einstellungen geladen
+*   **Training Mode:** Gegner-Spalte wird im Training-Modus komplett ausgeblendet
+*   **Training Mode:** Einzelspieler-Statistik-Ansicht im Details-Screen
+
+***
+
 ## v4.3.0+32 - Foundation & Training Mode Prep 🏗️
 
 Internal refactoring and preparation for Single Player Training Mode.
