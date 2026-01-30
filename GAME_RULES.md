@@ -116,6 +116,8 @@ A segment is the number of balls potted since the last re-rack.
 - TF inning penalty is −16 total (foul −1 plus additional −15)
 - Represented as `TF` only
 - No additional `F` is shown
+- **Re-Rack Consequence**: Ends the inning (turn ends), but the same player continues after re-rack with a new opening break
+
 
 ---
 
