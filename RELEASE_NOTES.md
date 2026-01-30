@@ -1,3 +1,14 @@
+## v4.4.0+34 - Triple Foul Re-Rack (BCA-Standard) ⚖️
+
+Vollständige Implementierung der offiziellen BCA Triple Foul Regel!
+
+*   **Triple Foul Re-Rack:** Nach 3 aufeinanderfolgenden Fouls werden alle 15 Kugeln neu aufgebaut und **derselbe Spieler** muss einen neuen Eröffnungsstoß ausführen (wie beim Spielbeginn)
+*   **BCA-Konform:** Strafe -16 Punkte + Re-Rack + Gleicher Spieler + Break-Bedingungen aktiv
+*   **Dokumentation:** Spielregeln in Deutsch und Englisch aktualisiert
+*   **Tests:** 3 neue Tests für TF Re-Rack-Verhalten (alle 21 Tests bestehen)
+
+***
+
 ### v4.3.1+33 - Bugfixes & Training Mode Polish 🎯
 
 Kleinere Verbesserungen und Fehlerbehebungen.
