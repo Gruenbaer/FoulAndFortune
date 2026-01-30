@@ -40,7 +40,7 @@ class ReRackEvent extends GameEvent {
   final String type; // "14.1 Continuous", "After Foul", "Auto/Safe", "tripleFoul"
   final ReRackReason reason;
   
-  const ReRackEvent(this.type, {this.reason = ReRackReason.normal});
+  ReRackEvent(this.type, {this.reason = ReRackReason.normal});
 }
 
 /// Event triggered when the game needs a player decision.

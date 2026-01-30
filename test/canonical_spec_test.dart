@@ -69,8 +69,8 @@ void main() {
       // Actually for pure foul test, ballsPocketed=0
       
       // Simpler: use applyNormalFoul directly
-      final penalty = gameState.foulTracker.applyNormalFoul(gameState.players[0], 0);
-      gameState.players[0].score += penalty;
+      final result = gameState.foulTracker.applyNormalFoul(gameState.players[0], 0);
+      gameState.players[0].score += result.penalty;
       
       expect(gameState.players[0].score, -1);
       expect(gameState.players[0].consecutiveFouls, 1);
@@ -81,20 +81,22 @@ void main() {
       final player = gameState.players[0];
       
       // First foul (pure)
-      int penalty1 = gameState.foulTracker.applyNormalFoul(player, 0);
-      player.score += penalty1;
+      final result1 = gameState.foulTracker.applyNormalFoul(player, 0);
+      player.score += result1.penalty;
       expect(player.score, -1);
       expect(player.consecutiveFouls, 1);
       
       // Second foul (pure)
-      int penalty2 = gameState.foulTracker.applyNormalFoul(player, 0);
-      player.score += penalty2;
+      final result2 = gameState.foulTracker.applyNormalFoul(player, 0);
+      player.score += result2.penalty;
       expect(player.score, -2);
       expect(player.consecutiveFouls, 2);
       
       // Third foul (triggers TF)
-      int penalty3 = gameState.foulTracker.applyNormalFoul(player, 0);
-      player.score += penalty3;
+      final result3 = gameState.foulTracker.applyNormalFoul(player, 0);
+      player.score += result3.penalty;
+      expect(result3.isTripleFoul, true);
+      expect(result3.penalty, -16);
       expect(player.score, -18); // -1 -1 -16 = -18
       expect(player.consecutiveFouls, 0); // Reset after TF
     });
@@ -104,11 +106,11 @@ void main() {
       final player = gameState.players[0];
       
       // First foul
-      player.score += gameState.foulTracker.applyNormalFoul(player, 0);
+      player.score += gameState.foulTracker.applyNormalFoul(player, 0).penalty;
       expect(player.consecutiveFouls, 1);
       
       // Second inning: pots 2 balls (15-13=2)
-      player.score += gameState.foulTracker.applyNormalFoul(player, 2); // Foul with pots
+      player.score += gameState.foulTracker.applyNormalFoul(player, 2).penalty; // Foul with pots
       expect(player.consecutiveFouls, 1); // Streak reset by points, but current foul counts (1)
       expect(player.score, -1 + -1); // First foul + second foul (no TF)
       
@@ -117,7 +119,7 @@ void main() {
       expect(player.score, 0);
       
       // Third inning: pure foul again
-      player.score += gameState.foulTracker.applyNormalFoul(player, 0);
+      player.score += gameState.foulTracker.applyNormalFoul(player, 0).penalty;
       expect(player.consecutiveFouls, 2); // Started new streak at 1, now 2
       expect(player.score, -1);
     });
@@ -127,7 +129,7 @@ void main() {
       final player = gameState.players[0];
       
       // First foul
-      player.score += gameState.foulTracker.applyNormalFoul(player, 0);
+      player.score += gameState.foulTracker.applyNormalFoul(player, 0).penalty;
       expect(player.consecutiveFouls, 1);
       
       // Safe (by canonical rules, resets streak)
@@ -135,7 +137,7 @@ void main() {
       expect(player.consecutiveFouls, 0);
       
       // Third inning: foul again
-      player.score += gameState.foulTracker.applyNormalFoul(player, 0);
+      player.score += gameState.foulTracker.applyNormalFoul(player, 0).penalty;
       expect(player.consecutiveFouls, 1); // New streak
       expect(player.score, -2); // -1 -1
     });
@@ -203,13 +205,82 @@ void main() {
       // Current Logic: Resets to 0 and returns -1
       // Required Logic: Resets to 0 (clears old streak), THEN adds current foul -> Result 1
       
-      int penalty = gameState.foulTracker.applyNormalFoul(player, 1); // ballsPocketed=1
+      final result = gameState.foulTracker.applyNormalFoul(player, 1); // ballsPocketed=1
       
       // Expected behavior per new requirement:
-      expect(penalty, -1);
+      expect(result.penalty, -1);
       expect(player.consecutiveFouls, 1); // Should be 1, currently failing (is 0)
     });
+
+    // ═══════════════════════════════════════════════════════════════
+    // TF RE-RACK TESTS (BCA Rule)
+    // ═══════════════════════════════════════════════════════════════
+    
+    test('TF1 - Triple foul: FoulResult returns correct values', () {
+      final player = gameState.players[0];
+      
+      // 3 consecutive pure fouls
+      final result1 = gameState.foulTracker.applyNormalFoul(player, 0);
+      expect(result1.isTripleFoul, false);
+      expect(result1.penalty, -1);
+      expect(player.consecutiveFouls, 1);
+      
+      final result2 = gameState.foulTracker.applyNormalFoul(player, 0);
+      expect(result2.isTripleFoul, false);
+      expect(result2.penalty, -1);
+      expect(player.consecutiveFouls, 2);
+      
+      final result3 = gameState.foulTracker.applyNormalFoul(player, 0);
+      expect(result3.isTripleFoul, true);
+      expect(result3.penalty, -16);
+      expect(player.consecutiveFouls, 0); // Reset after TF
+    });
+
+    test('TF2 - Triple foul via GameState: same player, re-rack, break conditions', () {
+      // Manually set up the consecutive fouls to avoid complex test logic
+      final player1 = gameState.players[0];
+      player1.consecutiveFouls = 2; // Set up 2 fouls manually
+      
+      // Trigger third foul via GameState -> TF
+      gameState.setFoulMode(FoulMode.normal);
+      gameState.onBallTapped(15); // No points, pure foul -> TF
+      
+      // Assertions:
+      expect(player1.score, -16); // Only -16 from this inning (not -18 total)
+      expect(gameState.currentPlayerIndex, 0); // Same player (no switch!)
+      expect(gameState.breakFoulStillAvailable, true); // Break conditions restored
+      expect(gameState.inBreakSequence, true);
+      expect(gameState.breakingPlayerIndex, 0);
+      
+      // Table should be re-racked
+      expect(gameState.activeBalls.length, 15);
+    });
+
+    test('TF3 - Normal foul switches player, TF does not', () {
+      // Part 1: Normal foul → player switch
+      gameState.setFoulMode(FoulMode.normal);
+      gameState.onBallTapped(10); // 5 balls potted with foul
+      expect(gameState.currentPlayerIndex, 1); // Switched to player 2
+      
+      // Reset game for TF test
+      gameState.resetGame();
+      
+      // Part 2: Trigger TF → no player switch
+      final player1 = gameState.players[0];
+      
+      // Manually set up 2 fouls (simpler than going through GameState)
+      player1.consecutiveFouls = 2;
+      
+      // Third foul via GameState
+      gameState.setFoulMode(FoulMode.normal);
+      gameState.onBallTapped(15); // Pure foul -> TF
+      
+      expect(gameState.currentPlayerIndex, 0); // Did NOT switch
+      expect(gameState.breakFoulStillAvailable, true); // Break active
+    });
   });
+
+
 
   group('Break Foul Restrictions Tests', () {
     late GameState gameState;
