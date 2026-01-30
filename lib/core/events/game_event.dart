@@ -29,10 +29,18 @@ class WarningEvent extends GameEvent {
   WarningEvent(this.title, this.message);
 }
 
+/// Reason for a re-rack event.
+enum ReRackReason {
+  normal,      // Standard re-rack (ball 1 or double sack)
+  tripleFoul,  // TF re-rack - same player continues with break conditions
+}
+
 /// Event triggered when a re-rack occurs.
 class ReRackEvent extends GameEvent {
-  final String type; // "14.1 Continuous", "After Foul", "Auto/Safe"
-  ReRackEvent(this.type);
+  final String type; // "14.1 Continuous", "After Foul", "Auto/Safe", "tripleFoul"
+  final ReRackReason reason;
+  
+  const ReRackEvent(this.type, {this.reason = ReRackReason.normal});
 }
 
 /// Event triggered when the game needs a player decision.

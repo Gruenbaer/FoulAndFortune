@@ -554,6 +554,8 @@ class GameState extends ChangeNotifier {
     
     // Apply foul penalties
     int foulPenalty = 0;
+    bool isTripleFoul = false;
+    
     if (player.inningBreakFoulCount > 0) {
       // Break foul: -2 per instance
       foulPenalty = player.inningBreakFoulCount * -2;
@@ -570,16 +572,10 @@ class GameState extends ChangeNotifier {
       // Calculate total balls pocketed in this inning (history + current)
       int totalRawPoints = player.inningHistory.fold(0, (sum, p) => sum + p) + pointsInInning;
       
-      // Check if this will trigger the 3-foul penalty BEFORE applying
-      bool willTriggerThreeFouls = false;
-      if (foulTracker.threeFoulRuleEnabled) {
-        // Simulate the logic: if no balls pocketed and already at 2, this makes 3
-        if (totalRawPoints == 0 && player.consecutiveFouls == 2) {
-          willTriggerThreeFouls = true;
-        }
-      }
-      
-      foulPenalty = foulTracker.applyNormalFoul(player, totalRawPoints);
+      // Use new FoulResult API
+      final foulResult = foulTracker.applyNormalFoul(player, totalRawPoints);
+      foulPenalty = foulResult.penalty;
+      isTripleFoul = foulResult.isTripleFoul;
       totalInningPoints += foulPenalty; // foulPenalty is negative
       
       
@@ -587,10 +583,10 @@ class GameState extends ChangeNotifier {
       // This prevents duplicate warnings and ensures correct timing
       
       
-      // Mark for notation "TF" if triggered (no splash message needed)
-      if (willTriggerThreeFouls) {
+      // Mark for notation "TF" if triggered
+      if (isTripleFoul) {
         player.inningHasThreeFouls = true; // Mark for notation "TF"
-        // Penalty already applied via foulTracker.applyNormalFoul() above
+        // Penalty already applied via foulResult above
       }
     } else {
       // Valid shot (no foul) resets consecutive fouls
@@ -626,6 +622,12 @@ class GameState extends ChangeNotifier {
     // Check for achievements after inning
     if (achievementManager != null) {
       AchievementChecker.checkAfterInning(player, achievementManager!);
+    }
+    
+    // TF Re-Rack Logic: If TF triggered, emit re-rack event
+    // The player switch will be suppressed in _switchPlayer()
+    if (isTripleFoul) {
+      _events.add(ReRackEvent('tripleFoul', reason: ReRackReason.tripleFoul));
     }
   }
 
@@ -760,6 +762,9 @@ class GameState extends ChangeNotifier {
   
   debugPrint('DEBUG _switchPlayer: ${oldPlayer.name} lastRun=${oldPlayer.lastRun} currentRun=${oldPlayer.currentRun}');
   
+  // 2.5 TF Check: If TF was triggered, suppress player switch and reset break conditions
+  final tfTriggered = oldPlayer.inningHasThreeFouls;
+  
   // 3. Reset for next inning (currentRun = 0)
   oldPlayer.incrementInning();
   
@@ -780,6 +785,34 @@ class GameState extends ChangeNotifier {
 
     notifyListeners();
     return;
+  }
+  
+  // TF Special Case: Same player continues with break conditions
+  if (tfTriggered) {
+    debugPrint('DEBUG _switchPlayer: TF detected - same player continues with break conditions');
+    
+    // Reset rack (table physical state)
+    _resetRack();
+    
+    // Reset break conditions
+    breakFoulStillAvailable = true;
+    inBreakSequence = true;
+    breakingPlayerIndex = currentPlayerIndex;
+    
+    // Sync rules state
+    if (_rulesState is sp_state.StraightPoolState) {
+      (_rulesState as sp_state.StraightPoolState).breakFoulStillAvailable = true;
+      (_rulesState as sp_state.StraightPoolState).inBreakSequence = true;
+    }
+    
+    // Check for 2-foul warning (same player continues)
+    if (foulTracker.threeFoulRuleEnabled &&
+        oldPlayer.consecutiveFouls == 2) {
+      _events.add(TwoFoulsWarningEvent());
+    }
+    
+    notifyListeners();
+    return; // Exit early - no player switch
   }
   
   final newPlayerIndex = 1 - currentPlayerIndex;
