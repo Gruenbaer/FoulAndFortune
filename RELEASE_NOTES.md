@@ -1,9 +1,9 @@
-## v4.4.0+34 - Triple Foul Re-Rack (BCA-Standard) ⚖️
+## v4.4.0+34 - Training Mode & Triple Foul Re-Rack 🎯⚖️
 
-Vollständige Implementierung der offiziellen BCA Triple Foul Regel!
+Einzelspieler-Training und BCA-konforme Triple Foul Regel!
 
-*   **Triple Foul Re-Rack:** Nach 3 aufeinanderfolgenden Fouls werden alle 15 Kugeln neu aufgebaut und **derselbe Spieler** muss einen neuen Eröffnungsstoß ausführen (wie beim Spielbeginn)
-*   **BCA-Konform:** Strafe -16 Punkte + Re-Rack + Gleicher Spieler + Break-Bedingungen aktiv
+*   **🎯 Training Mode (Einzelspieler):** Solo-Trainingsmodus mit eigener Statistik-Ansicht - perfekt zum Üben ohne Gegner
+*   **⚖️ Triple Foul Re-Rack:** Nach 3 aufeinanderfolgenden Fouls werden alle 15 Kugeln neu aufgebaut und **derselbe Spieler** muss einen neuen Eröffnungsstoß ausführen (BCA-Standard)
 *   **Dokumentation:** Spielregeln in Deutsch und Englisch aktualisiert
 *   **Tests:** 3 neue Tests für TF Re-Rack-Verhalten (alle 21 Tests bestehen)
 
