@@ -1,4 +1,16 @@
+## v4.4.1+35 - Training Mode Perfektioniert 🎯✨
+
+Das Training-Erlebnis ist jetzt noch besser!
+
+*   **🎨 Training UI Verbesserungen:** Einzelspieler-Oberfläche wurde verfeinert - Gegner-Spalte ist komplett ausgeblendet, Victory Screen zeigt jetzt "TRAINING COMPLETE"
+*   **⚖️ Triple Foul (TF) Re-Rack:** Offizieller BCA-Standard implementiert - nach 3 Fouls in Folge werden alle 15 Kugeln neu aufgebaut und **derselbe Spieler** stößt erneut an
+*   **✅ Tests:** 3 neue UI-Tests für Training Mode + TF Re-Rack Verhalten (alle 24 Tests bestehen)
+*   **📖 Dokumentation:** GAME_RULES.md zeigt jetzt die komplette TF-Regel in DE/EN
+
+***
+
 ## v4.4.0+34 - Training Mode & Triple Foul Re-Rack 🎯⚖️
+
 
 Einzelspieler-Training und BCA-konforme Triple Foul Regel!
 
