@@ -9,8 +9,9 @@ This file is the single handoff snapshot for current work-in-progress.
 Update it at the end of every session.
 
 ## Current focus
-- Release v4.3.1 published (APK upload pending manual fix)
-- Next: Fix deploy_release.ps1 script to ensure APK uploads correctly
+- Release v4.3.1 published (APK uploaded)
+- Next: Monitor release adoption
+
 
 ## Recent work (2026-01-25)
 - **Bug Fixes:**

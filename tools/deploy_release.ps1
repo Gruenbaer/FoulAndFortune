@@ -99,20 +99,39 @@ $versionedApkPath = "build/app/outputs/flutter-apk/$versionedApkName"
 Write-Host "Renaming APK to $versionedApkName..." -ForegroundColor Cyan
 Copy-Item $apkPath $versionedApkPath -Force
 
-# 5. Create GitHub Release
+# 5. Create Or Update GitHub Release
 Write-Host "Publishing to GitHub..." -ForegroundColor Cyan
 $notesFile = [System.IO.Path]::GetTempFileName()
 Set-Content -Path $notesFile -Value $releaseNotes -Encoding UTF8
 
 try {
-    # GH CLI usually in PATH
-    cmd /c "gh release create v$version ""$versionedApkPath"" --title ""v$version"" --notes-file ""$notesFile"""
+    # Check if release already exists
+    $releaseExists = $false
+    try {
+        # 'gh release view' returns 0 if exists, 1 if not.
+        # We redirect stderr to null to keep output clean if it doesn't exist.
+        cmd /c "gh release view v$version 2>NUL" | Out-Null
+        if ($LASTEXITCODE -eq 0) { $releaseExists = $true }
+    } catch {
+        # Command failed to run or other error
+    }
+
+    if ($releaseExists) {
+        Write-Warning "Release v$version already exists. Uploading APK asset only..."
+        # Upload asset to existing release, clobbering if it exists
+        cmd /c "gh release upload v$version ""$versionedApkPath"" --clobber"
+    }
+    else {
+        Write-Host "Creating new release v$version..."
+        # Create new release with asset
+        cmd /c "gh release create v$version ""$versionedApkPath"" --title ""v$version"" --notes-file ""$notesFile"""
+    }
 }
 finally {
     Remove-Item $notesFile
 }
 
-if ($LASTEXITCODE -ne 0) { throw "GitHub Release Failed" }
+if ($LASTEXITCODE -ne 0) { throw "GitHub Release/Upload Failed" }
 
 Write-Host "Release v$version Published!" -ForegroundColor Green
 

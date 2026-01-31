@@ -142,11 +142,11 @@ class ScoreCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                Expanded(
-                  flex: 1,
-                  child: const SizedBox(), // Spacer for Inning column
-                ),
-                if (!isTrainingMode)
+                if (!isTrainingMode) ...[
+                  Expanded(
+                    flex: 1,
+                    child: const SizedBox(), // Spacer for Inning column
+                  ),
                   Expanded(
                     flex: 4,
                     child: Text(
@@ -162,6 +162,7 @@ class ScoreCard extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
+                ],
               ],
             ),
           ),

@@ -18,6 +18,7 @@ class VictorySplash extends StatefulWidget {
   final VoidCallback onNewGame;
   final VoidCallback onExit;
   final VoidCallback? onUndo;
+  final bool isTrainingMode;
 
   const VictorySplash({
     super.key,
@@ -30,6 +31,7 @@ class VictorySplash extends StatefulWidget {
     required this.onNewGame,
     required this.onExit,
     this.onUndo,
+    this.isTrainingMode = false,
   });
 
   @override
@@ -127,7 +129,9 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                   const SizedBox(height: 8),
                   
                   Text(
-                    AppLocalizations.of(context).victory,
+                    widget.isTrainingMode 
+                        ? 'TRAINING COMPLETE' 
+                        : AppLocalizations.of(context).victory,
                     style: Theme.of(context).textTheme.displayLarge?.copyWith(
                       color: colors.primaryBright,
                       fontSize: 32,
@@ -150,11 +154,15 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                       children: [
                         // Player names and scores at top
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Expanded(child: _buildPlayerHeader(context, widget.player1, isWinner: isP1Winner, align: CrossAxisAlignment.center)),
-                            // Divider or VS?
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildPlayerHeader(context, widget.player2, isWinner: !isP1Winner, align: CrossAxisAlignment.center)),
+                            
+                            if (!widget.isTrainingMode) ...[
+                              // Divider or VS?
+                              const SizedBox(width: 16),
+                              Expanded(child: _buildPlayerHeader(context, widget.player2, isWinner: !isP1Winner, align: CrossAxisAlignment.center)),
+                            ],
                           ],
                         ),
                         
@@ -215,18 +223,20 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    const SizedBox(width: 80, child: Text('')),
-                                    Expanded(
-                                      child: Text(
-                                        widget.player2.name.toUpperCase(),
-                                        style: TextStyle(
-                                          color: !isP1Winner ? colors.accent : colors.primaryBright, // Highlight winner name
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
+                                    if (!widget.isTrainingMode) ...[
+                                      const SizedBox(width: 80, child: Text('')),
+                                      Expanded(
+                                        child: Text(
+                                          widget.player2.name.toUpperCase(),
+                                          style: TextStyle(
+                                            color: !isP1Winner ? colors.accent : colors.primaryBright, // Highlight winner name
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
                                         ),
-                                        textAlign: TextAlign.center,
                                       ),
-                                    ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -256,6 +266,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                           player2: widget.player2,
                           inningRecords: widget.inningRecords,
                           winnerName: widget.winner.name,
+                          isTrainingMode: widget.isTrainingMode,
                         ),
                       ],
                     ),
@@ -358,27 +369,41 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
               textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: colors.textMain,
-                fontSize: 12,
+          
+          if (widget.isTrainingMode) ...[
+             Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: colors.textMain,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              p2Stat,
-              style: TextStyle(
-                color: colors.textMain,
-                fontSize: 16,
+          ] else ...[
+             SizedBox(
+              width: 80,
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: colors.textMain,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
+            Expanded(
+              child: Text(
+                p2Stat,
+                style: TextStyle(
+                  color: colors.textMain,
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ],
       ),
     );

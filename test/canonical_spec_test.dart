@@ -403,4 +403,60 @@ void main() {
       expect(gameState.breakFoulStillAvailable, true);
     });
   });
+
+  group('Training Mode Tests', () {
+    late GameState gameState;
+
+    setUp(() {
+      final settings = GameSettings(
+        player1Name: 'Player 1',
+        player2Name: 'Player 2',
+        raceToScore: 100,
+        isTrainingMode: true,
+        threeFoulRuleEnabled: true,
+      );
+      gameState = GameState(settings: settings);
+    });
+
+    test('TM1 - Player does not switch on safe/miss', () {
+      // 1. Initial State
+      expect(gameState.currentPlayerIndex, 0);
+      expect(gameState.players[0].currentInning, 1);
+
+      // 2. Perform a Safe (requires enabling mode then confirming)
+      gameState.onSafe(); // Enable Safe Mode
+      gameState.onSafe(); // Confirm Safe
+
+      // 3. Verify Player DID NOT switch
+      expect(gameState.currentPlayerIndex, 0);
+      
+      // 4. Verify Inning DID increment (new rack/inning for same player)
+      expect(gameState.players[0].currentInning, 2);
+    });
+
+    test('TM2 - Break foul availability disabled after first "turn"', () {
+      expect(gameState.breakFoulStillAvailable, true);
+
+      // Trigger a turn switch (Safe)
+      gameState.onSafe(); // Enable
+      gameState.onSafe(); // Confirm
+
+      // Should still be player 1, but break fouls disabled for subsequent innings
+      expect(gameState.currentPlayerIndex, 0);
+      expect(gameState.breakFoulStillAvailable, false);
+    });
+
+    test('TM3 - Normal foul does not switch player', () {
+      gameState.setFoulMode(FoulMode.normal);
+      
+      // Commit foul (pure foul)
+      gameState.onBallTapped(10); 
+      
+      // In standard game: Switches to P2.
+      // In Training: Should stay P1.
+      expect(gameState.currentPlayerIndex, 0);
+      // And break fouls should be gone if they weren't already (if this was first turn)
+      expect(gameState.breakFoulStillAvailable, false);
+    });
+  });
 }
