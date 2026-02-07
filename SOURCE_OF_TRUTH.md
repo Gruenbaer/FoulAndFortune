@@ -75,6 +75,7 @@ code or update this document and any referenced specs together.
 - SharedPreferences now only used for device id and migration flags.
 - Notation migration: `GameHistoryService.migrateNotation` is currently a stub; existing records rely on lazy parsing.
 - Statistics roadmap (planned): `STATISTICS_SYSTEM_PLAN.md` (games context + innings table).
+- Shot-Level Event Sourcing (v4): `docs/SHOT_EVENT_IMPLEMENTATION.md` (granular analytics implementation).
 - Dialog testing architecture (planned): `docs/DIALOG_TESTING_ARCHITECTURE_BRIEF.md`.
 
 ## Strict API Contracts
