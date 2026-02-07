@@ -304,4 +304,57 @@ create policy "Sync state update" on public.sync_state
 create policy "Sync state delete" on public.sync_state
   for delete using (user_id = auth.uid());
 
+create table if not exists public.shot_events (
+  id uuid primary key default gen_random_uuid(),
+  game_id uuid not null references public.games(id) on delete cascade,
+  player_id uuid not null references public.players(id) on delete cascade,
+  turn_index integer not null,
+  shot_index integer not null,
+  event_type text not null,
+  payload jsonb not null,
+  ts timestamptz not null,
+  created_at timestamptz not null default now(),
+  unique (game_id, turn_index, shot_index)
+);
+
+create index if not exists shot_events_game_ts_idx
+  on public.shot_events (game_id, ts);
+
+create index if not exists shot_events_game_turn_shot_idx
+  on public.shot_events (game_id, turn_index, shot_index);
+
+create index if not exists shot_events_player_ts_idx
+  on public.shot_events (player_id, ts);
+
+alter table public.shot_events enable row level security;
+
+drop policy if exists "Shot events read" on public.shot_events;
+drop policy if exists "Shot events insert" on public.shot_events;
+drop policy if exists "Shot events update" on public.shot_events; /* Should be append-only, but sync might need it? strictly speaking append-only means no updates, but we might want to allow it for sync resolution if needed, though strictly append-only is better */
+/* Actually, let's stick to read/insert for now to enforce append-only logic at RLS level if possible, but standard sync might try to update? Let's assume standard policies for now. */
+
+create policy "Shot events read" on public.shot_events
+  for select using (
+    exists (
+      select 1 from public.games
+      where id = shot_events.game_id
+      and user_id = auth.uid()
+    )
+  );
+
+create policy "Shot events insert" on public.shot_events
+  for insert with check (
+    exists (
+      select 1 from public.games
+      where id = shot_events.game_id
+      and user_id = auth.uid()
+    )
+  );
+
+/* No update policy to enforce append-only nature? 
+   If we need to correct, we use compensating events as per spec.
+   However, DELETE might be needed for cascading deletes from games/users which is handled by FK cascade. 
+   But strictly speaking, no manual updates allowed.
+*/
+
 commit;

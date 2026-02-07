@@ -17,6 +17,8 @@ import '../games/base/rule_outcome.dart' as rules_outcome;
 import '../games/straight_pool/straight_pool_rules.dart';
 import '../games/straight_pool/straight_pool_state.dart' as sp_state;
 import '../core/actions/game_action.dart';
+import '../services/shot_event_service.dart';
+import '../stats/shot_event_type.dart';
 
 enum FoulMode { none, normal, severe }
 // FoulType now imported from '../codecs/notation_codec.dart'
@@ -29,6 +31,13 @@ class GameState extends ChangeNotifier {
   late List<Player> players;
   late FoulTracker foulTracker;
   late AchievementManager? achievementManager;
+  final ShotEventService shotEventService;
+  String? gameId;
+  
+  // Shot Event Sourcing State
+  int currentTurnIndex = 0;
+  int currentShotIndex = 0;
+
   int currentPlayerIndex = 0;
   bool gameStarted = false;
   bool gameOver = false;
@@ -192,16 +201,19 @@ class GameState extends ChangeNotifier {
   GameState({
     required this.settings,
     this.achievementManager,
+    required this.shotEventService,
   }) : raceToScore = settings.raceToScore {
     // Initialize Players
     players = [
       Player(
           name: settings.player1Name,
+          id: settings.player1Id,
           isActive: true, // P1 starts active by default
           score: settings.player1Handicap,
           handicapMultiplier: settings.player1HandicapMultiplier),
       Player(
           name: settings.player2Name,
+          id: settings.player2Id,
           isActive: false,
           score: settings.player2Handicap,
           handicapMultiplier: settings.player2HandicapMultiplier)
@@ -410,6 +422,33 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setGameId(String id) {
+    gameId = id;
+    currentTurnIndex = 1;
+    currentShotIndex = 0;
+  }
+
+  void _emitEvent(ShotEventType type, Map<String, dynamic> data) {
+    if (gameId == null) {
+      debugPrint('WARNING: Attempted to emit event without gameId');
+      return;
+    }
+    final pid = currentPlayer.id;
+    if (pid == null) {
+      debugPrint('WARNING: Attempted to emit event for player without ID');
+      return;
+    }
+
+    shotEventService.emit(
+      gameId: gameId!,
+      playerId: pid,
+      turnIndex: currentTurnIndex,
+      shotIndex: currentShotIndex++,
+      eventType: type,
+      data: data,
+    );
+  }
+
   void onSafe() {
     if (!isSafeMode) {
       // ENTER Safe Mode
@@ -417,6 +456,12 @@ class GameState extends ChangeNotifier {
       notifyListeners();
     } else {
       _pushState();
+      
+      // Emit Shot Event
+      _emitEvent(ShotEventType.shot, {
+        'kind': 'safety',
+      });
+
       // CONFIRM Standard Safe
       final outcome = _rules.apply(const SafeAction(), _buildCoreState(), _rulesState);
       _applyOutcome(outcome);
@@ -437,6 +482,19 @@ class GameState extends ChangeNotifier {
 
     // VALIDATION: Strict Mutual Exclusion (Spec §7.3)
     if (!_validateInteraction(ballNumber)) return;
+    
+    // Valid interaction
+    _emitEvent(ShotEventType.shot, {
+      'kind': 'pocket', // Default kind, refined below if special?
+      'ballId': ballNumber,
+    });
+    // Note: onBallTapped(0) is dealt with logic below but technically is a "shot" attempt or foul.
+    // If it's a FOUL, we might want to emit kind:foul?
+    // But onBallTapped(0) usually triggers DoubleSack or Foul?
+    // Actually onBallTapped handles generic input.
+    // 0 is usually foul.
+    // Let's rely on eventType/kind. 
+    // Spec: "onBallTapped(n) -> shot {kind:pocket, ballId:n}"
     
     // Delegate to Rules Engine
     final action = BallTappedAction(ballNumber);
@@ -469,6 +527,11 @@ class GameState extends ChangeNotifier {
 
   // Called by UI after Splash animation to physically reset the rack
   void finalizeReRack() {
+     _pushState();
+     
+     // Emit Rerack Event
+     _emitEvent(ShotEventType.rerack, {});
+
      final outcome = _rules.apply(const FinalizeReRackAction(), _buildCoreState(), _rulesState);
      _applyOutcome(outcome);
   }
@@ -753,6 +816,9 @@ class GameState extends ChangeNotifier {
   }
 
   void _switchPlayer() {
+    // End current turn
+    _emitEvent(ShotEventType.turnEnd, {});
+
   // 1. Capture references before switching logical index
   final oldPlayer = currentPlayer;
 
@@ -783,6 +849,11 @@ class GameState extends ChangeNotifier {
       _events.add(TwoFoulsWarningEvent());
     }
 
+    // Start new turn (Same player)
+    currentTurnIndex++;
+    currentShotIndex = 0;
+    _emitEvent(ShotEventType.turnStart, {});
+
     notifyListeners();
     return;
   }
@@ -811,6 +882,11 @@ class GameState extends ChangeNotifier {
       _events.add(TwoFoulsWarningEvent());
     }
     
+    // Start new turn (Same player)
+    currentTurnIndex++;
+    currentShotIndex = 0;
+    _emitEvent(ShotEventType.turnStart, {});
+
     notifyListeners();
     return; // Exit early - no player switch
   }
@@ -820,6 +896,11 @@ class GameState extends ChangeNotifier {
   
   // 4. Switch logical control immediately
   currentPlayerIndex = newPlayerIndex;
+
+  // Start new turn
+  currentTurnIndex++;
+  currentShotIndex = 0;
+  _emitEvent(ShotEventType.turnStart, {});
   
   // 5. Permanently disable break fouls when player switches during normal play
   if (breakFoulStillAvailable) {

@@ -452,11 +452,65 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
 
 
 
-  void _startGame() {
-    // Save settings globally (persisting player names)
-    Provider.of<Function(GameSettings)>(context, listen: false)(_settings);
+  Future<void> _startGame() async {
+    // 1. Resolve Player IDs
+    String? p1Id;
+    String? p2Id;
 
-    // Both players are selected, start the game
-    widget.onStartGame(_settings);
+    try {
+      final p1Name = _settings.player1Name.trim();
+      if (p1Name.isNotEmpty) {
+        // Find existing or create
+        final existing = _players.cast<Player?>().firstWhere(
+              (p) => p?.name.toLowerCase() == p1Name.toLowerCase(),
+              orElse: () => null,
+            );
+        
+        if (existing != null) {
+          p1Id = existing.id;
+        } else {
+          final newPlayer = await _playerService.createPlayer(p1Name);
+          p1Id = newPlayer.id;
+        }
+      }
+
+      if (!_settings.isTrainingMode) {
+        final p2Name = _settings.player2Name.trim();
+        if (p2Name.isNotEmpty) {
+          final existing = _players.cast<Player?>().firstWhere(
+                (p) => p?.name.toLowerCase() == p2Name.toLowerCase(),
+                orElse: () => null,
+              );
+          
+          if (existing != null) {
+            p2Id = existing.id;
+          } else {
+            final newPlayer = await _playerService.createPlayer(p2Name);
+            p2Id = newPlayer.id;
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error resolving players: $e')),
+        );
+      }
+      return;
+    }
+
+    // 2. Attach IDs to settings
+    final settingsWithIds = _settings.copyWith(
+      player1Id: p1Id,
+      player2Id: p2Id,
+    );
+    
+    // 3. Save settings globally (persists names + IDs)
+    if (mounted) {
+      Provider.of<Function(GameSettings)>(context, listen: false)(settingsWithIds);
+      
+      // 4. Start Game
+      widget.onStartGame(settingsWithIds);
+    }
   }
 }

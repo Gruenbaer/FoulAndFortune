@@ -4450,6 +4450,474 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
   }
 }
 
+class $ShotEventsTable extends ShotEvents
+    with TableInfo<$ShotEventsTable, ShotEventRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShotEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _gameIdMeta = const VerificationMeta('gameId');
+  @override
+  late final GeneratedColumn<String> gameId = GeneratedColumn<String>(
+      'game_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _playerIdMeta =
+      const VerificationMeta('playerId');
+  @override
+  late final GeneratedColumn<String> playerId = GeneratedColumn<String>(
+      'player_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _turnIndexMeta =
+      const VerificationMeta('turnIndex');
+  @override
+  late final GeneratedColumn<int> turnIndex = GeneratedColumn<int>(
+      'turn_index', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _shotIndexMeta =
+      const VerificationMeta('shotIndex');
+  @override
+  late final GeneratedColumn<int> shotIndex = GeneratedColumn<int>(
+      'shot_index', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _eventTypeMeta =
+      const VerificationMeta('eventType');
+  @override
+  late final GeneratedColumn<String> eventType = GeneratedColumn<String>(
+      'event_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _payloadMeta =
+      const VerificationMeta('payload');
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+      'payload', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _tsMeta = const VerificationMeta('ts');
+  @override
+  late final GeneratedColumn<DateTime> ts = GeneratedColumn<DateTime>(
+      'ts', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        gameId,
+        playerId,
+        turnIndex,
+        shotIndex,
+        eventType,
+        payload,
+        ts,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shot_events';
+  @override
+  VerificationContext validateIntegrity(Insertable<ShotEventRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('game_id')) {
+      context.handle(_gameIdMeta,
+          gameId.isAcceptableOrUnknown(data['game_id']!, _gameIdMeta));
+    } else if (isInserting) {
+      context.missing(_gameIdMeta);
+    }
+    if (data.containsKey('player_id')) {
+      context.handle(_playerIdMeta,
+          playerId.isAcceptableOrUnknown(data['player_id']!, _playerIdMeta));
+    } else if (isInserting) {
+      context.missing(_playerIdMeta);
+    }
+    if (data.containsKey('turn_index')) {
+      context.handle(_turnIndexMeta,
+          turnIndex.isAcceptableOrUnknown(data['turn_index']!, _turnIndexMeta));
+    } else if (isInserting) {
+      context.missing(_turnIndexMeta);
+    }
+    if (data.containsKey('shot_index')) {
+      context.handle(_shotIndexMeta,
+          shotIndex.isAcceptableOrUnknown(data['shot_index']!, _shotIndexMeta));
+    } else if (isInserting) {
+      context.missing(_shotIndexMeta);
+    }
+    if (data.containsKey('event_type')) {
+      context.handle(_eventTypeMeta,
+          eventType.isAcceptableOrUnknown(data['event_type']!, _eventTypeMeta));
+    } else if (isInserting) {
+      context.missing(_eventTypeMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(_payloadMeta,
+          payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta));
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
+    }
+    if (data.containsKey('ts')) {
+      context.handle(_tsMeta, ts.isAcceptableOrUnknown(data['ts']!, _tsMeta));
+    } else if (isInserting) {
+      context.missing(_tsMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {gameId, turnIndex, shotIndex},
+      ];
+  @override
+  ShotEventRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShotEventRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      gameId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}game_id'])!,
+      playerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}player_id'])!,
+      turnIndex: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}turn_index'])!,
+      shotIndex: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}shot_index'])!,
+      eventType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}event_type'])!,
+      payload: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payload'])!,
+      ts: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}ts'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $ShotEventsTable createAlias(String alias) {
+    return $ShotEventsTable(attachedDatabase, alias);
+  }
+}
+
+class ShotEventRow extends DataClass implements Insertable<ShotEventRow> {
+  final String id;
+  final String gameId;
+  final String playerId;
+  final int turnIndex;
+  final int shotIndex;
+  final String eventType;
+  final String payload;
+  final DateTime ts;
+  final DateTime createdAt;
+  const ShotEventRow(
+      {required this.id,
+      required this.gameId,
+      required this.playerId,
+      required this.turnIndex,
+      required this.shotIndex,
+      required this.eventType,
+      required this.payload,
+      required this.ts,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['game_id'] = Variable<String>(gameId);
+    map['player_id'] = Variable<String>(playerId);
+    map['turn_index'] = Variable<int>(turnIndex);
+    map['shot_index'] = Variable<int>(shotIndex);
+    map['event_type'] = Variable<String>(eventType);
+    map['payload'] = Variable<String>(payload);
+    map['ts'] = Variable<DateTime>(ts);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ShotEventsCompanion toCompanion(bool nullToAbsent) {
+    return ShotEventsCompanion(
+      id: Value(id),
+      gameId: Value(gameId),
+      playerId: Value(playerId),
+      turnIndex: Value(turnIndex),
+      shotIndex: Value(shotIndex),
+      eventType: Value(eventType),
+      payload: Value(payload),
+      ts: Value(ts),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ShotEventRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShotEventRow(
+      id: serializer.fromJson<String>(json['id']),
+      gameId: serializer.fromJson<String>(json['gameId']),
+      playerId: serializer.fromJson<String>(json['playerId']),
+      turnIndex: serializer.fromJson<int>(json['turnIndex']),
+      shotIndex: serializer.fromJson<int>(json['shotIndex']),
+      eventType: serializer.fromJson<String>(json['eventType']),
+      payload: serializer.fromJson<String>(json['payload']),
+      ts: serializer.fromJson<DateTime>(json['ts']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'gameId': serializer.toJson<String>(gameId),
+      'playerId': serializer.toJson<String>(playerId),
+      'turnIndex': serializer.toJson<int>(turnIndex),
+      'shotIndex': serializer.toJson<int>(shotIndex),
+      'eventType': serializer.toJson<String>(eventType),
+      'payload': serializer.toJson<String>(payload),
+      'ts': serializer.toJson<DateTime>(ts),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ShotEventRow copyWith(
+          {String? id,
+          String? gameId,
+          String? playerId,
+          int? turnIndex,
+          int? shotIndex,
+          String? eventType,
+          String? payload,
+          DateTime? ts,
+          DateTime? createdAt}) =>
+      ShotEventRow(
+        id: id ?? this.id,
+        gameId: gameId ?? this.gameId,
+        playerId: playerId ?? this.playerId,
+        turnIndex: turnIndex ?? this.turnIndex,
+        shotIndex: shotIndex ?? this.shotIndex,
+        eventType: eventType ?? this.eventType,
+        payload: payload ?? this.payload,
+        ts: ts ?? this.ts,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  ShotEventRow copyWithCompanion(ShotEventsCompanion data) {
+    return ShotEventRow(
+      id: data.id.present ? data.id.value : this.id,
+      gameId: data.gameId.present ? data.gameId.value : this.gameId,
+      playerId: data.playerId.present ? data.playerId.value : this.playerId,
+      turnIndex: data.turnIndex.present ? data.turnIndex.value : this.turnIndex,
+      shotIndex: data.shotIndex.present ? data.shotIndex.value : this.shotIndex,
+      eventType: data.eventType.present ? data.eventType.value : this.eventType,
+      payload: data.payload.present ? data.payload.value : this.payload,
+      ts: data.ts.present ? data.ts.value : this.ts,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShotEventRow(')
+          ..write('id: $id, ')
+          ..write('gameId: $gameId, ')
+          ..write('playerId: $playerId, ')
+          ..write('turnIndex: $turnIndex, ')
+          ..write('shotIndex: $shotIndex, ')
+          ..write('eventType: $eventType, ')
+          ..write('payload: $payload, ')
+          ..write('ts: $ts, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, gameId, playerId, turnIndex, shotIndex,
+      eventType, payload, ts, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShotEventRow &&
+          other.id == this.id &&
+          other.gameId == this.gameId &&
+          other.playerId == this.playerId &&
+          other.turnIndex == this.turnIndex &&
+          other.shotIndex == this.shotIndex &&
+          other.eventType == this.eventType &&
+          other.payload == this.payload &&
+          other.ts == this.ts &&
+          other.createdAt == this.createdAt);
+}
+
+class ShotEventsCompanion extends UpdateCompanion<ShotEventRow> {
+  final Value<String> id;
+  final Value<String> gameId;
+  final Value<String> playerId;
+  final Value<int> turnIndex;
+  final Value<int> shotIndex;
+  final Value<String> eventType;
+  final Value<String> payload;
+  final Value<DateTime> ts;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ShotEventsCompanion({
+    this.id = const Value.absent(),
+    this.gameId = const Value.absent(),
+    this.playerId = const Value.absent(),
+    this.turnIndex = const Value.absent(),
+    this.shotIndex = const Value.absent(),
+    this.eventType = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.ts = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShotEventsCompanion.insert({
+    required String id,
+    required String gameId,
+    required String playerId,
+    required int turnIndex,
+    required int shotIndex,
+    required String eventType,
+    required String payload,
+    required DateTime ts,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        gameId = Value(gameId),
+        playerId = Value(playerId),
+        turnIndex = Value(turnIndex),
+        shotIndex = Value(shotIndex),
+        eventType = Value(eventType),
+        payload = Value(payload),
+        ts = Value(ts),
+        createdAt = Value(createdAt);
+  static Insertable<ShotEventRow> custom({
+    Expression<String>? id,
+    Expression<String>? gameId,
+    Expression<String>? playerId,
+    Expression<int>? turnIndex,
+    Expression<int>? shotIndex,
+    Expression<String>? eventType,
+    Expression<String>? payload,
+    Expression<DateTime>? ts,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (gameId != null) 'game_id': gameId,
+      if (playerId != null) 'player_id': playerId,
+      if (turnIndex != null) 'turn_index': turnIndex,
+      if (shotIndex != null) 'shot_index': shotIndex,
+      if (eventType != null) 'event_type': eventType,
+      if (payload != null) 'payload': payload,
+      if (ts != null) 'ts': ts,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShotEventsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? gameId,
+      Value<String>? playerId,
+      Value<int>? turnIndex,
+      Value<int>? shotIndex,
+      Value<String>? eventType,
+      Value<String>? payload,
+      Value<DateTime>? ts,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return ShotEventsCompanion(
+      id: id ?? this.id,
+      gameId: gameId ?? this.gameId,
+      playerId: playerId ?? this.playerId,
+      turnIndex: turnIndex ?? this.turnIndex,
+      shotIndex: shotIndex ?? this.shotIndex,
+      eventType: eventType ?? this.eventType,
+      payload: payload ?? this.payload,
+      ts: ts ?? this.ts,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (gameId.present) {
+      map['game_id'] = Variable<String>(gameId.value);
+    }
+    if (playerId.present) {
+      map['player_id'] = Variable<String>(playerId.value);
+    }
+    if (turnIndex.present) {
+      map['turn_index'] = Variable<int>(turnIndex.value);
+    }
+    if (shotIndex.present) {
+      map['shot_index'] = Variable<int>(shotIndex.value);
+    }
+    if (eventType.present) {
+      map['event_type'] = Variable<String>(eventType.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (ts.present) {
+      map['ts'] = Variable<DateTime>(ts.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShotEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('gameId: $gameId, ')
+          ..write('playerId: $playerId, ')
+          ..write('turnIndex: $turnIndex, ')
+          ..write('shotIndex: $shotIndex, ')
+          ..write('eventType: $eventType, ')
+          ..write('payload: $payload, ')
+          ..write('ts: $ts, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4459,12 +4927,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SettingsTable settings = $SettingsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final $ShotEventsTable shotEvents = $ShotEventsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [players, games, achievements, settings, syncOutbox, syncState];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        players,
+        games,
+        achievements,
+        settings,
+        syncOutbox,
+        syncState,
+        shotEvents
+      ];
 }
 
 typedef $$PlayersTableCreateCompanionBuilder = PlayersCompanion Function({
@@ -6406,6 +6882,237 @@ typedef $$SyncStateTableProcessedTableManager = ProcessedTableManager<
     ),
     SyncStateRow,
     PrefetchHooks Function()>;
+typedef $$ShotEventsTableCreateCompanionBuilder = ShotEventsCompanion Function({
+  required String id,
+  required String gameId,
+  required String playerId,
+  required int turnIndex,
+  required int shotIndex,
+  required String eventType,
+  required String payload,
+  required DateTime ts,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $$ShotEventsTableUpdateCompanionBuilder = ShotEventsCompanion Function({
+  Value<String> id,
+  Value<String> gameId,
+  Value<String> playerId,
+  Value<int> turnIndex,
+  Value<int> shotIndex,
+  Value<String> eventType,
+  Value<String> payload,
+  Value<DateTime> ts,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $$ShotEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShotEventsTable> {
+  $$ShotEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get gameId => $composableBuilder(
+      column: $table.gameId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get playerId => $composableBuilder(
+      column: $table.playerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get turnIndex => $composableBuilder(
+      column: $table.turnIndex, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get shotIndex => $composableBuilder(
+      column: $table.shotIndex, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get eventType => $composableBuilder(
+      column: $table.eventType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get payload => $composableBuilder(
+      column: $table.payload, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get ts => $composableBuilder(
+      column: $table.ts, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ShotEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShotEventsTable> {
+  $$ShotEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get gameId => $composableBuilder(
+      column: $table.gameId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get playerId => $composableBuilder(
+      column: $table.playerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get turnIndex => $composableBuilder(
+      column: $table.turnIndex, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get shotIndex => $composableBuilder(
+      column: $table.shotIndex, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get eventType => $composableBuilder(
+      column: $table.eventType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+      column: $table.payload, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get ts => $composableBuilder(
+      column: $table.ts, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ShotEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShotEventsTable> {
+  $$ShotEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get gameId =>
+      $composableBuilder(column: $table.gameId, builder: (column) => column);
+
+  GeneratedColumn<String> get playerId =>
+      $composableBuilder(column: $table.playerId, builder: (column) => column);
+
+  GeneratedColumn<int> get turnIndex =>
+      $composableBuilder(column: $table.turnIndex, builder: (column) => column);
+
+  GeneratedColumn<int> get shotIndex =>
+      $composableBuilder(column: $table.shotIndex, builder: (column) => column);
+
+  GeneratedColumn<String> get eventType =>
+      $composableBuilder(column: $table.eventType, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get ts =>
+      $composableBuilder(column: $table.ts, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ShotEventsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ShotEventsTable,
+    ShotEventRow,
+    $$ShotEventsTableFilterComposer,
+    $$ShotEventsTableOrderingComposer,
+    $$ShotEventsTableAnnotationComposer,
+    $$ShotEventsTableCreateCompanionBuilder,
+    $$ShotEventsTableUpdateCompanionBuilder,
+    (
+      ShotEventRow,
+      BaseReferences<_$AppDatabase, $ShotEventsTable, ShotEventRow>
+    ),
+    ShotEventRow,
+    PrefetchHooks Function()> {
+  $$ShotEventsTableTableManager(_$AppDatabase db, $ShotEventsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShotEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShotEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShotEventsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> gameId = const Value.absent(),
+            Value<String> playerId = const Value.absent(),
+            Value<int> turnIndex = const Value.absent(),
+            Value<int> shotIndex = const Value.absent(),
+            Value<String> eventType = const Value.absent(),
+            Value<String> payload = const Value.absent(),
+            Value<DateTime> ts = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShotEventsCompanion(
+            id: id,
+            gameId: gameId,
+            playerId: playerId,
+            turnIndex: turnIndex,
+            shotIndex: shotIndex,
+            eventType: eventType,
+            payload: payload,
+            ts: ts,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String gameId,
+            required String playerId,
+            required int turnIndex,
+            required int shotIndex,
+            required String eventType,
+            required String payload,
+            required DateTime ts,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShotEventsCompanion.insert(
+            id: id,
+            gameId: gameId,
+            playerId: playerId,
+            turnIndex: turnIndex,
+            shotIndex: shotIndex,
+            eventType: eventType,
+            payload: payload,
+            ts: ts,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ShotEventsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ShotEventsTable,
+    ShotEventRow,
+    $$ShotEventsTableFilterComposer,
+    $$ShotEventsTableOrderingComposer,
+    $$ShotEventsTableAnnotationComposer,
+    $$ShotEventsTableCreateCompanionBuilder,
+    $$ShotEventsTableUpdateCompanionBuilder,
+    (
+      ShotEventRow,
+      BaseReferences<_$AppDatabase, $ShotEventsTable, ShotEventRow>
+    ),
+    ShotEventRow,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6422,4 +7129,6 @@ class $AppDatabaseManager {
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
   $$SyncStateTableTableManager get syncState =>
       $$SyncStateTableTableManager(_db, _db.syncState);
+  $$ShotEventsTableTableManager get shotEvents =>
+      $$ShotEventsTableTableManager(_db, _db.shotEvents);
 }

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class Player {
   final String name;
+  final String? id; // Persistent ID from database
   int score;
   int currentInning;
   bool isActive;
@@ -28,6 +29,7 @@ class Player {
 
   Player({
     required this.name,
+    this.id,
     this.score = 0,
     this.currentInning = 1,
     this.isActive = false,
@@ -123,6 +125,7 @@ class Player {
 
   Player copyWith({
     String? name,
+    String? id,
     int? score,
     int? currentInning,
     bool? isActive,
@@ -144,6 +147,7 @@ class Player {
   }) {
     return Player(
       name: name ?? this.name,
+      id: id ?? this.id,
       score: score ?? this.score,
       currentInning: currentInning ?? this.currentInning,
       isActive: isActive ?? this.isActive,
@@ -167,6 +171,7 @@ class Player {
   }
   Map<String, dynamic> toJson() => {
     'name': name,
+    'id': id,
     'score': score,
     'currentInning': currentInning,
     'isActive': isActive,
@@ -189,6 +194,7 @@ class Player {
 
   factory Player.fromJson(Map<String, dynamic> json) => Player(
     name: json['name'] as String,
+    id: json['id'] as String?,
     score: json['score'] as int,
     currentInning: json['currentInning'] as int,
     isActive: json['isActive'] as bool? ?? false,

@@ -17,6 +17,8 @@ import '../widgets/themed_widgets.dart';
 import '../theme/fortune_theme.dart';
 import '../services/game_history_service.dart';
 import '../widgets/video_logo.dart';
+import '../services/shot_event_service.dart';
+import '../data/app_database.dart'; // For appDatabase global
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ChangeNotifierProvider(
-          create: (_) => GameState(
+            create: (_) => GameState(
             settings: GameSettings(
               raceToScore: record.raceToScore,
               player1Name: record.player1Name,
@@ -72,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             achievementManager:
                 Provider.of<AchievementManager>(context, listen: false),
+            shotEventService: ShotEventService(db: appDatabase), // Inject Service
           ),
           child: GameScreen(
             settings: Provider.of<GameSettings>(context, listen: false),
@@ -104,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   settings: settings,
                   achievementManager:
                       achievementManager, // Use captured manager
+                  shotEventService: ShotEventService(db: appDatabase),
                 ),
                 child: GameScreen(
                   settings: settings,

@@ -139,6 +139,30 @@ class SyncState extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Shot-level events for granular analytics (v4).
+/// 
+/// See SHOT_EVENT_SOURCING.md for specification.
+@DataClassName('ShotEventRow')
+class ShotEvents extends Table {
+  TextColumn get id => text()();           // UUID
+  TextColumn get gameId => text()();       // FK to games
+  TextColumn get playerId => text()();     // Player who made the shot
+  IntColumn get turnIndex => integer()();  // Turn number in game
+  IntColumn get shotIndex => integer()();  // Shot number in turn (monotonic)
+  TextColumn get eventType => text()();    // ShotEventType.name
+  TextColumn get payload => text()();      // Versioned JSON: {"v":1,"data":{...}}
+  DateTimeColumn get ts => dateTime()();   // Logical shot timestamp
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {gameId, turnIndex, shotIndex},
+  ];
+}
+
 @DriftDatabase(tables: [
   Players,
   Games,
@@ -146,17 +170,22 @@ class SyncState extends Table {
   Settings,
   SyncOutbox,
   SyncState,
+  ShotEvents,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (migrator) async {
           await migrator.createAll();
+          // Create indices for shot_events
+          await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_game_ts ON shot_events(game_id, ts)');
+          await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_game_turn_shot ON shot_events(game_id, turn_index, shot_index)');
+          await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_player_ts ON shot_events(player_id, ts)');
         },
         onUpgrade: (migrator, from, to) async {
           if (from < 2) {
@@ -164,6 +193,13 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await migrator.addColumn(games, games.isTrainingMode);
+          }
+          if (from < 4) {
+            // Add shot_events table for shot-level event sourcing
+            await migrator.createTable(shotEvents);
+            await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_game_ts ON shot_events(game_id, ts)');
+            await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_game_turn_shot ON shot_events(game_id, turn_index, shot_index)');
+            await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_player_ts ON shot_events(player_id, ts)');
           }
         },
       );

@@ -5,6 +5,8 @@ class GameSettings {
   int raceToScore;
   String player1Name;
   String player2Name;
+  String? player1Id;
+  String? player2Id;
   bool isTrainingMode;
   bool isLeagueGame;
   int player1Handicap;
@@ -25,6 +27,8 @@ class GameSettings {
     this.raceToScore = 100,
     this.player1Name = '',
     this.player2Name = '',
+    this.player1Id,
+    this.player2Id,
     this.isTrainingMode = false,
     this.isLeagueGame = false,
     this.player1Handicap = 0,
@@ -51,6 +55,8 @@ class GameSettings {
         'raceToScore': raceToScore,
         'player1Name': player1Name,
         'player2Name': player2Name,
+        'player1Id': player1Id,
+        'player2Id': player2Id,
         'isTrainingMode': isTrainingMode,
         'isLeagueGame': isLeagueGame,
         'player1Handicap': player1Handicap,
@@ -72,6 +78,8 @@ class GameSettings {
         raceToScore: json['raceToScore'] ?? 100,
         player1Name: json['player1Name'] ?? '',
         player2Name: json['player2Name'] ?? '',
+        player1Id: json['player1Id'],
+        player2Id: json['player2Id'],
         isTrainingMode: json['isTrainingMode'] ?? false,
         isLeagueGame: json['isLeagueGame'] ?? false,
         player1Handicap: json['player1Handicap'] ?? 0,
@@ -95,6 +103,8 @@ class GameSettings {
     int? raceToScore,
     String? player1Name,
     String? player2Name,
+    String? player1Id,
+    String? player2Id,
     bool? isTrainingMode,
     bool? isLeagueGame,
     int? player1Handicap,
@@ -115,6 +125,8 @@ class GameSettings {
       raceToScore: raceToScore ?? this.raceToScore,
       player1Name: player1Name ?? this.player1Name,
       player2Name: player2Name ?? this.player2Name,
+      player1Id: player1Id ?? this.player1Id,
+      player2Id: player2Id ?? this.player2Id,
       isTrainingMode: isTrainingMode ?? this.isTrainingMode,
       isLeagueGame: isLeagueGame ?? this.isLeagueGame,
       player1Handicap: player1Handicap ?? this.player1Handicap,
