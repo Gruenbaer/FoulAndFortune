@@ -1,11 +1,11 @@
-## v4.4.1+35 - Training Mode Perfektioniert 🎯✨
+## v4.4.1+35 - Notation Bugfix & Event Tracking 🎯✨
 
-Das Training-Erlebnis ist jetzt noch besser!
+Das Wichtigste zuerst: Deine Score-Notationen sind wieder sicher!
 
-*   **🎨 Training UI Verbesserungen:** Einzelspieler-Oberfläche wurde verfeinert - Gegner-Spalte ist komplett ausgeblendet, Victory Screen zeigt jetzt "TRAINING COMPLETE"
-*   **⚖️ Triple Foul (TF) Re-Rack:** Offizieller BCA-Standard implementiert - nach 3 Fouls in Folge werden alle 15 Kugeln neu aufgebaut und **derselbe Spieler** stößt erneut an
-*   **✅ Tests:** 3 neue UI-Tests für Training Mode + TF Re-Rack Verhalten (alle 24 Tests bestehen)
-*   **📖 Dokumentation:** GAME_RULES.md zeigt jetzt die komplette TF-Regel in DE/EN
+*   **🐛 Bugfix:** Score-Notationen gehen nach Beendigung des Spiels nicht mehr verloren!
+*   **📊 Background Tracking:** Neuer Background-Tracker für detailliertere Ball-Ereignisse (Vorbereitung für zukünftige, genaue Statistiken)
+*   **⚙️ Stabilität:** Allgemeine Stabilitätsverbesserungen und aktualisierte Tests
+*   (Beinhaltet auch alle Änderungen aus 4.4.0)
 
 ***
 
