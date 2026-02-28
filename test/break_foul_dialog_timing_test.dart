@@ -7,14 +7,27 @@ import 'package:foulandfortune/widgets/game_event_overlay.dart';
 import 'package:foulandfortune/l10n/app_localizations.dart';
 import 'package:foulandfortune/theme/fortune_theme.dart';
 
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
+import 'package:foulandfortune/data/app_database.dart';
+import 'package:foulandfortune/services/shot_event_service.dart';
+
 void main() {
   testWidgets(
     'Break foul decision dialog appears right after the splash animation',
     (tester) async {
+      // Create in-memory DB for testing
+      final db = AppDatabase(NativeDatabase.memory());
+      final shotEventService = ShotEventService(db: db);
+
       final gameState = GameState(
         settings: GameSettings(player1Name: 'Alice', player2Name: 'Bob'),
+        shotEventService: shotEventService,
       );
-      addTearDown(gameState.dispose);
+      addTearDown(() async {
+        gameState.dispose();
+        await db.close();
+      });
 
       await tester.pumpWidget(
         ChangeNotifierProvider<GameState>.value(

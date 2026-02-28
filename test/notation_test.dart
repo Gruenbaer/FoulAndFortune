@@ -1,17 +1,33 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:foulandfortune/data/app_database.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
+import 'package:foulandfortune/services/shot_event_service.dart';
 
 void main() {
   group('Score Notation Tests', () {
+    late AppDatabase db;
+    late ShotEventService shotEventService;
     late GameState gameState;
+
+    setUpAll(() {
+      db = AppDatabase();
+      shotEventService = ShotEventService(db: db);
+    });
+
+    tearDownAll(() async {
+      await db.close();
+    });
 
     setUp(() {
       SharedPreferences.setMockInitialValues({});
       final settings = GameSettings(player1Name: 'P1', player2Name: 'P2');
-      gameState = GameState(settings: settings);
+      gameState = GameState(
+        settings: settings,
+        shotEventService: shotEventService,
+      );
       gameState.resetGame();
     });
 

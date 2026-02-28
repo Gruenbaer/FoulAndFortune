@@ -2,17 +2,25 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:foulandfortune/data/app_database.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
+import 'package:foulandfortune/services/shot_event_service.dart';
 
 void main() {
   test('Turn switching logic debug test', () {
+    final db = AppDatabase();
+    addTearDown(() async => db.close());
+
     final settings = GameSettings(
       player1Name: 'Player 1',
       player2Name: 'Player 2',
       raceToScore: 100,
     );
-    final gameState = GameState(settings: settings);
+    final gameState = GameState(
+      settings: settings,
+      shotEventService: ShotEventService(db: db),
+    );
 
     // Scenario 1: Pocket a ball (15 -> 14)
     // Current Logic: Any tap (except 0/1) ENDS turn

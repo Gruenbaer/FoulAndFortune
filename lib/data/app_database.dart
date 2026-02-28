@@ -173,7 +173,7 @@ class ShotEvents extends Table {
   ShotEvents,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(openConnection());
+  AppDatabase([QueryExecutor? e]) : super(e ?? openConnection());
 
   @override
   int get schemaVersion => 4;
@@ -203,6 +203,18 @@ class AppDatabase extends _$AppDatabase {
           }
         },
       );
+
+  /// Load all shot events for a specific game, ordered by sequence.
+  /// Used for Replay Engine and Analytics.
+  Future<List<ShotEventRow>> loadEventsForReplay(String gameId) {
+    return (select(shotEvents)
+          ..where((t) => t.gameId.equals(gameId))
+          ..orderBy([
+            (t) => OrderingTerm(expression: t.turnIndex),
+            (t) => OrderingTerm(expression: t.shotIndex),
+          ]))
+        .get();
+  }
 }
 
 final AppDatabase appDatabase = AppDatabase();

@@ -12,7 +12,6 @@ class PrefsMigrationService {
   PrefsMigrationService({AppDatabase? db}) : _db = db ?? appDatabase;
 
   static const String migrationKey = 'db_migration_v1';
-  static const int _maxGames = 100;
   static const String _playersKey = 'players';
   static const String _settingsKey = 'game_settings';
   static const String _historyKey = 'game_history';
@@ -244,8 +243,6 @@ class PrefsMigrationService {
     await _db.batch((batch) {
       batch.insertAll(_db.games, entries);
     });
-
-    await _cleanupGames();
   }
 
   Future<void> _insertAchievements(
@@ -276,20 +273,4 @@ class PrefsMigrationService {
     });
   }
 
-  Future<void> _cleanupGames() async {
-    final rows = await (_db.select(_db.games)
-          ..where((game) => game.deletedAt.isNull())
-          ..orderBy([(game) => OrderingTerm.desc(game.startTime)]))
-        .get();
-    if (rows.length <= _maxGames) {
-      return;
-    }
-
-    final toRemove = rows.sublist(_maxGames);
-    await _db.batch((batch) {
-      for (final row in toRemove) {
-        batch.delete(_db.games, row);
-      }
-    });
-  }
 }

@@ -45,10 +45,9 @@ void main() {
       expect(stats.pockets, 2);
       expect(stats.misses, 1);
       expect(stats.pocketSuccessRate, 2 / 3);
-      // Pacing: (10-0) + (25-10) + (45-25) + (46-45) = 10, 15, 20, 1? 
-      // Wait, in my loop: if (lastEventTs != null) shotIntervals.add(...)
-      // Intervals: 10s, 15s, 20s, 1s. Total 46. Avg 46/4 = 11.5s
-      expect(stats.averagePace.inMilliseconds, 11500); 
+      // Pacing: time since last game event to each player shot.
+      // Intervals: (10-0), (25-10), (45-25) => 10s, 15s, 20s. Avg = 15s.
+      expect(stats.averagePace.inMilliseconds, 15000); 
     });
 
     test('StraightPoolStatsAdapter calculates rack and break shot metrics', () {

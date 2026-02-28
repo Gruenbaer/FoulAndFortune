@@ -89,7 +89,7 @@ void main() {
       expect(deleteRows.length, 1);
     });
 
-    test('GameHistoryService saves, filters, and cleans up history', () async {
+    test('GameHistoryService saves, filters, and preserves all history', () async {
       GameRecord buildGame({
         required String id,
         required DateTime startTime,
@@ -145,7 +145,7 @@ void main() {
       expect(completedGames.length, 1);
       expect(completedGames.single.id, 'done-1');
 
-      // Cleanup: keep max 100 games
+      // No automatic cleanup: all games should be preserved.
       for (var i = 0; i < 101; i++) {
         await gameHistoryService.saveGame(
           buildGame(
@@ -157,9 +157,9 @@ void main() {
       }
 
       final rows = await db.select(db.games).get();
-      expect(rows.length, 100);
-      final removed = await gameHistoryService.getGameById('game-0');
-      expect(removed, isNull);
+      expect(rows.length, 103);
+      final preserved = await gameHistoryService.getGameById('game-0');
+      expect(preserved, isNotNull);
       final newest = await gameHistoryService.getGameById('game-100');
       expect(newest, isNotNull);
     });

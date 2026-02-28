@@ -7,7 +7,6 @@ import '../models/game_record.dart';
 
 class GameHistoryService {
   static const String _migrationKey = 'notation_v2_migrated';
-  static const int _maxGames = 100;
 
   GameHistoryService({AppDatabase? db, OutboxService? outbox})
       : _db = db ?? appDatabase,
@@ -115,8 +114,6 @@ class GameHistoryService {
       await (_db.update(_db.games)..where((row) => row.id.equals(game.id)))
           .write(entry);
     }
-
-    await _cleanup();
     await _outbox.record(
       entityType: 'game',
       entityId: game.id,
@@ -215,27 +212,6 @@ class GameHistoryService {
       player1IsActive: row.player1IsActive,
       snapshot: row.snapshot,
     );
-  }
-
-  Future<void> _cleanup() async {
-    final rows = await (_db.select(_db.games)
-          ..where((game) => game.deletedAt.isNull())
-          ..orderBy([(game) => OrderingTerm.desc(game.startTime)]))
-        .get();
-    if (rows.length <= _maxGames) {
-      return;
-    }
-
-    final toRemove = rows.sublist(_maxGames);
-    for (final row in toRemove) {
-      await _db.delete(_db.games).delete(row);
-      await _outbox.record(
-        entityType: 'game',
-        entityId: row.id,
-        operation: 'delete',
-        payload: {'deletedAt': DateTime.now().toIso8601String()},
-      );
-    }
   }
 
   Future<String?> _findPlayerIdByName(String name) async {

@@ -1,8 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:foulandfortune/data/app_database.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
+import 'package:foulandfortune/services/shot_event_service.dart';
 
 void main() {
+  late AppDatabase db;
+  late ShotEventService shotEventService;
+
+  setUpAll(() {
+    db = AppDatabase();
+    shotEventService = ShotEventService(db: db);
+  });
+
+  tearDownAll(() async {
+    await db.close();
+  });
+
   group('FF14 Canonical Notation Tests (TV1-TV8)', () {
     late GameState gameState;
 
@@ -17,7 +31,10 @@ void main() {
         player2HandicapMultiplier: 1.0,
         threeFoulRuleEnabled: true,
       );
-      gameState = GameState(settings: settings);
+      gameState = GameState(
+        settings: settings,
+        shotEventService: shotEventService,
+      );
     });
 
     test('TV1 - Simple inning, ends by non-continuation number', () {
@@ -296,7 +313,10 @@ void main() {
         player2HandicapMultiplier: 1.0,
         threeFoulRuleEnabled: true,
       );
-      gameState = GameState(settings: settings);
+      gameState = GameState(
+        settings: settings,
+        shotEventService: shotEventService,
+      );
     });
 
     test('BF1 - Break foul available at game start', () {
@@ -415,7 +435,10 @@ void main() {
         isTrainingMode: true,
         threeFoulRuleEnabled: true,
       );
-      gameState = GameState(settings: settings);
+      gameState = GameState(
+        settings: settings,
+        shotEventService: shotEventService,
+      );
     });
 
     test('TM1 - Player does not switch on safe/miss', () {

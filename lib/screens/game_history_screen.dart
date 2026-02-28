@@ -5,6 +5,8 @@ import '../models/game_settings.dart';
 import '../models/achievement_manager.dart';
 import '../models/game_record.dart';
 import '../services/game_history_service.dart';
+import '../services/shot_event_service.dart';
+import '../data/app_database.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart'; // Ensure ThemedBackground is available
@@ -311,6 +313,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                       achievementManager: Provider.of<AchievementManager>(
                           context,
                           listen: false),
+                      shotEventService: ShotEventService(db: appDatabase),
                     ),
                     child: GameScreen(
                       settings:
@@ -330,6 +333,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   player2Name: game.player2Name,
                   isTrainingMode: game.isTrainingMode,
                 ),
+                shotEventService: ShotEventService(db: appDatabase),
                 achievementManager:
                     Provider.of<AchievementManager>(context, listen: false),
               );

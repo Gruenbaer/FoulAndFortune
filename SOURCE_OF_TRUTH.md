@@ -66,7 +66,7 @@ code or update this document and any referenced specs together.
 ### Persistence
 - Local database: Drift (SQLite/IndexedDB) via `lib/data/app_database.dart`.
 - Settings: `SettingsService` -> `settings` table (single row id `default`).
-- Game history: `GameHistoryService` -> `games` table (max 100 recent).
+- Game history: `GameHistoryService` -> `games` table (no automatic cap; all games preserved unless user deletes).
 - Player stats: `PlayerService` -> `players` table.
 - Achievements: `AchievementManager` -> `achievements` table.
 - Sync scaffolding: `sync_outbox` + `sync_state` tables (no remote sync yet).
@@ -111,9 +111,9 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 - `serialize()` requires at least one segment and throws `ArgumentError` otherwise.
 
 ### GameHistoryService / GameRecord
-- Persistence: `games` table keyed by `id` (string). `saveGame()` upserts by `id`, keeps max 100 non-deleted games.
+- Persistence: `games` table keyed by `id` (string). `saveGame()` upserts by `id` (no automatic cleanup).
 - `getAllGames()` sorts by `startTime` descending; `getActiveGames()` and `getCompletedGames()` filter by `isCompleted`.
-- `snapshot` stores `GameState.toJson()` for in-progress games only; completed games should have `snapshot` null.
+- `snapshot` stores `GameState.toJson()` including `inningRecords` for both active and completed games; used for resume and viewing details.
 - Queries ignore rows where `deletedAt` is set; current deletes remove rows outright.
 
 ### SettingsService

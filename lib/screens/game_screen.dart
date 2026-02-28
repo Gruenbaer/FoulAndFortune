@@ -25,6 +25,8 @@ import '../widgets/game_control_button.dart';
 // For Arial alternative (Lato/Roboto) if Arial not available, but user said Arial.
 import '../services/player_service.dart' as stats; // For stats fetching
 import '../utils/ui_utils.dart'; // Zoom Dialog Helper
+import '../services/shot_event_service.dart';
+import '../data/app_database.dart';
 
 class GameScreen extends StatefulWidget {
   final GameSettings settings;
@@ -166,7 +168,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       player2Fouls: player2Fouls,
       activeBalls: [], // Cleared
       player1IsActive: false,
-      snapshot: null, // Don't save snapshot for completed game
+      snapshot: gameState.toJson(), // PRESERVE snapshot for viewing details/notations
     );
 
     // Add matchLog if GameRecord supports it (it appeared missing in previous step view of GameRecord, let's omit if not there)
@@ -910,6 +912,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                               create: (_) => GameState(
                                                 settings: settings,
                                                 achievementManager: achievementManager,
+                                                shotEventService: ShotEventService(db: appDatabase),
                                               ),
                                               child: GameScreen(
                                                 settings: settings,

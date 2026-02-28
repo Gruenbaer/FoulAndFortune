@@ -31,12 +31,15 @@ class GameState extends ChangeNotifier {
   late List<Player> players;
   late FoulTracker foulTracker;
   late AchievementManager? achievementManager;
-  final ShotEventService shotEventService;
+  late ShotEventService shotEventService;
   String? gameId;
   
   // Shot Event Sourcing State
   int currentTurnIndex = 0;
   int currentShotIndex = 0;
+  
+  // Last action context for event emission
+  int? _lastBallTapped;
 
   int currentPlayerIndex = 0;
   bool gameStarted = false;
@@ -203,6 +206,7 @@ class GameState extends ChangeNotifier {
     this.achievementManager,
     required this.shotEventService,
   }) : raceToScore = settings.raceToScore {
+    
     // Initialize Players
     players = [
       Player(
@@ -439,6 +443,7 @@ class GameState extends ChangeNotifier {
       return;
     }
 
+
     shotEventService.emit(
       gameId: gameId!,
       playerId: pid,
@@ -457,10 +462,7 @@ class GameState extends ChangeNotifier {
     } else {
       _pushState();
       
-      // Emit Shot Event
-      _emitEvent(ShotEventType.shot, {
-        'kind': 'safety',
-      });
+      // NOTE: Shot event will be emitted in _applyOutcome() after rules confirm safety
 
       // CONFIRM Standard Safe
       final outcome = _rules.apply(const SafeAction(), _buildCoreState(), _rulesState);
@@ -483,18 +485,12 @@ class GameState extends ChangeNotifier {
     // VALIDATION: Strict Mutual Exclusion (Spec §7.3)
     if (!_validateInteraction(ballNumber)) return;
     
-    // Valid interaction
-    _emitEvent(ShotEventType.shot, {
-      'kind': 'pocket', // Default kind, refined below if special?
-      'ballId': ballNumber,
-    });
-    // Note: onBallTapped(0) is dealt with logic below but technically is a "shot" attempt or foul.
-    // If it's a FOUL, we might want to emit kind:foul?
-    // But onBallTapped(0) usually triggers DoubleSack or Foul?
-    // Actually onBallTapped handles generic input.
-    // 0 is usually foul.
-    // Let's rely on eventType/kind. 
-    // Spec: "onBallTapped(n) -> shot {kind:pocket, ballId:n}"
+    
+    // NOTE: Shot event will be emitted in _applyOutcome() after rules engine
+    // determines if this is a pocket, foul, or miss
+    
+    // Track action context for event emission
+    _lastBallTapped = ballNumber;
     
     // Delegate to Rules Engine
     final action = BallTappedAction(ballNumber);
@@ -1052,7 +1048,24 @@ class GameState extends ChangeNotifier {
       }
     }
     
-    // 3. Queue Events
+    // 3a. Emit Pocket Event (if positive delta and no foul)
+    bool hasFoul = outcome.events.any((e) => e is rules_outcome.FoulEventDescriptor);
+    if (outcome.rawPointsDelta > 0 && !hasFoul && _lastBallTapped != null) {
+      // Determine if this is a break shot
+      bool isBreakShot = false;
+      if (_rulesState is sp_state.StraightPoolState) {
+        isBreakShot = (_rulesState as sp_state.StraightPoolState).inBreakSequence;
+      }
+      
+      _emitEvent(ShotEventType.shot, {
+        'kind': ShotKind.pocket.name,
+        'ballId': _lastBallTapped,
+        'isBreakShot': isBreakShot,
+      });
+      _lastBallTapped = null; // Clear context
+    }
+
+    // 3b. Queue Events + Emit Shot Events for Analytics
     for (final event in outcome.events) {
        if (event is rules_outcome.FoulEventDescriptor) {
           // Map FoulType from Rules to Legacy (NotationCodec)
@@ -1062,11 +1075,42 @@ class GameState extends ChangeNotifier {
           else if (event.type == rules_outcome.FoulType.threeFouls) legacyType = FoulType.threeFouls;
           
           _events.add(FoulEvent(currentPlayer, event.penalty, legacyType));
+          
+          // NEW: Emit shot event for analytics
+          _emitEvent(ShotEventType.shot, {
+            'kind': ShotKind.foul.name,
+            'foulType': event.type.name,
+            'penalty': event.penalty,
+          });
        } else if (event is rules_outcome.SafeEventDescriptor) {
           _events.add(SafeEvent());
+          
+          // NEW: Emit shot event for analytics
+          _emitEvent(ShotEventType.shot, {
+            'kind': ShotKind.safety.name,
+          });
        } else if (event is rules_outcome.ReRackEventDescriptor) {
           _events.add(ReRackEvent(event.variant)); 
        }
+    }
+
+    // 3c. Emit Miss Event (if turn ends with no shot event)
+    bool hasShotEvent = outcome.rawPointsDelta > 0 || hasFoul || 
+                        outcome.events.any((e) => e is rules_outcome.SafeEventDescriptor);
+    bool turnEnds = outcome.turnDirective == rules_outcome.TurnDirective.endTurn;
+    
+    if (turnEnds && !hasShotEvent && _lastBallTapped != null) {
+      final payload = <String, dynamic>{
+        'kind': ShotKind.miss.name,
+      };
+      
+      // Include ballId if available (for ball-specific miss analytics)
+      if (_lastBallTapped != null) {
+        payload['ballId'] = _lastBallTapped;
+      }
+      
+      _emitEvent(ShotEventType.shot, payload);
+      _lastBallTapped = null; // Clear context
     }
 
     // 4. Turn Directive

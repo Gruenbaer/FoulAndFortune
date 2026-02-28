@@ -81,7 +81,7 @@ Implemented using the **Memento Pattern**.
 ### 4.4 Data Persistence
 The app uses a local database via Drift:
 1.  **Settings**: `SettingsService` stores a single row in `settings` (id `default`).
-2.  **History**: `GameHistoryService` manages `games` (max 100 recent).
+2.  **History**: `GameHistoryService` manages `games` (no automatic cap; all games preserved unless user deletes).
 3.  **Players**: `PlayerService` stores stats in `players`.
 4.  **Achievements**: `AchievementManager` persists `achievements`.
 5.  **Migration**: `PrefsMigrationService` imports legacy `SharedPreferences` data once.

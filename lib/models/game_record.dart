@@ -137,7 +137,7 @@ class GameRecord {
       player2HighestRun: player2HighestRun,
       player1Fouls: player1Fouls,
       player2Fouls: player2Fouls,
-      snapshot: null, // Don't allow resume of completed game
+      snapshot: snapshot, // Preserve snapshot for viewing details (includes inningRecords)
     );
   }
 }

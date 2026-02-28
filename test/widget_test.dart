@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:foulandfortune/data/app_database.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
 import 'package:foulandfortune/models/achievement_manager.dart';
+import 'package:foulandfortune/services/shot_event_service.dart';
 
 void main() {
   testWidgets('App compiles without errors', (WidgetTester tester) async {
@@ -10,6 +12,9 @@ void main() {
   });
 
   test('GameState can be created', () {
+    final db = AppDatabase();
+    addTearDown(() async => db.close());
+
     final settings = GameSettings(
       raceToScore: 100,
       player1Name: 'Player 1',
@@ -19,6 +24,7 @@ void main() {
     final gameState = GameState(
       settings: settings,
       achievementManager: AchievementManager(),
+      shotEventService: ShotEventService(db: db),
     );
     expect(gameState.settings.raceToScore, 100);
     expect(gameState.players.length, 2);

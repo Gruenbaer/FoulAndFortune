@@ -280,7 +280,18 @@ class ScoreCard extends StatelessWidget {
   }
 
   Widget _buildNotationText(FortuneColors colors, String notation) {
-      if (notation.isEmpty) return const SizedBox.shrink();
+      if (notation.isEmpty) {
+        // Show placeholder for old games with missing notation data
+        return Text(
+          '—',  // Em dash indicates unavailable data
+          style: TextStyle(
+            color: colors.textMain.withValues(alpha: 0.4),
+            fontSize: 14,
+            fontFamily: 'Arial'
+          ),
+          textAlign: TextAlign.center
+        );
+      }
       
       // Format notation for display (Spec §9: Mixed Delimiters)
       final displayNotation = NotationCodec.formatForDisplay(notation);
