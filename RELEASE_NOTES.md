@@ -1,6 +1,12 @@
-## v4.4.1+35 - Notation Bugfix & Event Tracking 🎯✨
+## v4.4.2+36 - High Run Statistic Bugfix 🎯📈
 
-Das Wichtigste zuerst: Deine Score-Notationen sind wieder sicher!
+Kleiner Fix für die High Run Anzeige in den Spieler-Statistiken!
+
+*   **🐛 Bugfix:** Der *High Run* Wert eines Spielers wird nun korrekt in der Historie und im Chart angezeigt. (Vorher wurde er fälschlicherweise auf 0 gesetzt).
+
+***
+
+## v4.4.1+35 - Notation Bugfix & Event Tracking 🎯✨
 
 *   **🐛 Bugfix:** Score-Notationen gehen nach Beendigung des Spiels nicht mehr verloren!
 *   **📊 Background Tracking:** Neuer Background-Tracker für detailliertere Ball-Ereignisse (Vorbereitung für zukünftige, genaue Statistiken)

@@ -5,7 +5,6 @@ import 'package:foulandfortune/widgets/victory_splash.dart';
 import 'package:foulandfortune/widgets/score_card.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
-import 'package:foulandfortune/codecs/notation_codec.dart'; // Correct import
 import 'package:foulandfortune/theme/fortune_theme.dart';
 import 'package:foulandfortune/l10n/app_localizations.dart';
 

@@ -121,6 +121,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       isTrainingMode: gameState.settings.isTrainingMode,
       player1Innings: p1.currentInning,
       player2Innings: p2.currentInning,
+      player1HighestRun: p1.highestRun,
+      player2HighestRun: p2.highestRun,
       player1Fouls: player1Fouls,
       player2Fouls: player2Fouls,
       activeBalls: gameState.activeBalls.toList(),
@@ -164,6 +166,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       winner: effectiveWinner.name,
       player1Innings: p1.currentInning,
       player2Innings: p2.currentInning,
+      player1HighestRun: p1.highestRun,
+      player2HighestRun: p2.highestRun,
       player1Fouls: player1Fouls,
       player2Fouls: player2Fouls,
       activeBalls: [], // Cleared
@@ -192,6 +196,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           existingPlayer.totalInnings += gamePlayer.currentInning;
           existingPlayer.totalSaves += gamePlayer.saves;
           existingPlayer.totalFouls += gameFouls;
+          if (gamePlayer.highestRun > existingPlayer.highestRun) {
+            existingPlayer.highestRun = gamePlayer.highestRun;
+          }
 
           await playerService.updatePlayer(existingPlayer);
         }

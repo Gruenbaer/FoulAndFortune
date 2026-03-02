@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../data/app_database.dart';
 import '../data/device_id_service.dart';
 import '../data/outbox_service.dart';
+import '../models/game_trend_point.dart';
 
 class Player {
   final String id;
@@ -282,5 +283,40 @@ class PlayerService {
       totalSaves: row.totalSaves,
       highestRun: row.highestRun,
     );
+  }
+
+  /// Extracts historical game performance for a player to display in charts.
+  Future<List<GameTrendPoint>> getPlayerTrends(String playerId, {int limit = 20}) async {
+    // We query games where the player participated and the game is completed.
+    // We order by startTime ascending because charts usually render left (old) to right (new).
+    final rows = await (_db.select(_db.games)
+          ..where((g) =>
+              g.isCompleted.equals(true) &
+              g.deletedAt.isNull() &
+              (g.player1Id.equals(playerId) | g.player2Id.equals(playerId)))
+          ..orderBy([(g) => OrderingTerm.asc(g.startTime)])
+          ..limit(limit))
+        .get();
+
+    final List<GameTrendPoint> trends = [];
+
+    for (final row in rows) {
+      final isPlayer1 = row.player1Id == playerId;
+      
+      final score = isPlayer1 ? row.player1Score : row.player2Score;
+      final innings = isPlayer1 ? row.player1Innings : row.player2Innings;
+      final highRun = isPlayer1 ? row.player1HighestRun : row.player2HighestRun;
+
+      // Calculate BPI for this specific game
+      final bpi = innings > 0 ? score / innings : 0.0;
+
+      trends.add(GameTrendPoint(
+        date: row.startTime,
+        bpi: bpi,
+        highRun: highRun,
+      ));
+    }
+
+    return trends;
   }
 }

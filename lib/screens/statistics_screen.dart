@@ -3,7 +3,8 @@ import '../services/player_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart';
-
+import '../models/game_trend_point.dart';
+import '../widgets/charts/stat_trend_chart.dart';
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
@@ -258,6 +259,54 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 _buildStatRow('Total Fouls', player.totalFouls.toString(), colors),
                 _buildStatRow('Avg Fouls/Game', player.averageFoulsPerGame.toStringAsFixed(1), colors),
                 _buildStatRow('Total Saves', player.totalSaves.toString(), colors),
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                Text(
+                  'Performance Trends',
+                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: colors.textMain),
+                ),
+                const SizedBox(height: 12),
+                FutureBuilder<List<GameTrendPoint>>(
+                  future: _playerService.getPlayerTrends(player.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: CircularProgressIndicator(),
+                      ));
+                    }
+                    
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error loading charts: ${snapshot.error}', style: TextStyle(color: colors.danger)));
+                    }
+                    
+                    final trends = snapshot.data ?? [];
+                    if (trends.length < 2) {
+                       return Text(
+                         'Not enough data for trend charts.',
+                         style: TextStyle(color: colors.textMain.withValues(alpha: 0.7), fontStyle: FontStyle.italic),
+                       );
+                    }
+                    
+                    return Column(
+                      children: [
+                        StatTrendChart(
+                          title: 'Balls Per Inning (BPI)',
+                          dataPoints: trends,
+                          valueMapper: (p) => p.bpi,
+                        ),
+                        const SizedBox(height: 16),
+                        StatTrendChart(
+                          title: 'Highest Run Trend',
+                          dataPoints: trends,
+                          valueMapper: (p) => p.highRun.toDouble(),
+                          isInteger: true,
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ],
             ),
           ),

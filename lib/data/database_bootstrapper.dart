@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'app_database.dart';
 import 'device_id_service.dart';
 import 'prefs_migration_service.dart';
+import 'highest_run_migration.dart';
 
 class DatabaseBootstrapper {
   DatabaseBootstrapper({AppDatabase? db}) : _db = db ?? appDatabase;
@@ -14,6 +15,7 @@ class DatabaseBootstrapper {
     final deviceId = await DeviceIdService.instance.getDeviceId();
     final migration = PrefsMigrationService(db: _db);
     await migration.migrateIfNeeded(deviceId: deviceId);
+    await HighestRunMigration.runMigrationIfNeeded();
     await _ensureSyncState(deviceId);
   }
 

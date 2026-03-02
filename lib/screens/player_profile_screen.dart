@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../services/player_service.dart';
 import '../models/achievement_manager.dart';
 import '../models/achievement.dart';
+import '../models/game_trend_point.dart';
 import '../widgets/achievement_badge.dart';
+import '../widgets/charts/stat_trend_chart.dart';
 import '../l10n/app_localizations.dart';
 import '../services/game_history_service.dart';
 import '../widgets/player_name_input_dialog.dart';
@@ -282,6 +284,53 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
 
           const SizedBox(height: 32),
 
+          // PERFORMANCE TRENDS SECTION
+          const Text(
+            'Performance Trends',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          
+          FutureBuilder<List<GameTrendPoint>>(
+            future: _playerService.getPlayerTrends(_player.id),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: CircularProgressIndicator(),
+                ));
+              }
+              
+              if (snapshot.hasError) {
+                return Center(child: Text('Error loading trends: ${snapshot.error}'));
+              }
+              
+              final trends = snapshot.data ?? [];
+              
+              return Column(
+                children: [
+                  StatTrendChart(
+                    title: 'Balls Per Inning (BPI) Trend',
+                    dataPoints: trends,
+                    valueMapper: (p) => p.bpi,
+                  ),
+                  const SizedBox(height: 16),
+                  StatTrendChart(
+                    title: 'Highest Run Trend',
+                    dataPoints: trends,
+                    valueMapper: (p) => p.highRun.toDouble(),
+                    isInteger: true,
+                  ),
+                ],
+              );
+            },
+          ),
+
+          const SizedBox(height: 32),
+
           // RIVALRY SECTION (Head-to-Head)
           if (_rivalryStats.isNotEmpty) ...[
             Text(
@@ -324,7 +373,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                             fontSize: 16
                           ),
                         ),
-                        Text(l10n.winRate, style: TextStyle(fontSize: 10, color: fortuneTheme.disabled)),
+                        Text(l10n.winRate, style: TextStyle(fontSize: 10, color: fortuneTheme.textMain.withValues(alpha: 0.7))),
                       ],
                     ),
                   ),
@@ -370,13 +419,13 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                 padding: const EdgeInsets.all(32),
                 child: Column(
                   children: [
-                    Icon(Icons.emoji_events_outlined, size: 64, color: fortuneTheme.disabled),
+                    Icon(Icons.emoji_events_outlined, size: 64, color: fortuneTheme.textMain.withValues(alpha: 0.5)),
                     const SizedBox(height: 16),
                     Text(
                       l10n.noAchievementsYet,
                       style: TextStyle(
                         fontSize: 16,
-                        color: fortuneTheme.disabled,
+                        color: fortuneTheme.textMain.withValues(alpha: 0.7),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -446,9 +495,10 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: fortuneTheme.textMain,
               ),
             ),
             const SizedBox(height: 4),
@@ -456,7 +506,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: fortuneTheme.disabled,
+                color: fortuneTheme.textMain.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
