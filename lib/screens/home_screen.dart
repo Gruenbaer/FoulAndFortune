@@ -13,6 +13,7 @@ import '../screens/statistics_screen.dart';
 import '../screens/achievements_gallery_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/game_history_screen.dart';
+import '../screens/practice_academy_screen.dart';
 import '../widgets/themed_widgets.dart';
 import '../theme/fortune_theme.dart';
 import '../services/game_history_service.dart';
@@ -209,6 +210,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         const StatisticsScreen()),
+                              );
+                            },
+                          ),
+
+                          ThemedButton(
+                            label: 'Practice Academy',
+                            icon: Icons.fitness_center,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PracticeAcademyScreen(),
+                                ),
                               );
                             },
                           ),
