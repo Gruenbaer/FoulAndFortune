@@ -412,6 +412,16 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
                       });
                     },
                   ),
+                  SettingsToggle(
+                    title: 'Fast Score Input',
+                    subtitle: 'Enable <= 2-tap scoring interface',
+                    value: _settings.fastScoreInputEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _settings = _settings.copyWith(fastScoreInputEnabled: value);
+                      });
+                    },
+                  ),
                 ],
               ),
             ),

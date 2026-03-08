@@ -163,6 +163,15 @@ class ShotEvents extends Table {
   ];
 }
 
+@DataClassName('PracticeDrillHistoryRow')
+class PracticeDrillHistory extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get drillId => text()();
+  IntColumn get attempts => integer()();
+  IntColumn get successes => integer()();
+  DateTimeColumn get timestamp => dateTime()();
+}
+
 @DriftDatabase(tables: [
   Players,
   Games,
@@ -171,12 +180,13 @@ class ShotEvents extends Table {
   SyncOutbox,
   SyncState,
   ShotEvents,
+  PracticeDrillHistory,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -200,6 +210,9 @@ class AppDatabase extends _$AppDatabase {
             await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_game_ts ON shot_events(game_id, ts)');
             await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_game_turn_shot ON shot_events(game_id, turn_index, shot_index)');
             await customStatement('CREATE INDEX IF NOT EXISTS idx_shot_events_player_ts ON shot_events(player_id, ts)');
+          }
+          if (from < 5) {
+            await migrator.createTable(practiceDrillHistory);
           }
         },
       );

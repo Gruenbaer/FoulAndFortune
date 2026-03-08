@@ -201,6 +201,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               buildSectionHeader(l10n.mechanicsSection, Icons.settings_input_component),
 
+              // Fast Score Input Toggle
+              buildPanelTile(
+                child: SettingsToggle(
+                  title: 'Fast Score Input',
+                  subtitle: 'Enable <= 2-tap scoring interface',
+                  value: _settings.fastScoreInputEnabled,
+                  onChanged: (value) => setState(() => _settings = _settings.copyWith(fastScoreInputEnabled: value)),
+                ),
+              ),
+
               // 3-Foul Rule Toggle
               buildPanelTile(
                 child: SettingsToggle(

@@ -4918,6 +4918,310 @@ class ShotEventsCompanion extends UpdateCompanion<ShotEventRow> {
   }
 }
 
+class $PracticeDrillHistoryTable extends PracticeDrillHistory
+    with TableInfo<$PracticeDrillHistoryTable, PracticeDrillHistoryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PracticeDrillHistoryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _drillIdMeta =
+      const VerificationMeta('drillId');
+  @override
+  late final GeneratedColumn<String> drillId = GeneratedColumn<String>(
+      'drill_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _attemptsMeta =
+      const VerificationMeta('attempts');
+  @override
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+      'attempts', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _successesMeta =
+      const VerificationMeta('successes');
+  @override
+  late final GeneratedColumn<int> successes = GeneratedColumn<int>(
+      'successes', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, drillId, attempts, successes, timestamp];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'practice_drill_history';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<PracticeDrillHistoryRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('drill_id')) {
+      context.handle(_drillIdMeta,
+          drillId.isAcceptableOrUnknown(data['drill_id']!, _drillIdMeta));
+    } else if (isInserting) {
+      context.missing(_drillIdMeta);
+    }
+    if (data.containsKey('attempts')) {
+      context.handle(_attemptsMeta,
+          attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta));
+    } else if (isInserting) {
+      context.missing(_attemptsMeta);
+    }
+    if (data.containsKey('successes')) {
+      context.handle(_successesMeta,
+          successes.isAcceptableOrUnknown(data['successes']!, _successesMeta));
+    } else if (isInserting) {
+      context.missing(_successesMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PracticeDrillHistoryRow map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PracticeDrillHistoryRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      drillId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}drill_id'])!,
+      attempts: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}attempts'])!,
+      successes: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}successes'])!,
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
+    );
+  }
+
+  @override
+  $PracticeDrillHistoryTable createAlias(String alias) {
+    return $PracticeDrillHistoryTable(attachedDatabase, alias);
+  }
+}
+
+class PracticeDrillHistoryRow extends DataClass
+    implements Insertable<PracticeDrillHistoryRow> {
+  final int id;
+  final String drillId;
+  final int attempts;
+  final int successes;
+  final DateTime timestamp;
+  const PracticeDrillHistoryRow(
+      {required this.id,
+      required this.drillId,
+      required this.attempts,
+      required this.successes,
+      required this.timestamp});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['drill_id'] = Variable<String>(drillId);
+    map['attempts'] = Variable<int>(attempts);
+    map['successes'] = Variable<int>(successes);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    return map;
+  }
+
+  PracticeDrillHistoryCompanion toCompanion(bool nullToAbsent) {
+    return PracticeDrillHistoryCompanion(
+      id: Value(id),
+      drillId: Value(drillId),
+      attempts: Value(attempts),
+      successes: Value(successes),
+      timestamp: Value(timestamp),
+    );
+  }
+
+  factory PracticeDrillHistoryRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PracticeDrillHistoryRow(
+      id: serializer.fromJson<int>(json['id']),
+      drillId: serializer.fromJson<String>(json['drillId']),
+      attempts: serializer.fromJson<int>(json['attempts']),
+      successes: serializer.fromJson<int>(json['successes']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'drillId': serializer.toJson<String>(drillId),
+      'attempts': serializer.toJson<int>(attempts),
+      'successes': serializer.toJson<int>(successes),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+    };
+  }
+
+  PracticeDrillHistoryRow copyWith(
+          {int? id,
+          String? drillId,
+          int? attempts,
+          int? successes,
+          DateTime? timestamp}) =>
+      PracticeDrillHistoryRow(
+        id: id ?? this.id,
+        drillId: drillId ?? this.drillId,
+        attempts: attempts ?? this.attempts,
+        successes: successes ?? this.successes,
+        timestamp: timestamp ?? this.timestamp,
+      );
+  PracticeDrillHistoryRow copyWithCompanion(
+      PracticeDrillHistoryCompanion data) {
+    return PracticeDrillHistoryRow(
+      id: data.id.present ? data.id.value : this.id,
+      drillId: data.drillId.present ? data.drillId.value : this.drillId,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      successes: data.successes.present ? data.successes.value : this.successes,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PracticeDrillHistoryRow(')
+          ..write('id: $id, ')
+          ..write('drillId: $drillId, ')
+          ..write('attempts: $attempts, ')
+          ..write('successes: $successes, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, drillId, attempts, successes, timestamp);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PracticeDrillHistoryRow &&
+          other.id == this.id &&
+          other.drillId == this.drillId &&
+          other.attempts == this.attempts &&
+          other.successes == this.successes &&
+          other.timestamp == this.timestamp);
+}
+
+class PracticeDrillHistoryCompanion
+    extends UpdateCompanion<PracticeDrillHistoryRow> {
+  final Value<int> id;
+  final Value<String> drillId;
+  final Value<int> attempts;
+  final Value<int> successes;
+  final Value<DateTime> timestamp;
+  const PracticeDrillHistoryCompanion({
+    this.id = const Value.absent(),
+    this.drillId = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.successes = const Value.absent(),
+    this.timestamp = const Value.absent(),
+  });
+  PracticeDrillHistoryCompanion.insert({
+    this.id = const Value.absent(),
+    required String drillId,
+    required int attempts,
+    required int successes,
+    required DateTime timestamp,
+  })  : drillId = Value(drillId),
+        attempts = Value(attempts),
+        successes = Value(successes),
+        timestamp = Value(timestamp);
+  static Insertable<PracticeDrillHistoryRow> custom({
+    Expression<int>? id,
+    Expression<String>? drillId,
+    Expression<int>? attempts,
+    Expression<int>? successes,
+    Expression<DateTime>? timestamp,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (drillId != null) 'drill_id': drillId,
+      if (attempts != null) 'attempts': attempts,
+      if (successes != null) 'successes': successes,
+      if (timestamp != null) 'timestamp': timestamp,
+    });
+  }
+
+  PracticeDrillHistoryCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? drillId,
+      Value<int>? attempts,
+      Value<int>? successes,
+      Value<DateTime>? timestamp}) {
+    return PracticeDrillHistoryCompanion(
+      id: id ?? this.id,
+      drillId: drillId ?? this.drillId,
+      attempts: attempts ?? this.attempts,
+      successes: successes ?? this.successes,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (drillId.present) {
+      map['drill_id'] = Variable<String>(drillId.value);
+    }
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
+    }
+    if (successes.present) {
+      map['successes'] = Variable<int>(successes.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PracticeDrillHistoryCompanion(')
+          ..write('id: $id, ')
+          ..write('drillId: $drillId, ')
+          ..write('attempts: $attempts, ')
+          ..write('successes: $successes, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4928,6 +5232,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   late final $ShotEventsTable shotEvents = $ShotEventsTable(this);
+  late final $PracticeDrillHistoryTable practiceDrillHistory =
+      $PracticeDrillHistoryTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4939,7 +5245,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         settings,
         syncOutbox,
         syncState,
-        shotEvents
+        shotEvents,
+        practiceDrillHistory
       ];
 }
 
@@ -7113,6 +7420,179 @@ typedef $$ShotEventsTableProcessedTableManager = ProcessedTableManager<
     ),
     ShotEventRow,
     PrefetchHooks Function()>;
+typedef $$PracticeDrillHistoryTableCreateCompanionBuilder
+    = PracticeDrillHistoryCompanion Function({
+  Value<int> id,
+  required String drillId,
+  required int attempts,
+  required int successes,
+  required DateTime timestamp,
+});
+typedef $$PracticeDrillHistoryTableUpdateCompanionBuilder
+    = PracticeDrillHistoryCompanion Function({
+  Value<int> id,
+  Value<String> drillId,
+  Value<int> attempts,
+  Value<int> successes,
+  Value<DateTime> timestamp,
+});
+
+class $$PracticeDrillHistoryTableFilterComposer
+    extends Composer<_$AppDatabase, $PracticeDrillHistoryTable> {
+  $$PracticeDrillHistoryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get drillId => $composableBuilder(
+      column: $table.drillId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get attempts => $composableBuilder(
+      column: $table.attempts, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get successes => $composableBuilder(
+      column: $table.successes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+}
+
+class $$PracticeDrillHistoryTableOrderingComposer
+    extends Composer<_$AppDatabase, $PracticeDrillHistoryTable> {
+  $$PracticeDrillHistoryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get drillId => $composableBuilder(
+      column: $table.drillId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get attempts => $composableBuilder(
+      column: $table.attempts, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get successes => $composableBuilder(
+      column: $table.successes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PracticeDrillHistoryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PracticeDrillHistoryTable> {
+  $$PracticeDrillHistoryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get drillId =>
+      $composableBuilder(column: $table.drillId, builder: (column) => column);
+
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<int> get successes =>
+      $composableBuilder(column: $table.successes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
+class $$PracticeDrillHistoryTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PracticeDrillHistoryTable,
+    PracticeDrillHistoryRow,
+    $$PracticeDrillHistoryTableFilterComposer,
+    $$PracticeDrillHistoryTableOrderingComposer,
+    $$PracticeDrillHistoryTableAnnotationComposer,
+    $$PracticeDrillHistoryTableCreateCompanionBuilder,
+    $$PracticeDrillHistoryTableUpdateCompanionBuilder,
+    (
+      PracticeDrillHistoryRow,
+      BaseReferences<_$AppDatabase, $PracticeDrillHistoryTable,
+          PracticeDrillHistoryRow>
+    ),
+    PracticeDrillHistoryRow,
+    PrefetchHooks Function()> {
+  $$PracticeDrillHistoryTableTableManager(
+      _$AppDatabase db, $PracticeDrillHistoryTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PracticeDrillHistoryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PracticeDrillHistoryTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PracticeDrillHistoryTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> drillId = const Value.absent(),
+            Value<int> attempts = const Value.absent(),
+            Value<int> successes = const Value.absent(),
+            Value<DateTime> timestamp = const Value.absent(),
+          }) =>
+              PracticeDrillHistoryCompanion(
+            id: id,
+            drillId: drillId,
+            attempts: attempts,
+            successes: successes,
+            timestamp: timestamp,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String drillId,
+            required int attempts,
+            required int successes,
+            required DateTime timestamp,
+          }) =>
+              PracticeDrillHistoryCompanion.insert(
+            id: id,
+            drillId: drillId,
+            attempts: attempts,
+            successes: successes,
+            timestamp: timestamp,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PracticeDrillHistoryTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $PracticeDrillHistoryTable,
+        PracticeDrillHistoryRow,
+        $$PracticeDrillHistoryTableFilterComposer,
+        $$PracticeDrillHistoryTableOrderingComposer,
+        $$PracticeDrillHistoryTableAnnotationComposer,
+        $$PracticeDrillHistoryTableCreateCompanionBuilder,
+        $$PracticeDrillHistoryTableUpdateCompanionBuilder,
+        (
+          PracticeDrillHistoryRow,
+          BaseReferences<_$AppDatabase, $PracticeDrillHistoryTable,
+              PracticeDrillHistoryRow>
+        ),
+        PracticeDrillHistoryRow,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7131,4 +7611,6 @@ class $AppDatabaseManager {
       $$SyncStateTableTableManager(_db, _db.syncState);
   $$ShotEventsTableTableManager get shotEvents =>
       $$ShotEventsTableTableManager(_db, _db.shotEvents);
+  $$PracticeDrillHistoryTableTableManager get practiceDrillHistory =>
+      $$PracticeDrillHistoryTableTableManager(_db, _db.practiceDrillHistory);
 }

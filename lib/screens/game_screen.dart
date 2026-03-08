@@ -22,6 +22,7 @@ import '../widgets/game_clock.dart';
 import '../widgets/pause_overlay.dart';
 import '../widgets/game_event_overlay.dart'; // Unified Overlay System
 import '../widgets/game_control_button.dart';
+import '../widgets/fast_score_input.dart';
 // For Arial alternative (Lato/Roboto) if Arial not available, but user said Arial.
 import '../services/player_service.dart' as stats; // For stats fetching
 import '../utils/ui_utils.dart'; // Zoom Dialog Helper
@@ -774,6 +775,17 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   },
                 ),
                 IconButton(
+                  icon: Icon(gameState.settings.fastScoreInputEnabled ? Icons.grid_view : Icons.speed),
+                  color: colors.primary,
+                  tooltip: 'Toggle Fast Input',
+                  onPressed: () {
+                    final newSettings = gameState.settings.copyWith(
+                      fastScoreInputEnabled: !gameState.settings.fastScoreInputEnabled,
+                    );
+                    gameState.updateSettings(newSettings);
+                  },
+                ),
+                IconButton(
                   icon: const Icon(Icons.settings),
                   color: colors.primary,
                   tooltip: l10n.settings,
@@ -1177,36 +1189,43 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
                         // 5. Ball Rack (Expanded to fill remaining space)
                         Expanded(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Decorative Gears behind the rack
-                              if (colors.themeId == 'steampunk')
-                                Opacity(
-                                  opacity: 0.1,
-                                  child: Image.asset(
-                                      'assets/images/ui/gears.png',
-                                      fit: BoxFit.contain),
-                                ),
-                              // The Rack
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(
-                                      16.0), // Reduced padding
-                                  child: FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: _buildRackFormation(
-                                          context, gameState),
-                                    ),
+                          child: gameState.settings.fastScoreInputEnabled
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: FastScoreInput(),
                                   ),
+                                )
+                              : Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Decorative Gears behind the rack
+                                    if (colors.themeId == 'steampunk')
+                                      Opacity(
+                                        opacity: 0.1,
+                                        child: Image.asset(
+                                            'assets/images/ui/gears.png',
+                                            fit: BoxFit.contain),
+                                      ),
+                                    // The Rack
+                                    Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(
+                                            16.0), // Reduced padding
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: _buildRackFormation(
+                                                context, gameState),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
 
                         // Controls
