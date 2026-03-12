@@ -1,3 +1,14 @@
+## v4.5.1+38 - Ultimate Scorer & BilliardManager Pro Features 🎱✨
+
+Das ultimative Performance-Update ist da! Inspiriert von professionellen Analyse-Tools bringen wir tiefe Einblicke direkt in dein Spiel.
+
+*   **🏆 Ultimate Scorer Dialog:** Ein neuer, hochwertiger Cyberpunk-Dialog nach jedem Rack, um Break-Erfolge und Runouts festzuhalten.
+*   **📊 Performance Tracking:** Automatisches Speichern von `RackResults` für zukünftige Profi-Statistiken.
+*   **⚙️ Advanced Scoring:** In den Einstellungen umschaltbar (standardmäßig AN), um den Fokus auf das Wesentliche zu behalten.
+*   **🛠️ Stabilität & Compatibility:** Viele interne Fixes für bessere Performance und Kompatibilität mit älteren Geräten.
+
+***
+
 ## v4.4.2+36 - High Run Statistic Bugfix 🎯📈
 
 Kleiner Fix für die High Run Anzeige in den Spieler-Statistiken!
