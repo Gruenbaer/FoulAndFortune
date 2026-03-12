@@ -50,12 +50,12 @@ class DrillVisualizer extends StatelessWidget {
                 ],
               ).createShader(bounds);
             },
-            blendMode: BlendMode.srcAtop, // This applies a global tint to markings
+            blendMode: BlendMode.srcATop, // This applies a global tint to markings
             child: Image.asset(
               imageAsset,
               fit: fit,
               color: Colors.white,
-              colorBlendMode: BlendMode.screen, // Essential to remove the black foil background
+              colorBlendMode: BlendMode.screen, // Essential to remove the black Aufbau-Markierung background
               errorBuilder: (context, error, stackTrace) => const Icon(Icons.fitness_center, size: 48),
             ),
           ),
@@ -68,9 +68,9 @@ class DrillVisualizer extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colors.white.withOpacity(0.05),
+                    Colors.white.withAlpha(12), // replaced withAlpha for withOpacity
                     Colors.transparent,
-                    Colors.cyan.withOpacity(0.02),
+                    Colors.cyan.withAlpha(5), // replaced withAlpha for withOpacity
                   ],
                 ),
               ),
