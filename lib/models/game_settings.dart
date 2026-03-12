@@ -22,6 +22,7 @@ class GameSettings {
   bool hasShown2FoulWarning;
   bool hasShown3FoulWarning;
   bool fastScoreInputEnabled;
+  bool advancedScoringEnabled;
 
   GameSettings({
     this.threeFoulRuleEnabled = true,
@@ -45,6 +46,7 @@ class GameSettings {
     this.hasShown2FoulWarning = false,
     this.hasShown3FoulWarning = false,
     this.fastScoreInputEnabled = true,
+    this.advancedScoringEnabled = true,
   });
 
   // Validation helpers
@@ -74,6 +76,7 @@ class GameSettings {
         'hasShown2FoulWarning': hasShown2FoulWarning,
         'hasShown3FoulWarning': hasShown3FoulWarning,
         'fastScoreInputEnabled': fastScoreInputEnabled,
+        'advancedScoringEnabled': advancedScoringEnabled,
       };
 
   factory GameSettings.fromJson(Map<String, dynamic> json) => GameSettings(
@@ -100,6 +103,7 @@ class GameSettings {
         hasShown2FoulWarning: json['hasShown2FoulWarning'] ?? false,
         hasShown3FoulWarning: json['hasShown3FoulWarning'] ?? false,
         fastScoreInputEnabled: json['fastScoreInputEnabled'] ?? true,
+        advancedScoringEnabled: json['advancedScoringEnabled'] ?? true,
       );
 
   GameSettings copyWith({
@@ -124,6 +128,7 @@ class GameSettings {
     bool? hasShown2FoulWarning,
     bool? hasShown3FoulWarning,
     bool? fastScoreInputEnabled,
+    bool? advancedScoringEnabled,
   }) {
     return GameSettings(
       threeFoulRuleEnabled: threeFoulRuleEnabled ?? this.threeFoulRuleEnabled,
@@ -150,6 +155,7 @@ class GameSettings {
       hasShown2FoulWarning: hasShown2FoulWarning ?? this.hasShown2FoulWarning,
       hasShown3FoulWarning: hasShown3FoulWarning ?? this.hasShown3FoulWarning,
       fastScoreInputEnabled: fastScoreInputEnabled ?? this.fastScoreInputEnabled,
+      advancedScoringEnabled: advancedScoringEnabled ?? this.advancedScoringEnabled,
     );
   }
 

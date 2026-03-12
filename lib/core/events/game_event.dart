@@ -62,3 +62,9 @@ class BreakFoulDecisionEvent extends GameEvent {
 
 /// Event triggered when a player makes a safe shot.
 class SafeEvent extends GameEvent {}
+
+/// Event triggered when the Ultimate Scorer dialog should be shown (post-rack).
+class UltimateScorerEvent extends GameEvent {
+  final Player player;
+  UltimateScorerEvent(this.player);
+}

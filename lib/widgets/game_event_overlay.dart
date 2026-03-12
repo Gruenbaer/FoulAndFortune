@@ -8,6 +8,7 @@ import 'package:foulandfortune/widgets/themed_widgets.dart'; // For ThemedButton
 import 'package:foulandfortune/theme/fortune_theme.dart';
 import 'package:foulandfortune/l10n/app_localizations.dart';
 import 'package:foulandfortune/utils/ui_utils.dart'; // For showZoomDialog
+import 'package:foulandfortune/widgets/ultimate_scorer_dialog.dart';
 
 /// Unified Overlay System handling the Game Event Queue
 
@@ -256,6 +257,9 @@ class _GameEventOverlayState extends State<GameEventOverlay>
         _currentEvent = event; // Store event for post-animation logic
       });
       _controller.forward();
+    } else if (event is UltimateScorerEvent) {
+      _showUltimateScorerDialog(event.player);
+      return;
     } else {
       // Skip unknown event
       _isAnimating = false;
@@ -352,6 +356,22 @@ class _GameEventOverlayState extends State<GameEventOverlay>
           );
         },
       );
+    });
+  }
+
+  void _showUltimateScorerDialog(Player player) {
+    showZoomDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => UltimateScorerDialog(player: player),
+    ).then((_) {
+      if (mounted) {
+        setState(() {
+          _isAnimating = false;
+          _currentEvent = null;
+        });
+        _processNext(); // Continue queue
+      }
     });
   }
 
