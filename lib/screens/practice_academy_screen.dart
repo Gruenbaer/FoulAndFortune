@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/practice_drill.dart';
 import '../services/practice_service.dart';
+import '../widgets/fullscreen_image_viewer.dart';
+import '../utils/ui_utils.dart';
 
 class PracticeAcademyScreen extends StatefulWidget {
   const PracticeAcademyScreen({super.key});
@@ -98,6 +100,16 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
     setState(() {
       _progress = updated;
     });
+  }
+
+  void _showFullscreenImage(PracticeDrill drill) {
+    showZoomDialog(
+      context: context,
+      builder: (context) => FullscreenImageViewer(
+        imageAsset: drill.imageAsset,
+        title: drill.title,
+      ),
+    );
   }
 
   @override
@@ -294,10 +306,16 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
             color: theme.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Image.asset(
-            drill.imageAsset,
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.fitness_center),
-            fit: BoxFit.cover,
+          child: InkWell(
+            onTap: () => _showFullscreenImage(drill),
+            child: Hero(
+              tag: drill.imageAsset,
+              child: Image.asset(
+                drill.imageAsset,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.fitness_center),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
         children: [
@@ -308,7 +326,44 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
               children: [
                 Text('Ziel:', style: theme.textTheme.titleSmall),
                 Text(drill.goal),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+                // Large Preview Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    height: 180,
+                    width: double.infinity,
+                    color: theme.colorScheme.surfaceVariant,
+                    child: InkWell(
+                      onTap: () => _showFullscreenImage(drill),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.asset(
+                            drill.imageAsset,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => const Center(
+                              child: Icon(Icons.fitness_center, size: 48),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Icon(Icons.fullscreen, color: Colors.white, size: 20),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Text('Beschreibung:', style: theme.textTheme.titleSmall),
                 Text(drill.description),
                 const SizedBox(height: 12),
