@@ -24,7 +24,7 @@ class FoulSplashContent extends StatelessWidget {
       textColor: Colors.cyanAccent, // Title Text
       subtitleColor: Colors.redAccent, // Number Text
       subtitleGlowColor: Colors.yellowAccent, // Number Glow (Yellow Border effect)
-      backgroundColor: Colors.black.withValues(alpha: 0.7), // Semi-transparent background
+      backgroundColor: Colors.black.withOpacity(0.7), // Semi-transparent background
     );
   }
 }
@@ -66,13 +66,13 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Semi-transparent interior background
     final bgPaint = Paint()
-      ..color = glowColor.withValues(alpha: 0.2)
+      ..color = glowColor.withOpacity(0.2)
       ..style = PaintingStyle.fill;
     canvas.drawPath(shieldPath, bgPaint);
     
     // Extreme outer glow (widest, very transparent)
     final extremeGlowPaint = Paint()
-      ..color = glowColor.withValues(alpha: 0.4)
+      ..color = glowColor.withOpacity(0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 40.0
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 50);
@@ -80,7 +80,7 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Very wide outer glow
     final veryOuterGlowPaint = Paint()
-      ..color = glowColor.withValues(alpha: 0.5)
+      ..color = glowColor.withOpacity(0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 30.0
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 35);
@@ -88,7 +88,7 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Outer glow
     final outerGlowPaint = Paint()
-      ..color = glowColor.withValues(alpha: 0.6)
+      ..color = glowColor.withOpacity(0.6)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 20.0
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25);
@@ -96,7 +96,7 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Middle glow
     final midGlowPaint = Paint()
-      ..color = brightGreen.withValues(alpha: 0.7)
+      ..color = brightGreen.withOpacity(0.7)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 12.0
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
@@ -104,7 +104,7 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Inner glow
     final innerGlowPaint = Paint()
-      ..color = brightGreen.withValues(alpha: 0.9)
+      ..color = brightGreen.withOpacity(0.9)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8.0
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
@@ -130,7 +130,7 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Checkmark extreme outer glow
     final checkExtremeGlowPaint = Paint()
-      ..color = glowColor.withValues(alpha: 0.4)
+      ..color = glowColor.withOpacity(0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 30.0
       ..strokeCap = StrokeCap.round
@@ -140,7 +140,7 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Checkmark outer glow
     final checkOuterGlowPaint = Paint()
-      ..color = glowColor.withValues(alpha: 0.6)
+      ..color = glowColor.withOpacity(0.6)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 20.0
       ..strokeCap = StrokeCap.round
@@ -150,7 +150,7 @@ class GlowingShieldPainter extends CustomPainter {
     
     // Checkmark middle glow
     final checkMidGlowPaint = Paint()
-      ..color = brightGreen.withValues(alpha: 0.8)
+      ..color = brightGreen.withOpacity(0.8)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 12.0
       ..strokeCap = StrokeCap.round

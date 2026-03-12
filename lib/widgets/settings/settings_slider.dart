@@ -96,7 +96,7 @@ class SettingsSlider extends StatelessWidget {
                 divisions: divisions,
                 label: displayValue,
                 activeColor: theme.secondary,
-                inactiveColor: theme.primaryDark.withValues(alpha: 0.3),
+                inactiveColor: theme.primaryDark.withOpacity(0.3),
                 thumbColor: theme.primary,
                 onChanged: onChanged,
               ),

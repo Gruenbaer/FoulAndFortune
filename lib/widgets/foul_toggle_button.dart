@@ -55,7 +55,7 @@ class FoulToggleButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: isActive ? [
             BoxShadow(
-              color: activeColor.withValues(alpha: 0.6),
+              color: activeColor.withOpacity(0.6),
               blurRadius: 15,
               spreadRadius: 1,
             )
@@ -66,7 +66,7 @@ class FoulToggleButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: _getButtonColor(colors),
             side: BorderSide(
-              color: isActive ? activeColor : colors.primary.withValues(alpha: 0.3),
+              color: isActive ? activeColor : colors.primary.withOpacity(0.3),
               width: 2,
             ),
             shape: RoundedRectangleBorder(

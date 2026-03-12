@@ -296,7 +296,7 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
           ),
           child: Image.asset(
             drill.imageAsset,
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.sports_pool),
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.fitness_center),
             fit: BoxFit.cover,
           ),
         ),

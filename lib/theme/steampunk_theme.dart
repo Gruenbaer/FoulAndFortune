@@ -96,7 +96,7 @@ class SteampunkTheme {
         // Body text (Readable Serif or Slab Serif)
         bodyLarge: GoogleFonts.libreBaskerville(color: steamWhite, fontSize: 18),
         bodyMedium: GoogleFonts.libreBaskerville(color: steamWhite, fontSize: 16),
-        bodySmall: GoogleFonts.libreBaskerville(color: brassPrimary.withValues(alpha: 0.8), fontSize: 14),
+        bodySmall: GoogleFonts.libreBaskerville(color: brassPrimary.withOpacity(0.8), fontSize: 14),
         
         // Button text (Condensed, Bold Serif)
         labelLarge: GoogleFonts.crimsonPro(

@@ -239,7 +239,7 @@ class CyberpunkTheme {
       cardTheme: CardThemeData(
         color: darkMatrix,
         elevation: 8,
-        shadowColor: neonCyan.withValues(alpha: 0.4),
+        shadowColor: neonCyan.withOpacity(0.4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4), // Sharper corners for Cyberpunk
           side: const BorderSide(color: darkCyan, width: 2),
@@ -256,7 +256,7 @@ class CyberpunkTheme {
           fontWeight: FontWeight.w800,
           letterSpacing: 2.0, // Wide letter spacing for tech feel
           shadows: [
-            Shadow(blurRadius: 10, color: neonCyan.withValues(alpha: 0.8), offset: const Offset(0, 0)),
+            Shadow(blurRadius: 10, color: neonCyan.withOpacity(0.8), offset: const Offset(0, 0)),
           ],
         ),
         iconTheme: const IconThemeData(color: neonCyan),
@@ -271,7 +271,7 @@ class CyberpunkTheme {
         // Body: Rajdhani for clean, tech readability
         bodyLarge: GoogleFonts.rajdhani(color: textWhite, fontSize: 20, fontWeight: FontWeight.w500),
         bodyMedium: GoogleFonts.rajdhani(color: textWhite, fontSize: 18, fontWeight: FontWeight.w400),
-        bodySmall: GoogleFonts.rajdhani(color: neonCyan.withValues(alpha: 0.8), fontSize: 16, fontWeight: FontWeight.w400),
+        bodySmall: GoogleFonts.rajdhani(color: neonCyan.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w400),
         
         // Buttons: Orbitron for tech button feel
         labelLarge: GoogleFonts.orbitron(

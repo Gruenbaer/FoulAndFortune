@@ -29,11 +29,11 @@ class GameControlButton extends StatelessWidget {
     // Determine effective toggle color (Active or Default Grey/White)
     final effectiveColor = isActive 
         ? activeColor 
-        : colors.textMain.withValues(alpha: 0.7);
+        : colors.textMain.withOpacity(0.7);
         
     final borderColor = isActive 
         ? activeColor 
-        : colors.primaryDark.withValues(alpha: 0.3);
+        : colors.primaryDark.withOpacity(0.3);
 
     return Expanded(
       child: GestureDetector(
@@ -41,7 +41,7 @@ class GameControlButton extends StatelessWidget {
         child: Container(
           height: 48, // Standard touch target
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.4), // Dark translucent bg
+            color: Colors.black.withOpacity(0.4), // Dark translucent bg
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: borderColor,
@@ -49,7 +49,7 @@ class GameControlButton extends StatelessWidget {
             ),
             boxShadow: isActive ? [
               BoxShadow(
-                color: activeColor.withValues(alpha: 0.3),
+                color: activeColor.withOpacity(0.3),
                 blurRadius: 8,
                 spreadRadius: 1,
               )

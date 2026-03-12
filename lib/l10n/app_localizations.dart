@@ -1255,6 +1255,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Safe/Foul ends the inning; re-rack actions are disabled.'**
   String get terminatorExclusionMessage;
+
+  /// No description provided for @miss.
+  ///
+  /// In en, this message translates to:
+  /// **'Miss'**
+  String get miss;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
 }
 
 class _AppLocalizationsDelegate

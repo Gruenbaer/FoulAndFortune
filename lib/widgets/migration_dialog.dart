@@ -64,7 +64,7 @@ class MigrationDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: colors.danger.withValues(alpha: 0.1),
+                color: colors.danger.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: colors.danger, width: 2),
               ),
@@ -228,7 +228,7 @@ class MigrationProgressDialog extends StatelessWidget {
               l10n.migrationProgressText(migratedGames, totalGames),
               style: TextStyle(
                 fontSize: 14,
-                color: colors.textMain.withValues(alpha: 0.7),
+                color: colors.textMain.withOpacity(0.7),
               ),
             ),
           ],

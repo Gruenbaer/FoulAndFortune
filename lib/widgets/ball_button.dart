@@ -66,7 +66,7 @@ class BallPainter extends CustomPainter {
     // Drop shadow
     final shadowPath = Path()
       ..addOval(Rect.fromCircle(center: center.translate(0, radius * 0.05), radius: radius));
-    canvas.drawShadow(shadowPath, Colors.black.withValues(alpha: 0.4), 2.0, true);
+    canvas.drawShadow(shadowPath, Colors.black.withOpacity(0.4), 2.0, true);
 
     // Draw ball body
     if (ballNumber == 0) {
@@ -130,7 +130,7 @@ class BallPainter extends CustomPainter {
     
     // Add gradient to stripe to match sphere volume
     final gradient = RadialGradient(
-      colors: [color.withValues(alpha: 0.0), Colors.black.withValues(alpha: 0.4)],
+      colors: [color.withOpacity(0.0), Colors.black.withOpacity(0.4)],
       stops: const [0.6, 1.0],
       center: const Alignment(-0.2, -0.2),
       radius: 1.0,
@@ -170,7 +170,7 @@ class BallPainter extends CustomPainter {
     canvas.drawCircle(
       center.translate(1, 1), 
       circleRadius, 
-      Paint()..color = Colors.black.withValues(alpha: 0.2)
+      Paint()..color = Colors.black.withOpacity(0.2)
     );
     canvas.drawCircle(center, circleRadius, circlePaint);
 
@@ -222,7 +222,7 @@ class BallPainter extends CustomPainter {
       highlightPath, 
       Paint()
         ..shader = RadialGradient(
-          colors: [Colors.white.withValues(alpha: 0.9), Colors.white.withValues(alpha: 0.0)],
+          colors: [Colors.white.withOpacity(0.9), Colors.white.withOpacity(0.0)],
         ).createShader(Rect.fromCircle(center: center.translate(-radius*0.35, -radius*0.35), radius: radius*0.3))
     );
 
@@ -233,7 +233,7 @@ class BallPainter extends CustomPainter {
     canvas.drawPath(
       rimPath,
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.05)
+        ..color = Colors.white.withOpacity(0.05)
         ..style = PaintingStyle.stroke
         ..strokeWidth = radius * 0.05
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2)

@@ -98,9 +98,9 @@ class DetailsScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: colors.backgroundCard.withValues(alpha: 0.8),
+                  color: colors.backgroundCard.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
+                  border: Border.all(color: colors.primary.withOpacity(0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -142,7 +142,7 @@ class DetailsScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: colors.backgroundCard.withValues(alpha: 0.7),
+                    color: colors.backgroundCard.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: colors.primary),
                   ),
@@ -164,7 +164,7 @@ class DetailsScreen extends StatelessWidget {
             // Player Comparison (Left vs Right) or Single Player (Training)
             Container(
               decoration: BoxDecoration(
-                color: colors.backgroundCard.withValues(alpha: 0.5),
+                color: colors.backgroundCard.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: colors.primaryDark),
               ),
@@ -467,7 +467,7 @@ class DetailsScreen extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: colors.textMain.withValues(alpha: 0.7),
+            color: colors.textMain.withOpacity(0.7),
             fontSize: 12,
           ),
         ),

@@ -612,4 +612,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get terminatorExclusionMessage =>
       'Safe/Foul ends the inning; re-rack actions are disabled.';
+
+  @override
+  String get miss => 'Miss';
+
+  @override
+  String get confirm => 'Confirm';
 }

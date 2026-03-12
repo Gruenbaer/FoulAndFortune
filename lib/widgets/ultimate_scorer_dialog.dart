@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/game_state.dart';
 import '../models/rack_result.dart';
+import '../models/player.dart';
 import '../theme/fortune_theme.dart';
 import '../l10n/app_localizations.dart';
 
@@ -53,7 +54,7 @@ class _UltimateScorerDialogState extends State<UltimateScorerDialog> {
                 color: colors.primary,
                 letterSpacing: 4,
                 shadows: [
-                  Shadow(blurRadius: 10, color: colors.primary.withValues(alpha: 0.8)),
+                  Shadow(blurRadius: 10, color: colors.primary.withOpacity(0.8)),
                 ],
               ),
               textAlign: TextAlign.center,
@@ -74,7 +75,7 @@ class _UltimateScorerDialogState extends State<UltimateScorerDialog> {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isSelected ? colors.primary.withValues(alpha: 0.2) : Colors.transparent,
+                          color: isSelected ? colors.primary.withOpacity(0.2) : Colors.transparent,
                           border: Border.all(
                             color: isSelected ? colors.primary : colors.disabled,
                             width: 2,
@@ -163,7 +164,7 @@ class _UltimateScorerDialogState extends State<UltimateScorerDialog> {
           style: GoogleFonts.orbitron(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: colors.textMain.withValues(alpha: 0.7),
+            color: colors.textMain.withOpacity(0.7),
             letterSpacing: 2,
           ),
         ),
@@ -186,7 +187,7 @@ class _UltimateScorerDialogState extends State<UltimateScorerDialog> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             border: Border.all(
-              color: value ? colors.accent : colors.disabled.withValues(alpha: 0.3),
+              color: value ? colors.accent : colors.disabled.withOpacity(0.3),
             ),
           ),
           child: Row(
@@ -204,7 +205,7 @@ class _UltimateScorerDialogState extends State<UltimateScorerDialog> {
                 value: value,
                 onChanged: enabled ? onChanged : null,
                 activeColor: colors.accent,
-                activeTrackColor: colors.accent.withValues(alpha: 0.2),
+                activeTrackColor: colors.accent.withOpacity(0.2),
                 inactiveThumbColor: colors.disabled,
                 inactiveTrackColor: Colors.transparent,
               ),

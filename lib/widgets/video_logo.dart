@@ -21,12 +21,12 @@ class VideoLogo extends StatelessWidget {
             shape: BoxShape.circle,
             color: Colors.transparent, 
             boxShadow: [
-               BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 15, offset: const Offset(0, 4)),
+               BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 15, offset: const Offset(0, 4)),
                // Outer glow matching theme
-               BoxShadow(color: fortuneTheme.accent.withValues(alpha: 0.3), blurRadius: 20, spreadRadius: 2),
+               BoxShadow(color: fortuneTheme.accent.withOpacity(0.3), blurRadius: 20, spreadRadius: 2),
             ],
             // Thin border to define edge
-            border: Border.all(color: fortuneTheme.primary.withValues(alpha: 0.8), width: 2), 
+            border: Border.all(color: fortuneTheme.primary.withOpacity(0.8), width: 2), 
           ),
           child: ClipOval(
             child: Image.asset(

@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 /// Represents the metadata and performance results of a single completed rack or inning segment.
-/// 
-/// Part of the 'Ultimate Scorer' system to track advanced analytics inspired by BilliardManager Pro.
+/// Model representing the result of a single rack for performance tracking.
 @immutable
 class RackResult {
   final String? id;

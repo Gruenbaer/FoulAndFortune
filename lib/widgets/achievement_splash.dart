@@ -143,7 +143,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: FortuneColors.of(context).success.withValues(alpha: 0.6),
+                              color: FortuneColors.of(context).success.withOpacity(0.6),
                               blurRadius: 40,
                               spreadRadius: 8,
                             ),
@@ -236,7 +236,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                               widget.achievement.description,
                               style: TextStyle(
                                 fontSize: 16,
-                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.8),
+                                color: FortuneColors.of(context).textMain.withOpacity(0.8),
                                 height: 1.4,
                               ),
                               textAlign: TextAlign.center,
@@ -266,7 +266,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                               widget.achievement.howToUnlock,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.6),
+                                color: FortuneColors.of(context).textMain.withOpacity(0.6),
                                 fontStyle: FontStyle.italic,
                               ),
                               textAlign: TextAlign.center,
@@ -279,7 +279,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 'Unlocked by: ${widget.achievement.unlockedBy.last}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: FortuneColors.of(context).textMain.withValues(alpha: 0.4),
+                                  color: FortuneColors.of(context).textMain.withOpacity(0.4),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -298,7 +298,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 ),
                                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                                 elevation: 8,
-                                shadowColor: FortuneColors.of(context).success.withValues(alpha: 0.5),
+                                shadowColor: FortuneColors.of(context).success.withOpacity(0.5),
                               ),
                               child: const Text(
                                 'OK',

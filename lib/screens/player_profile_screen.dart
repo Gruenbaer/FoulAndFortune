@@ -373,7 +373,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                             fontSize: 16
                           ),
                         ),
-                        Text(l10n.winRate, style: TextStyle(fontSize: 10, color: fortuneTheme.textMain.withValues(alpha: 0.7))),
+                        Text(l10n.winRate, style: TextStyle(fontSize: 10, color: fortuneTheme.textMain.withOpacity(0.7))),
                       ],
                     ),
                   ),
@@ -419,13 +419,13 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
                 padding: const EdgeInsets.all(32),
                 child: Column(
                   children: [
-                    Icon(Icons.emoji_events_outlined, size: 64, color: fortuneTheme.textMain.withValues(alpha: 0.5)),
+                    Icon(Icons.emoji_events_outlined, size: 64, color: fortuneTheme.textMain.withOpacity(0.5)),
                     const SizedBox(height: 16),
                     Text(
                       l10n.noAchievementsYet,
                       style: TextStyle(
                         fontSize: 16,
-                        color: fortuneTheme.textMain.withValues(alpha: 0.7),
+                        color: fortuneTheme.textMain.withOpacity(0.7),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -506,7 +506,7 @@ class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: fortuneTheme.textMain.withValues(alpha: 0.7),
+                color: fortuneTheme.textMain.withOpacity(0.7),
               ),
               textAlign: TextAlign.center,
             ),

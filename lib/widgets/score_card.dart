@@ -114,7 +114,7 @@ class ScoreCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(color: colors.primaryDark),
         borderRadius: BorderRadius.circular(8),
-        color: colors.backgroundCard.withValues(alpha: 0.5),
+        color: colors.backgroundCard.withOpacity(0.5),
       ),
       child: Column(
         children: [
@@ -197,7 +197,7 @@ class ScoreCard extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: colors.textMain.withValues(alpha: 0.7),
+        color: colors.textMain.withOpacity(0.7),
         fontSize: 12,
         fontWeight: FontWeight.w900,
         letterSpacing: 1.0,
@@ -285,7 +285,7 @@ class ScoreCard extends StatelessWidget {
         return Text(
           '—',  // Em dash indicates unavailable data
           style: TextStyle(
-            color: colors.textMain.withValues(alpha: 0.4),
+            color: colors.textMain.withOpacity(0.4),
             fontSize: 14,
             fontFamily: 'Arial'
           ),

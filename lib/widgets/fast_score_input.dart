@@ -34,9 +34,9 @@ class _FastScoreInputState extends State<FastScoreInput> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: colors.backgroundCard.withValues(alpha: 0.8),
+        color: colors.backgroundCard.withOpacity(0.8),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
+        border: Border.all(color: colors.primary.withOpacity(0.3)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -63,7 +63,7 @@ class _FastScoreInputState extends State<FastScoreInput> {
                   ),
                   Text(
                     l10n.inning.toUpperCase(),
-                    style: theme.textTheme.labelSmall?.copyWith(color: colors.textMain.withValues(alpha: 0.6)),
+                    style: theme.textTheme.labelSmall?.copyWith(color: colors.textMain.withOpacity(0.6)),
                   ),
                 ],
               ),
@@ -144,7 +144,7 @@ class _FastScoreInputState extends State<FastScoreInput> {
                 ),
                 _buildActionButton(
                   label: 'SF (-2)',
-                  color: colors.danger.withValues(alpha: 0.7),
+                  color: colors.danger.withOpacity(0.7),
                   onPressed: () {
                     gameState.setFoulMode(FoulMode.severe);
                     gameState.onBallTapped(0); // Apply severe foul
@@ -175,7 +175,7 @@ class _FastScoreInputState extends State<FastScoreInput> {
         ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: color.withValues(alpha: 0.2),
+            backgroundColor: color.withOpacity(0.2),
             foregroundColor: color,
             shape: const CircleBorder(),
             padding: const EdgeInsets.all(24),

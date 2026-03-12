@@ -125,7 +125,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             decoration: BoxDecoration(
                               border: Border(bottom: BorderSide(color: colors.primary, width: 2)),
                               gradient: LinearGradient(
-                                colors: [colors.primaryDark.withValues(alpha: 0.5), Colors.transparent],
+                                colors: [colors.primaryDark.withOpacity(0.5), Colors.transparent],
                               ),
                             ),
                             child: Text(
@@ -206,7 +206,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         ),
         Text(
           label,
-          style: theme.textTheme.bodySmall?.copyWith(color: colors.textMain.withValues(alpha: 0.7)),
+          style: theme.textTheme.bodySmall?.copyWith(color: colors.textMain.withOpacity(0.7)),
         ),
       ],
     );
@@ -238,7 +238,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         subtitle: Text(
           '${player.gamesPlayed} games | ${player.winRate.toStringAsFixed(1)}% Win',
           // Explicitly use textMain (Light Grey) as requested by user for readability
-          style: theme.textTheme.bodySmall?.copyWith(color: colors.textMain.withValues(alpha: 0.7)),
+          style: theme.textTheme.bodySmall?.copyWith(color: colors.textMain.withOpacity(0.7)),
         ),
 
         children: [
@@ -285,7 +285,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     if (trends.length < 2) {
                        return Text(
                          'Not enough data for trend charts.',
-                         style: TextStyle(color: colors.textMain.withValues(alpha: 0.7), fontStyle: FontStyle.italic),
+                         style: TextStyle(color: colors.textMain.withOpacity(0.7), fontStyle: FontStyle.italic),
                        );
                     }
                     
@@ -323,7 +323,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(color: colors.textMain.withValues(alpha: 0.7)),
+            style: TextStyle(color: colors.textMain.withOpacity(0.7)),
           ),
           Text(
             value,

@@ -119,7 +119,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   border: Border(
                       bottom: BorderSide(
                           color: colors.primaryDark, width: 2)),
-                  color: colors.backgroundCard.withValues(alpha: 0.5),
+                  color: colors.backgroundCard.withOpacity(0.5),
                 ),
                 child: Row(
                   children: [
@@ -202,7 +202,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           border: Border.all(color: colors.primary),
           borderRadius: BorderRadius.circular(4),
           boxShadow: isSelected 
-              ? [BoxShadow(color: colors.primary.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 1)] 
+              ? [BoxShadow(color: colors.primary.withOpacity(0.4), blurRadius: 8, spreadRadius: 1)] 
               : [],
         ),
         child: Text(
@@ -259,7 +259,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         border: Border.all(color: colors.primaryDark),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5),
+              color: Colors.black.withOpacity(0.5),
               offset: const Offset(2, 2),
               blurRadius: 4),
         ],

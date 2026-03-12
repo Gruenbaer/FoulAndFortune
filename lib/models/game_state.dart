@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'player.dart';
 import 'foul_tracker.dart';
 import '../core/game_timer.dart';
 import '../core/game_history.dart';
@@ -10,6 +11,7 @@ import '../data/messages.dart';
 import 'game_settings.dart';
 import '../services/achievement_checker.dart';
 import '../codecs/notation_codec.dart';
+import 'rack_result.dart';
 
 import '../games/base/game_rules.dart' as rules;
 import '../games/base/rules_state.dart';
@@ -128,6 +130,17 @@ class GameState extends ChangeNotifier {
 
   // Match History
   List<String> matchLog = [];
+  
+  // Performance tracking for advanced stats
+  List<RackResult> rackResults = [];
+
+  void recordRackResult(RackResult result) {
+    debugPrint('[GameState] Recording Rack Result: ${result.playerName}');
+    rackResults.add(result);
+    _logAction('Performance Stats Recorded: ${result.playerName}');
+    notifyListeners();
+    onSaveRequired?.call();
+  }
   
   // Inning Records for Score Card (structured data, no parsing needed)
   List<InningRecord> inningRecords = [];
@@ -1018,7 +1031,7 @@ class GameState extends ChangeNotifier {
   // === RULES INTEGRATION ===
 
   rules.CoreState _buildCoreState() {
-    final rulePlayers = players.map((p) => rules.Player(
+    final rulePlayers = players.map((p) => Player(
       name: p.name, 
       score: p.projectedScore
     )).toList();

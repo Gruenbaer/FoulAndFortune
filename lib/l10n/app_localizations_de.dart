@@ -613,4 +613,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get terminatorExclusionMessage =>
       'Safety/Foul beendet die Aufnahme; Neuaufbau-Aktionen sind deaktiviert.';
+
+  @override
+  String get miss => 'Fehlstoß';
+
+  @override
+  String get confirm => 'Bestätigen';
 }

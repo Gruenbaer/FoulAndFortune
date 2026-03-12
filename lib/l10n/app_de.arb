@@ -219,5 +219,7 @@
     }
   },
   "actionRestrictedTitle": "Aktion eingeschränkt",
-  "terminatorExclusionMessage": "Safety/Foul beendet die Aufnahme; Neuaufbau-Aktionen sind deaktiviert."
+  "terminatorExclusionMessage": "Safety/Foul beendet die Aufnahme; Neuaufbau-Aktionen sind deaktiviert.",
+  "miss": "Fehlstoß",
+  "confirm": "Bestätigen"
 }

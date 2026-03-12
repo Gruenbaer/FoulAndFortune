@@ -175,7 +175,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                           decoration: BoxDecoration(
                             color: colors.backgroundCard,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: colors.primary.withValues(alpha: 0.5)),
+                            border: Border.all(color: colors.primary.withOpacity(0.5)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -316,7 +316,7 @@ class _VictorySplashState extends State<VictorySplash> with SingleTickerProvider
                 color: isWinner ? colors.accent : colors.textMain,
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
-                shadows: isWinner ? [Shadow(color: colors.accent.withValues(alpha:0.5), blurRadius: 10)] : [],
+                shadows: isWinner ? [Shadow(color: colors.accent.withOpacity(0.5), blurRadius: 10)] : [],
               ),
             ),
             if (isWinner)

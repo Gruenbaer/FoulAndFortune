@@ -77,7 +77,7 @@ class _MyAppState extends State<MyApp> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
-                      BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.3), blurRadius: 20),
+                      BoxShadow(color: Colors.greenAccent.withOpacity(0.3), blurRadius: 20),
                     ],
                   ),
                   child: ClipOval(

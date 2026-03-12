@@ -81,7 +81,7 @@ class StatTrendChart extends StatelessWidget {
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: colors.primaryDark.withValues(alpha: 0.5),
+                      color: colors.primaryDark.withOpacity(0.5),
                       strokeWidth: 1,
                     );
                   },
@@ -109,7 +109,7 @@ class StatTrendChart extends StatelessWidget {
                           child: Text(
                             DateFormat('MM/dd').format(dataPoints[index].date),
                             style: TextStyle(
-                              color: colors.textMain.withValues(alpha: 0.7),
+                              color: colors.textMain.withOpacity(0.7),
                               fontSize: 10,
                             ),
                           ),
@@ -126,7 +126,7 @@ class StatTrendChart extends StatelessWidget {
                         return Text(
                           isInteger ? value.toInt().toString() : value.toStringAsFixed(1),
                           style: TextStyle(
-                            color: colors.textMain.withValues(alpha: 0.7),
+                            color: colors.textMain.withOpacity(0.7),
                             fontSize: 10,
                           ),
                         );
@@ -167,7 +167,7 @@ class StatTrendChart extends StatelessWidget {
                     ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: colors.accent.withValues(alpha: 0.2),
+                      color: colors.accent.withOpacity(0.2),
                     ),
                   ),
                 ],

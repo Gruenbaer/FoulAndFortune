@@ -274,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         _version,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: FortuneColors.of(context).textMain.withValues(alpha: 0.7),
+                          color: FortuneColors.of(context).textMain.withOpacity(0.7),
                         ),
                       ),
                   ],

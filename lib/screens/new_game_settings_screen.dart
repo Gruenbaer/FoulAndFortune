@@ -153,10 +153,10 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
           ),
           Container(
             decoration: BoxDecoration(
-              color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
+              color: fortuneTheme.primaryDark.withOpacity(0.5),
               borderRadius: BorderRadius.circular(4),
               border:
-                  Border.all(color: fortuneTheme.primary.withValues(alpha: 0.3)),
+                  Border.all(color: fortuneTheme.primary.withOpacity(0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

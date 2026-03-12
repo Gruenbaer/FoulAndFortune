@@ -79,7 +79,7 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
                         color: const Color(0xFF00F0FF), // Cyan
                         shadows: [
                           const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
-                          Shadow(blurRadius: 15, color: const Color(0xFF00F0FF).withValues(alpha: 0.6), offset: const Offset(0, 0)), // Cyan Glow
+                          Shadow(blurRadius: 15, color: const Color(0xFF00F0FF).withOpacity(0.6), offset: const Offset(0, 0)), // Cyan Glow
                         ],
                       ),
                     ),
@@ -214,7 +214,7 @@ class _FoulMessageOverlayState extends State<FoulMessageOverlay> with SingleTick
                           color: Colors.redAccent, 
                           shadows: [
                             const Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1)),
-                            Shadow(blurRadius: 15, color: Colors.redAccent.withValues(alpha: 0.6), offset: const Offset(0, 0)), // Red Glow
+                            Shadow(blurRadius: 15, color: Colors.redAccent.withOpacity(0.6), offset: const Offset(0, 0)), // Red Glow
                           ],
                         ),
                       ),

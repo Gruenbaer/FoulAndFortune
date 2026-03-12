@@ -59,10 +59,10 @@ class GhibliTheme {
       cardTheme: CardThemeData(
         color: cloudWhite,
         elevation: 0, // Flat with border or subtle shadow
-        shadowColor: charcoal.withValues(alpha: 0.1),
+        shadowColor: charcoal.withOpacity(0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20), 
-          side: BorderSide(color: lushGreen.withValues(alpha: 0.2), width: 1), 
+          side: BorderSide(color: lushGreen.withOpacity(0.2), width: 1), 
         ),
       ),
 
@@ -87,7 +87,7 @@ class GhibliTheme {
         
         bodyLarge: GoogleFonts.nunito(color: charcoal, fontSize: 18, fontWeight: FontWeight.w600),
         bodyMedium: GoogleFonts.nunito(color: charcoal, fontSize: 16, fontWeight: FontWeight.w500),
-        bodySmall: GoogleFonts.nunito(color: charcoal.withValues(alpha: 0.7), fontSize: 14),
+        bodySmall: GoogleFonts.nunito(color: charcoal.withOpacity(0.7), fontSize: 14),
         
         // Button text
         labelLarge: GoogleFonts.nunito(

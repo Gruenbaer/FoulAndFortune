@@ -52,8 +52,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   DateTime? _gameStartTime; // Track when game started
   bool _isCompletedSaved = false;
 
-
-
   // Rack Animation Controller
   late AnimationController _rackAnimationController;
 
@@ -69,13 +67,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // Input Locking (Prevent rapid taps breaking state)
   bool _isInputLocked = false;
-  
+
   // Victory State Tracking
   bool _victoryShown = false;
 
   void _handleInteraction(VoidCallback action) {
     if (_isInputLocked) return;
-    
+
     setState(() {
       _isInputLocked = true;
     });
@@ -94,7 +92,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       });
     }
   }
- 
+
   Future<void> _saveInProgressGame(GameState gameState) async {
     // Check if game is completed (score >= raceToScore)
     final p1 = gameState.players[0];
@@ -173,7 +171,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       player2Fouls: player2Fouls,
       activeBalls: [], // Cleared
       player1IsActive: false,
-      snapshot: gameState.toJson(), // PRESERVE snapshot for viewing details/notations
+      snapshot:
+          gameState.toJson(), // PRESERVE snapshot for viewing details/notations
     );
 
     // Add matchLog if GameRecord supports it (it appeared missing in previous step view of GameRecord, let's omit if not there)
@@ -186,7 +185,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       final playerService = stats.PlayerService();
 
       // Helper to update a single player
-      Future<void> updatePlayerStats(Player gamePlayer, int gameFouls, bool isWinner) async {
+      Future<void> updatePlayerStats(
+          Player gamePlayer, int gameFouls, bool isWinner) async {
         final existingPlayer =
             await playerService.getPlayerByName(gamePlayer.name);
         if (existingPlayer != null) {
@@ -268,7 +268,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.6),
+            color: Colors.black.withOpacity(0.6),
             offset: const Offset(0, 4),
             blurRadius: 6,
           ),
@@ -394,12 +394,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameState = Provider.of<GameState>(context, listen: false);
-      
+
       // 1. Load data if resuming
       if (widget.resumeGame != null && widget.resumeGame!.snapshot != null) {
         gameState.loadFromJson(widget.resumeGame!.snapshot!);
       }
-      
+
       // 2. Attach auto-save listener (ALWAYS)
       gameState.onSaveRequired = () {
         if (mounted) {
@@ -423,7 +423,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 achievement: achievement,
                 onDismiss: () => Navigator.of(context).pop(),
               ),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
                 return FadeTransition(
                   opacity: animation,
                   child: child,
@@ -433,7 +434,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           );
         });
       };
-        });
+    });
 
     _rackAnimationController = AnimationController(
       vsync: this,
@@ -447,13 +448,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // Initialize Red Flash Controller
     _screenShakeController = AnimationController(
-       vsync: this,
-       duration: const Duration(milliseconds: 600),
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
     );
     // Flash Opacity Animation (0 -> 0.4 -> 0)
     _screenShakeOffset = TweenSequence<Offset>([
-      TweenSequenceItem(tween: Tween(begin: Offset.zero, end: const Offset(0.3, 0)), weight: 1), // Using Offset type to reuse variable, but it represents Opacity now
-      TweenSequenceItem(tween: Tween(begin: const Offset(0.3, 0), end: Offset.zero), weight: 3),
+      TweenSequenceItem(
+          tween: Tween(begin: Offset.zero, end: const Offset(0.3, 0)),
+          weight:
+              1), // Using Offset type to reuse variable, but it represents Opacity now
+      TweenSequenceItem(
+          tween: Tween(begin: const Offset(0.3, 0), end: Offset.zero),
+          weight: 3),
     ]).animate(_screenShakeController);
   }
 
@@ -505,49 +511,51 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         // Or check if the top route is VictorySplash?
         // Using a local flag is safest.
         if (!_victoryShown) {
-           _victoryShown = true;
-           // Reuse the Concede logic which saves and pushes splash
-           // But concede calls finalize, which is already done by checkWinCondition
-           // So we just call the UI part:
-           _saveCompletedGame(gameState);
-           Navigator.of(context).push(
+          _victoryShown = true;
+          // Reuse the Concede logic which saves and pushes splash
+          // But concede calls finalize, which is already done by checkWinCondition
+          // So we just call the UI part:
+          _saveCompletedGame(gameState);
+          Navigator.of(context).push(
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => VictorySplash(
-                player1: gameState.players[0],
-                player2: gameState.players[1],
-                winner: gameState.winner!,
-                raceToScore: gameState.raceToScore,
-                inningRecords: gameState.inningRecords,
-                elapsedDuration: gameState.elapsedDuration,
-                onUndo: () {
-                   gameState.undo();
-                   _victoryShown = false; // Reset flag
-                   Navigator.of(context).pop(); 
-                },
-                onNewGame: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                onExit: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-              ),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                 return FadeTransition(opacity: animation, child: child);
-              }
-            ),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    VictorySplash(
+                      player1: gameState.players[0],
+                      player2: gameState.players[1],
+                      winner: gameState.winner!,
+                      raceToScore: gameState.raceToScore,
+                      inningRecords: gameState.inningRecords,
+                      elapsedDuration: gameState.elapsedDuration,
+                      onUndo: () {
+                        gameState.undo();
+                        _victoryShown = false; // Reset flag
+                        Navigator.of(context).pop();
+                      },
+                      onNewGame: () {
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      },
+                      onExit: () {
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      },
+                    ),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                }),
           );
         }
       });
     } else {
-        // Reset flag if game is not over (e.g. undo happened)
-        _victoryShown = false;
+      // Reset flag if game is not over (e.g. undo happened)
+      _victoryShown = false;
     }
 
     Future<void> openSettings() async {
       final updateSettings =
           Provider.of<Function(GameSettings)>(context, listen: false);
-      final currentSettings =
-          Provider.of<GameSettings>(context, listen: false);
+      final currentSettings = Provider.of<GameSettings>(context, listen: false);
 
       // Create a Settings object that reflects the CURRENT game state
       // This ensures the menu shows real names/scores, not defaults
@@ -586,7 +594,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel, style: TextStyle(color: colors.textMain)),
+              child:
+                  Text(l10n.cancel, style: TextStyle(color: colors.textMain)),
             ),
             TextButton(
               onPressed: () {
@@ -599,38 +608,39 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         ),
       );
     }
-    
+
     void concedeGameTo(Player winner) {
       // Use the robust method in GameState that finalizes the inning first
       gameState.concedeGame(winner);
-      
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-          _saveCompletedGame(gameState);
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => VictorySplash(
-                player1: gameState.players[0],
-                player2: gameState.players[1],
-                winner: winner,
-                raceToScore: gameState.raceToScore,
-                inningRecords: gameState.inningRecords,
-                elapsedDuration: gameState.elapsedDuration,
-                onUndo: () {
-                   gameState.undo();
-                   Navigator.of(context).pop(); 
-                },
-                onNewGame: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                onExit: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-              ),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                 return FadeTransition(opacity: animation, child: child);
-              }
-            ),
-          );
+        _saveCompletedGame(gameState);
+        Navigator.of(context).push(
+          PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  VictorySplash(
+                    player1: gameState.players[0],
+                    player2: gameState.players[1],
+                    winner: winner,
+                    raceToScore: gameState.raceToScore,
+                    inningRecords: gameState.inningRecords,
+                    elapsedDuration: gameState.elapsedDuration,
+                    onUndo: () {
+                      gameState.undo();
+                      Navigator.of(context).pop();
+                    },
+                    onNewGame: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    onExit: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                  ),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              }),
+        );
       });
     }
 
@@ -643,27 +653,28 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               ThemedButton(
-                 label: gameState.players[0].name,
-                 onPressed: () {
-                   Navigator.pop(context);
-                   concedeGameTo(gameState.players[0]);
-                 },
-               ),
-               const SizedBox(height: 12),
-               ThemedButton(
-                 label: gameState.players[1].name,
-                 onPressed: () {
-                   Navigator.pop(context);
-                   concedeGameTo(gameState.players[1]);
-                 },
-               ),
+              ThemedButton(
+                label: gameState.players[0].name,
+                onPressed: () {
+                  Navigator.pop(context);
+                  concedeGameTo(gameState.players[0]);
+                },
+              ),
+              const SizedBox(height: 12),
+              ThemedButton(
+                label: gameState.players[1].name,
+                onPressed: () {
+                  Navigator.pop(context);
+                  concedeGameTo(gameState.players[1]);
+                },
+              ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel, style: TextStyle(color: colors.textMain)),
+              child:
+                  Text(l10n.cancel, style: TextStyle(color: colors.textMain)),
             ),
           ],
         ),
@@ -699,631 +710,698 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       child: AbsorbPointer(
         absorbing: _isInputLocked,
         child: Stack(
-        children: [
-        PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, result) async {
-            if (didPop) return;
-            final l10n = AppLocalizations.of(context);
-            final shouldExit = await showZoomDialog<bool>(
-              context: context,
-              builder: (context) => GameAlertDialog(
-                title: l10n.exitGameTitle,
-                content: Text(l10n.exitGameMessage),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
+          children: [
+            PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, result) async {
+                if (didPop) return;
+                final l10n = AppLocalizations.of(context);
+                final shouldExit = await showZoomDialog<bool>(
+                  context: context,
+                  builder: (context) => GameAlertDialog(
+                    title: l10n.exitGameTitle,
+                    content: Text(l10n.exitGameMessage),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(l10n.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(l10n.exit),
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.exit),
-                  ),
-                ],
-              ),
-            );
-            if (shouldExit == true) {
-              if (context.mounted) {
-                // Save in-progress game before exiting
-                final gameState =
-                    Provider.of<GameState>(context, listen: false);
-                await _saveInProgressGame(gameState);
+                );
+                if (shouldExit == true) {
+                  if (context.mounted) {
+                    // Save in-progress game before exiting
+                    final gameState =
+                        Provider.of<GameState>(context, listen: false);
+                    await _saveInProgressGame(gameState);
 
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              }
-            }
-          },
-          child: Scaffold(
-            extendBodyBehindAppBar: true,
-            appBar: AppBar(
-              iconTheme: IconThemeData(color: colors.primary),
-              title: Text(
-                l10n.straightPool,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  shadows: [
-                    const Shadow(
-                        blurRadius: 3,
-                        color: Colors.black87,
-                        offset: Offset(1, 1)),
-                    Shadow(
-                        blurRadius: 6,
-                        color: colors.primary.withValues(alpha: 0.5),
-                        offset: const Offset(0, 0)),
-                  ],
-                ),
-              ),
-              leading:
-                  null, // Allow default drawer icon if needed, or remove if strictly no menu desired
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.analytics_outlined),
-                  color: colors.primary,
-                  tooltip: l10n.details,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            DetailsScreen(gameState: gameState),
-                      ),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: Icon(gameState.settings.fastScoreInputEnabled ? Icons.grid_view : Icons.speed),
-                  color: colors.primary,
-                  tooltip: 'Toggle Fast Input',
-                  onPressed: () {
-                    final newSettings = gameState.settings.copyWith(
-                      fastScoreInputEnabled: !gameState.settings.fastScoreInputEnabled,
-                    );
-                    gameState.updateSettings(newSettings);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  color: colors.primary,
-                  tooltip: l10n.settings,
-                  onPressed: openSettings,
-                ),
-                GuardedIconButton(
-                  icon: Icons.undo,
-                  shadows: colors.themeId == 'cyberpunk'
-                      ? [
-                          BoxShadow(
-                              color: colors.primary,
-                              blurRadius: 10,
-                              spreadRadius: 2),
-                        ]
-                      : [],
-                  color: colors.primary,
-                  tooltip: l10n.undo,
-                  onPressed: gameState.canUndo ? gameState.undo : null,
-                  isGuarded: _isInputLocked,
-                ),
-                GuardedIconButton(
-                  icon: Icons.redo,
-                  shadows: colors.themeId == 'cyberpunk'
-                      ? [
-                          BoxShadow(
-                              color: colors.primary,
-                              blurRadius: 10,
-                              spreadRadius: 2),
-                        ]
-                      : [],
-                  color: colors.primary,
-                  tooltip: l10n.redo,
-                  onPressed: gameState.canRedo ? gameState.redo : null,
-                  isGuarded: _isInputLocked,
-                ),
-              ],
-            ),
-            drawer: Drawer(
-              elevation: 100, // High elevation to appear above overlays
-              backgroundColor: colors.backgroundMain, // Themed background
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  DrawerHeader(
-                    decoration: BoxDecoration(
-                      color: colors.backgroundCard, // Themed header background
-                    ),
-                    child: Center(
-                      child: Text(
-                        l10n.appTitle,
-                        style: theme.textTheme.displayMedium?.copyWith(
-                          color: colors.primary, // Themed text
-                          fontSize: 24,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.refresh, color: colors.primary),
-                    title: Text(l10n.restartGame,
-                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
-                    onTap: showRestartConfirmation,
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.flag_outlined, color: colors.warning), // Warning color for giving up
-                    title: Text(l10n.giveUp,
-                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
-                    onTap: showGiveUpConfirmation,
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.menu_book, color: colors.primary),
-                    title: Text(l10n.gameRules,
-                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
-                    onTap: showRulesPopup,
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.settings, color: colors.primary),
-                    title: Text(l10n.settings,
-                        style: theme.textTheme.bodyLarge?.copyWith(color: colors.textMain)),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await openSettings();
-                    },
-                  ),
-                ],
-              ),
-            ),
-            body: ThemedBackground(
-              child: SafeArea(
-                child: Consumer<GameState>(
-                  builder: (context, gameState, child) {
-                    // Game Events moved to GameEventOverlay
-                    
-                    // Reset completion flag if game is no longer over (after undo)
-                    if (!gameState.gameOver && _isCompletedSaved) {
-                      _isCompletedSaved = false;
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
                     }
-
-                    // Check gameOver flag, not scores (prevents re-trigger after undo)
-                    if (gameState.gameOver && gameState.winner != null && !_isCompletedSaved) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _saveCompletedGame(gameState);
-                        _saveCompletedGame(gameState);
-                        // Navigate to victory screen with Zoom Transition
-                        // Use PUSH instead of PUSH REPLACEMENT to preserve GameState/Undo Stack
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) =>
-                                    VictorySplash(
-                              player1: gameState.players[0],
-                              player2: gameState.players[1],
-                              winner: gameState.winner!,
-                              raceToScore: gameState.raceToScore,
-                              inningRecords: gameState.inningRecords,
-                              elapsedDuration: gameState.elapsedDuration,
-                              onUndo: () {
-                                 // Undo the winning shot
-                                 gameState.undo();
-                                 Navigator.of(context).pop(); 
-                              },
-                              onNewGame: () {
-                                // Pop until home, then show new game settings
-                                Navigator.of(context).popUntil((route) => route.isFirst);
-                                // Use post-frame callback to show modal after navigation settles
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  final homeContext = Navigator.of(context).context;
-                                  // Access HomeScreen's showNewGameSettings method
-                                  // Note: We can't directly call it, so we'll replicate the modal logic
-                                  final achievementManager = Provider.of<AchievementManager>(homeContext, listen: false);
-                                  showModalBottomSheet(
-                                    context: homeContext,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (modalContext) => NewGameSettingsScreen(
-                                      onStartGame: (settings) {
-                                        Navigator.pop(modalContext);
-                                        Navigator.push(
-                                          homeContext,
-                                          MaterialPageRoute(
-                                            builder: (context) => ChangeNotifierProvider(
-                                              create: (_) => GameState(
-                                                settings: settings,
-                                                achievementManager: achievementManager,
-                                                shotEventService: ShotEventService(db: appDatabase),
-                                              ),
-                                              child: GameScreen(
-                                                settings: settings,
-                                                onSettingsChanged: (newSettings) {},
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  );
-                                });
-                              },
-                              onExit: () {
-                                Navigator.of(context)
-                                    .popUntil((route) => route.isFirst);
-                              },
-                            ),
-                            transitionsBuilder: (context, animation,
-                                secondaryAnimation, child) {
-                              // Custom Zoom + Fade Transition
-                              var curve = Curves.easeOutBack;
-                              var scaleTween =
-                                  Tween<double>(begin: 0.8, end: 1.0)
-                                      .chain(CurveTween(curve: curve));
-                              var fadeTween =
-                                  Tween<double>(begin: 0.0, end: 1.0);
-
-                              return FadeTransition(
-                                opacity: animation.drive(fadeTween),
-                                child: ScaleTransition(
-                                  scale: animation.drive(scaleTween),
-                                  child: child,
-                                ),
-                              );
-                            },
-                            transitionDuration: const Duration(
-                                milliseconds:
-                                    500), // Slightly slower for Victory
+                  }
+                }
+              },
+              child: Scaffold(
+                extendBodyBehindAppBar: true,
+                appBar: AppBar(
+                  iconTheme: IconThemeData(color: colors.primary),
+                  title: Text(
+                    l10n.straightPool,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      shadows: [
+                        const Shadow(
+                            blurRadius: 3,
+                            color: Colors.black87,
+                            offset: Offset(1, 1)),
+                        Shadow(
+                            blurRadius: 6,
+                            color: colors.primary.withOpacity(0.5),
+                            offset: const Offset(0, 0)),
+                      ],
+                    ),
+                  ),
+                  leading:
+                      null, // Allow default drawer icon if needed, or remove if strictly no menu desired
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.analytics_outlined),
+                      color: colors.primary,
+                      tooltip: l10n.details,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DetailsScreen(gameState: gameState),
                           ),
                         );
-                      });
-                    }
-
-                    return Column(
-                      children: [
-                        // Race to XX / Inning Counter - Fades from prominent to compact
-                        AnimatedOpacity(
-                          opacity: !gameState.gameStarted ? 1.0 : 0.0,
-                          duration: const Duration(milliseconds: 800),
-                          child: !gameState.gameStarted
-                              ? Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Text(
-                                    'Race to ${gameState.raceToScore}',
-                                    style: theme.textTheme.headlineMedium
-                                        ?.copyWith(
-                                      color: colors.accent,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 32,
-                                      shadows: [
-                                        const Shadow(
-                                            blurRadius: 4,
-                                            color: Colors.black,
-                                            offset: Offset(2, 2)),
-                                        Shadow(
-                                            blurRadius: 8,
-                                            color:
-                                                colors.accent.withValues(alpha: 0.6)),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(gameState.settings.fastScoreInputEnabled
+                          ? Icons.grid_view
+                          : Icons.speed),
+                      color: colors.primary,
+                      tooltip: 'Toggle Fast Input',
+                      onPressed: () {
+                        final newSettings = gameState.settings.copyWith(
+                          fastScoreInputEnabled:
+                              !gameState.settings.fastScoreInputEnabled,
+                        );
+                        gameState.updateSettings(newSettings);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      color: colors.primary,
+                      tooltip: l10n.settings,
+                      onPressed: openSettings,
+                    ),
+                  ],
+                ),
+                drawer: Drawer(
+                  elevation: 100, // High elevation to appear above overlays
+                  backgroundColor: colors.backgroundMain, // Themed background
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      DrawerHeader(
+                        decoration: BoxDecoration(
+                          color:
+                              colors.backgroundCard, // Themed header background
                         ),
-                        AnimatedOpacity(
-                          opacity: gameState.gameStarted ? 1.0 : 0.0,
-                          duration: const Duration(milliseconds: 800),
-                          child: gameState.gameStarted
-                              ? Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      // Left: Inning
-                                      RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: '${l10n.inning}: ',
-                                              style: theme.textTheme.titleMedium
-                                                  ?.copyWith(
-                                                color: colors.primary,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
+                        child: Center(
+                          child: Text(
+                            l10n.appTitle,
+                            style: theme.textTheme.displayMedium?.copyWith(
+                              color: colors.primary, // Themed text
+                              fontSize: 24,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.refresh, color: colors.primary),
+                        title: Text(l10n.restartGame,
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: colors.textMain)),
+                        onTap: showRestartConfirmation,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.flag_outlined,
+                            color:
+                                colors.warning), // Warning color for giving up
+                        title: Text(l10n.giveUp,
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: colors.textMain)),
+                        onTap: showGiveUpConfirmation,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.menu_book, color: colors.primary),
+                        title: Text(l10n.gameRules,
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: colors.textMain)),
+                        onTap: showRulesPopup,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.settings, color: colors.primary),
+                        title: Text(l10n.settings,
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: colors.textMain)),
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await openSettings();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                body: ThemedBackground(
+                  child: SafeArea(
+                    child: Consumer<GameState>(
+                      builder: (context, gameState, child) {
+                        // Game Events moved to GameEventOverlay
+
+                        // Reset completion flag if game is no longer over (after undo)
+                        if (!gameState.gameOver && _isCompletedSaved) {
+                          _isCompletedSaved = false;
+                        }
+
+                        // Check gameOver flag, not scores (prevents re-trigger after undo)
+                        if (gameState.gameOver &&
+                            gameState.winner != null &&
+                            !_isCompletedSaved) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _saveCompletedGame(gameState);
+                            // Navigate to victory screen with Zoom Transition
+                            // Use PUSH instead of PUSH REPLACEMENT to preserve GameState/Undo Stack
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        VictorySplash(
+                                  player1: gameState.players[0],
+                                  player2: gameState.players[1],
+                                  winner: gameState.winner!,
+                                  raceToScore: gameState.raceToScore,
+                                  inningRecords: gameState.inningRecords,
+                                  elapsedDuration: gameState.elapsedDuration,
+                                  onUndo: () {
+                                    // Undo the winning shot
+                                    gameState.undo();
+                                    Navigator.of(context).pop();
+                                  },
+                                  onNewGame: () {
+                                    // Pop until home, then show new game settings
+                                    Navigator.of(context)
+                                        .popUntil((route) => route.isFirst);
+                                    // Use post-frame callback to show modal after navigation settles
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      final homeContext =
+                                          Navigator.of(context).context;
+                                      // Access HomeScreen's showNewGameSettings method
+                                      // Note: We can't directly call it, so we'll replicate the modal logic
+                                      final achievementManager =
+                                          Provider.of<AchievementManager>(
+                                              homeContext,
+                                              listen: false);
+                                      showModalBottomSheet(
+                                        context: homeContext,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (modalContext) =>
+                                            NewGameSettingsScreen(
+                                          onStartGame: (settings) {
+                                            Navigator.pop(modalContext);
+                                            Navigator.push(
+                                              homeContext,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ChangeNotifierProvider(
+                                                  create: (_) => GameState(
+                                                    settings: settings,
+                                                    achievementManager:
+                                                        achievementManager,
+                                                    shotEventService:
+                                                        ShotEventService(
+                                                            db: appDatabase),
+                                                  ),
+                                                  child: GameScreen(
+                                                    settings: settings,
+                                                    onSettingsChanged:
+                                                        (newSettings) {},
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                            TextSpan(
-                                              text:
-                                                  '${gameState.currentPlayer.currentInning}',
-                                              style: theme
-                                                  .textTheme.headlineSmall
-                                                  ?.copyWith(
-                                                color: colors.accent,
-                                                fontWeight: FontWeight.w900,
-                                                fontSize: 28,
-                                                shadows: [
-                                                  const Shadow(
-                                                      blurRadius: 3,
-                                                      color: Colors.black,
-                                                      offset: Offset(1, 1)),
-                                                ],
-                                              ),
-                                            ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    });
+                                  },
+                                  onExit: () {
+                                    Navigator.of(context)
+                                        .popUntil((route) => route.isFirst);
+                                  },
+                                ),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  // Custom Zoom + Fade Transition
+                                  var curve = Curves.easeOutBack;
+                                  var scaleTween =
+                                      Tween<double>(begin: 0.8, end: 1.0)
+                                          .chain(CurveTween(curve: curve));
+                                  var fadeTween =
+                                      Tween<double>(begin: 0.0, end: 1.0);
+
+                                  return FadeTransition(
+                                    opacity: animation.drive(fadeTween),
+                                    child: ScaleTransition(
+                                      scale: animation.drive(scaleTween),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                transitionDuration: const Duration(
+                                    milliseconds:
+                                        500), // Slightly slower for Victory
+                              ),
+                            );
+                          });
+                        }
+
+                        return Column(
+                          children: [
+                            // Race to XX / Inning Counter - Fades from prominent to compact
+                            AnimatedOpacity(
+                              opacity: !gameState.gameStarted ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 800),
+                              child: !gameState.gameStarted
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      child: Text(
+                                        'Race to ${gameState.raceToScore}',
+                                        style: theme.textTheme.headlineMedium
+                                            ?.copyWith(
+                                          color: colors.accent,
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 32,
+                                          shadows: [
+                                            const Shadow(
+                                                blurRadius: 4,
+                                                color: Colors.black,
+                                                offset: Offset(2, 2)),
+                                            Shadow(
+                                                blurRadius: 8,
+                                                color: colors.accent
+                                                    .withOpacity(0.6)),
                                           ],
                                         ),
                                       ),
-                                      // Spacer
-                                      const SizedBox(width: 32),
-                                      // Right: Race to
-                                      RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: '${l10n.raceTo} ',
-                                              style: theme.textTheme.titleMedium
-                                                  ?.copyWith(
-                                                color: colors.primary
-                                                    .withValues(alpha: 0.8),
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                              ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                            AnimatedOpacity(
+                              opacity: gameState.gameStarted ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 800),
+                              child: gameState.gameStarted
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          // Left: Inning
+                                          RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: '${l10n.inning}: ',
+                                                  style: theme
+                                                      .textTheme.titleMedium
+                                                      ?.copyWith(
+                                                    color: colors.primary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text:
+                                                      '${gameState.currentPlayer.currentInning}',
+                                                  style: theme
+                                                      .textTheme.headlineSmall
+                                                      ?.copyWith(
+                                                    color: colors.accent,
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 28,
+                                                    shadows: [
+                                                      const Shadow(
+                                                          blurRadius: 3,
+                                                          color: Colors.black,
+                                                          offset: Offset(1, 1)),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            TextSpan(
-                                              text: '${gameState.raceToScore}',
-                                              style: theme
-                                                  .textTheme.headlineSmall
-                                                  ?.copyWith(
-                                                color: colors
-                                                    .accent, // Green to match Inning
-                                                fontWeight: FontWeight.w900,
-                                                fontSize: 28,
-                                                shadows: [
-                                                  const Shadow(
-                                                      blurRadius: 3,
-                                                      color: Colors.black,
-                                                      offset: Offset(1, 1)),
-                                                ],
-                                              ),
+                                          ),
+                                          // Spacer
+                                          const SizedBox(width: 32),
+                                          // Right: Race to
+                                          RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: '${l10n.raceTo} ',
+                                                  style: theme
+                                                      .textTheme.titleMedium
+                                                      ?.copyWith(
+                                                    color: colors.primary
+                                                        .withOpacity(0.8),
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text:
+                                                      '${gameState.raceToScore}',
+                                                  style: theme
+                                                      .textTheme.headlineSmall
+                                                      ?.copyWith(
+                                                    color: colors
+                                                        .accent, // Green to match Inning
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 28,
+                                                    shadows: [
+                                                      const Shadow(
+                                                          blurRadius: 3,
+                                                          color: Colors.black,
+                                                          offset: Offset(1, 1)),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                            // Z-INDEX FIX: Use VerticalDirection.up to paint Clock FIRST, then Plaques ON TOP
+                            // Layout: Bottom (First Child in List) -> Top (Last Child in List) in placement?
+                            // No: Column with VerticalDirection.up places children from bottom to top.
+                            // Order in List: [Clock, Plaques]
+                            // Layout: Clock at Bottom, Plaques above it.
+                            // Paint Order: Clock (index 0) paints first. Plaques (index 1) paints second.
+                            // Result: Plaques paint ON TOP of Clock.
+                            Column(
+                              verticalDirection: VerticalDirection.up,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // CLOCK (Bottom position, painted first)
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                                  child: GameClock(),
+                                ),
+
+                                // 1. Players & Scores Header (Top position, painted second)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: colors.backgroundCard,
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: colors.primary, width: 2)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: PlayerPlaque(
+                                            key: _p1PlaqueKey,
+                                            player: gameState.players[0],
+                                            raceToScore: gameState.raceToScore,
+                                            isLeft: true),
+                                      ),
+                                      // Switch Button or Spacer
+                                      if (!isTrainingMode &&
+                                          !gameState.gameStarted &&
+                                          gameState.matchLog.isEmpty)
+                                        IconButton(
+                                          icon: const Icon(Icons.swap_horiz,
+                                              size: 28),
+                                          color: colors.accent,
+                                          onPressed:
+                                              gameState.swapStartingPlayer,
+                                          tooltip: 'Swap Sides',
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                        )
+                                      else
+                                        const SizedBox(width: 12),
+                                      Expanded(
+                                        child: isTrainingMode
+                                            ? _buildTrainingStatsPanel(
+                                                context, gameState)
+                                            : PlayerPlaque(
+                                                key: _p2PlaqueKey,
+                                                player: gameState.players[1],
+                                                raceToScore:
+                                                    gameState.raceToScore,
+                                                isLeft: false),
                                       ),
                                     ],
                                   ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                        // Z-INDEX FIX: Use VerticalDirection.up to paint Clock FIRST, then Plaques ON TOP
-                        // Layout: Bottom (First Child in List) -> Top (Last Child in List) in placement?
-                        // No: Column with VerticalDirection.up places children from bottom to top.
-                        // Order in List: [Clock, Plaques]
-                        // Layout: Clock at Bottom, Plaques above it.
-                        // Paint Order: Clock (index 0) paints first. Plaques (index 1) paints second.
-                        // Result: Plaques paint ON TOP of Clock.
-                        Column(
-                          verticalDirection: VerticalDirection.up,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // CLOCK (Bottom position, painted first)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: GameClock(),
+                                ),
+                              ],
                             ),
 
-                            // 1. Players & Scores Header (Top position, painted second)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: colors.backgroundCard,
-                                border: Border(
-                                    bottom: BorderSide(
-                                        color: colors.primary, width: 2)),
-                              ),
+                            // 4. Notification / Last Action (Overlay)
+                            // Using SizedBox to prevent jump
+                            SizedBox(
+                              height: 24,
+                              width: double.infinity,
+                              child: gameState.lastAction != null
+                                  ? Container(
+                                      // Removed background color as requested
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4),
+                                      child: Text(
+                                        gameState.lastAction!.toUpperCase(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: colors
+                                              .primary, // Text is now primary color
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          shadows: [
+                                            Shadow(
+                                              blurRadius: 2,
+                                              color: Colors.black
+                                                  .withOpacity(0.8),
+                                              offset: const Offset(1, 1),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                            ),
+
+                            // 5. Ball Rack (Expanded to fill remaining space)
+                            Expanded(
+                              child: gameState.settings.fastScoreInputEnabled
+                                  ? const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(16.0),
+                                        child: FastScoreInput(),
+                                      ),
+                                    )
+                                  : Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Decorative Gears behind the rack
+                                        if (colors.themeId == 'steampunk')
+                                          Opacity(
+                                            opacity: 0.1,
+                                            child: Image.asset(
+                                                'assets/images/ui/gears.png',
+                                                fit: BoxFit.contain),
+                                          ),
+                                        // The Rack
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(
+                                                16.0), // Reduced padding
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: _buildRackFormation(
+                                                    context, gameState),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+
+                            // P0-02: Persistent Undo/Redo Action Rail (Match Footer)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: PlayerPlaque(
-                                        key: _p1PlaqueKey,
-                                        player: gameState.players[0],
-                                        raceToScore: gameState.raceToScore,
-                                        isLeft: true),
+                                    child: ElevatedButton.icon(
+                                      onPressed: (!_isInputLocked &&
+                                              gameState.canUndo)
+                                          ? () =>
+                                              _handleInteraction(gameState.undo)
+                                          : null,
+                                      icon: const Icon(Icons.undo),
+                                      label: Text(l10n.undo.toUpperCase()),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: colors.backgroundCard,
+                                        foregroundColor: colors.primary,
+                                        disabledBackgroundColor: colors
+                                            .backgroundCard
+                                            .withOpacity(0.45),
+                                        disabledForegroundColor: colors.textMain
+                                            .withOpacity(0.35),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                        side: BorderSide(
+                                            color: colors.primary
+                                                .withOpacity(0.45)),
+                                      ),
+                                    ),
                                   ),
-                                  // Switch Button or Spacer
-                                  if (!isTrainingMode &&
-                                      !gameState.gameStarted &&
-                                      gameState.matchLog.isEmpty)
-                                    IconButton(
-                                      icon: const Icon(Icons.swap_horiz, size: 28),
-                                      color: colors.accent,
-                                      onPressed: gameState.swapStartingPlayer,
-                                      tooltip: 'Swap Sides',
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                    )
-                                  else
-                                    const SizedBox(width: 12),
+                                  const SizedBox(width: 10),
                                   Expanded(
-                                    child: isTrainingMode
-                                        ? _buildTrainingStatsPanel(context, gameState)
-                                        : PlayerPlaque(
-                                            key: _p2PlaqueKey,
-                                            player: gameState.players[1],
-                                            raceToScore: gameState.raceToScore,
-                                            isLeft: false),
+                                    child: ElevatedButton.icon(
+                                      onPressed: (!_isInputLocked &&
+                                              gameState.canRedo)
+                                          ? () =>
+                                              _handleInteraction(gameState.redo)
+                                          : null,
+                                      icon: const Icon(Icons.redo),
+                                      label: Text(l10n.redo.toUpperCase()),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: colors.backgroundCard,
+                                        foregroundColor: colors.accent,
+                                        disabledBackgroundColor: colors
+                                            .backgroundCard
+                                            .withOpacity(0.45),
+                                        disabledForegroundColor: colors.textMain
+                                            .withOpacity(0.35),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                        side: BorderSide(
+                                            color: colors.accent
+                                                .withOpacity(0.45)),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
 
-                        // 4. Notification / Last Action (Overlay)
-                        // Using SizedBox to prevent jump
-                        SizedBox(
-                          height: 24,
-                          width: double.infinity,
-                          child: gameState.lastAction != null
-                              ? Container(
-                                  // Removed background color as requested
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4),
-                                  child: Text(
-                                    gameState.lastAction!.toUpperCase(),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: colors.primary, // Text is now primary color
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      shadows: [
-                                        Shadow(
-                                          blurRadius: 2,
-                                          color: Colors.black.withValues(alpha: 0.8),
-                                          offset: const Offset(1, 1),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              : null,
-                        ),
-
-                        // 5. Ball Rack (Expanded to fill remaining space)
-                        Expanded(
-                          child: gameState.settings.fastScoreInputEnabled
-                              ? const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: FastScoreInput(),
-                                  ),
-                                )
-                              : Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    // Decorative Gears behind the rack
-                                    if (colors.themeId == 'steampunk')
-                                      Opacity(
-                                        opacity: 0.1,
-                                        child: Image.asset(
-                                            'assets/images/ui/gears.png',
-                                            fit: BoxFit.contain),
-                                      ),
-                                    // The Rack
-                                    Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(
-                                            16.0), // Reduced padding
-                                        child: FittedBox(
-                                          fit: BoxFit.contain,
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: _buildRackFormation(
-                                                context, gameState),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                        ),
-
-                        // Controls
-                        // Controls (COMPACT)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          child: Row(
-                            children: [
-                            // Foul Button (Toggle)
-                            GameControlButton(
-                              text: gameState.foulMode == FoulMode.none
-                                  ? 'NO FOUL'
-                                  : (gameState.foulMode == FoulMode.normal
-                                      ? 'FOUL'
-                                      : 'BREAK FOUL'),
-                              subText: gameState.foulMode == FoulMode.none
-                                  ? null
-                                  : (gameState.foulMode == FoulMode.normal
-                                      ? '-1'
-                                      : '-2'),
-                              isActive: gameState.foulMode != FoulMode.none,
-                              activeColor: colors.danger,
-                              isGuarded: _isInputLocked,
-                              onPressed: () {
-                                
-                                // Cycle: None -> Normal -> Severe -> None
-                                FoulMode next;
-                                switch (gameState.foulMode) {
-                                  case FoulMode.none:
-                                    next = FoulMode.normal;
-                                    break;
-                                  case FoulMode.normal:
-                                    next = gameState.canBreakFoul
-                                        ? FoulMode.severe
-                                        : FoulMode.none;
-                                    break;
-                                  case FoulMode.severe:
-                                    next = FoulMode.none;
-                                    break;
-                                }
-                                _handleInteraction(() => gameState.setFoulMode(next));
-                              },
-                            ),
-                            
-                            const SizedBox(width: 12),
-                            
-                            // Safe Button (Toggle)
-                            GameControlButton(
-                              text: 'SAFE',
-                              isActive: gameState.isSafeMode,
-                              activeColor: const Color(0xFF4CAF50), // Green for Safe
-                              isGuarded: _isInputLocked,
-                              onPressed: gameState.gameOver
-                                  ? () {}
-                                  : () {
-                                      _handleInteraction(() => gameState.toggleSafeMode());
+                            // Controls
+                            // Controls (COMPACT)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child: Row(
+                                children: [
+                                  // Foul Button (Toggle)
+                                  GameControlButton(
+                                    text: gameState.foulMode == FoulMode.none
+                                        ? 'NO FOUL'
+                                        : (gameState.foulMode == FoulMode.normal
+                                            ? 'FOUL'
+                                            : 'BREAK FOUL'),
+                                    subText: gameState.foulMode == FoulMode.none
+                                        ? null
+                                        : (gameState.foulMode == FoulMode.normal
+                                            ? '-1'
+                                            : '-2'),
+                                    isActive:
+                                        gameState.foulMode != FoulMode.none,
+                                    activeColor: colors.danger,
+                                    isGuarded: _isInputLocked,
+                                    onPressed: () {
+                                      // Cycle: None -> Normal -> Severe -> None
+                                      FoulMode next;
+                                      switch (gameState.foulMode) {
+                                        case FoulMode.none:
+                                          next = FoulMode.normal;
+                                          break;
+                                        case FoulMode.normal:
+                                          next = gameState.canBreakFoul
+                                              ? FoulMode.severe
+                                              : FoulMode.none;
+                                          break;
+                                        case FoulMode.severe:
+                                          next = FoulMode.none;
+                                          break;
+                                      }
+                                      _handleInteraction(
+                                          () => gameState.setFoulMode(next));
                                     },
-                            ),
-                            ],
-                          ),
-                        ),
+                                  ),
 
-                        const SizedBox(height: 8),
-                      ],
+                                  const SizedBox(width: 12),
+
+                                  // Safe Button (Toggle)
+                                  GameControlButton(
+                                    text: 'SAFE',
+                                    isActive: gameState.isSafeMode,
+                                    activeColor: const Color(
+                                        0xFF4CAF50), // Green for Safe
+                                    isGuarded: _isInputLocked,
+                                    onPressed: gameState.gameOver
+                                        ? () {}
+                                        : () {
+                                            _handleInteraction(() =>
+                                                gameState.toggleSafeMode());
+                                          },
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Achievement Splash now shown via Navigator.push (see initState)
+
+            // Pause Overlay
+            const PauseOverlay(),
+
+            // Red Flash Overlay (For Triple Foul)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _screenShakeController,
+                  builder: (context, child) {
+                    return ColoredBox(
+                      color: Colors.red.withValues(
+                          alpha: _screenShakeOffset.value.dx.clamp(0.0, 1.0)),
                     );
                   },
                 ),
               ),
             ),
-          ),
-        ),
 
-        // Achievement Splash now shown via Navigator.push (see initState)
-
-        // Pause Overlay
-        const PauseOverlay(),
-        
-        // Red Flash Overlay (For Triple Foul)
-        Positioned.fill(
-          child: IgnorePointer(
-            child: AnimatedBuilder(
-              animation: _screenShakeController,
-              builder: (context, child) {
-                return ColoredBox(
-                  color: Colors.red.withValues(alpha: _screenShakeOffset.value.dx.clamp(0.0, 1.0)),
-                );
-              },
-            ),
-          ),
-        ),
-
-        // Unified Game Event System (Splashes)
-        const GameEventOverlay(),
-      ],
-    ), // Close Stack
-    ), // Close AbsorbPointer
-   ); // Close NotificationListener
+            // Unified Game Event System (Splashes)
+            const GameEventOverlay(),
+          ],
+        ), // Close Stack
+      ), // Close AbsorbPointer
+    ); // Close NotificationListener
   }
 
   List<Widget> _buildRackFormation(BuildContext context, GameState gameState) {
@@ -1368,14 +1446,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final rackWidth = 5 * diameter;
     final rackHeight = 4 * verticalOffset + diameter;
 
-
-
     // Helper to determine if a ball is interactive based on game state
     bool canInteractWithBall(GameState state, int ballNumber) {
       if (state.gameOver) return false;
 
       // 1. Terminating Actions (Safe, Foul, Break Foul) disable Continuation Actions (0, 1)
-      bool isTerminatorActive = state.isSafeMode || state.foulMode != FoulMode.none;
+      bool isTerminatorActive =
+          state.isSafeMode || state.foulMode != FoulMode.none;
       if (isTerminatorActive && (ballNumber == 0 || ballNumber == 1)) {
         return false;
       }
@@ -1387,7 +1464,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       }
 
       // 3. Table Presence (for 1-15)
-      // Ball 0 (Double Sack) is virtual/always present unless cleared. 
+      // Ball 0 (Double Sack) is virtual/always present unless cleared.
       // This check is usually done by caller for opacity, but for interactability:
       if (ballNumber != 0 && !state.activeBalls.contains(ballNumber)) {
         return false;
@@ -1446,47 +1523,50 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   child: Builder(
                     builder: (context) {
                       final int ballNum = rows[r][c];
-                      final bool isOnTable = gameState.activeBalls.contains(ballNum);
-                      
+                      final bool isOnTable =
+                          gameState.activeBalls.contains(ballNum);
+
                       // Use centralized helper
-                      final bool isInteractable = canInteractWithBall(gameState, ballNum);
-                      
-                      final double targetOpacity = !isOnTable ? 0.15 : (isInteractable ? 1.0 : 0.5);
+                      final bool isInteractable =
+                          canInteractWithBall(gameState, ballNum);
+
+                      final double targetOpacity =
+                          !isOnTable ? 0.15 : (isInteractable ? 1.0 : 0.5);
 
                       return AnimatedBuilder(
-                    animation: _rackAnimationController,
-                    builder: (context, child) {
-                      // Sequential Fade In Logic
-                      int flatIndex = 0;
-                      for (int i = 0; i < r; i++) {
-                        flatIndex += rows[i].length;
-                      }
-                      flatIndex += c;
+                        animation: _rackAnimationController,
+                        builder: (context, child) {
+                          // Sequential Fade In Logic
+                          int flatIndex = 0;
+                          for (int i = 0; i < r; i++) {
+                            flatIndex += rows[i].length;
+                          }
+                          flatIndex += c;
 
-                      final double start = flatIndex * 0.05;
-                      final double end = start + 0.3;
+                          final double start = flatIndex * 0.05;
+                          final double end = start + 0.3;
 
-                      final animOpacity = Curves.easeOut.transform(
-                          ((_rackAnimationController.value - start) /
-                                  (end - start))
-                              .clamp(0.0, 1.0));
+                          final animOpacity = Curves.easeOut.transform(
+                              ((_rackAnimationController.value - start) /
+                                      (end - start))
+                                  .clamp(0.0, 1.0));
 
-                      return Opacity(
-                        opacity: animOpacity,
-                        child: child,
+                          return Opacity(
+                            opacity: animOpacity,
+                            child: child,
+                          );
+                        },
+                        child: BallButton(
+                          ballNumber: ballNum,
+                          isActive: isInteractable,
+                          opacity: targetOpacity,
+                          onTap: () => handleTap(ballNum),
+                        ),
                       );
                     },
-                    child: BallButton(
-                      ballNumber: ballNum,
-                      isActive: isInteractable,
-                      opacity: targetOpacity, 
-                      onTap: () => handleTap(ballNum),
-                    ),
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
-          ),
 
           // Cue Ball (Double Sack)
           // Moved closer to Ball 1 (left: 0) to avoid cutoff.
@@ -1500,7 +1580,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: diameter,
                   height: diameter,
-                    child: BallButton(
+                  child: BallButton(
                     ballNumber: 0,
                     isActive: canInteractWithBall(gameState, 0),
                     // Cue Ball always visible if game not over, or handled by rack animation
@@ -1544,6 +1624,4 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       rackStack,
     ];
   }
-
-
 }

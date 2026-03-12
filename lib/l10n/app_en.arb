@@ -219,5 +219,7 @@
     }
   },
   "actionRestrictedTitle": "Action Restricted",
-  "terminatorExclusionMessage": "Safe/Foul ends the inning; re-rack actions are disabled."
+  "terminatorExclusionMessage": "Safe/Foul ends the inning; re-rack actions are disabled.",
+  "miss": "Miss",
+  "confirm": "Confirm"
 }

@@ -2,6 +2,8 @@ import 'rules_state.dart';
 import 'rule_outcome.dart';
 import '../../core/actions/game_action.dart';
 import '../../models/game_settings.dart';
+import '../../models/player.dart';
+export '../../models/player.dart';
 
 /// Abstract interface for game-specific rules plugins.
 /// 
@@ -72,11 +74,4 @@ class InningData {
   });
 }
 
-// Player class will be imported from existing models
-// This is a placeholder to prevent errors during interface definition
-class Player {
-  final String name;
-  int score;
-  
-  Player({required this.name, this.score = 0});
-}
+// Player class is now imported from existing models
