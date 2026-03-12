@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/practice_drill.dart';
 import '../services/practice_service.dart';
 import '../widgets/fullscreen_image_viewer.dart';
+import '../widgets/drill_visualizer.dart';
 import '../utils/ui_utils.dart';
 
 class PracticeAcademyScreen extends StatefulWidget {
@@ -310,9 +311,8 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
             onTap: () => _showFullscreenImage(drill),
             child: Hero(
               tag: drill.imageAsset,
-              child: Image.asset(
-                drill.imageAsset,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.fitness_center),
+              child: DrillVisualizer(
+                imageAsset: drill.imageAsset,
                 fit: BoxFit.cover,
               ),
             ),
@@ -339,12 +339,9 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.asset(
-                            drill.imageAsset,
+                          DrillVisualizer(
+                            imageAsset: drill.imageAsset,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => const Center(
-                              child: Icon(Icons.fitness_center, size: 48),
-                            ),
                           ),
                           Positioned(
                             bottom: 8,

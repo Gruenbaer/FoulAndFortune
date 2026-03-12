@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'drill_visualizer.dart';
 
 /// A fullscreen image viewer with pinch-to-zoom and pan support.
 class FullscreenImageViewer extends StatelessWidget {
@@ -24,20 +25,9 @@ class FullscreenImageViewer extends StatelessWidget {
               maxScale: 4.0,
               child: Hero(
                 tag: imageAsset,
-                child: Image.asset(
-                  imageAsset,
+                child: DrillVisualizer(
+                  imageAsset: imageAsset,
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.broken_image, color: Colors.white54, size: 64),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Bild konnte nicht geladen werden',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),
