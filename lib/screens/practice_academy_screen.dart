@@ -104,13 +104,7 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
   }
 
   void _showFullscreenImage(PracticeDrill drill) {
-    showZoomDialog(
-      context: context,
-      builder: (context) => FullscreenImageViewer(
-        imageAsset: drill.imageAsset,
-        title: drill.title,
-      ),
-    );
+    // Images are not clickable as requested
   }
 
   @override
@@ -307,14 +301,11 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
             color: theme.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: InkWell(
-            onTap: () => _showFullscreenImage(drill),
-            child: Hero(
-              tag: drill.imageAsset,
-              child: DrillVisualizer(
-                imageAsset: drill.imageAsset,
-                fit: BoxFit.cover,
-              ),
+          child: Hero(
+            tag: drill.imageAsset,
+            child: DrillVisualizer(
+              imageAsset: drill.imageAsset,
+              fit: BoxFit.cover,
             ),
           ),
         ),
@@ -327,41 +318,21 @@ class _PracticeAcademyScreenState extends State<PracticeAcademyScreen> {
                 Text('Ziel:', style: theme.textTheme.titleSmall),
                 Text(drill.goal),
                 const SizedBox(height: 12),
-                // Large Preview Image
+                // Large Preview Image (Non-clickable)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     height: 180,
                     width: double.infinity,
                     color: theme.colorScheme.surfaceVariant,
-                    child: InkWell(
-                      onTap: () => _showFullscreenImage(drill),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          DrillVisualizer(
-                            imageAsset: drill.imageAsset,
-                            fit: BoxFit.cover,
-                          ),
-                          Positioned(
-                            bottom: 8,
-                            right: 8,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Icon(Icons.fullscreen, color: Colors.white, size: 20),
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: DrillVisualizer(
+                      imageAsset: drill.imageAsset,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text('Beschreibung:', style: theme.textTheme.titleSmall),
+                Text('Aufbau & Ablauf:', style: theme.textTheme.titleSmall),
                 Text(drill.description),
                 const SizedBox(height: 12),
                 Row(

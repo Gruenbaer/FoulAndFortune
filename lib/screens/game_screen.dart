@@ -786,20 +786,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       },
                     ),
                     IconButton(
-                      icon: Icon(gameState.settings.fastScoreInputEnabled
-                          ? Icons.grid_view
-                          : Icons.speed),
-                      color: colors.primary,
-                      tooltip: 'Toggle Fast Input',
-                      onPressed: () {
-                        final newSettings = gameState.settings.copyWith(
-                          fastScoreInputEnabled:
-                              !gameState.settings.fastScoreInputEnabled,
-                        );
-                        gameState.updateSettings(newSettings);
-                      },
-                    ),
-                    IconButton(
                       icon: const Icon(Icons.settings),
                       color: colors.primary,
                       tooltip: l10n.settings,
@@ -1203,43 +1189,36 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
                             // 5. Ball Rack (Expanded to fill remaining space)
                             Expanded(
-                              child: gameState.settings.fastScoreInputEnabled
-                                  ? const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(16.0),
-                                        child: FastScoreInput(),
-                                      ),
-                                    )
-                                  : Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        // Decorative Gears behind the rack
-                                        if (colors.themeId == 'steampunk')
-                                          Opacity(
-                                            opacity: 0.1,
-                                            child: Image.asset(
-                                                'assets/images/ui/gears.png',
-                                                fit: BoxFit.contain),
-                                          ),
-                                        // The Rack
-                                        Center(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(
-                                                16.0), // Reduced padding
-                                            child: FittedBox(
-                                              fit: BoxFit.contain,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: _buildRackFormation(
-                                                    context, gameState),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Decorative Gears behind the rack
+                                  if (colors.themeId == 'steampunk')
+                                    Opacity(
+                                      opacity: 0.1,
+                                      child: Image.asset(
+                                          'assets/images/ui/gears.png',
+                                          fit: BoxFit.contain),
                                     ),
+                                  // The Rack
+                                  Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(
+                                          16.0), // Reduced padding
+                                      child: FittedBox(
+                                        fit: BoxFit.contain,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: _buildRackFormation(
+                                              context, gameState),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
 
                             // P0-02: Persistent Undo/Redo Action Rail (Match Footer)
@@ -1265,7 +1244,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                         disabledForegroundColor: colors.textMain
                                             .withOpacity(0.35),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 12),
+                                            vertical: 24),
                                         side: BorderSide(
                                             color: colors.primary
                                                 .withOpacity(0.45)),
@@ -1291,7 +1270,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                         disabledForegroundColor: colors.textMain
                                             .withOpacity(0.35),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 12),
+                                            vertical: 24),
                                         side: BorderSide(
                                             color: colors.accent
                                                 .withOpacity(0.45)),
@@ -1412,7 +1391,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // Account for UI elements: AppBar, Stats, Clock, Controls, Padding
     // AppBar ~56, Stats ~36, Clock ~32, Controls ~80, Padding ~50
-    final availableHeight = screenHeight - 254;
+    final availableHeight = screenHeight - 350;
     final availableWidth = screenWidth - 32; // 16px padding on each side
 
     // Calculate maximum ball size based on constraints
