@@ -19,6 +19,7 @@ import '../theme/fortune_theme.dart';
 import '../services/game_history_service.dart';
 import '../widgets/video_logo.dart';
 import '../services/shot_event_service.dart';
+import '../services/player_service.dart';
 import '../data/app_database.dart'; // For appDatabase global
 
 class HomeScreen extends StatefulWidget {
@@ -92,12 +93,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // to avoid context issues when the modal is dismissed
     final achievementManager =
         Provider.of<AchievementManager>(context, listen: false);
+    final playerService = PlayerService(db: appDatabase);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (modalContext) => NewGameSettingsScreen(
+        playerService: playerService,
         onStartGame: (settings) {
           Navigator.pop(modalContext);
           Navigator.push(

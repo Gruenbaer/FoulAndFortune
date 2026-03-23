@@ -28,6 +28,7 @@ import '../services/player_service.dart' as stats; // For stats fetching
 import '../utils/ui_utils.dart'; // Zoom Dialog Helper
 import '../services/shot_event_service.dart';
 import '../data/app_database.dart';
+import '../main.dart' as app;
 
 class GameScreen extends StatefulWidget {
   final GameSettings settings;
@@ -92,6 +93,86 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         }
       });
     }
+  }
+
+  void _showNewGameSetupFromHome() {
+    final rootContext = app.navigatorKey.currentContext;
+    if (rootContext == null) return;
+
+    final rootNavigator = Navigator.of(rootContext, rootNavigator: true);
+    rootNavigator.popUntil((route) => route.isFirst);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final homeContext = app.navigatorKey.currentContext;
+      if (homeContext == null) return;
+
+      final achievementManager =
+          Provider.of<AchievementManager>(homeContext, listen: false);
+      final playerService = stats.PlayerService(db: appDatabase);
+
+      showModalBottomSheet(
+        context: homeContext,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (modalContext) => NewGameSettingsScreen(
+          playerService: playerService,
+          onStartGame: (settings) {
+            Navigator.pop(modalContext);
+            Navigator.push(
+              homeContext,
+              MaterialPageRoute(
+                builder: (context) => ChangeNotifierProvider(
+                  create: (_) => GameState(
+                    settings: settings,
+                    achievementManager: achievementManager,
+                    shotEventService: ShotEventService(db: appDatabase),
+                  ),
+                  child: GameScreen(
+                    settings: settings,
+                    onSettingsChanged: (newSettings) {
+                      Provider.of<Function(GameSettings)>(homeContext,
+                          listen: false)(newSettings);
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  void _showVictorySplash(GameState gameState, Player winner) {
+    if (_victoryShown) return;
+
+    _victoryShown = true;
+    _saveCompletedGame(gameState);
+
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => VictorySplash(
+          player1: gameState.players[0],
+          player2: gameState.players[1],
+          winner: winner,
+          raceToScore: gameState.raceToScore,
+          inningRecords: gameState.inningRecords,
+          elapsedDuration: gameState.elapsedDuration,
+          onUndo: () {
+            gameState.undo();
+            _victoryShown = false;
+            Navigator.of(context).pop();
+          },
+          onNewGame: _showNewGameSetupFromHome,
+          onExit: () {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          },
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
   }
 
   Future<void> _saveInProgressGame(GameState gameState) async {
@@ -506,49 +587,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     if (gameState.gameOver && gameState.winner != null) {
       // Use PostFrameCallback to avoid setstate during build
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Ensure we haven't already shown the victory screen (avoid loop)
-        // Checking if already popped?
-        // Actually, check if we are already showing it?
-        // GameState.gameOver sticks to true.
-        // We need a local flag to know if we've handled it.
-        // Or check if the top route is VictorySplash?
-        // Using a local flag is safest.
-        if (!_victoryShown) {
-          _victoryShown = true;
-          // Reuse the Concede logic which saves and pushes splash
-          // But concede calls finalize, which is already done by checkWinCondition
-          // So we just call the UI part:
-          _saveCompletedGame(gameState);
-          Navigator.of(context).push(
-            PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    VictorySplash(
-                      player1: gameState.players[0],
-                      player2: gameState.players[1],
-                      winner: gameState.winner!,
-                      raceToScore: gameState.raceToScore,
-                      inningRecords: gameState.inningRecords,
-                      elapsedDuration: gameState.elapsedDuration,
-                      onUndo: () {
-                        gameState.undo();
-                        _victoryShown = false; // Reset flag
-                        Navigator.of(context).pop();
-                      },
-                      onNewGame: () {
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
-                      },
-                      onExit: () {
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
-                      },
-                    ),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                }),
-          );
-        }
+        _showVictorySplash(gameState, gameState.winner!);
       });
     } else {
       // Reset flag if game is not over (e.g. undo happened)
@@ -617,33 +656,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       gameState.concedeGame(winner);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _saveCompletedGame(gameState);
-        Navigator.of(context).push(
-          PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  VictorySplash(
-                    player1: gameState.players[0],
-                    player2: gameState.players[1],
-                    winner: winner,
-                    raceToScore: gameState.raceToScore,
-                    inningRecords: gameState.inningRecords,
-                    elapsedDuration: gameState.elapsedDuration,
-                    onUndo: () {
-                      gameState.undo();
-                      Navigator.of(context).pop();
-                    },
-                    onNewGame: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
-                    onExit: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
-                  ),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(opacity: animation, child: child);
-              }),
-        );
+        _showVictorySplash(gameState, winner);
       });
     }
 
@@ -863,110 +876,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         // Reset completion flag if game is no longer over (after undo)
                         if (!gameState.gameOver && _isCompletedSaved) {
                           _isCompletedSaved = false;
-                        }
-
-                        // Check gameOver flag, not scores (prevents re-trigger after undo)
-                        if (gameState.gameOver &&
-                            gameState.winner != null &&
-                            !_isCompletedSaved) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            _saveCompletedGame(gameState);
-                            // Navigate to victory screen with Zoom Transition
-                            // Use PUSH instead of PUSH REPLACEMENT to preserve GameState/Undo Stack
-                            Navigator.of(context).push(
-                              PageRouteBuilder(
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) =>
-                                        VictorySplash(
-                                  player1: gameState.players[0],
-                                  player2: gameState.players[1],
-                                  winner: gameState.winner!,
-                                  raceToScore: gameState.raceToScore,
-                                  inningRecords: gameState.inningRecords,
-                                  elapsedDuration: gameState.elapsedDuration,
-                                  onUndo: () {
-                                    // Undo the winning shot
-                                    gameState.undo();
-                                    Navigator.of(context).pop();
-                                  },
-                                  onNewGame: () {
-                                    // Pop until home, then show new game settings
-                                    Navigator.of(context)
-                                        .popUntil((route) => route.isFirst);
-                                    // Use post-frame callback to show modal after navigation settles
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      final homeContext =
-                                          Navigator.of(context).context;
-                                      // Access HomeScreen's showNewGameSettings method
-                                      // Note: We can't directly call it, so we'll replicate the modal logic
-                                      final achievementManager =
-                                          Provider.of<AchievementManager>(
-                                              homeContext,
-                                              listen: false);
-                                      showModalBottomSheet(
-                                        context: homeContext,
-                                        isScrollControlled: true,
-                                        backgroundColor: Colors.transparent,
-                                        builder: (modalContext) =>
-                                            NewGameSettingsScreen(
-                                          onStartGame: (settings) {
-                                            Navigator.pop(modalContext);
-                                            Navigator.push(
-                                              homeContext,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ChangeNotifierProvider(
-                                                  create: (_) => GameState(
-                                                    settings: settings,
-                                                    achievementManager:
-                                                        achievementManager,
-                                                    shotEventService:
-                                                        ShotEventService(
-                                                            db: appDatabase),
-                                                  ),
-                                                  child: GameScreen(
-                                                    settings: settings,
-                                                    onSettingsChanged:
-                                                        (newSettings) {},
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    });
-                                  },
-                                  onExit: () {
-                                    Navigator.of(context)
-                                        .popUntil((route) => route.isFirst);
-                                  },
-                                ),
-                                transitionsBuilder: (context, animation,
-                                    secondaryAnimation, child) {
-                                  // Custom Zoom + Fade Transition
-                                  var curve = Curves.easeOutBack;
-                                  var scaleTween =
-                                      Tween<double>(begin: 0.8, end: 1.0)
-                                          .chain(CurveTween(curve: curve));
-                                  var fadeTween =
-                                      Tween<double>(begin: 0.0, end: 1.0);
-
-                                  return FadeTransition(
-                                    opacity: animation.drive(fadeTween),
-                                    child: ScaleTransition(
-                                      scale: animation.drive(scaleTween),
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                transitionDuration: const Duration(
-                                    milliseconds:
-                                        500), // Slightly slower for Victory
-                              ),
-                            );
-                          });
                         }
 
                         return Column(

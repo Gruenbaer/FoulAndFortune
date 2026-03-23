@@ -11,10 +11,12 @@ import '../widgets/settings/handicap_picker.dart';
 
 class NewGameSettingsScreen extends StatefulWidget {
   final Function(GameSettings) onStartGame;
+  final PlayerService? playerService;
 
   const NewGameSettingsScreen({
     super.key,
     required this.onStartGame,
+    this.playerService,
   });
 
   @override
@@ -29,14 +31,14 @@ class _NewGameSettingsScreenState extends State<NewGameSettingsScreen> {
   double? _cachedPlayer2Multiplier;
   bool _hasLoadedFromProvider = false;
 
-
-  final PlayerService _playerService = PlayerService();
+  late final PlayerService _playerService;
   List<Player> _players = [];
 
 
   @override
   void initState() {
     super.initState();
+    _playerService = widget.playerService ?? PlayerService();
     // Initialize with default settings (will be replaced in didChangeDependencies)
     _settings = GameSettings();
     _raceSliderValue = _settings.raceToScore.toDouble();

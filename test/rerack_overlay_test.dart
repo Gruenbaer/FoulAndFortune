@@ -60,6 +60,7 @@ void main() {
 
       expect(find.text('RE-RACK!'), findsNothing);
       expect(gameState.activeBalls.length, 15);
+      expect(find.byType(Dialog), findsNothing);
     },
   );
 }

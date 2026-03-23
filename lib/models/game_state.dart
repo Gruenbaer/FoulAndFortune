@@ -545,13 +545,9 @@ class GameState extends ChangeNotifier {
      // Emit Rerack Event
      _emitEvent(ShotEventType.rerack, {});
 
-     final outcome = _rules.apply(const FinalizeReRackAction(), _buildCoreState(), _rulesState);
+     final outcome = _rules.apply(
+         const FinalizeReRackAction(), _buildCoreState(), _rulesState);
      _applyOutcome(outcome);
-
-     // Trigger Ultimate Scorer Dialog if enabled
-     if (settings.advancedScoringEnabled) {
-       _events.add(UltimateScorerEvent(currentPlayer));
-     }
   }
 
   // Helper to validate interactions against exclusion rules
