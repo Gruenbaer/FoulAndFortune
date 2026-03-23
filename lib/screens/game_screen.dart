@@ -32,14 +32,15 @@ import '../data/app_database.dart';
 class GameScreen extends StatefulWidget {
   final GameSettings settings;
   final Function(GameSettings) onSettingsChanged;
-
   final GameRecord? resumeGame;
+  final GameHistoryService? gameHistoryService;
 
   const GameScreen({
     super.key,
     required this.settings,
     required this.onSettingsChanged,
     this.resumeGame,
+    this.gameHistoryService,
   });
 
   @override
@@ -47,7 +48,7 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
-  final GameHistoryService _historyService = GameHistoryService();
+  late final GameHistoryService _historyService;
   late String _gameId; // Unique ID for this game
   DateTime? _gameStartTime; // Track when game started
   bool _isCompletedSaved = false;
@@ -383,6 +384,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _historyService = widget.gameHistoryService ?? GameHistoryService();
 
     if (widget.resumeGame != null) {
       _gameId = widget.resumeGame!.id;
@@ -394,6 +396,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameState = Provider.of<GameState>(context, listen: false);
+      gameState.setGameId(_gameId);
 
       // 1. Load data if resuming
       if (widget.resumeGame != null && widget.resumeGame!.snapshot != null) {
@@ -1214,66 +1217,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                           children: _buildRackFormation(
                                               context, gameState),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // P0-02: Persistent Undo/Redo Action Rail (Match Footer)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: (!_isInputLocked &&
-                                              gameState.canUndo)
-                                          ? () =>
-                                              _handleInteraction(gameState.undo)
-                                          : null,
-                                      icon: const Icon(Icons.undo),
-                                      label: Text(l10n.undo.toUpperCase()),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: colors.backgroundCard,
-                                        foregroundColor: colors.primary,
-                                        disabledBackgroundColor: colors
-                                            .backgroundCard
-                                            .withOpacity(0.45),
-                                        disabledForegroundColor: colors.textMain
-                                            .withOpacity(0.35),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 24),
-                                        side: BorderSide(
-                                            color: colors.primary
-                                                .withOpacity(0.45)),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: (!_isInputLocked &&
-                                              gameState.canRedo)
-                                          ? () =>
-                                              _handleInteraction(gameState.redo)
-                                          : null,
-                                      icon: const Icon(Icons.redo),
-                                      label: Text(l10n.redo.toUpperCase()),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: colors.backgroundCard,
-                                        foregroundColor: colors.accent,
-                                        disabledBackgroundColor: colors
-                                            .backgroundCard
-                                            .withOpacity(0.45),
-                                        disabledForegroundColor: colors.textMain
-                                            .withOpacity(0.35),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 24),
-                                        side: BorderSide(
-                                            color: colors.accent
-                                                .withOpacity(0.45)),
                                       ),
                                     ),
                                   ),

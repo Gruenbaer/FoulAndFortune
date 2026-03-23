@@ -36,6 +36,40 @@ $fullVersion = $versionLine.ToString().Split(":")[1].Trim()
 $version = $fullVersion.Split("+")[0] # Remove build number if present
 Write-Host "   Detected Version: $version" -ForegroundColor Green
 
+function Invoke-GhRelease {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Arguments
+    )
+
+    & gh @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "GitHub CLI command failed: gh $($Arguments -join ' ')"
+    }
+}
+
+function Archive-OlderPublishedReleases {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Repo,
+        [Parameter(Mandatory = $true)]
+        [string]$CurrentTag
+    )
+
+    Write-Host "Archiving older public releases..." -ForegroundColor Cyan
+    $releases = gh api "repos/$Repo/releases" --paginate | ConvertFrom-Json
+    $targets = $releases | Where-Object { -not $_.draft -and $_.tag_name -ne $CurrentTag }
+
+    foreach ($release in $targets) {
+        Write-Host "   Archiving $($release.tag_name)..." -ForegroundColor DarkGray
+        Invoke-GhRelease -Arguments @("release", "edit", $release.tag_name, "--repo", $Repo, "--draft")
+    }
+
+    if ($targets.Count -eq 0) {
+        Write-Host "   No older public releases found." -ForegroundColor DarkGray
+    }
+}
+
 
 # 2. Check if Tag Exists
 $tagExists = git tag -l "v$version"
@@ -103,6 +137,7 @@ Copy-Item $apkPath $versionedApkPath -Force
 Write-Host "Publishing to GitHub..." -ForegroundColor Cyan
 $notesFile = [System.IO.Path]::GetTempFileName()
 Set-Content -Path $notesFile -Value $releaseNotes -Encoding UTF8
+$repoSlug = "Gruenbaer/FoulAndFortune"
 
 try {
     # Check if release already exists
@@ -110,28 +145,27 @@ try {
     try {
         # 'gh release view' returns 0 if exists, 1 if not.
         # We redirect stderr to null to keep output clean if it doesn't exist.
-        cmd /c "gh release view v$version 2>NUL" | Out-Null
+        cmd /c "gh release view v$version --repo $repoSlug 2>NUL" | Out-Null
         if ($LASTEXITCODE -eq 0) { $releaseExists = $true }
     } catch {
         # Command failed to run or other error
     }
 
     if ($releaseExists) {
-        Write-Warning "Release v$version already exists. Uploading APK asset only..."
-        # Upload asset to existing release, clobbering if it exists
-        cmd /c "gh release upload v$version ""$versionedApkPath"" --clobber"
+        Write-Warning "Release v$version already exists. Updating assets and metadata..."
+        Invoke-GhRelease -Arguments @("release", "upload", "v$version", $versionedApkPath, "--repo", $repoSlug, "--clobber")
+        Invoke-GhRelease -Arguments @("release", "edit", "v$version", "--repo", $repoSlug, "--title", "v$version", "--notes-file", $notesFile, "--latest")
     }
     else {
         Write-Host "Creating new release v$version..."
-        # Create new release with asset
-        cmd /c "gh release create v$version ""$versionedApkPath"" --title ""v$version"" --notes-file ""$notesFile"""
+        Invoke-GhRelease -Arguments @("release", "create", "v$version", $versionedApkPath, "--repo", $repoSlug, "--title", "v$version", "--notes-file", $notesFile, "--latest")
     }
+
+    Archive-OlderPublishedReleases -Repo $repoSlug -CurrentTag "v$version"
 }
 finally {
     Remove-Item $notesFile
 }
-
-if ($LASTEXITCODE -ne 0) { throw "GitHub Release/Upload Failed" }
 
 Write-Host "Release v$version Published!" -ForegroundColor Green
 
@@ -150,7 +184,7 @@ else {
     if ($platformChoice -eq "") { $platformChoice = "1" }
 }
 
-$repoUrl = "https://github.com/Gruenbaer/141fortune"
+$repoUrl = "https://github.com/Gruenbaer/FoulAndFortune"
 $downloadUrl = "$repoUrl/releases/download/v$version/$versionedApkName"
 
 $notesText = "See GitHub for details"

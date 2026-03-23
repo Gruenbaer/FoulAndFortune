@@ -108,17 +108,9 @@ class _GameEventOverlayState extends State<GameEventOverlay>
   }
 
   void _onAnimationComplete() {
-    // Handle post-animation logic for ReRackEvent
-    if (_currentEvent is ReRackEvent && _currentGameState != null) {
-      debugPrint(
-          '[GameEventOverlay] ReRackEvent animation complete, calling finalizeReRack()');
-      try {
-        _currentGameState!.finalizeReRack();
-        debugPrint('[GameEventOverlay] ✓ finalizeReRack() succeeded');
-      } catch (e) {
-        debugPrint('[GameEventOverlay] ✗ ERROR in finalizeReRack(): $e');
-      }
-    }
+    final shouldFinalizeReRack =
+        _currentEvent is ReRackEvent && _currentGameState != null;
+    final rerackGameState = _currentGameState;
 
     setState(() {
       _currentContent = null;
@@ -127,6 +119,27 @@ class _GameEventOverlayState extends State<GameEventOverlay>
       _currentGameState = null;
     });
     _controller.reset();
+
+    if (shouldFinalizeReRack) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || rerackGameState == null) return;
+
+        debugPrint(
+            '[GameEventOverlay] ReRackEvent animation complete, calling finalizeReRack()');
+        try {
+          rerackGameState.finalizeReRack();
+          debugPrint('[GameEventOverlay] ✓ finalizeReRack() succeeded');
+        } catch (e) {
+          debugPrint('[GameEventOverlay] ✗ ERROR in finalizeReRack(): $e');
+        }
+
+        if (mounted && !_isAnimating) {
+          _processNext();
+        }
+      });
+      return;
+    }
+
     _processNext();
   }
 

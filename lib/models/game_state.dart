@@ -21,6 +21,7 @@ import '../games/straight_pool/straight_pool_state.dart' as sp_state;
 import '../core/actions/game_action.dart';
 import '../services/shot_event_service.dart';
 import '../stats/shot_event_type.dart';
+import 'package:uuid/uuid.dart';
 
 enum FoulMode { none, normal, severe }
 // FoulType now imported from '../codecs/notation_codec.dart'
@@ -28,6 +29,7 @@ enum FoulMode { none, normal, severe }
 // GameEvent classes now imported from '../core/events/game_event.dart'
 
 class GameState extends ChangeNotifier {
+  static const Uuid _uuid = Uuid();
   GameSettings settings;
   int raceToScore;
   late List<Player> players;
@@ -218,19 +220,21 @@ class GameState extends ChangeNotifier {
     required this.settings,
     this.achievementManager,
     required this.shotEventService,
+    String? initialGameId,
   }) : raceToScore = settings.raceToScore {
+    setGameId(initialGameId ?? _uuid.v4());
     
     // Initialize Players
     players = [
       Player(
           name: settings.player1Name,
-          id: settings.player1Id,
+          id: settings.player1Id ?? _uuid.v4(),
           isActive: true, // P1 starts active by default
           score: settings.player1Handicap,
           handicapMultiplier: settings.player1HandicapMultiplier),
       Player(
           name: settings.player2Name,
-          id: settings.player2Id,
+          id: settings.player2Id ?? _uuid.v4(),
           isActive: false,
           score: settings.player2Handicap,
           handicapMultiplier: settings.player2HandicapMultiplier)

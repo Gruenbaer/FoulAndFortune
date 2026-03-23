@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drift/native.dart';
 import 'package:foulandfortune/data/app_database.dart';
 import 'package:foulandfortune/models/game_state.dart';
 import 'package:foulandfortune/models/game_settings.dart';
@@ -12,7 +13,7 @@ void main() {
   });
 
   test('GameState can be created', () {
-    final db = AppDatabase();
+    final db = AppDatabase(NativeDatabase.memory());
     addTearDown(() async => db.close());
 
     final settings = GameSettings(
@@ -23,7 +24,7 @@ void main() {
     );
     final gameState = GameState(
       settings: settings,
-      achievementManager: AchievementManager(),
+      achievementManager: AchievementManager(db: db),
       shotEventService: ShotEventService(db: db),
     );
     expect(gameState.settings.raceToScore, 100);
