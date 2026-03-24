@@ -787,6 +787,40 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   leading:
                       null, // Allow default drawer icon if needed, or remove if strictly no menu desired
                   actions: [
+                    GuardedIconButton(
+                      icon: Icons.undo,
+                      shadows: colors.themeId == 'cyberpunk'
+                          ? [
+                              BoxShadow(
+                                color: colors.primary.withOpacity(0.45),
+                                blurRadius: 8,
+                              ),
+                            ]
+                          : null,
+                      color: colors.primary,
+                      tooltip: l10n.undo,
+                      onPressed: gameState.canUndo
+                          ? () => _handleInteraction(gameState.undo)
+                          : null,
+                      isGuarded: _isInputLocked,
+                    ),
+                    GuardedIconButton(
+                      icon: Icons.redo,
+                      shadows: colors.themeId == 'cyberpunk'
+                          ? [
+                              BoxShadow(
+                                color: colors.primary.withOpacity(0.45),
+                                blurRadius: 8,
+                              ),
+                            ]
+                          : null,
+                      color: colors.primary,
+                      tooltip: l10n.redo,
+                      onPressed: gameState.canRedo
+                          ? () => _handleInteraction(gameState.redo)
+                          : null,
+                      isGuarded: _isInputLocked,
+                    ),
                     IconButton(
                       icon: const Icon(Icons.analytics_outlined),
                       color: colors.primary,
@@ -830,6 +864,32 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             textAlign: TextAlign.center,
                           ),
                         ),
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.undo, color: colors.primary),
+                        title: Text(l10n.undo,
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: colors.textMain)),
+                        enabled: !_isInputLocked && gameState.canUndo,
+                        onTap: (!_isInputLocked && gameState.canUndo)
+                            ? () {
+                                Navigator.pop(context);
+                                _handleInteraction(gameState.undo);
+                              }
+                            : null,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.redo, color: colors.primary),
+                        title: Text(l10n.redo,
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: colors.textMain)),
+                        enabled: !_isInputLocked && gameState.canRedo,
+                        onTap: (!_isInputLocked && gameState.canRedo)
+                            ? () {
+                                Navigator.pop(context);
+                                _handleInteraction(gameState.redo);
+                              }
+                            : null,
                       ),
                       ListTile(
                         leading: Icon(Icons.refresh, color: colors.primary),
