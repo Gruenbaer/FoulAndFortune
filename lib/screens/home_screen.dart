@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
+import '../models/pool_match_state.dart';
 import '../models/achievement_manager.dart';
 import '../models/game_record.dart';
 import '../l10n/app_localizations.dart';
@@ -13,7 +14,8 @@ import '../screens/statistics_screen.dart';
 import '../screens/achievements_gallery_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/game_history_screen.dart';
-import '../screens/practice_academy_screen.dart';
+import '../screens/pool_match_center_screen.dart';
+import '../screens/pool_match_setup_screen.dart';
 import '../widgets/themed_widgets.dart';
 import '../theme/fortune_theme.dart';
 import '../services/game_history_service.dart';
@@ -59,6 +61,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _resumeGame(GameRecord record) {
+    if (record.isPoolMatch && record.snapshot != null) {
+      final match = PoolMatchState.fromSnapshotJson(record.snapshot!);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChangeNotifierProvider.value(
+            value: match,
+            child: PoolMatchCenterScreen(
+              discipline: record.discipline,
+            ),
+          ),
+        ),
+      ).then((_) => _checkActiveGame());
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -179,6 +197,86 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
 
                           ThemedButton(
+                            label: '8-Ball',
+                            icon: Icons.sports_bar,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PoolMatchSetupScreen(
+                                    discipline: GameDiscipline.eightBall,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          ThemedButton(
+                            label: '9-Ball',
+                            icon: Icons.adjust,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PoolMatchSetupScreen(
+                                    discipline: GameDiscipline.nineBall,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          ThemedButton(
+                            label: '10-Ball',
+                            icon: Icons.blur_circular,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PoolMatchSetupScreen(
+                                    discipline: GameDiscipline.tenBall,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          ThemedButton(
+                            label: '1-Pocket',
+                            icon: Icons.gpp_good,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PoolMatchSetupScreen(
+                                    discipline: GameDiscipline.onePocket,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          ThemedButton(
+                            label: 'Cowboy',
+                            icon: Icons.auto_fix_high,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PoolMatchSetupScreen(
+                                    discipline: GameDiscipline.cowboy,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          ThemedButton(
                             label: l10n.gameHistory,
                             icon: Icons.history,
                             onPressed: () {
@@ -213,20 +311,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         const StatisticsScreen()),
-                              );
-                            },
-                          ),
-
-                          ThemedButton(
-                            label: 'Practice Academy',
-                            icon: Icons.fitness_center,
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const PracticeAcademyScreen(),
-                                ),
                               );
                             },
                           ),

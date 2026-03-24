@@ -1,0 +1,645 @@
+import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
+import '../core/game_history.dart';
+import 'game_settings.dart';
+
+extension GameDisciplineMeta on GameDiscipline {
+  String get label {
+    switch (this) {
+      case GameDiscipline.straightPool:
+        return '14.1 Straight Pool';
+      case GameDiscipline.eightBall:
+        return '8-Ball';
+      case GameDiscipline.nineBall:
+        return '9-Ball';
+      case GameDiscipline.tenBall:
+        return '10-Ball';
+      case GameDiscipline.onePocket:
+        return '1-Pocket';
+      case GameDiscipline.cowboy:
+        return 'Cowboy';
+    }
+  }
+
+  bool get supportsPushOut =>
+      this == GameDiscipline.nineBall || this == GameDiscipline.tenBall;
+
+  bool get supportsGroups => this == GameDiscipline.eightBall;
+
+  String get finishLabel {
+    switch (this) {
+      case GameDiscipline.eightBall:
+        return '8 on the Hill';
+      case GameDiscipline.nineBall:
+        return '9-Ball Finish';
+      case GameDiscipline.tenBall:
+        return '10-Ball Finish';
+      case GameDiscipline.onePocket:
+        return '1-Pocket Finish';
+      case GameDiscipline.cowboy:
+        return 'Cowboy Finish';
+      case GameDiscipline.straightPool:
+        return 'Finish';
+    }
+  }
+
+  String get scoreLabel {
+    switch (this) {
+      case GameDiscipline.onePocket:
+        return 'Games';
+      case GameDiscipline.cowboy:
+        return 'Sets';
+      case GameDiscipline.straightPool:
+      case GameDiscipline.eightBall:
+      case GameDiscipline.nineBall:
+      case GameDiscipline.tenBall:
+        return 'Racks';
+    }
+  }
+
+  String get setupHint {
+    switch (this) {
+      case GameDiscipline.eightBall:
+        return 'Gruppen, Safeties und klares Match-Tempo fuer Liga- und Trainingsabende.';
+      case GameDiscipline.nineBall:
+        return 'Rotation mit Push-Out, Break-Druck und starkem Rack-Flow fuer lange Sessions.';
+      case GameDiscipline.tenBall:
+        return 'Praeziser Rotationsmodus mit mehr Kontrolle und sauberem Turn-Management.';
+      case GameDiscipline.onePocket:
+        return 'Taktischer Defensivmodus mit Fokus auf Safeties, Foul-Pressure und Session-Statistiken.';
+      case GameDiscipline.cowboy:
+        return 'Hybrid-Modus fuer kreative Sessions mit klarer Matchfuehrung und Live-Stats.';
+      case GameDiscipline.straightPool:
+        return 'Der bestehende 14.1-Pfad bleibt separat und unangetastet.';
+    }
+  }
+}
+
+enum TableGroup { open, solids, stripes }
+
+class PoolMatchPlayerStats {
+  final String name;
+  final int rackWins;
+  final int safeties;
+  final int fouls;
+  final int dryBreaks;
+  final int breakAndRuns;
+  final int goldenBreaks;
+  final int runOuts;
+  final int ballInHandWins;
+  final int pushes;
+  final int visits;
+  final int momentum;
+  final TableGroup? assignedGroup;
+
+  const PoolMatchPlayerStats({
+    required this.name,
+    this.rackWins = 0,
+    this.safeties = 0,
+    this.fouls = 0,
+    this.dryBreaks = 0,
+    this.breakAndRuns = 0,
+    this.goldenBreaks = 0,
+    this.runOuts = 0,
+    this.ballInHandWins = 0,
+    this.pushes = 0,
+    this.visits = 0,
+    this.momentum = 0,
+    this.assignedGroup,
+  });
+
+  PoolMatchPlayerStats copyWith({
+    String? name,
+    int? rackWins,
+    int? safeties,
+    int? fouls,
+    int? dryBreaks,
+    int? breakAndRuns,
+    int? goldenBreaks,
+    int? runOuts,
+    int? ballInHandWins,
+    int? pushes,
+    int? visits,
+    int? momentum,
+    Object? assignedGroup = _unset,
+  }) {
+    return PoolMatchPlayerStats(
+      name: name ?? this.name,
+      rackWins: rackWins ?? this.rackWins,
+      safeties: safeties ?? this.safeties,
+      fouls: fouls ?? this.fouls,
+      dryBreaks: dryBreaks ?? this.dryBreaks,
+      breakAndRuns: breakAndRuns ?? this.breakAndRuns,
+      goldenBreaks: goldenBreaks ?? this.goldenBreaks,
+      runOuts: runOuts ?? this.runOuts,
+      ballInHandWins: ballInHandWins ?? this.ballInHandWins,
+      pushes: pushes ?? this.pushes,
+      visits: visits ?? this.visits,
+      momentum: momentum ?? this.momentum,
+      assignedGroup: identical(assignedGroup, _unset)
+          ? this.assignedGroup
+          : assignedGroup as TableGroup?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'rackWins': rackWins,
+      'safeties': safeties,
+      'fouls': fouls,
+      'dryBreaks': dryBreaks,
+      'breakAndRuns': breakAndRuns,
+      'goldenBreaks': goldenBreaks,
+      'runOuts': runOuts,
+      'ballInHandWins': ballInHandWins,
+      'pushes': pushes,
+      'visits': visits,
+      'momentum': momentum,
+      'assignedGroup': assignedGroup?.name,
+    };
+  }
+
+  factory PoolMatchPlayerStats.fromJson(Map<String, dynamic> json) {
+    TableGroup? assignedGroup;
+    final assignedGroupName = json['assignedGroup'] as String?;
+    if (assignedGroupName != null) {
+      for (final group in TableGroup.values) {
+        if (group.name == assignedGroupName) {
+          assignedGroup = group;
+          break;
+        }
+      }
+    }
+
+    return PoolMatchPlayerStats(
+      name: json['name'] as String? ?? 'Player',
+      rackWins: json['rackWins'] as int? ?? 0,
+      safeties: json['safeties'] as int? ?? 0,
+      fouls: json['fouls'] as int? ?? 0,
+      dryBreaks: json['dryBreaks'] as int? ?? 0,
+      breakAndRuns: json['breakAndRuns'] as int? ?? 0,
+      goldenBreaks: json['goldenBreaks'] as int? ?? 0,
+      runOuts: json['runOuts'] as int? ?? 0,
+      ballInHandWins: json['ballInHandWins'] as int? ?? 0,
+      pushes: json['pushes'] as int? ?? 0,
+      visits: json['visits'] as int? ?? 0,
+      momentum: json['momentum'] as int? ?? 0,
+      assignedGroup: assignedGroup,
+    );
+  }
+}
+
+const Object _unset = Object();
+
+class PoolMatchSnapshot {
+  final List<PoolMatchPlayerStats> players;
+  final int activePlayerIndex;
+  final int breakerIndex;
+  final int rackNumber;
+  final bool alternatingBreaks;
+  final bool ballInHand;
+  final bool pushOutAvailable;
+  final bool pushOutArmed;
+  final bool matchOver;
+  final TableGroup tableGroup;
+  final List<String> actionLog;
+
+  const PoolMatchSnapshot({
+    required this.players,
+    required this.activePlayerIndex,
+    required this.breakerIndex,
+    required this.rackNumber,
+    required this.alternatingBreaks,
+    required this.ballInHand,
+    required this.pushOutAvailable,
+    required this.pushOutArmed,
+    required this.matchOver,
+    required this.tableGroup,
+    required this.actionLog,
+  });
+}
+
+class PoolMatchState extends ChangeNotifier {
+  PoolMatchState({
+    required this.discipline,
+    required this.raceTo,
+    required List<String> playerNames,
+    this.alternatingBreaks = true,
+    String? matchId,
+    DateTime? startedAt,
+  }) : players = playerNames
+            .map((name) => PoolMatchPlayerStats(name: name.trim()))
+            .toList(),
+        matchId = matchId ?? const Uuid().v4(),
+        startedAt = startedAt ?? DateTime.now() {
+    _actionLog = <String>[];
+    _setOpeningState();
+  }
+
+  factory PoolMatchState.fromSnapshotJson(Map<String, dynamic> json) {
+    final playersJson =
+        (json['players'] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<Map>()
+            .map((entry) => Map<String, dynamic>.from(entry))
+            .toList();
+    final players = playersJson
+        .map(PoolMatchPlayerStats.fromJson)
+        .toList(growable: false);
+    final discipline =
+        GameDiscipline.fromStorageKey(json['discipline'] as String?);
+
+    final match = PoolMatchState(
+      discipline: discipline,
+      raceTo: json['raceTo'] as int? ?? 5,
+      alternatingBreaks: json['alternatingBreaks'] as bool? ?? true,
+      playerNames: players.isEmpty
+          ? const ['Player 1', 'Player 2']
+          : players.map((player) => player.name).toList(),
+      matchId: json['matchId'] as String?,
+      startedAt: json['startedAt'] == null
+          ? null
+          : DateTime.tryParse(json['startedAt'] as String),
+    );
+
+    for (var i = 0; i < match.players.length && i < players.length; i++) {
+      match.players[i] = players[i];
+    }
+
+    match.activePlayerIndex = json['activePlayerIndex'] as int? ?? 0;
+    match.breakerIndex = json['breakerIndex'] as int? ?? 0;
+    match.rackNumber = json['rackNumber'] as int? ?? 1;
+    match.ballInHand = json['ballInHand'] as bool? ?? false;
+    match.pushOutAvailable = json['pushOutAvailable'] as bool? ?? false;
+    match.pushOutArmed = json['pushOutArmed'] as bool? ?? false;
+    match.matchOver = json['matchOver'] as bool? ?? false;
+
+    final tableGroupName = json['tableGroup'] as String?;
+    match.tableGroup = TableGroup.values.firstWhere(
+      (group) => group.name == tableGroupName,
+      orElse: () => TableGroup.open,
+    );
+    match._actionLog = (json['actionLog'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<String>()
+        .toList();
+
+    return match;
+  }
+
+  final GameDiscipline discipline;
+  final int raceTo;
+  final bool alternatingBreaks;
+  final String matchId;
+  final DateTime startedAt;
+  final List<PoolMatchPlayerStats> players;
+  final GameHistory<PoolMatchSnapshot> _history = GameHistory();
+
+  late List<String> _actionLog;
+  int activePlayerIndex = 0;
+  int breakerIndex = 0;
+  int rackNumber = 1;
+  bool ballInHand = false;
+  bool pushOutAvailable = false;
+  bool pushOutArmed = false;
+  bool matchOver = false;
+  TableGroup tableGroup = TableGroup.open;
+
+  List<String> get actionLog => List.unmodifiable(_actionLog);
+  bool get canUndo => _history.canUndo;
+  bool get canRedo => _history.canRedo;
+  PoolMatchPlayerStats get currentPlayer => players[activePlayerIndex];
+  PoolMatchPlayerStats get opponent => players[1 - activePlayerIndex];
+  String get scoreLine => '${players[0].rackWins}:${players[1].rackWins}';
+  int get completedRacks => players.fold<int>(0, (sum, player) => sum + player.rackWins);
+  PoolMatchPlayerStats? get winner =>
+      matchOver ? players.firstWhere((player) => player.rackWins >= raceTo) : null;
+
+  String get contextLine {
+    final pieces = <String>[
+      'Rack $rackNumber',
+      'Breaker: ${players[breakerIndex].name}',
+      'At table: ${currentPlayer.name}',
+    ];
+    if (discipline.supportsGroups) {
+      pieces.add(
+        tableGroup == TableGroup.open
+            ? 'Open table'
+            : 'Table: ${tableGroup.name}',
+      );
+    }
+    if (ballInHand) pieces.add('Ball in Hand');
+    if (pushOutArmed) pieces.add('Push Out');
+    return pieces.join('  |  ');
+  }
+
+  double winRateFor(int index) {
+    if (rackNumber <= 1) {
+      return players[index].rackWins > 0 ? 100 : 0;
+    }
+    if (completedRacks == 0) return 0;
+    return players[index].rackWins / completedRacks * 100;
+  }
+
+  double pressureIndexFor(int index) {
+    final player = players[index];
+    final offense = player.breakAndRuns + player.runOuts + player.goldenBreaks;
+    final defense = player.safeties;
+    final disciplineBonus = discipline == GameDiscipline.onePocket ? 1.25 : 1.0;
+    return (offense * 1.6 + defense * 1.2 - player.fouls * 0.8) * disciplineBonus;
+  }
+
+  double tableControlFor(int index) {
+    final player = players[index];
+    final totalVisits = player.visits == 0 ? 1 : player.visits;
+    return (player.safeties + player.ballInHandWins + player.runOuts) / totalVisits;
+  }
+
+  void undo() {
+    final snapshot = _history.undo(_snapshot());
+    if (snapshot == null) return;
+    _restore(snapshot);
+    notifyListeners();
+  }
+
+  void redo() {
+    final snapshot = _history.redo(_snapshot());
+    if (snapshot == null) return;
+    _restore(snapshot);
+    notifyListeners();
+  }
+
+  void switchTurn({String? reason}) {
+    _recordMutation(() {
+      _incrementVisits(activePlayerIndex);
+      activePlayerIndex = 1 - activePlayerIndex;
+      pushOutAvailable = false;
+      pushOutArmed = false;
+      final note = reason ?? 'Turn switched to ${currentPlayer.name}';
+      _prependLog(note);
+    });
+  }
+
+  void recordSafety() {
+    _recordMutation(() {
+      _replacePlayer(
+        activePlayerIndex,
+        currentPlayer.copyWith(safeties: currentPlayer.safeties + 1),
+      );
+      pushOutAvailable = false;
+      _prependLog('${currentPlayer.name} played a safety');
+    });
+  }
+
+  void recordFoul() {
+    _recordMutation(() {
+      final foulingPlayer = currentPlayer;
+      _replacePlayer(
+        activePlayerIndex,
+        foulingPlayer.copyWith(fouls: foulingPlayer.fouls + 1),
+      );
+      ballInHand = true;
+      pushOutAvailable = false;
+      pushOutArmed = false;
+      activePlayerIndex = 1 - activePlayerIndex;
+      _prependLog(
+          '${foulingPlayer.name} committed a foul. ${currentPlayer.name} gets ball in hand');
+    });
+  }
+
+  void toggleBallInHand() {
+    _recordMutation(() {
+      ballInHand = !ballInHand;
+      _prependLog(ballInHand
+          ? '${currentPlayer.name} has ball in hand'
+          : 'Ball in hand cleared');
+    });
+  }
+
+  void recordDryBreak() {
+    _recordMutation(() {
+      final breaker = players[breakerIndex];
+      _replacePlayer(
+        breakerIndex,
+        breaker.copyWith(dryBreaks: breaker.dryBreaks + 1),
+      );
+      pushOutAvailable = discipline.supportsPushOut;
+      pushOutArmed = false;
+      activePlayerIndex = 1 - breakerIndex;
+      _prependLog('${breaker.name} broke dry');
+    });
+  }
+
+  void togglePushOut() {
+    if (!discipline.supportsPushOut) return;
+    _recordMutation(() {
+      pushOutArmed = !pushOutArmed;
+      pushOutAvailable = true;
+      if (pushOutArmed) {
+        _replacePlayer(
+          activePlayerIndex,
+          currentPlayer.copyWith(pushes: currentPlayer.pushes + 1),
+        );
+      }
+      _prependLog(pushOutArmed
+          ? '${currentPlayer.name} calls push out'
+          : 'Push out cleared');
+    });
+  }
+
+  void assignTableGroup(TableGroup group) {
+    if (!discipline.supportsGroups) return;
+    _recordMutation(() {
+      tableGroup = group;
+      if (group == TableGroup.open) {
+        _replacePlayer(activePlayerIndex,
+            currentPlayer.copyWith(assignedGroup: null));
+        _replacePlayer(1 - activePlayerIndex, opponent.copyWith(assignedGroup: null));
+        _prependLog('Table reset to open');
+        return;
+      }
+      final opposite =
+          group == TableGroup.solids ? TableGroup.stripes : TableGroup.solids;
+      final shooter = currentPlayer;
+      final other = opponent;
+      _replacePlayer(
+        activePlayerIndex,
+        shooter.copyWith(assignedGroup: group),
+      );
+      _replacePlayer(
+        1 - activePlayerIndex,
+        other.copyWith(assignedGroup: opposite),
+      );
+      _prependLog(
+          '${shooter.name} takes ${group.name}. ${other.name} gets ${opposite.name}');
+    });
+  }
+
+  void winRack({
+    bool breakAndRun = false,
+    bool goldenBreak = false,
+    bool runOut = false,
+    String? customLabel,
+  }) {
+    _recordMutation(() {
+      final winnerIndex = activePlayerIndex;
+      final winner = currentPlayer;
+      var updated = winner.copyWith(
+        rackWins: winner.rackWins + 1,
+        momentum: winner.momentum + 1,
+        ballInHandWins:
+            ballInHand ? winner.ballInHandWins + 1 : winner.ballInHandWins,
+        breakAndRuns:
+            breakAndRun ? winner.breakAndRuns + 1 : winner.breakAndRuns,
+        goldenBreaks:
+            goldenBreak ? winner.goldenBreaks + 1 : winner.goldenBreaks,
+        runOuts: runOut ? winner.runOuts + 1 : winner.runOuts,
+      );
+      _replacePlayer(winnerIndex, updated);
+      _replacePlayer(
+        1 - winnerIndex,
+        opponent.copyWith(momentum: 0),
+      );
+
+      final label = customLabel ??
+          (goldenBreak
+              ? 'golden break'
+              : breakAndRun
+                  ? 'break and run'
+                  : runOut
+                      ? discipline.finishLabel.toLowerCase()
+                      : 'rack');
+      _prependLog('${winner.name} wins the $label');
+
+      matchOver = updated.rackWins >= raceTo;
+      if (matchOver) {
+        _prependLog('${winner.name} wins the match ${updated.rackWins}:'
+            '${players[1 - winnerIndex].rackWins}');
+        return;
+      }
+
+      _prepareNextRack(winnerIndex: winnerIndex);
+    });
+  }
+
+  void resetMatch() {
+    _recordMutation(() {
+      for (var i = 0; i < players.length; i++) {
+        _replacePlayer(
+          i,
+          players[i].copyWith(
+            rackWins: 0,
+            safeties: 0,
+            fouls: 0,
+            dryBreaks: 0,
+            breakAndRuns: 0,
+            goldenBreaks: 0,
+            runOuts: 0,
+            ballInHandWins: 0,
+            pushes: 0,
+            visits: 0,
+            momentum: 0,
+            assignedGroup: null,
+          ),
+        );
+      }
+      rackNumber = 1;
+      breakerIndex = 0;
+      activePlayerIndex = 0;
+      ballInHand = false;
+      matchOver = false;
+      tableGroup = TableGroup.open;
+      _setOpeningState();
+      _actionLog.clear();
+      _prependLog('Match reset');
+    });
+  }
+
+  PoolMatchSnapshot _snapshot() {
+    return PoolMatchSnapshot(
+      players: players.map((player) => player.copyWith()).toList(),
+      activePlayerIndex: activePlayerIndex,
+      breakerIndex: breakerIndex,
+      rackNumber: rackNumber,
+      alternatingBreaks: alternatingBreaks,
+      ballInHand: ballInHand,
+      pushOutAvailable: pushOutAvailable,
+      pushOutArmed: pushOutArmed,
+      matchOver: matchOver,
+      tableGroup: tableGroup,
+      actionLog: List<String>.from(_actionLog),
+    );
+  }
+
+  void _restore(PoolMatchSnapshot snapshot) {
+    for (var i = 0; i < players.length; i++) {
+      players[i] = snapshot.players[i].copyWith();
+    }
+    activePlayerIndex = snapshot.activePlayerIndex;
+    breakerIndex = snapshot.breakerIndex;
+    rackNumber = snapshot.rackNumber;
+    ballInHand = snapshot.ballInHand;
+    pushOutAvailable = snapshot.pushOutAvailable;
+    pushOutArmed = snapshot.pushOutArmed;
+    matchOver = snapshot.matchOver;
+    tableGroup = snapshot.tableGroup;
+    _actionLog = List<String>.from(snapshot.actionLog);
+  }
+
+  void _recordMutation(VoidCallback mutation) {
+    _history.push(_snapshot());
+    mutation();
+    notifyListeners();
+  }
+
+  void _replacePlayer(int index, PoolMatchPlayerStats value) {
+    players[index] = value;
+  }
+
+  void _prepareNextRack({required int winnerIndex}) {
+    rackNumber += 1;
+    breakerIndex = alternatingBreaks ? 1 - breakerIndex : winnerIndex;
+    activePlayerIndex = breakerIndex;
+    ballInHand = false;
+    tableGroup = TableGroup.open;
+    pushOutArmed = false;
+    _setOpeningState();
+  }
+
+  void _setOpeningState() {
+    pushOutAvailable = discipline.supportsPushOut;
+  }
+
+  void _incrementVisits(int index) {
+    final player = players[index];
+    _replacePlayer(index, player.copyWith(visits: player.visits + 1));
+  }
+
+  void _prependLog(String value) {
+    _actionLog.insert(0, value);
+    if (_actionLog.length > 30) {
+      _actionLog = _actionLog.take(30).toList();
+    }
+  }
+
+  Map<String, dynamic> toSnapshotJson() {
+    return {
+      'poolMatch': true,
+      'matchId': matchId,
+      'startedAt': startedAt.toIso8601String(),
+      'discipline': discipline.storageKey,
+      'raceTo': raceTo,
+      'alternatingBreaks': alternatingBreaks,
+      'activePlayerIndex': activePlayerIndex,
+      'breakerIndex': breakerIndex,
+      'rackNumber': rackNumber,
+      'ballInHand': ballInHand,
+      'pushOutAvailable': pushOutAvailable,
+      'pushOutArmed': pushOutArmed,
+      'matchOver': matchOver,
+      'tableGroup': tableGroup.name,
+      'players': players.map((player) => player.toJson()).toList(),
+      'actionLog': List<String>.from(_actionLog),
+      'scoreLine': scoreLine,
+    };
+  }
+}

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../services/player_service.dart';
+import '../services/game_history_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart';
 import '../models/game_trend_point.dart';
+import '../models/game_record.dart';
 import '../widgets/charts/stat_trend_chart.dart';
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -14,7 +16,9 @@ class StatisticsScreen extends StatefulWidget {
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   final PlayerService _playerService = PlayerService();
+  final GameHistoryService _historyService = GameHistoryService();
   List<Player> _players = [];
+  List<GameRecord> _completedGames = [];
   bool _isLoading = true;
   String _sortBy = 'gamesPlayed'; // Default sort
 
@@ -27,8 +31,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Future<void> _loadPlayers() async {
     setState(() => _isLoading = true);
     final players = await _playerService.getAllPlayers();
+    final completedGames = await _historyService.getCompletedGames();
     setState(() {
       _players = players;
+      _completedGames = completedGames;
       _sortPlayers();
       _isLoading = false;
     });
@@ -116,6 +122,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         children: [
                           // Overall Stats Card
                           _buildOverallStatsCard(l10n, colors, theme),
+
+                          const SizedBox(height: 16),
+
+                          _buildDisciplineBreakdownCard(colors, theme),
                           
                           const SizedBox(height: 24),
                           
@@ -152,7 +162,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildOverallStatsCard(AppLocalizations l10n, FortuneColors colors, ThemeData theme) {
-    final totalGames = _players.fold<int>(0, (sum, p) => sum + p.gamesPlayed);
+    final totalGames = _completedGames.length;
     final totalPoints = _players.fold<int>(0, (sum, p) => sum + p.totalPoints);
     final totalFouls = _players.fold<int>(0, (sum, p) => sum + p.totalFouls);
     final highestRun = _players.fold<int>(0, (max, p) => p.highestRun > max ? p.highestRun : max);
@@ -190,6 +200,73 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               _buildStatColumn(l10n.bestRun, highestRun.toString(), Icons.trending_up, colors, theme),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDisciplineBreakdownCard(FortuneColors colors, ThemeData theme) {
+    final counts = <String, int>{};
+    for (final game in _completedGames) {
+      counts.update(game.disciplineLabel, (value) => value + 1, ifAbsent: () => 1);
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.backgroundCard,
+        border: Border.all(color: colors.primaryDark, width: 2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.pie_chart_outline, color: colors.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Disziplinen',
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontSize: 18,
+                  color: colors.textMain,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (counts.isEmpty)
+            Text(
+              'Noch keine abgeschlossenen Matches.',
+              style: theme.textTheme.bodyMedium,
+            )
+          else
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: counts.entries
+                  .map(
+                    (entry) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.backgroundMain.withOpacity(0.55),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: colors.primary.withOpacity(0.25)),
+                      ),
+                      child: Text(
+                        '${entry.key}: ${entry.value}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colors.textMain,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
         ],
       ),
     );

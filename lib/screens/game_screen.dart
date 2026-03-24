@@ -835,12 +835,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         );
                       },
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.settings),
-                      color: colors.primary,
-                      tooltip: l10n.settings,
-                      onPressed: openSettings,
-                    ),
                   ],
                 ),
                 drawer: Drawer(
@@ -866,30 +860,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       ListTile(
-                        leading: Icon(Icons.undo, color: colors.primary),
-                        title: Text(l10n.undo,
+                        leading: Icon(Icons.settings, color: colors.primary),
+                        title: Text(l10n.settings,
                             style: theme.textTheme.bodyLarge
                                 ?.copyWith(color: colors.textMain)),
-                        enabled: !_isInputLocked && gameState.canUndo,
-                        onTap: (!_isInputLocked && gameState.canUndo)
-                            ? () {
-                                Navigator.pop(context);
-                                _handleInteraction(gameState.undo);
-                              }
-                            : null,
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.redo, color: colors.primary),
-                        title: Text(l10n.redo,
-                            style: theme.textTheme.bodyLarge
-                                ?.copyWith(color: colors.textMain)),
-                        enabled: !_isInputLocked && gameState.canRedo,
-                        onTap: (!_isInputLocked && gameState.canRedo)
-                            ? () {
-                                Navigator.pop(context);
-                                _handleInteraction(gameState.redo);
-                              }
-                            : null,
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await openSettings();
+                        },
                       ),
                       ListTile(
                         leading: Icon(Icons.refresh, color: colors.primary),
@@ -913,16 +891,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             style: theme.textTheme.bodyLarge
                                 ?.copyWith(color: colors.textMain)),
                         onTap: showRulesPopup,
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.settings, color: colors.primary),
-                        title: Text(l10n.settings,
-                            style: theme.textTheme.bodyLarge
-                                ?.copyWith(color: colors.textMain)),
-                        onTap: () async {
-                          Navigator.pop(context);
-                          await openSettings();
-                        },
                       ),
                     ],
                   ),

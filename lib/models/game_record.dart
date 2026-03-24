@@ -1,3 +1,5 @@
+import 'game_settings.dart';
+
 class GameRecord {
   final String id;
   final String player1Name;
@@ -140,4 +142,32 @@ class GameRecord {
       snapshot: snapshot, // Preserve snapshot for viewing details (includes inningRecords)
     );
   }
+
+  bool get isPoolMatch => snapshot?['poolMatch'] == true;
+
+  GameDiscipline get discipline {
+    if (!isPoolMatch) {
+      return GameDiscipline.straightPool;
+    }
+    return GameDiscipline.fromStorageKey(snapshot?['discipline'] as String?);
+  }
+
+  String get disciplineLabel {
+    switch (discipline) {
+      case GameDiscipline.straightPool:
+        return '14.1 Straight Pool';
+      case GameDiscipline.eightBall:
+        return '8-Ball';
+      case GameDiscipline.nineBall:
+        return '9-Ball';
+      case GameDiscipline.tenBall:
+        return '10-Ball';
+      case GameDiscipline.onePocket:
+        return '1-Pocket';
+      case GameDiscipline.cowboy:
+        return 'Cowboy';
+    }
+  }
+
+  String get scoreLine => '$player1Score:$player2Score';
 }

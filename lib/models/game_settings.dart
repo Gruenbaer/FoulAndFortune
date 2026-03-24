@@ -1,6 +1,27 @@
 export 'player.dart';
 
+enum GameDiscipline {
+  straightPool('straight_pool'),
+  eightBall('eight_ball'),
+  nineBall('nine_ball'),
+  tenBall('ten_ball'),
+  onePocket('one_pocket'),
+  cowboy('cowboy');
+
+  const GameDiscipline(this.storageKey);
+
+  final String storageKey;
+
+  static GameDiscipline fromStorageKey(String? value) {
+    return GameDiscipline.values.firstWhere(
+      (discipline) => discipline.storageKey == value,
+      orElse: () => GameDiscipline.straightPool,
+    );
+  }
+}
+
 class GameSettings {
+  GameDiscipline discipline;
   bool threeFoulRuleEnabled;
   int raceToScore;
   String player1Name;
@@ -25,6 +46,7 @@ class GameSettings {
   bool advancedScoringEnabled;
 
   GameSettings({
+    this.discipline = GameDiscipline.straightPool,
     this.threeFoulRuleEnabled = true,
     this.raceToScore = 100,
     this.player1Name = '',
@@ -55,6 +77,7 @@ class GameSettings {
       (isTrainingMode || player2Name.trim().isNotEmpty);
 
   Map<String, dynamic> toJson() => {
+        'discipline': discipline.storageKey,
         'threeFoulRuleEnabled': threeFoulRuleEnabled,
         'raceToScore': raceToScore,
         'player1Name': player1Name,
@@ -80,6 +103,7 @@ class GameSettings {
       };
 
   factory GameSettings.fromJson(Map<String, dynamic> json) => GameSettings(
+        discipline: GameDiscipline.fromStorageKey(json['discipline'] as String?),
         threeFoulRuleEnabled: json['threeFoulRuleEnabled'] ?? true,
         raceToScore: json['raceToScore'] ?? 100,
         player1Name: json['player1Name'] ?? '',
@@ -107,6 +131,7 @@ class GameSettings {
       );
 
   GameSettings copyWith({
+    GameDiscipline? discipline,
     bool? threeFoulRuleEnabled,
     int? raceToScore,
     String? player1Name,
@@ -131,6 +156,7 @@ class GameSettings {
     bool? advancedScoringEnabled,
   }) {
     return GameSettings(
+      discipline: discipline ?? this.discipline,
       threeFoulRuleEnabled: threeFoulRuleEnabled ?? this.threeFoulRuleEnabled,
       raceToScore: raceToScore ?? this.raceToScore,
       player1Name: player1Name ?? this.player1Name,
@@ -164,6 +190,7 @@ class GameSettings {
     if (identical(this, other)) return true;
 
     return other is GameSettings &&
+        other.discipline == discipline &&
         other.threeFoulRuleEnabled == threeFoulRuleEnabled &&
         other.raceToScore == raceToScore &&
         other.player1Name == player1Name &&
@@ -184,7 +211,8 @@ class GameSettings {
 
   @override
   int get hashCode {
-    return threeFoulRuleEnabled.hashCode ^
+    return discipline.hashCode ^
+        threeFoulRuleEnabled.hashCode ^
         raceToScore.hashCode ^
         player1Name.hashCode ^
         player2Name.hashCode ^

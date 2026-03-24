@@ -12,6 +12,9 @@ import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart'; // Ensure ThemedBackground is available
 import 'game_screen.dart';
 import 'details_screen.dart';
+import 'pool_match_center_screen.dart';
+import 'pool_match_details_screen.dart';
+import '../models/pool_match_state.dart';
 
 class GameHistoryScreen extends StatefulWidget {
   const GameHistoryScreen({super.key});
@@ -298,6 +301,31 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         onDismissed: (direction) => _deleteGame(game.id),
         child: ListTile(
           onTap: () {
+            if (game.isPoolMatch && game.snapshot != null) {
+              if (!game.isCompleted) {
+                final match = PoolMatchState.fromSnapshotJson(game.snapshot!);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider.value(
+                      value: match,
+                      child: PoolMatchCenterScreen(
+                        discipline: game.discipline,
+                      ),
+                    ),
+                  ),
+                ).then((_) => _loadGames());
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PoolMatchDetailsScreen(record: game),
+                  ),
+                );
+              }
+              return;
+            }
+
             if (!game.isCompleted) {
               Navigator.push(
                 context,
@@ -363,6 +391,14 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8),
+              Text(
+                game.disciplineLabel,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.primaryBright,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
               Text(
                 '${l10n.score}: ${game.player1Score} - ${game.player2Score}',
                 style: theme.textTheme.bodyLarge
