@@ -9,7 +9,8 @@ This file is the single handoff snapshot for current work-in-progress.
 Update it at the end of every session.
 
 ## Current focus
-- Release v4.3.1 published (APK uploaded)
+- Keep exactly one public GitHub release visible at a time
+- Archive older releases as drafts automatically during release deploy
 - Next: Monitor release adoption
 
 
@@ -43,4 +44,4 @@ Update it at the end of every session.
 - L10n: `puro flutter gen-l10n`
 - Build runner: `puro flutter pub run build_runner build --delete-conflicting-outputs`
 - Tests: `puro flutter test`
-- Release: `.\tools\deploy_release.ps1` (needs APK upload fix)
+- Release: `.\tools\deploy_release.ps1` (publishes current release, uploads only the versioned APK, archives older public releases as drafts)
