@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/game_settings.dart';
+import '../models/game_record.dart';
+import '../models/game_settings.dart' hide Player;
 import '../models/pool_match_state.dart';
+import '../services/game_history_service.dart';
+import '../services/player_service.dart';
 import '../theme/fortune_theme.dart';
+import '../widgets/player_name_field.dart';
 import '../widgets/themed_widgets.dart';
 import 'pool_match_center_screen.dart';
 
@@ -10,9 +14,13 @@ class PoolMatchSetupScreen extends StatefulWidget {
   const PoolMatchSetupScreen({
     super.key,
     required this.discipline,
+    this.playerService,
+    this.gameHistoryService,
   });
 
   final GameDiscipline discipline;
+  final PlayerService? playerService;
+  final GameHistoryService? gameHistoryService;
 
   @override
   State<PoolMatchSetupScreen> createState() => _PoolMatchSetupScreenState();
@@ -21,15 +29,21 @@ class PoolMatchSetupScreen extends StatefulWidget {
 class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
   late final TextEditingController _player1Controller;
   late final TextEditingController _player2Controller;
+  late final PlayerService _playerService;
+  late final GameHistoryService _gameHistoryService;
   late double _raceValue;
   bool _alternatingBreaks = true;
   int _startingBreakerIndex = 0;
+  bool _hasLoadedDefaults = false;
+  List<Player> _players = [];
 
   @override
   void initState() {
     super.initState();
-    _player1Controller = TextEditingController(text: 'Player 1');
-    _player2Controller = TextEditingController(text: 'Player 2');
+    _playerService = widget.playerService ?? PlayerService();
+    _gameHistoryService = widget.gameHistoryService ?? GameHistoryService();
+    _player1Controller = TextEditingController();
+    _player2Controller = TextEditingController();
     switch (widget.discipline) {
       case GameDiscipline.eightBall:
         _raceValue = 7;
@@ -53,6 +67,14 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasLoadedDefaults) return;
+    _hasLoadedDefaults = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDefaults());
+  }
+
+  @override
   void dispose() {
     _player1Controller.dispose();
     _player2Controller.dispose();
@@ -64,7 +86,6 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
       case GameDiscipline.eightBall:
         return 15;
       case GameDiscipline.nineBall:
-        return 21;
       case GameDiscipline.tenBall:
         return 21;
       case GameDiscipline.onePocket:
@@ -93,10 +114,111 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
     }
   }
 
-  void _startMatch() {
+  Future<void> _loadDefaults() async {
+    final settings = Provider.of<GameSettings>(context, listen: false);
+    final players = await _playerService.getAllPlayers();
+    final lastGame = await _gameHistoryService.getMostRecentGame();
+    if (!mounted) return;
+
+    final defaults = _resolveDefaultPlayers(
+      settings: settings,
+      lastGame: lastGame,
+      players: players,
+    );
+
+    setState(() {
+      _players = players;
+      _player1Controller.text = defaults.$1;
+      _player2Controller.text = defaults.$2;
+    });
+  }
+
+  (String, String) _resolveDefaultPlayers({
+    required GameSettings settings,
+    required GameRecord? lastGame,
+    required List<Player> players,
+  }) {
+    var player1Name = '';
+    var player2Name = '';
+
+    if (lastGame != null) {
+      player1Name = lastGame.player1Name.trim();
+      player2Name = lastGame.player2Name.trim();
+    }
+
+    if (player1Name.isEmpty) {
+      player1Name = settings.player1Name.trim();
+    }
+    if (player2Name.isEmpty) {
+      player2Name = settings.player2Name.trim();
+    }
+
+    if (player1Name.isEmpty && players.isNotEmpty) {
+      player1Name = players.first.name;
+    }
+    if (player2Name.isEmpty && players.length > 1) {
+      player2Name = players
+          .firstWhere(
+            (player) => player.name != player1Name,
+            orElse: () => players[1],
+          )
+          .name;
+    }
+
+    return (player1Name, player2Name);
+  }
+
+  Future<String?> _resolvePlayerId(String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return null;
+
+    Player? existing;
+    for (final player in _players) {
+      if (player.name.toLowerCase() == trimmed.toLowerCase()) {
+        existing = player;
+        break;
+      }
+    }
+    if (existing != null) {
+      return existing.id;
+    }
+
+    final created = await _playerService.createPlayer(trimmed);
+    _players = [..._players, created];
+    return created.id;
+  }
+
+  Future<void> _createPlayerInline(TextEditingController controller) async {
+    final trimmed = controller.text.trim();
+    if (trimmed.isEmpty) return;
+    final created = await _playerService.createPlayer(trimmed);
+    if (!mounted) return;
+    setState(() {
+      _players = [..._players, created];
+      controller.text = created.name;
+    });
+  }
+
+  Future<void> _startMatch() async {
     final p1 = _player1Controller.text.trim();
     final p2 = _player2Controller.text.trim();
     if (p1.isEmpty || p2.isEmpty) return;
+
+    final currentSettings = Provider.of<GameSettings>(context, listen: false);
+    final updateSettings =
+        Provider.of<Function(GameSettings)>(context, listen: false);
+    final player1Id = await _resolvePlayerId(p1);
+    final player2Id = await _resolvePlayerId(p2);
+    if (!mounted) return;
+
+    updateSettings(
+      currentSettings.copyWith(
+        player1Name: p1,
+        player2Name: p2,
+        player1Id: player1Id,
+        player2Id: player2Id,
+      ),
+    );
 
     Navigator.push(
       context,
@@ -156,7 +278,7 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                 (entry) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
-                    '• $entry',
+                    '- $entry',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: colors.textMain,
                       height: 1.45,
@@ -177,7 +299,7 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                 (entry) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
-                    '• $entry',
+                    '- $entry',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: colors.textMain.withOpacity(0.92),
                       height: 1.45,
@@ -256,20 +378,38 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Spieler',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: colors.textMain,
-                          fontWeight: FontWeight.bold,
-                        )),
+                    Text(
+                      'Spieler',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: colors.textMain,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 14),
-                    TextField(
-                      controller: _player1Controller,
-                      decoration: const InputDecoration(labelText: 'Player 1'),
+                    PlayerNameField(
+                      key: const ValueKey('pool_player1_input'),
+                      label: 'Player 1',
+                      initialValue: _player1Controller.text,
+                      players: _players,
+                      onChanged: (name) {
+                        _player1Controller.text = name;
+                        setState(() {});
+                      },
+                      onCreatePlayer: () =>
+                          _createPlayerInline(_player1Controller),
                     ),
                     const SizedBox(height: 12),
-                    TextField(
-                      controller: _player2Controller,
-                      decoration: const InputDecoration(labelText: 'Player 2'),
+                    PlayerNameField(
+                      key: const ValueKey('pool_player2_input'),
+                      label: 'Player 2',
+                      initialValue: _player2Controller.text,
+                      players: _players,
+                      onChanged: (name) {
+                        _player2Controller.text = name;
+                        setState(() {});
+                      },
+                      onCreatePlayer: () =>
+                          _createPlayerInline(_player2Controller),
                     ),
                   ],
                 ),
@@ -278,11 +418,13 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Race',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: colors.textMain,
-                          fontWeight: FontWeight.bold,
-                        )),
+                    Text(
+                      'Race',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: colors.textMain,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     Text(
                       'Race to ${_raceValue.round()}',
@@ -390,11 +532,13 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Was du im Match-Center bekommst',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: colors.textMain,
-                          fontWeight: FontWeight.bold,
-                        )),
+                    Text(
+                      'Was du im Match-Center bekommst',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: colors.textMain,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       '* Live Rack-Flow mit Breaker, Shooter, Ball-in-Hand und Match-Kontext\n'

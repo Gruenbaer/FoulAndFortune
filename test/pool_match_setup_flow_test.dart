@@ -1,22 +1,89 @@
+import 'package:drift/native.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foulandfortune/models/game_settings.dart';
+import 'package:foulandfortune/data/app_database.dart';
+import 'package:foulandfortune/l10n/app_localizations.dart';
+import 'package:foulandfortune/models/game_record.dart';
+import 'package:foulandfortune/models/game_settings.dart' hide Player;
 import 'package:foulandfortune/models/pool_match_state.dart';
 import 'package:foulandfortune/screens/pool_match_center_screen.dart';
 import 'package:foulandfortune/screens/pool_match_setup_screen.dart';
+import 'package:foulandfortune/services/game_history_service.dart';
+import 'package:foulandfortune/services/player_service.dart';
 import 'package:foulandfortune/theme/fortune_theme.dart';
 import 'package:provider/provider.dart';
 
+AppDatabase buildDb() => AppDatabase(NativeDatabase.memory());
+
+class FakePlayerService extends PlayerService {
+  FakePlayerService(List<Player> players, {required AppDatabase db})
+      : _players = List<Player>.from(players),
+        super(db: db);
+
+  final List<Player> _players;
+
+  @override
+  Future<List<Player>> getAllPlayers() async => List<Player>.from(_players);
+
+  @override
+  Future<Player> createPlayer(String name) async {
+    final created = Player(
+      id: 'player-${_players.length + 1}',
+      name: name,
+    );
+    _players.add(created);
+    return created;
+  }
+}
+
+class FakeGameHistoryService extends GameHistoryService {
+  FakeGameHistoryService(this.record, {required AppDatabase db}) : super(db: db);
+
+  final GameRecord? record;
+
+  @override
+  Future<GameRecord?> getMostRecentGame() async => record;
+}
+
 void main() {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+
   Future<void> useLargeSurface(WidgetTester tester) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(const Size(1400, 2200));
   }
 
-  Widget buildHarness(GameDiscipline discipline) {
-    return MaterialApp(
-      theme: CyberpunkTheme.themeData,
-      home: PoolMatchSetupScreen(discipline: discipline),
+  Widget buildHarness(
+    GameDiscipline discipline, {
+    GameSettings? settings,
+    PlayerService? playerService,
+    GameHistoryService? historyService,
+    void Function(GameSettings)? onSettingsChanged,
+  }) {
+    return MultiProvider(
+      providers: [
+        Provider<GameSettings>.value(value: settings ?? GameSettings()),
+        Provider<Function(GameSettings)>.value(
+          value: onSettingsChanged ?? (_) {},
+        ),
+      ],
+      child: MaterialApp(
+        theme: CyberpunkTheme.themeData,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PoolMatchSetupScreen(
+          discipline: discipline,
+          playerService: playerService,
+          gameHistoryService: historyService,
+        ),
+      ),
     );
   }
 
@@ -35,8 +102,16 @@ void main() {
   }
 
   testWidgets('nine-ball setup shows correct quick races', (tester) async {
+    final db = buildDb();
+    addTearDown(() => db.close());
     await useLargeSurface(tester);
-    await tester.pumpWidget(buildHarness(GameDiscipline.nineBall));
+    await tester.pumpWidget(
+      buildHarness(
+        GameDiscipline.nineBall,
+        playerService: PlayerService(db: db),
+        historyService: GameHistoryService(db: db),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('9-Ball Setup'), findsOneWidget);
@@ -71,8 +146,16 @@ void main() {
 
   testWidgets('one-pocket setup reflects discipline-specific defaults',
       (tester) async {
+    final db = buildDb();
+    addTearDown(() => db.close());
     await useLargeSurface(tester);
-    await tester.pumpWidget(buildHarness(GameDiscipline.onePocket));
+    await tester.pumpWidget(
+      buildHarness(
+        GameDiscipline.onePocket,
+        playerService: PlayerService(db: db),
+        historyService: GameHistoryService(db: db),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('1-Pocket Setup'), findsOneWidget);
@@ -87,8 +170,16 @@ void main() {
 
   testWidgets('cowboy setup reflects discipline-specific defaults',
       (tester) async {
+    final db = buildDb();
+    addTearDown(() => db.close());
     await useLargeSurface(tester);
-    await tester.pumpWidget(buildHarness(GameDiscipline.cowboy));
+    await tester.pumpWidget(
+      buildHarness(
+        GameDiscipline.cowboy,
+        playerService: PlayerService(db: db),
+        historyService: GameHistoryService(db: db),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Cowboy Setup'), findsOneWidget);
@@ -129,8 +220,16 @@ void main() {
   });
 
   testWidgets('setup allows choosing the starting breaker', (tester) async {
+    final db = buildDb();
+    addTearDown(() => db.close());
     await useLargeSurface(tester);
-    await tester.pumpWidget(buildHarness(GameDiscipline.tenBall));
+    await tester.pumpWidget(
+      buildHarness(
+        GameDiscipline.tenBall,
+        playerService: PlayerService(db: db),
+        historyService: GameHistoryService(db: db),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Wer stoesst an?'), findsOneWidget);
@@ -141,5 +240,43 @@ void main() {
       find.widgetWithText(ChoiceChip, 'Player 2'),
     );
     expect(bobChip.selected, isTrue);
+  });
+
+  testWidgets('setup preloads most recent game players as new default',
+      (tester) async {
+    final db = buildDb();
+    addTearDown(() => db.close());
+    final players = FakePlayerService([
+      Player(id: 'p1', name: 'Alice'),
+      Player(id: 'p2', name: 'Bob'),
+    ], db: db);
+    final history = FakeGameHistoryService(
+      GameRecord(
+        id: 'recent-game',
+        player1Name: 'Alice',
+        player2Name: 'Bob',
+        player1Score: 7,
+        player2Score: 5,
+        startTime: DateTime.now(),
+        isCompleted: true,
+        raceToScore: 9,
+      ),
+      db: db,
+    );
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(
+      buildHarness(
+        GameDiscipline.eightBall,
+        settings: GameSettings(player1Name: 'Old 1', player2Name: 'Old 2'),
+        playerService: players,
+        historyService: history,
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Alice'), findsWidgets);
+    expect(find.text('Bob'), findsWidgets);
   });
 }

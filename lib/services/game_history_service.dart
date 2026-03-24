@@ -26,12 +26,12 @@ class GameHistoryService {
   }
 
   /// Notation V2 Migration (FF14 Canonical Notation)
-  /// 
+  ///
   /// This is intentionally a no-op stub. Migration is not needed because:
   /// 1. `NotationCodec.parse()` already handles legacy formats via fallback parsing
   /// 2. Old notation is converted on-the-fly when games are loaded
   /// 3. New saves automatically use the canonical format
-  /// 
+  ///
   /// The migration flag simply indicates the app has been launched with V2 support,
   /// preventing unnecessary migration prompts to the user.
   Future<int> migrateNotation() async {
@@ -63,6 +63,15 @@ class GameHistoryService {
           ..orderBy([(game) => OrderingTerm.desc(game.startTime)]))
         .get();
     return rows.map(_fromRow).toList();
+  }
+
+  Future<GameRecord?> getMostRecentGame() async {
+    final row = await (_db.select(_db.games)
+          ..where((game) => game.deletedAt.isNull())
+          ..orderBy([(game) => OrderingTerm.desc(game.startTime)])
+          ..limit(1))
+        .getSingleOrNull();
+    return row == null ? null : _fromRow(row);
   }
 
   Future<void> saveGame(GameRecord game) async {
@@ -118,16 +127,14 @@ class GameHistoryService {
       entityType: 'game',
       entityId: game.id,
       operation: 'upsert',
-      payload: _gamePayload(game,
-          player1Id: player1Id, player2Id: player2Id),
+      payload: _gamePayload(game, player1Id: player1Id, player2Id: player2Id),
     );
   }
 
   Future<void> deleteGame(String id) async {
     final now = DateTime.now();
-    final deleted = await (_db.delete(_db.games)
-          ..where((row) => row.id.equals(id)))
-        .go();
+    final deleted =
+        await (_db.delete(_db.games)..where((row) => row.id.equals(id))).go();
     if (deleted == 0) {
       return;
     }
@@ -159,8 +166,7 @@ class GameHistoryService {
 
   Future<GameRecord?> getGameById(String id) async {
     final row = await (_db.select(_db.games)
-          ..where((game) =>
-              game.id.equals(id) & game.deletedAt.isNull()))
+          ..where((game) => game.id.equals(id) & game.deletedAt.isNull()))
         .getSingleOrNull();
     return row == null ? null : _fromRow(row);
   }
