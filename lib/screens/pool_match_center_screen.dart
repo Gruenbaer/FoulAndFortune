@@ -76,6 +76,179 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
     }
   }
 
+  void _showInfoDialog(String title, String body) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => GameAlertDialog(
+        title: title,
+        content: Text(body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Schliessen'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRuleSheet(PoolMatchState match) {
+    final colors = FortuneColors.of(context);
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 26),
+        decoration: BoxDecoration(
+          color: colors.backgroundMain,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(color: colors.primary.withOpacity(0.25)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Container(
+                width: 52,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              Text(
+                '${widget.discipline.label} Anleitung',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: colors.accent,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'So benutzt du den Screen',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colors.textMain,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ...widget.discipline.quickHowTo.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    '• $entry',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.textMain,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Regelwerk',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colors.textMain,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ...widget.discipline.ruleBook.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    '• $entry',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.textMain.withOpacity(0.92),
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Aktuell stoest ${match.players[match.breakerIndex].name} an.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colors.accent,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showBreakerSheet(PoolMatchState match) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        final colors = FortuneColors.of(context);
+        final theme = Theme.of(context);
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          decoration: BoxDecoration(
+            color: colors.backgroundMain,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border.all(color: colors.primary.withOpacity(0.25)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Breaking Player wechseln',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colors.accent,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Waehl den Spieler, der dieses Rack anstoessen soll. Der aktive Spieler wird dabei ebenfalls umgestellt.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.textMain,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...List.generate(
+                  match.players.length,
+                  (index) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      index == match.breakerIndex
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                    ),
+                    title: Text(match.players[index].name),
+                    subtitle: Text(index == match.breakerIndex
+                        ? 'Aktueller Breaker'
+                        : 'Als Breaker setzen'),
+                    onTap: () {
+                      match.setBreaker(index);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = FortuneColors.of(context);
@@ -129,8 +302,9 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                     : colors.backgroundCard.withOpacity(0.78),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color:
-                      isActive ? colors.accent : colors.primary.withOpacity(0.25),
+                  color: isActive
+                      ? colors.accent
+                      : colors.primary.withOpacity(0.25),
                   width: 2,
                 ),
               ),
@@ -169,7 +343,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                     spacing: 10,
                     runSpacing: 10,
                     children: [
-                      statChip(widget.discipline.scoreLabel, player.rackWins.toString()),
+                      statChip(widget.discipline.scoreLabel,
+                          player.rackWins.toString()),
                       statChip(
                         'Safeties',
                         player.safeties.toString(),
@@ -213,12 +388,16 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
           required String label,
           required IconData icon,
           required VoidCallback onPressed,
+          required String helpText,
           Color? accent,
         }) {
           return Expanded(
             child: ThemedButton(
               label: label,
               icon: icon,
+              iconPosition: ThemedButtonIconPosition.top,
+              forceSingleLineLabel: true,
+              contentSpacing: 8,
               backgroundGradientColors: accent == null
                   ? null
                   : [
@@ -226,6 +405,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                       colors.backgroundCard,
                     ],
               onPressed: match.matchOver ? null : onPressed,
+              onLongPress: () => _showInfoDialog(label, helpText),
             ),
           );
         }
@@ -245,7 +425,9 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
-            title: Text('${widget.discipline.label} Match Center'),
+            leadingWidth: 44,
+            titleSpacing: 8,
+            title: Text(widget.discipline.label),
             centerTitle: true,
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -254,18 +436,73 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                 icon: Icons.undo,
                 onPressed: match.canUndo ? match.undo : null,
                 tooltip: 'Undo',
+                shadows: const [],
               ),
               GuardedIconButton(
                 icon: Icons.redo,
                 onPressed: match.canRedo ? match.redo : null,
                 tooltip: 'Redo',
-              ),
-              IconButton(
-                icon: const Icon(Icons.query_stats),
-                onPressed: showStatsSheet,
-                tooltip: 'Stats',
+                shadows: const [],
               ),
             ],
+          ),
+          drawer: Drawer(
+            child: SafeArea(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                children: [
+                  ListTile(
+                    title: Text(
+                      widget.discipline.label,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: colors.accent,
+                      ),
+                    ),
+                    subtitle: Text(
+                      match.contextLine,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.textMain.withOpacity(0.75),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.menu_book_outlined),
+                    title: const Text('Anleitung & Regelwerk'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showRuleSheet(match);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.swap_horiz),
+                    title: const Text('Breaking Player wechseln'),
+                    subtitle: Text(match.players[match.breakerIndex].name),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showBreakerSheet(match);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.query_stats),
+                    title: const Text('Live-Stats'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      showStatsSheet();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.restart_alt),
+                    title: const Text('Match zuruecksetzen'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      match.resetMatch();
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
           body: ThemedBackground(
             child: SafeArea(
@@ -288,6 +525,13 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: colors.textMain,
                             fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Long-Press auf einen Button zeigt dir kurz, was er genau macht.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colors.textMain.withOpacity(0.72),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -346,6 +590,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         icon: Icons.emoji_events,
                         accent: colors.accent,
                         onPressed: () => match.winRack(),
+                        helpText:
+                            'Normales gewonnenes Rack ohne Sondermerkmal. Nutze das fuer den regulaeren Punktgewinn.',
                       ),
                       const SizedBox(width: 10),
                       actionButton(
@@ -353,6 +599,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         icon: Icons.local_fire_department,
                         accent: colors.primaryBright,
                         onPressed: () => match.winRack(runOut: true),
+                        helpText:
+                            'Komplettes Ausspielen des Racks in einem Zug. Zaehlt auch als Rack-Win.',
                       ),
                     ],
                   ),
@@ -364,6 +612,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         accent: colors.warning,
                         onPressed: () =>
                             match.winRack(breakAndRun: true, runOut: true),
+                        helpText:
+                            'Der Breaker gewinnt das Rack ohne den Tisch noch einmal abzugeben.',
                       ),
                       const SizedBox(width: 10),
                       actionButton(
@@ -371,6 +621,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         icon: Icons.auto_awesome,
                         accent: colors.danger,
                         onPressed: () => match.winRack(goldenBreak: true),
+                        helpText:
+                            'Sonderfinish des jeweiligen Modus, etwa Golden Break oder 8 on Break.',
                       ),
                     ],
                   ),
@@ -380,6 +632,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         label: 'Safety',
                         icon: Icons.shield_outlined,
                         onPressed: match.recordSafety,
+                        helpText:
+                            'Defensivstoss ohne Rack-Ende. Gut fuer One Pocket, 8-Ball und kontrollierte Rotationsracks.',
                       ),
                       const SizedBox(width: 10),
                       actionButton(
@@ -387,6 +641,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         icon: Icons.warning_amber_rounded,
                         accent: colors.danger,
                         onPressed: match.recordFoul,
+                        helpText:
+                            'Trage ein Foul ein. Der Gegner bekommt Ball in Hand und der Zug wechselt automatisch.',
                       ),
                     ],
                   ),
@@ -396,12 +652,16 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         label: 'Switch Turn',
                         icon: Icons.swap_horiz,
                         onPressed: match.switchTurn,
+                        helpText:
+                            'Manueller Spielerwechsel ohne Foul. Praktisch nach Safety-Duellen oder Korrekturen.',
                       ),
                       const SizedBox(width: 10),
                       actionButton(
                         label: 'Dry Break',
                         icon: Icons.hourglass_bottom,
                         onPressed: match.recordDryBreak,
+                        helpText:
+                            'Der Break brachte keinen gelochten Ball. In 9-Ball und 10-Ball wird damit Push Out vorbereitet.',
                       ),
                     ],
                   ),
@@ -412,6 +672,8 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         icon: Icons.control_camera,
                         accent: colors.warning,
                         onPressed: match.toggleBallInHand,
+                        helpText:
+                            'Ball in Hand ein- oder ausschalten. Nutze das nach Fouls oder manuellen Korrekturen.',
                       ),
                       const SizedBox(width: 10),
                       actionButton(
@@ -420,6 +682,9 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         onPressed: widget.discipline.supportsPushOut
                             ? match.togglePushOut
                             : () {},
+                        helpText: widget.discipline.supportsPushOut
+                            ? 'Push Out fuer 9-Ball und 10-Ball aktivieren oder wieder loesen.'
+                            : 'In diesem Modus gibt es keinen Push Out.',
                       ),
                     ],
                   ),
@@ -445,15 +710,15 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         ),
                         ChoiceChip(
                           label: const Text('Solids'),
-                          selected:
-                              match.currentPlayer.assignedGroup == TableGroup.solids,
+                          selected: match.currentPlayer.assignedGroup ==
+                              TableGroup.solids,
                           onSelected: (_) =>
                               match.assignTableGroup(TableGroup.solids),
                         ),
                         ChoiceChip(
                           label: const Text('Stripes'),
-                          selected:
-                              match.currentPlayer.assignedGroup == TableGroup.stripes,
+                          selected: match.currentPlayer.assignedGroup ==
+                              TableGroup.stripes,
                           onSelected: (_) =>
                               match.assignTableGroup(TableGroup.stripes),
                         ),
@@ -467,7 +732,13 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         child: ThemedButton(
                           label: 'Stats',
                           icon: Icons.analytics_outlined,
+                          iconPosition: ThemedButtonIconPosition.top,
+                          forceSingleLineLabel: true,
                           onPressed: showStatsSheet,
+                          onLongPress: () => _showInfoDialog(
+                            'Stats',
+                            'Zeigt die Live-Statistiken des aktuellen Matches mit Rack-Wins, Safeties, Fouls und Druckwerten.',
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -475,7 +746,13 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         child: ThemedButton(
                           label: 'Reset Match',
                           icon: Icons.restart_alt,
+                          iconPosition: ThemedButtonIconPosition.top,
+                          forceSingleLineLabel: true,
                           onPressed: match.resetMatch,
+                          onLongPress: () => _showInfoDialog(
+                            'Reset Match',
+                            'Setzt das laufende Match auf Rack 1 zurueck und loescht die aktuelle Live-Chronik.',
+                          ),
                         ),
                       ),
                     ],
@@ -647,7 +924,8 @@ class _MatchStatsSheet extends StatelessWidget {
             buildRow('Safeties', '${p1.safeties}', '${p2.safeties}'),
             buildRow('Fouls', '${p1.fouls}', '${p2.fouls}'),
             buildRow('Break & Run', '${p1.breakAndRuns}', '${p2.breakAndRuns}'),
-            buildRow('Special Finish', '${p1.goldenBreaks}', '${p2.goldenBreaks}'),
+            buildRow(
+                'Special Finish', '${p1.goldenBreaks}', '${p2.goldenBreaks}'),
             buildRow('Runouts', '${p1.runOuts}', '${p2.runOuts}'),
             buildRow('Dry Breaks', '${p1.dryBreaks}', '${p2.dryBreaks}'),
             buildRow(

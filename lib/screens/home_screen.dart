@@ -35,6 +35,44 @@ class _HomeScreenState extends State<HomeScreen> {
   GameRecord? _activeGame;
   String _version = '';
 
+  void _showModeInfo(GameDiscipline discipline) {
+    final colors = FortuneColors.of(context);
+    final theme = Theme.of(context);
+
+    showDialog<void>(
+      context: context,
+      builder: (_) => GameAlertDialog(
+        title: discipline.label,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              discipline.shortHomeHint,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: colors.textMain,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 14),
+            ...discipline.quickHowTo.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text('• $entry'),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Schliessen'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -81,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ChangeNotifierProvider(
-            create: (_) => GameState(
+          create: (_) => GameState(
             settings: GameSettings(
               raceToScore: record.raceToScore,
               player1Name: record.player1Name,
@@ -94,7 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             achievementManager:
                 Provider.of<AchievementManager>(context, listen: false),
-            shotEventService: ShotEventService(db: appDatabase), // Inject Service
+            shotEventService:
+                ShotEventService(db: appDatabase), // Inject Service
           ),
           child: GameScreen(
             settings: Provider.of<GameSettings>(context, listen: false),
@@ -185,6 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               label:
                                   '${l10n.resume}: ${_activeGame!.player1Name} vs ${_activeGame!.player2Name}',
                               icon: Icons.play_circle_fill,
+                              iconPosition: ThemedButtonIconPosition.top,
+                              forceSingleLineLabel: true,
                               onPressed: () => _resumeGame(_activeGame!),
                             ),
                             const SizedBox(height: 16),
@@ -193,12 +234,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           ThemedButton(
                             label: l10n.new141Game,
                             icon: Icons.play_arrow,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () => showNewGameSettings(context),
                           ),
 
                           ThemedButton(
                             label: '8-Ball',
                             icon: Icons.sports_bar,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -210,11 +255,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
+                            onLongPress: () =>
+                                _showModeInfo(GameDiscipline.eightBall),
                           ),
 
                           ThemedButton(
                             label: '9-Ball',
                             icon: Icons.adjust,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -226,11 +275,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
+                            onLongPress: () =>
+                                _showModeInfo(GameDiscipline.nineBall),
                           ),
 
                           ThemedButton(
                             label: '10-Ball',
                             icon: Icons.blur_circular,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -242,11 +295,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
+                            onLongPress: () =>
+                                _showModeInfo(GameDiscipline.tenBall),
                           ),
 
                           ThemedButton(
                             label: '1-Pocket',
                             icon: Icons.gpp_good,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -258,11 +315,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
+                            onLongPress: () =>
+                                _showModeInfo(GameDiscipline.onePocket),
                           ),
 
                           ThemedButton(
                             label: 'Cowboy',
                             icon: Icons.auto_fix_high,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -274,11 +335,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
+                            onLongPress: () =>
+                                _showModeInfo(GameDiscipline.cowboy),
                           ),
 
                           ThemedButton(
                             label: l10n.gameHistory,
                             icon: Icons.history,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -292,6 +357,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ThemedButton(
                             label: l10n.players,
                             icon: Icons.people_outline,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -305,6 +372,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ThemedButton(
                             label: l10n.statistics,
                             icon: Icons.bar_chart,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -319,6 +388,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ThemedButton(
                             label: l10n.achievements,
                             icon: Icons.emoji_events,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -332,6 +403,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ThemedButton(
                             label: l10n.settings,
                             icon: Icons.settings_suggest,
+                            iconPosition: ThemedButtonIconPosition.top,
+                            forceSingleLineLabel: true,
                             onPressed: () async {
                               final currentSettings = Provider.of<GameSettings>(
                                   context,
@@ -361,7 +434,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         _version,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: FortuneColors.of(context).textMain.withOpacity(0.7),
+                          color: FortuneColors.of(context)
+                              .textMain
+                              .withOpacity(0.7),
                         ),
                       ),
                   ],

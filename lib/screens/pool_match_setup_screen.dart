@@ -23,6 +23,7 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
   late final TextEditingController _player2Controller;
   late double _raceValue;
   bool _alternatingBreaks = true;
+  int _startingBreakerIndex = 0;
 
   @override
   void initState() {
@@ -105,9 +106,87 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
             discipline: widget.discipline,
             raceTo: _raceValue.round(),
             alternatingBreaks: _alternatingBreaks,
+            initialBreakerIndex: _startingBreakerIndex,
             playerNames: [p1, p2],
           ),
           child: PoolMatchCenterScreen(discipline: widget.discipline),
+        ),
+      ),
+    );
+  }
+
+  void _showHowToSheet() {
+    final colors = FortuneColors.of(context);
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 26),
+        decoration: BoxDecoration(
+          color: colors.backgroundMain,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(color: colors.primary.withOpacity(0.25)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Container(
+                width: 52,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              Text(
+                '${widget.discipline.label} Anleitung',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: colors.accent,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...widget.discipline.quickHowTo.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    '• $entry',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.textMain,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Regelwerk',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colors.textMain,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ...widget.discipline.ruleBook.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    '• $entry',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.textMain.withOpacity(0.92),
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -138,6 +217,13 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu_book_outlined),
+            tooltip: 'Anleitung und Regeln',
+            onPressed: _showHowToSheet,
+          ),
+        ],
       ),
       body: ThemedBackground(
         child: SafeArea(
@@ -260,6 +346,43 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                         });
                       },
                     ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Wer stoesst an?',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colors.textMain,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        ChoiceChip(
+                          label: Text(_player1Controller.text.trim().isEmpty
+                              ? 'Player 1'
+                              : _player1Controller.text.trim()),
+                          selected: _startingBreakerIndex == 0,
+                          onSelected: (_) {
+                            setState(() {
+                              _startingBreakerIndex = 0;
+                            });
+                          },
+                        ),
+                        ChoiceChip(
+                          label: Text(_player2Controller.text.trim().isEmpty
+                              ? 'Player 2'
+                              : _player2Controller.text.trim()),
+                          selected: _startingBreakerIndex == 1,
+                          onSelected: (_) {
+                            setState(() {
+                              _startingBreakerIndex = 1;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -289,7 +412,10 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
               ThemedButton(
                 label: '${widget.discipline.label} Starten',
                 icon: Icons.play_circle_fill,
+                iconPosition: ThemedButtonIconPosition.top,
+                forceSingleLineLabel: true,
                 onPressed: _startMatch,
+                onLongPress: _showHowToSheet,
               ),
             ],
           ),

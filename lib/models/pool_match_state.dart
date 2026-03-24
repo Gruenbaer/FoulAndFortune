@@ -73,6 +73,106 @@ extension GameDisciplineMeta on GameDiscipline {
         return 'Der bestehende 14.1-Pfad bleibt separat und unangetastet.';
     }
   }
+
+  String get shortHomeHint {
+    switch (this) {
+      case GameDiscipline.eightBall:
+        return 'Gruppen vergeben, Safeties tracken und den Tisch mit klaren Rack-Wins abschliessen.';
+      case GameDiscipline.nineBall:
+        return 'Rotation mit Push-Out, Golden Break und schnellem Rack-Flow fuer klassische Sessions.';
+      case GameDiscipline.tenBall:
+        return 'Wie 9-Ball, nur kontrollierter: Call-Shot-Feeling, Push-Out und starker Safety-Druck.';
+      case GameDiscipline.onePocket:
+        return 'Taktikmodus mit einer Tasche pro Spieler, viel Defense und langen Druckphasen.';
+      case GameDiscipline.cowboy:
+        return 'Abwechslungsreicher Hybrid-Modus fuer kreative Sessions mit klaren Set- und Finish-Aktionen.';
+      case GameDiscipline.straightPool:
+        return 'Der bewaehrte 14.1-Modus mit eigener Bedienung bleibt separat erhalten.';
+    }
+  }
+
+  List<String> get quickHowTo {
+    switch (this) {
+      case GameDiscipline.eightBall:
+        return const [
+          'Nach dem Break zuerst Gruppen festlegen: Open Table, Solids oder Stripes.',
+          'Rack-Win fuer normale Racks, Runout fuer saubere Ausspiele und 8 on Break fuer den Sonderfall.',
+          'Safety, Foul und Ball in Hand halten den taktischen Ablauf sauber fest.',
+        ];
+      case GameDiscipline.nineBall:
+        return const [
+          'Nach einem trockenen Break ist Push Out verfuegbar; per Button aktivieren, wenn es angesagt wurde.',
+          'Runout steht fuer regulare Ausspiele, Golden Break fuer die 9 direkt vom Break.',
+          'Foul gibt Ball in Hand an den Gegner, Safety und Turn Switch dokumentieren den Rack-Verlauf.',
+        ];
+      case GameDiscipline.tenBall:
+        return const [
+          'Nutze den gleichen Rotationsfluss wie bei 9-Ball, aber trage nur wirklich angesagte klare Finishes ein.',
+          'Push Out gibt es nach trockenem Break, Ball in Hand und Fouls laufen ueber die Schnellaktionen.',
+          'Breaker im Menue wechseln, wenn das Rack manuell korrigiert werden muss.',
+        ];
+      case GameDiscipline.onePocket:
+        return const [
+          'Rack-Win zaehlt das Spiel, Safeties und Fouls sind die wichtigsten Steuerknopfe im laufenden Duell.',
+          'Breaker laesst sich im Menue umstellen, wenn ihr vor dem Rack anders entscheidet.',
+          'Chronik und Live-Stats helfen bei langen, defensiven Sessions den Faden zu behalten.',
+        ];
+      case GameDiscipline.cowboy:
+        return const [
+          'Den Modus wie ein Hybrid-Match fuehren: saubere Racks, bewusst gesetzte Safeties und kontrollierte Turn-Wechsel.',
+          'Clean Finish steht fuer den besonderen Abschluss, Rack-Win fuer den regulaeren Punkt.',
+          'Im Menue findest du Regeln, Stats und den Breaker-Wechsel an einer Stelle.',
+        ];
+      case GameDiscipline.straightPool:
+        return const [
+          '14.1 bleibt im bestehenden Screen mit eigener Bedienlogik.',
+        ];
+    }
+  }
+
+  List<String> get ruleBook {
+    switch (this) {
+      case GameDiscipline.eightBall:
+        return const [
+          'Break: Nach einem legalen Break ist der Tisch offen, bis eine Gruppe sauber festgelegt wird.',
+          'Gruppen: Solids und Stripes werden im Match-Center dem aktiven Spieler zugewiesen.',
+          'Ziel: Erst die eigene Gruppe, dann die 8. 8 on Break kann als Sonderfinish geloggt werden.',
+          'Fouls: Gegner erhaelt Ball in Hand.',
+        ];
+      case GameDiscipline.nineBall:
+        return const [
+          'Rotation: Immer zuerst die niedrigste Kugel anspielen.',
+          'Push Out: Nach einem trockenen oder sonst passenden Erffnungsrack verfuegbar, wenn ihr es nutzt.',
+          'Gewinn: 9 regulär gelocht oder Golden Break direkt vom Break.',
+          'Fouls: Gegner erhaelt Ball in Hand; Dry Break und Safeties separat festhalten.',
+        ];
+      case GameDiscipline.tenBall:
+        return const [
+          'Rotation: Immer zuerst die niedrigste Kugel anspielen.',
+          'Kontrolle: 10-Ball wird stricter gespielt; besondere Finishes bewusst nur dann loggen, wenn sie regelgerecht waren.',
+          'Push Out: Nach der Erffnung verfuegbar, wenn euer Regelset das vorsieht.',
+          'Fouls: Gegner erhaelt Ball in Hand.',
+        ];
+      case GameDiscipline.onePocket:
+        return const [
+          'Jeder Spieler verteidigt und spielt auf eine eigene Tasche.',
+          'Safeties, Fouls und Ball in Hand sind im Match-Center die wichtigsten Match-Events.',
+          'Ein gewonnenes Rack wird als Spiel gezaehlt und ueber Rack-Win abgeschlossen.',
+          'Breaker und Rack-Tempo lassen sich im Menue sauber nachfuehren.',
+        ];
+      case GameDiscipline.cowboy:
+        return const [
+          'Cowboy wird hier als flexibler Hybrid-Modus fuer Sessions gefuehrt.',
+          'Normale Gewinne laufen ueber Rack-Win, besondere Abschluesse ueber Clean Finish.',
+          'Safety, Foul, Turn Switch und Chronik dokumentieren den Ablauf so, dass Stats und Historie konsistent bleiben.',
+          'Wenn ihr hausinterne Varianten spielt, nutzt das Regelblatt im Menue als Referenz und die Chronik fuer Abweichungen.',
+        ];
+      case GameDiscipline.straightPool:
+        return const [
+          '14.1 wird im separaten Straight-Pool-Screen gefuehrt.',
+        ];
+    }
+  }
 }
 
 enum TableGroup { open, solids, stripes }
@@ -226,26 +326,27 @@ class PoolMatchState extends ChangeNotifier {
     required this.raceTo,
     required List<String> playerNames,
     this.alternatingBreaks = true,
+    this.initialBreakerIndex = 0,
     String? matchId,
     DateTime? startedAt,
-  }) : players = playerNames
+  })  : players = playerNames
             .map((name) => PoolMatchPlayerStats(name: name.trim()))
             .toList(),
         matchId = matchId ?? const Uuid().v4(),
         startedAt = startedAt ?? DateTime.now() {
     _actionLog = <String>[];
+    breakerIndex = initialBreakerIndex.clamp(0, players.length - 1);
+    activePlayerIndex = breakerIndex;
     _setOpeningState();
   }
 
   factory PoolMatchState.fromSnapshotJson(Map<String, dynamic> json) {
-    final playersJson =
-        (json['players'] as List<dynamic>? ?? const <dynamic>[])
-            .whereType<Map>()
-            .map((entry) => Map<String, dynamic>.from(entry))
-            .toList();
-    final players = playersJson
-        .map(PoolMatchPlayerStats.fromJson)
-        .toList(growable: false);
+    final playersJson = (json['players'] as List<dynamic>? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map((entry) => Map<String, dynamic>.from(entry))
+        .toList();
+    final players =
+        playersJson.map(PoolMatchPlayerStats.fromJson).toList(growable: false);
     final discipline =
         GameDiscipline.fromStorageKey(json['discipline'] as String?);
 
@@ -279,9 +380,10 @@ class PoolMatchState extends ChangeNotifier {
       (group) => group.name == tableGroupName,
       orElse: () => TableGroup.open,
     );
-    match._actionLog = (json['actionLog'] as List<dynamic>? ?? const <dynamic>[])
-        .whereType<String>()
-        .toList();
+    match._actionLog =
+        (json['actionLog'] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<String>()
+            .toList();
 
     return match;
   }
@@ -289,6 +391,7 @@ class PoolMatchState extends ChangeNotifier {
   final GameDiscipline discipline;
   final int raceTo;
   final bool alternatingBreaks;
+  final int initialBreakerIndex;
   final String matchId;
   final DateTime startedAt;
   final List<PoolMatchPlayerStats> players;
@@ -310,9 +413,11 @@ class PoolMatchState extends ChangeNotifier {
   PoolMatchPlayerStats get currentPlayer => players[activePlayerIndex];
   PoolMatchPlayerStats get opponent => players[1 - activePlayerIndex];
   String get scoreLine => '${players[0].rackWins}:${players[1].rackWins}';
-  int get completedRacks => players.fold<int>(0, (sum, player) => sum + player.rackWins);
-  PoolMatchPlayerStats? get winner =>
-      matchOver ? players.firstWhere((player) => player.rackWins >= raceTo) : null;
+  int get completedRacks =>
+      players.fold<int>(0, (sum, player) => sum + player.rackWins);
+  PoolMatchPlayerStats? get winner => matchOver
+      ? players.firstWhere((player) => player.rackWins >= raceTo)
+      : null;
 
   String get contextLine {
     final pieces = <String>[
@@ -345,13 +450,15 @@ class PoolMatchState extends ChangeNotifier {
     final offense = player.breakAndRuns + player.runOuts + player.goldenBreaks;
     final defense = player.safeties;
     final disciplineBonus = discipline == GameDiscipline.onePocket ? 1.25 : 1.0;
-    return (offense * 1.6 + defense * 1.2 - player.fouls * 0.8) * disciplineBonus;
+    return (offense * 1.6 + defense * 1.2 - player.fouls * 0.8) *
+        disciplineBonus;
   }
 
   double tableControlFor(int index) {
     final player = players[index];
     final totalVisits = player.visits == 0 ? 1 : player.visits;
-    return (player.safeties + player.ballInHandWins + player.runOuts) / totalVisits;
+    return (player.safeties + player.ballInHandWins + player.runOuts) /
+        totalVisits;
   }
 
   void undo() {
@@ -415,6 +522,19 @@ class PoolMatchState extends ChangeNotifier {
     });
   }
 
+  void setBreaker(int index, {bool makeActive = true}) {
+    if (index < 0 || index >= players.length) return;
+    _recordMutation(() {
+      breakerIndex = index;
+      if (makeActive) {
+        activePlayerIndex = index;
+      }
+      pushOutArmed = false;
+      pushOutAvailable = discipline.supportsPushOut;
+      _prependLog('Breaker set to ${players[index].name}');
+    });
+  }
+
   void recordDryBreak() {
     _recordMutation(() {
       final breaker = players[breakerIndex];
@@ -451,9 +571,10 @@ class PoolMatchState extends ChangeNotifier {
     _recordMutation(() {
       tableGroup = group;
       if (group == TableGroup.open) {
-        _replacePlayer(activePlayerIndex,
-            currentPlayer.copyWith(assignedGroup: null));
-        _replacePlayer(1 - activePlayerIndex, opponent.copyWith(assignedGroup: null));
+        _replacePlayer(
+            activePlayerIndex, currentPlayer.copyWith(assignedGroup: null));
+        _replacePlayer(
+            1 - activePlayerIndex, opponent.copyWith(assignedGroup: null));
         _prependLog('Table reset to open');
         return;
       }

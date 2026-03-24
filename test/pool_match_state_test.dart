@@ -178,5 +178,19 @@ void main() {
       expect(match.pressureIndexFor(0), greaterThan(0));
       expect(match.tableControlFor(0), greaterThan(0));
     });
+
+    test('breaker can be switched manually for the current rack', () {
+      final match = PoolMatchState(
+        discipline: GameDiscipline.nineBall,
+        raceTo: 5,
+        playerNames: const ['Alice', 'Bob'],
+      );
+
+      match.setBreaker(1);
+
+      expect(match.breakerIndex, 1);
+      expect(match.activePlayerIndex, 1);
+      expect(match.actionLog.first, contains('Breaker set to Bob'));
+    });
   });
 }
