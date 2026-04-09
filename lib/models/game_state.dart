@@ -1086,19 +1086,35 @@ class GameState extends ChangeNotifier {
     // 3b. Queue Events + Emit Shot Events for Analytics
     for (final event in outcome.events) {
        if (event is rules_outcome.FoulEventDescriptor) {
+          var effectiveType = event.type;
+          var effectivePenalty = event.penalty;
+
+          if (event.type == rules_outcome.FoulType.normal) {
+            final ballsPocketedInInning =
+                currentPlayer.inningHistory.fold<int>(0, (sum, p) => sum + p) +
+                    currentPlayer.inningPoints;
+            final foulPreview =
+                foulTracker.previewNormalFoul(currentPlayer, ballsPocketedInInning);
+
+            effectivePenalty = foulPreview.penalty;
+            if (foulPreview.isTripleFoul) {
+              effectiveType = rules_outcome.FoulType.threeFouls;
+            }
+          }
+
           // Map FoulType from Rules to Legacy (NotationCodec)
           FoulType legacyType = FoulType.none;
-          if (event.type == rules_outcome.FoulType.normal) legacyType = FoulType.normal;
-          else if (event.type == rules_outcome.FoulType.breakFoul) legacyType = FoulType.breakFoul;
-          else if (event.type == rules_outcome.FoulType.threeFouls) legacyType = FoulType.threeFouls;
+          if (effectiveType == rules_outcome.FoulType.normal) legacyType = FoulType.normal;
+          else if (effectiveType == rules_outcome.FoulType.breakFoul) legacyType = FoulType.breakFoul;
+          else if (effectiveType == rules_outcome.FoulType.threeFouls) legacyType = FoulType.threeFouls;
           
-          _events.add(FoulEvent(currentPlayer, event.penalty, legacyType));
+          _events.add(FoulEvent(currentPlayer, effectivePenalty, legacyType));
           
           // NEW: Emit shot event for analytics
           _emitEvent(ShotEventType.shot, {
             'kind': ShotKind.foul.name,
-            'foulType': event.type.name,
-            'penalty': event.penalty,
+            'foulType': effectiveType.name,
+            'penalty': effectivePenalty,
           });
        } else if (event is rules_outcome.SafeEventDescriptor) {
           _events.add(SafeEvent());

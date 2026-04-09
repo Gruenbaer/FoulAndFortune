@@ -25,26 +25,46 @@ class FoulTracker {
   /// - A foul in such an inning does NOT count toward the 3-foul chain.
   /// - Only PURE fouls (ballsPocketed == 0) increment the streak.
   FoulResult applyNormalFoul(Player player, int ballsPocketed) {
+    final evaluation = _evaluateNormalFoul(
+      consecutiveFouls: player.consecutiveFouls,
+      ballsPocketed: ballsPocketed,
+    );
+
+    player.consecutiveFouls = evaluation.nextConsecutiveFouls;
+    return evaluation.result;
+  }
+
+  /// Predicts the normal foul result WITHOUT mutating player state.
+  /// Use this for event/overlay preview paths so scoring logic stays centralized.
+  FoulResult previewNormalFoul(Player player, int ballsPocketed) {
+    return _evaluateNormalFoul(
+      consecutiveFouls: player.consecutiveFouls,
+      ballsPocketed: ballsPocketed,
+    ).result;
+  }
+
+  ({FoulResult result, int nextConsecutiveFouls}) _evaluateNormalFoul({
+    required int consecutiveFouls,
+    required int ballsPocketed,
+  }) {
     if (!threeFoulRuleEnabled) {
-      player.consecutiveFouls = 0;
-      return const FoulResult(-1);
+      return (result: const FoulResult(-1), nextConsecutiveFouls: 0);
     }
 
-    // Made balls reset the foul chain completely (canonical rule)
+    // Made balls reset the previous chain, but this inning's foul still counts.
     if (ballsPocketed > 0) {
-      player.consecutiveFouls = 1; // Reset previous streak, but count CURRENT foul
-      return const FoulResult(-1);
+      return (result: const FoulResult(-1), nextConsecutiveFouls: 1);
     }
 
-    // Pure foul increments the chain
-    player.consecutiveFouls++;
-    
-    if (player.consecutiveFouls >= 3) {
-      player.consecutiveFouls = 0; // Reset after TF
-      return const FoulResult(-16, isTripleFoul: true); // TF total: -1 + -15
+    final nextStreak = consecutiveFouls + 1;
+    if (nextStreak >= 3) {
+      return (
+        result: const FoulResult(-16, isTripleFoul: true),
+        nextConsecutiveFouls: 0,
+      );
     }
-    
-    return const FoulResult(-1);
+
+    return (result: const FoulResult(-1), nextConsecutiveFouls: nextStreak);
   }
 
   /// Severe (Break) Foul: -2 points, does NOT count toward 3-foul rule
