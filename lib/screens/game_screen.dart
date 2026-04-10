@@ -349,7 +349,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.6),
+            color: Colors.black.withValues(alpha: 0.6),
             offset: const Offset(0, 4),
             blurRadius: 6,
           ),
@@ -791,7 +791,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: colors.backgroundMain,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border.all(color: colors.primary.withOpacity(0.25)),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
           ),
           child: SafeArea(
             top: false,
@@ -909,7 +909,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             offset: Offset(1, 1)),
                         Shadow(
                             blurRadius: 6,
-                            color: colors.primary.withOpacity(0.5),
+                            color: colors.primary.withValues(alpha: 0.5),
                             offset: const Offset(0, 0)),
                       ],
                     ),
@@ -922,7 +922,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       shadows: colors.themeId == 'cyberpunk'
                           ? [
                               BoxShadow(
-                                color: colors.primary.withOpacity(0.45),
+                                color: colors.primary.withValues(alpha: 0.45),
                                 blurRadius: 8,
                               ),
                             ]
@@ -939,7 +939,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       shadows: colors.themeId == 'cyberpunk'
                           ? [
                               BoxShadow(
-                                color: colors.primary.withOpacity(0.45),
+                                color: colors.primary.withValues(alpha: 0.45),
                                 blurRadius: 8,
                               ),
                             ]
@@ -1069,7 +1069,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                             Shadow(
                                                 blurRadius: 8,
                                                 color: colors.accent
-                                                    .withOpacity(0.6)),
+                                                    .withValues(alpha: 0.6)),
                                           ],
                                         ),
                                       ),
@@ -1133,7 +1133,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                                       .textTheme.titleMedium
                                                       ?.copyWith(
                                                     color: colors.primary
-                                                        .withOpacity(0.8),
+                                                        .withValues(alpha: 0.8),
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 18,
                                                   ),
@@ -1255,7 +1255,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                             Shadow(
                                               blurRadius: 2,
                                               color: Colors.black
-                                                  .withOpacity(0.8),
+                                                  .withValues(alpha: 0.8),
                                               offset: const Offset(1, 1),
                                             ),
                                           ],

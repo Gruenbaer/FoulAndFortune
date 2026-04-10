@@ -82,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         margin: const EdgeInsets.only(top: 24, bottom: 8),
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         decoration: BoxDecoration(
-          color: fortuneTheme.primaryDark.withOpacity(0.3),
+          color: fortuneTheme.primaryDark.withValues(alpha: 0.3),
           border: Border(bottom: BorderSide(color: fortuneTheme.primary, width: 2)),
         ),
         child: Row(
@@ -107,7 +107,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         decoration: BoxDecoration(
           color: Colors.black26,
           // Using slightly transparent border to blend with potential background
-          border: Border.all(color: fortuneTheme.primaryDark.withOpacity(0.3)),
+          border: Border.all(
+            color: fortuneTheme.primaryDark.withValues(alpha: 0.3),
+          ),
           borderRadius: BorderRadius.circular(4),
         ),
         child: child,
@@ -283,9 +285,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          color: fortuneTheme.primaryDark.withOpacity(0.5),
+                          color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: fortuneTheme.primary.withOpacity(0.3)),
+                          border: Border.all(
+                            color: fortuneTheme.primary.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -333,9 +337,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: fortuneTheme.primaryDark.withOpacity(0.5),
+                            color: fortuneTheme.primaryDark.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: fortuneTheme.primary.withOpacity(0.3)),
+                            border: Border.all(
+                              color: fortuneTheme.primary.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -518,7 +524,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: fortuneTheme.danger.withOpacity(0.1),
+                  color: fortuneTheme.danger.withValues(alpha: 0.1),
                   border: Border.all(color: fortuneTheme.dangerDark),
                 ),
                 child: ListTile(
@@ -529,7 +535,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   subtitle: Text(
                     l10n.dataManagement,
-                    style: theme.textTheme.bodySmall?.copyWith(color: fortuneTheme.danger.withOpacity(0.8)),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: fortuneTheme.danger.withValues(alpha: 0.8),
+                    ),
                   ),
                   trailing: Icon(Icons.chevron_right, color: fortuneTheme.primary),
                   onTap: _showResetDataConfirmation,

@@ -106,7 +106,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
         decoration: BoxDecoration(
           color: colors.backgroundMain,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border.all(color: colors.primary.withOpacity(0.25)),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
         ),
         child: SafeArea(
           top: false,
@@ -118,7 +118,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                 height: 5,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.35),
+                  color: colors.primary.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -165,7 +165,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   child: Text(
                     '• $entry',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.textMain.withOpacity(0.92),
+                      color: colors.textMain.withValues(alpha: 0.92),
                       height: 1.45,
                     ),
                   ),
@@ -254,7 +254,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
         decoration: BoxDecoration(
           color: colors.backgroundMain,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border.all(color: colors.primary.withOpacity(0.25)),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
         ),
         child: SafeArea(
           top: false,
@@ -347,7 +347,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
           decoration: BoxDecoration(
             color: colors.backgroundMain,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border.all(color: colors.primary.withOpacity(0.25)),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
           ),
           child: SafeArea(
             top: false,
@@ -409,10 +409,10 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: colors.backgroundCard.withOpacity(0.92),
+              color: colors.backgroundCard.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: (color ?? colors.primary).withOpacity(0.35),
+                color: (color ?? colors.primary).withValues(alpha: 0.35),
               ),
             ),
             child: Column(
@@ -429,7 +429,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                 Text(
                   label,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.textMain.withOpacity(0.8),
+                    color: colors.textMain.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -448,12 +448,12 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
               decoration: BoxDecoration(
                 color: isActive
                     ? colors.backgroundCard
-                    : colors.backgroundCard.withOpacity(0.78),
+                    : colors.backgroundCard.withValues(alpha: 0.78),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: isActive
                       ? colors.accent
-                      : colors.primary.withOpacity(0.25),
+                      : colors.primary.withValues(alpha: 0.25),
                   width: 2,
                 ),
               ),
@@ -510,21 +510,21 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   Text(
                     'B&R ${player.breakAndRuns}  |  Runouts ${player.runOuts}  |  Dry ${player.dryBreaks}',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.textMain.withOpacity(0.84),
+                      color: colors.textMain.withValues(alpha: 0.84),
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'BIH wins ${player.ballInHandWins}  |  Pushes ${player.pushes}  |  Winrate ${match.winRateFor(index).toStringAsFixed(1)}%',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.textMain.withOpacity(0.72),
+                      color: colors.textMain.withValues(alpha: 0.72),
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Pressure ${match.pressureIndexFor(index).toStringAsFixed(1)}  |  Control ${match.tableControlFor(index).toStringAsFixed(2)}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.textMain.withOpacity(0.68),
+                      color: colors.textMain.withValues(alpha: 0.68),
                     ),
                   ),
                 ],
@@ -556,7 +556,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   backgroundGradientColors: accent == null
                       ? null
                       : [
-                          accent.withOpacity(0.35),
+                          accent.withValues(alpha: 0.35),
                           colors.backgroundCard,
                         ],
                   onPressed: isEnabled ? onPressed : null,
@@ -571,10 +571,10 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         width: 18,
                         height: 18,
                         decoration: BoxDecoration(
-                          color: colors.backgroundMain.withOpacity(0.92),
+                          color: colors.backgroundMain.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
-                            color: colors.primary.withOpacity(0.55),
+                            color: colors.primary.withValues(alpha: 0.55),
                           ),
                         ),
                         child: Icon(
@@ -597,10 +597,10 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                             width: 20,
                             height: 20,
                             decoration: BoxDecoration(
-                              color: colors.backgroundMain.withOpacity(0.92),
+                              color: colors.backgroundMain.withValues(alpha: 0.92),
                               borderRadius: BorderRadius.circular(999),
                               border: Border.all(
-                                color: colors.primary.withOpacity(0.55),
+                                color: colors.primary.withValues(alpha: 0.55),
                               ),
                             ),
                             child: Icon(
@@ -693,7 +693,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                     subtitle: Text(
                       match.contextLine,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.textMain.withOpacity(0.75),
+                        color: colors.textMain.withValues(alpha: 0.75),
                       ),
                     ),
                   ),
@@ -743,10 +743,12 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: colors.backgroundCard.withOpacity(0.92),
+                      color: colors.backgroundCard.withValues(alpha: 0.92),
                       borderRadius: BorderRadius.circular(20),
                       border:
-                          Border.all(color: colors.primary.withOpacity(0.28)),
+                          Border.all(
+                            color: colors.primary.withValues(alpha: 0.28),
+                          ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -762,7 +764,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         Text(
                           'Long-Press auf einen Button zeigt dir kurz, was er genau macht. Ausgegraut heisst nur: Voraussetzung aktuell nicht erfuellt.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.textMain.withOpacity(0.72),
+                            color: colors.textMain.withValues(alpha: 0.72),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -1011,10 +1013,12 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   const SizedBox(height: 10),
                   Container(
                     decoration: BoxDecoration(
-                      color: colors.backgroundCard.withOpacity(0.9),
+                      color: colors.backgroundCard.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(18),
                       border:
-                          Border.all(color: colors.primary.withOpacity(0.24)),
+                          Border.all(
+                            color: colors.primary.withValues(alpha: 0.24),
+                          ),
                     ),
                     child: match.actionLog.isEmpty
                         ? Padding(
@@ -1022,7 +1026,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                             child: Text(
                               'Noch keine Aktionen. Starte mit Break, Safety, Foul oder ${widget.discipline.scoreLabel.toLowerCase()}-Win.',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colors.textMain.withOpacity(0.8),
+                                color: colors.textMain.withValues(alpha: 0.8),
                               ),
                             ),
                           )
@@ -1063,9 +1067,9 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
+        color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.45)),
+        border: Border.all(color: color.withValues(alpha: 0.45)),
       ),
       child: Text(
         label,
@@ -1112,7 +1116,7 @@ class _MatchStatsSheet extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.textMain.withOpacity(0.7),
+                  color: colors.textMain.withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -1139,7 +1143,7 @@ class _MatchStatsSheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.backgroundMain,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border.all(color: colors.primary.withOpacity(0.25)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
       ),
       child: SafeArea(
         top: false,
@@ -1151,7 +1155,7 @@ class _MatchStatsSheet extends StatelessWidget {
               height: 5,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: colors.primary.withOpacity(0.35),
+                color: colors.primary.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(999),
               ),
             ),

@@ -159,14 +159,14 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                   shadows: [
                     // Outer shadow for depth
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       offset: const Offset(0, 4),
                       blurRadius: 6,
                     ),
                     // Inner Glow for active player
                     if (isActive)
                       BoxShadow(
-                        color: colors.accent.withOpacity(0.4),
+                        color: colors.accent.withValues(alpha: 0.4),
                         blurRadius: 12,
                         spreadRadius: 2,
                       ),
@@ -248,7 +248,10 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                                 color: Colors.redAccent, 
                                 size: 24,
                                 shadows: [
-                                  Shadow(color: Colors.red.withOpacity(0.5), blurRadius: 4),
+                                  Shadow(
+                                    color: Colors.red.withValues(alpha: 0.5),
+                                    blurRadius: 4,
+                                  ),
                                 ],
                               ),
                             )
@@ -325,7 +328,7 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                                 color: Colors.black38,
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: valColor.withOpacity(0.5),
+                                  color: valColor.withValues(alpha: 0.5),
                                 ),
                               ),
                               child: Column(
@@ -367,7 +370,9 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                         decoration: BoxDecoration(
                           color: Colors.black38,
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: colors.primaryDark.withOpacity(0.5)),
+                          border: Border.all(
+                            color: colors.primaryDark.withValues(alpha: 0.5),
+                          ),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -403,7 +408,9 @@ class PlayerPlaqueState extends State<PlayerPlaque> with TickerProviderStateMixi
                         decoration: BoxDecoration(
                           color: Colors.black38,
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: colors.primaryDark.withOpacity(0.5)),
+                          border: Border.all(
+                            color: colors.primaryDark.withValues(alpha: 0.5),
+                          ),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,

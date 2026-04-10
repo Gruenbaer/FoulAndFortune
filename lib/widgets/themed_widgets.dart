@@ -98,7 +98,7 @@ class _ThemedButtonState extends State<ThemedButton>
       color: widget.textColor ?? const Color(0xFFF0F0F0),
       shadows: [
         Shadow(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withValues(alpha: 0.8),
           offset: const Offset(1, 1),
           blurRadius: 2,
         ),
@@ -205,7 +205,7 @@ class _ThemedButtonState extends State<ThemedButton>
                           end: Alignment.bottomCenter,
                           colors: widget.backgroundGradientColors ??
                               [
-                                colors.backgroundCard.withOpacity(0.8),
+                                colors.backgroundCard.withValues(alpha: 0.8),
                                 colors.backgroundCard,
                               ],
                         ),
@@ -216,12 +216,14 @@ class _ThemedButtonState extends State<ThemedButton>
 
                         // For Cyberpunk, we might want a clipPath for cut corners, but for now simple box
                         border: colors.themeId == 'cyberpunk'
-                            ? Border.all(color: colors.primary.withOpacity(0.3))
+                            ? Border.all(
+                                color: colors.primary.withValues(alpha: 0.3),
+                              )
                             : null,
 
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             offset: const Offset(0, 2),
                             blurRadius: 4,
                             spreadRadius: -2,
@@ -259,7 +261,7 @@ class BrassFramePainter extends CustomPainter {
     canvas.drawRRect(
       rrect.shift(const Offset(0, 3)),
       Paint()
-        ..color = Colors.black.withOpacity(0.4)
+        ..color = Colors.black.withValues(alpha: 0.4)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
     );
 
@@ -301,7 +303,7 @@ class BrassFramePainter extends CustomPainter {
     canvas.drawPath(
       highlightPath,
       Paint()
-        ..color = colors.primaryBright.withOpacity(0.6)
+        ..color = colors.primaryBright.withValues(alpha: 0.6)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
@@ -325,7 +327,7 @@ class BrassFramePainter extends CustomPainter {
         4,
         Paint()
           ..shader = RadialGradient(colors: [
-            colors.primaryBright.withOpacity(0.8),
+            colors.primaryBright.withValues(alpha: 0.8),
             Colors.transparent
           ], stops: const [
             0.3,
@@ -335,7 +337,7 @@ class BrassFramePainter extends CustomPainter {
         center.translate(-2, 0),
         center.translate(2, 0),
         Paint()
-          ..color = Colors.black.withOpacity(0.7)
+          ..color = Colors.black.withValues(alpha: 0.7)
           ..strokeWidth = 1
           ..strokeCap = StrokeCap.round);
   }
@@ -413,7 +415,7 @@ class CyberpunkFramePainter extends CustomPainter {
 
     // 5. Tech Bits (Decorations)
     final decorPaint = Paint()
-      ..color = colors.primary.withOpacity(0.5)
+      ..color = colors.primary.withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
     // Small rects
     canvas.drawRect(
@@ -463,14 +465,14 @@ class GhibliFramePainter extends CustomPainter {
 
     // Shadow
     canvas.drawPath(path.shift(const Offset(3, 4)),
-        Paint()..color = charcoal.withOpacity(0.15));
+        Paint()..color = charcoal.withValues(alpha: 0.15));
     canvas.drawPath(path, fillPaint);
 
     // Highlight
     canvas.save();
     canvas.clipPath(path);
     final highlightPaint = Paint()
-      ..color = Colors.white.withOpacity(0.15)
+      ..color = Colors.white.withValues(alpha: 0.15)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
     canvas.drawCircle(Offset(w * 0.2, h * 0.3), h * 0.8, highlightPaint);
     canvas.drawCircle(Offset(w * 0.8, h * 0.6), h * 0.6, highlightPaint);
@@ -478,7 +480,7 @@ class GhibliFramePainter extends CustomPainter {
 
     // 3. Border
     final borderPaint = Paint()
-      ..color = charcoal.withOpacity(0.9)
+      ..color = charcoal.withValues(alpha: 0.9)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round
@@ -490,10 +492,12 @@ class GhibliFramePainter extends CustomPainter {
     final config = random.nextInt(5);
 
     // Pass colors to cluster for variety
-    if (config == 0 || config == 2 || config == 4)
+    if (config == 0 || config == 2 || config == 4) {
       _drawCluster(canvas, size, 0, random, borderPaint); // TL
-    if (config == 1 || config == 4)
+    }
+    if (config == 1 || config == 4) {
       _drawCluster(canvas, size, 1, random, borderPaint); // TR
+    }
     if (config == 2) _drawCluster(canvas, size, 2, random, borderPaint); // BR
     if (config == 3) _drawCluster(canvas, size, 3, random, borderPaint); // BL
   }

@@ -250,7 +250,7 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
         decoration: BoxDecoration(
           color: colors.backgroundMain,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border.all(color: colors.primary.withOpacity(0.25)),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
         ),
         child: SafeArea(
           top: false,
@@ -262,7 +262,7 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                 height: 5,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.35),
+                  color: colors.primary.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -301,7 +301,7 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                   child: Text(
                     '- $entry',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.textMain.withOpacity(0.92),
+                      color: colors.textMain.withValues(alpha: 0.92),
                       height: 1.45,
                     ),
                   ),
@@ -324,9 +324,12 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
         margin: const EdgeInsets.only(bottom: 18),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: colors.backgroundCard.withOpacity(0.9),
+          color: colors.backgroundCard.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colors.primary.withOpacity(0.3), width: 2),
+          border: Border.all(
+            color: colors.primary.withValues(alpha: 0.3),
+            width: 2,
+          ),
         ),
         child: child,
       );
@@ -546,7 +549,7 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                       '* Undo/Redo und eine laufende Match-Chronik\n'
                       '* Ausgegraute Buttons bedeuten nur: Eine Voraussetzung ist aktuell nicht erfuellt',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colors.textMain.withOpacity(0.92),
+                        color: colors.textMain.withValues(alpha: 0.92),
                         height: 1.45,
                       ),
                     ),
