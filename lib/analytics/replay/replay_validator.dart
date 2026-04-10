@@ -58,21 +58,6 @@ class ReplayValidator {
           mismatches.add('Score Mismatch for $name: Snapshot=$snapScore, Replay=$replayScore');
         }
         
-        // Innings
-        final snapInnings = pMap['currentInning'] as int? ?? 0;
-        // Replay state tracks innings. Note: GameState uses 1-based "currentInning".
-        // Replay might track 0-based or 1-based?
-        // _applyTurnEnd increments innings. Initial is 0?
-        // GameState.currentInning starts at 1.
-        // ReplayState.innings starts at 0?
-        // Let's adjust comparison strictly. 
-        // If Replay counts completed innings, and GameState is "current Inning nr".
-        // Usually: completed innings = currentInning - 1 (if top of inning).
-        // Let's just compare raw values and acknowledge mapping later if needed.
-        final replayInnings = rebuilt.innings[id] ?? 0;
-        // Assumption: Replay counts increments. 
-        // We'll log mismatch if different.
-        
         // Highest Run
         final snapHighRun = pMap['highestRun'] as int? ?? 0;
         final replayHighRun = rebuilt.highestRuns[id] ?? 0;

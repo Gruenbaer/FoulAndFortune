@@ -47,7 +47,6 @@ class StraightPoolRules implements GameRules {
       FoulAction() => _handleFoul(action, core, state),
       BreakFoulDecisionAction() => _handleBreakFoulDecision(action, core, state),
       FinalizeReRackAction() => _handleFinalizeReRack(action, core, state),
-      _ => throw UnimplementedError('Unknown action: $action'),
     };
   }
   

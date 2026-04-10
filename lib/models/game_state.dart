@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'player.dart';
 import 'foul_tracker.dart';
 import '../core/game_timer.dart';
 import '../core/game_history.dart';
@@ -1118,9 +1117,13 @@ class GameState extends ChangeNotifier {
 
           // Map FoulType from Rules to Legacy (NotationCodec)
           FoulType legacyType = FoulType.none;
-          if (effectiveType == rules_outcome.FoulType.normal) legacyType = FoulType.normal;
-          else if (effectiveType == rules_outcome.FoulType.breakFoul) legacyType = FoulType.breakFoul;
-          else if (effectiveType == rules_outcome.FoulType.threeFouls) legacyType = FoulType.threeFouls;
+          if (effectiveType == rules_outcome.FoulType.normal) {
+            legacyType = FoulType.normal;
+          } else if (effectiveType == rules_outcome.FoulType.breakFoul) {
+            legacyType = FoulType.breakFoul;
+          } else if (effectiveType == rules_outcome.FoulType.threeFouls) {
+            legacyType = FoulType.threeFouls;
+          }
           
           _events.add(FoulEvent(currentPlayer, effectivePenalty, legacyType));
           

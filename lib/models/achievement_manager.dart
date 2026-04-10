@@ -66,6 +66,13 @@ class AchievementManager extends ChangeNotifier {
     }
   }
 
+  Future<void> reloadFromDatabase() async {
+    for (final achievement in AchievementDefinitions.all) {
+      _achievements[achievement.id] = achievement;
+    }
+    await _loadFromDb();
+  }
+
   Future<void> _saveToDb(Achievement achievement) async {
     final now = DateTime.now();
     final deviceId = await DeviceIdService.instance.getDeviceId();

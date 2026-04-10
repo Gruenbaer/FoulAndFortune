@@ -2,7 +2,6 @@ import 'rules_state.dart';
 import 'rule_outcome.dart';
 import '../../core/actions/game_action.dart';
 import '../../models/game_settings.dart';
-import '../../models/player.dart';
 export '../../models/player.dart';
 
 /// Abstract interface for game-specific rules plugins.

@@ -22,7 +22,6 @@ import '../widgets/game_clock.dart';
 import '../widgets/pause_overlay.dart';
 import '../widgets/game_event_overlay.dart'; // Unified Overlay System
 import '../widgets/game_control_button.dart';
-import '../widgets/fast_score_input.dart';
 // For Arial alternative (Lato/Roboto) if Arial not available, but user said Arial.
 import '../services/player_service.dart' as stats; // For stats fetching
 import '../utils/ui_utils.dart'; // Zoom Dialog Helper
@@ -697,7 +696,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       );
     }
 
-    void _showRulesDialog() {
+    void showRulesDialog() {
       showZoomDialog(
         context: context,
         builder: (context) => GameAlertDialog(
@@ -717,7 +716,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       );
     }
 
-    Future<void> _start141Tutorial() async {
+    Future<void> start141Tutorial() async {
       final steps = <({String title, String body})>[
         (
           title: '14.1 Kurz-Tutorial (1/6)',
@@ -823,7 +822,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   forceSingleLineLabel: true,
                   onPressed: () async {
                     Navigator.pop(context);
-                    await _start141Tutorial();
+                    await start141Tutorial();
                   },
                 ),
                 const SizedBox(height: 10),
@@ -834,7 +833,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   forceSingleLineLabel: true,
                   onPressed: () {
                     Navigator.pop(context);
-                    _showRulesDialog();
+                    showRulesDialog();
                   },
                 ),
               ],
@@ -846,7 +845,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     void showRulesPopup() {
       Navigator.pop(context); // Close drawer
-      _showRulesDialog();
+      showRulesDialog();
     }
 
     return NotificationListener<ScreenShakeNotification>(

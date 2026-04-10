@@ -1,7 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/game_settings.dart' hide Player;
 import '../services/settings_service.dart';
+import '../services/data_backup_service.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/fortune_theme.dart';
 import '../widgets/themed_widgets.dart';
@@ -28,9 +34,11 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late GameSettings _settings;
   final _settingsService = SettingsService();
+  final _dataBackupService = DataBackupService();
   String? _cachedPlayer2Name;
   int? _cachedPlayer2Handicap;
   double? _cachedPlayer2Multiplier;
+  bool _isTransferBusy = false;
 
   @override
   void initState() {
@@ -450,6 +458,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const SizedBox(height: 24),
 
+              buildSectionHeader('Backup & Restore', Icons.import_export),
+              buildPanelTile(
+                child: ListTile(
+                  leading: Icon(Icons.upload_file, color: fortuneTheme.primary),
+                  title: Text(
+                    'Daten exportieren',
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  subtitle: Text(
+                    'Erzeugt eine komplette Sicherungsdatei fuer Einstellungen, Historie, Spieler, Achievements und Analytics.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  trailing: _isTransferBusy
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: fortuneTheme.primary,
+                          ),
+                        )
+                      : Icon(Icons.chevron_right, color: fortuneTheme.primary),
+                  onTap: _isTransferBusy ? null : _exportDataBackup,
+                ),
+              ),
+              buildPanelTile(
+                child: ListTile(
+                  leading: Icon(Icons.download_for_offline, color: fortuneTheme.primary),
+                  title: Text(
+                    'Daten importieren',
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  subtitle: Text(
+                    'Stellt eine komplette Sicherung wieder her und ersetzt die aktuellen lokalen Daten.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  trailing: _isTransferBusy
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: fortuneTheme.primary,
+                          ),
+                        )
+                      : Icon(Icons.chevron_right, color: fortuneTheme.primary),
+                  onTap: _isTransferBusy ? null : _importDataBackup,
+                ),
+              ),
+
               // 3-Foul info box removed per user request (redundant)
 
               const SizedBox(height: 24),
@@ -516,6 +574,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
+  }
+
+  Future<void> _exportDataBackup() async {
+    setState(() => _isTransferBusy = true);
+    try {
+      final result = await _dataBackupService.createBackupFile();
+      final file = result.file;
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Foul & Fortune Backup ${result.manifest['exportedAt']}',
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Backup erstellt: ${file.path}'),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Export fehlgeschlagen: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isTransferBusy = false);
+      }
+    }
+  }
+
+  Future<void> _importDataBackup() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Backup importieren'),
+        content: const Text(
+          'Der Import ersetzt die aktuellen lokalen Daten vollstaendig. '
+          'Ausgewaehlt werden Einstellungen, Spieler, Historie, Achievements, Analytics und Trainingshistorie.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Weiter'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    setState(() => _isTransferBusy = true);
+    try {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+        withData: true,
+      );
+      if (picked == null || picked.files.isEmpty) {
+        return;
+      }
+
+      final file = picked.files.single;
+      final content = await _readPickedBackup(file);
+      final summary = await _dataBackupService.importBackupJson(content);
+
+      if (!mounted) return;
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      final achievementManager =
+          Provider.of<AchievementManager>(context, listen: false);
+      await achievementManager.reloadFromDatabase();
+      widget.onSettingsChanged(summary.settings);
+      setState(() {
+        _settings = summary.settings;
+      });
+
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Import fertig: ${summary.players} Spieler, ${summary.games} Spiele, ${summary.achievements} Achievements.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Import fehlgeschlagen: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isTransferBusy = false);
+      }
+    }
+  }
+
+  Future<String> _readPickedBackup(PlatformFile file) async {
+    if (file.path != null) {
+      return File(file.path!).readAsString();
+    }
+    final bytes = file.bytes;
+    if (bytes == null) {
+      throw const DataBackupException('Ausgewaehlte Datei konnte nicht gelesen werden.');
+    }
+    return utf8.decode(bytes);
   }
 
   Future<void> _editRaceToScore() async {

@@ -69,6 +69,7 @@ code or update this document and any referenced specs together.
 - Game history: `GameHistoryService` -> `games` table (no automatic cap; all games preserved unless user deletes).
 - Player stats: `PlayerService` -> `players` table.
 - Achievements: `AchievementManager` -> `achievements` table.
+- Full backup/export/import: `DataBackupService` -> JSON snapshot of settings, players, games, achievements, shot events, and practice drill history.
 - Sync scaffolding: `sync_outbox` + `sync_state` tables (no remote sync yet).
 - Supabase schema (future sync backend): `supabase/schema.sql`.
 - Prefs migration: `PrefsMigrationService` imports legacy `SharedPreferences` data on first launch.
@@ -119,6 +120,11 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 ### SettingsService
 - Persistence: `settings` table with a single row id `default`. Invalid or missing data falls back to defaults.
 
+### DataBackupService
+- Export creates a user-shareable JSON backup snapshot with metadata, app version, and the current local user data.
+- Import is a full restore: current local settings, players, history, achievements, shot events, and practice history are replaced from the backup.
+- Backup intentionally excludes sync transport internals; import clears `sync_outbox` and `sync_state` so restored data starts from a clean sync baseline.
+
 ### PlayerService
 - Persistence: `players` table keyed by `id` (UUID string).
 - Player names must be unique case-insensitively among non-deleted rows.
@@ -152,12 +158,16 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 - `NewGameSettingsScreen`: configure new game, players, race, innings.
 - `GameScreen`: primary scoring UI, rack interaction, controls, overlays.
   - Drawer includes "Hilfe & Tutorial" entry with guided quick tutorial and rules access.
+  - 14.1 remains its own input path and is not driven by the pool live-tracking action model.
+- `PoolMatchSetupScreen`: discipline-specific setup for 8/9/10-Ball, 1-Pocket, Cowboy.
+- `PoolMatchCenterScreen`: live pool match flow per visit/turn with guarded action buttons, tutorial entry, and per-discipline finish actions.
+- `PoolMatchDetailsScreen`: persisted pool match details and stat breakdown.
 - `GameHistoryScreen`: list/filters history, resume or inspect games.
 - `DetailsScreen`: match details and score sheet.
 - `PlayersScreen`/`PlayerProfileScreen`: player list and profile management.
 - `StatisticsScreen`: aggregated player stats.
 - `AchievementsGalleryScreen`: achievement gallery and details.
-- `SettingsScreen`: global settings and data reset.
+- `SettingsScreen`: global settings, backup export/import, and data reset.
 
 ### Widgets and UI Systems
 - Theme-aware base widgets: `ThemedBackground`, `ThemedButton`, `GameAlertDialog` in `lib/widgets/themed_widgets.dart`.
@@ -182,6 +192,13 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 5) Inning finalization creates notation and updates scores; history saved.
 6) Game completion writes record and updates player stats; Victory screen shown.
 
+### Pool Match Flow Summary
+1) Home -> discipline selection -> `PoolMatchSetupScreen` -> `PoolMatchCenterScreen`.
+2) Pool modes are tracked live per visit, not as a late match summary.
+3) `Safety`, `Foul`, `Dry Break`, `Push Out`, `Switch Turn`, `Ball in Hand`, and finish actions mutate the active player flow immediately.
+4) Greyed-out buttons mean a prerequisite is currently not met; long-press explains why.
+5) Pool matches persist as snapshots/stats records and do not use FF14 notation.
+
 ## Data Models
 - `GameSettings`: game configuration and preferences.
 - `Player` (models): in-game scoring state and inning tracking.
@@ -194,6 +211,12 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 - Canonical rules tests: `test/canonical_spec_test.dart`.
 - Notation parsing/serialization: `test/notation_codec_test.dart`.
 - Notation behavior: `test/notation_test.dart`.
+- Straight-pool live-flow validation: `test/straight_pool_live_flow_test.dart`.
+- Pool state and persistence: `test/pool_match_state_test.dart`, `test/pool_match_service_test.dart`.
+- Pool scenario matrix: `test/pool_match_scenarios_test.dart`.
+- Pool widget/live-flow coverage: `test/pool_match_setup_flow_test.dart`.
+- Backup roundtrip validation: `test/data_backup_service_test.dart`.
+- Replay validation: `test/replay/game_replay_engine_test.dart`.
 - Misc: `test/debugging_turn_logic_test.dart`, `test/widget_test.dart`.
 
 ## Assets
