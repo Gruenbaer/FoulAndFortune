@@ -697,11 +697,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       );
     }
 
-    void showRulesPopup() {
-      Navigator.pop(context); // Close drawer
-      _showRulesDialog();
-    }
-
     void _showRulesDialog() {
       showZoomDialog(
         context: context,
@@ -845,6 +840,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           ),
         ),
       );
+    }
+
+    void showRulesPopup() {
+      Navigator.pop(context); // Close drawer
+      _showRulesDialog();
     }
 
     return NotificationListener<ScreenShakeNotification>(

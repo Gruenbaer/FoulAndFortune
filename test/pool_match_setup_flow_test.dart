@@ -197,7 +197,7 @@ void main() {
     await tester.tap(find.byTooltip('Open navigation menu'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Anleitung & Regelwerk'), findsOneWidget);
+    expect(find.text('Hilfe & Tutorial'), findsOneWidget);
     expect(find.text('Breaking Player wechseln'), findsOneWidget);
 
     await tester.tap(find.text('Breaking Player wechseln'));
