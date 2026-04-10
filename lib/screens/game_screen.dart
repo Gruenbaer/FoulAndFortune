@@ -735,7 +735,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           title: '14.1 Kurz-Tutorial (3/6)',
           body:
               'Foul und Safe sind Modi für den nächsten Stoß. '
-              'Aktiver Modus wird dann beim Stoß mit ausgewertet.',
+              'Aktiver Modus wird dann beim Stoß mit ausgewertet. '
+              'Anders als die Pool-Match-Modi läuft 14.1 hier über die bestehende eigene Eingabelogik.',
         ),
         (
           title: '14.1 Kurz-Tutorial (4/6)',
@@ -808,7 +809,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Nutze das Kurz-Tutorial für die Bedienlogik von 14.1 oder öffne das vollständige Regelwerk.',
+                  'Nutze das Kurz-Tutorial für die Bedienlogik von 14.1 oder öffne das vollständige Regelwerk. '
+                  'Die neuen Pool-Match-Modi werden separat live pro Aufnahme geführt.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colors.textMain,
                   ),

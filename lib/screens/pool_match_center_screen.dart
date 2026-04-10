@@ -189,22 +189,27 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
   Future<void> _startPoolQuickTutorial(PoolMatchState match) async {
     final steps = <({String title, String body})>[
       (
-        title: '${widget.discipline.label} Tutorial (1/4)',
+        title: '${widget.discipline.label} Tutorial (1/5)',
         body:
-            'Das Match-Center zeigt dir Rack, Score, Breaker und den aktiven Spieler in Echtzeit.',
+            'Das Match-Center wird live pro Aufnahme gefuehrt. Jede Schnellaktion beschreibt den aktuellen Stoss und nicht nur eine spaete Match-Zusammenfassung.',
       ),
       (
-        title: '${widget.discipline.label} Tutorial (2/4)',
+        title: '${widget.discipline.label} Tutorial (2/5)',
         body:
-            'Long-Press auf Aktionsbuttons erklärt deren genaue Bedeutung für den aktuellen Modus.',
+            'Achte auf den aktiven Spieler oben im Kontext. Safety, Foul, Dry Break und Turnwechsel bewegen den Rack-Verlauf live weiter.',
       ),
       (
-        title: '${widget.discipline.label} Tutorial (3/4)',
+        title: '${widget.discipline.label} Tutorial (3/5)',
         body:
-            'Nutze Safety, Foul und Ball-in-Hand bewusst — diese Aktionen beeinflussen Flow und Statistik.',
+            'Ausgegraute Buttons bedeuten nur: Eine Voraussetzung fuer diese Aktion ist gerade nicht erfuellt. Long-Press erklaert dir immer den Grund.',
       ),
       (
-        title: '${widget.discipline.label} Tutorial (4/4)',
+        title: '${widget.discipline.label} Tutorial (4/5)',
+        body:
+            'Push Out loest nach trockenem Break eine Rueckfrage aus, wer die naechste Aufnahme spielt. So bleibt die Turn-Logik sauber.',
+      ),
+      (
+        title: '${widget.discipline.label} Tutorial (5/5)',
         body:
             'Im Hamburger-Menü findest du jederzeit Anleitung & Regelwerk sowie dieses Tutorial erneut.',
       ),
@@ -266,7 +271,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Starte das Kurz-Tutorial oder öffne die vollständige Anleitung mit Regelwerk.',
+                'Starte das Kurz-Tutorial oder oeffne die vollstaendige Anleitung mit Regelwerk fuer den Live-Aufnahmefluss.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colors.textMain,
                 ),
@@ -298,6 +303,35 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handlePushOut(PoolMatchState match) async {
+    final keepCurrentPlayer = await showZoomDialog<bool>(
+      context: context,
+      builder: (dialogContext) => GameAlertDialog(
+        title: 'Push Out',
+        content: const Text(
+          'Der Push Out wurde gespielt. Wer fuehrt die naechste Aufnahme aus?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, null),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Gegner uebernimmt'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Push-Spieler bleibt'),
+          ),
+        ],
+      ),
+    );
+
+    if (keepCurrentPlayer == null) return;
+    match.recordPushOut(keepCurrentPlayer: keepCurrentPlayer);
   }
 
   void _showBreakerSheet(PoolMatchState match) {
@@ -505,22 +539,104 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
           required VoidCallback onPressed,
           required String helpText,
           Color? accent,
+          bool switchesPlayer = false,
+          bool asksPlayerDecision = false,
+          bool enabled = true,
         }) {
+          final isEnabled = !match.matchOver && enabled;
           return Expanded(
-            child: ThemedButton(
-              label: label,
-              icon: icon,
-              iconPosition: ThemedButtonIconPosition.top,
-              forceSingleLineLabel: true,
-              contentSpacing: 8,
-              backgroundGradientColors: accent == null
-                  ? null
-                  : [
-                      accent.withOpacity(0.35),
-                      colors.backgroundCard,
-                    ],
-              onPressed: match.matchOver ? null : onPressed,
-              onLongPress: () => _showInfoDialog(label, helpText),
+            child: Stack(
+              children: [
+                ThemedButton(
+                  label: label,
+                  icon: icon,
+                  iconPosition: ThemedButtonIconPosition.top,
+                  forceSingleLineLabel: true,
+                  contentSpacing: 8,
+                  backgroundGradientColors: accent == null
+                      ? null
+                      : [
+                          accent.withOpacity(0.35),
+                          colors.backgroundCard,
+                        ],
+                  onPressed: isEnabled ? onPressed : null,
+                  onLongPress: () => _showInfoDialog(label, helpText),
+                ),
+                if (switchesPlayer)
+                  Positioned(
+                    top: 14,
+                    right: 14,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: colors.backgroundMain.withOpacity(0.92),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: colors.primary.withOpacity(0.55),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.swap_horiz,
+                          size: 12,
+                          color: colors.accent,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (asksPlayerDecision)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: IgnorePointer(
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: colors.backgroundMain.withOpacity(0.92),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: colors.primary.withOpacity(0.55),
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.swap_horiz,
+                              size: 12,
+                              color: colors.accent,
+                            ),
+                          ),
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: colors.danger,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  '?',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w900,
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
           );
         }
@@ -644,7 +760,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Long-Press auf einen Button zeigt dir kurz, was er genau macht.',
+                          'Long-Press auf einen Button zeigt dir kurz, was er genau macht. Ausgegraut heisst nur: Voraussetzung aktuell nicht erfuellt.',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colors.textMain.withOpacity(0.72),
                           ),
@@ -659,10 +775,10 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                             statChip('Score', match.scoreLine),
                             if (match.ballInHand)
                               statChip('BIH', 'LIVE', color: colors.warning),
-                            if (match.pushOutAvailable || match.pushOutArmed)
+                            if (match.pushOutAvailable)
                               statChip(
                                 'Push',
-                                match.pushOutArmed ? 'ARMED' : 'READY',
+                                'READY',
                                 color: colors.primaryBright,
                               ),
                           ],
@@ -701,7 +817,77 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   Row(
                     children: [
                       actionButton(
-                        label: '${widget.discipline.scoreLabel} Win',
+                        label: 'Safety',
+                        icon: Icons.shield_outlined,
+                        onPressed: match.recordSafety,
+                        switchesPlayer: true,
+                        helpText:
+                            'Safety wird live als abgeschlossene Aufnahme erfasst und gibt den Tisch an den Gegner weiter.',
+                      ),
+                      const SizedBox(width: 10),
+                      actionButton(
+                        label: 'Foul',
+                        icon: Icons.warning_amber_rounded,
+                        accent: colors.danger,
+                        onPressed: match.recordFoul,
+                        switchesPlayer: true,
+                        helpText:
+                            'Foul beendet die aktuelle Aufnahme live. Der Gegner bekommt Ball in Hand und ist danach am Tisch.',
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      actionButton(
+                        label: 'Switch Turn',
+                        icon: Icons.swap_horiz,
+                        onPressed: match.switchTurn,
+                        switchesPlayer: true,
+                        helpText:
+                            'Manueller Spielerwechsel ohne Foul. Praktisch nach Safety-Duellen oder Korrekturen.',
+                      ),
+                      const SizedBox(width: 10),
+                      actionButton(
+                        label: match.ballInHand ? 'Clear BIH' : 'Ball in Hand',
+                        icon: Icons.control_camera,
+                        accent: colors.warning,
+                        onPressed: match.toggleBallInHand,
+                        helpText:
+                            'Ball in Hand ein- oder ausschalten. Nutze das nach Fouls oder manuellen Korrekturen.',
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      actionButton(
+                        label: 'Dry Break',
+                        icon: Icons.hourglass_bottom,
+                        onPressed: match.recordDryBreak,
+                        switchesPlayer: true,
+                        enabled: match.canRecordDryBreak,
+                        helpText: match.canRecordDryBreak
+                            ? 'Der Break brachte keinen gelochten Ball. In 9-Ball und 10-Ball wird damit Push Out vorbereitet.'
+                            : 'Dry Break ist nur direkt fuer den Anstoss des Breakers sinnvoll. Spaeter im Rack bleibt der Button absichtlich grau.',
+                      ),
+                      const SizedBox(width: 10),
+                      actionButton(
+                        label: 'Push Out',
+                        icon: Icons.assistant_navigation,
+                        onPressed: () => _handlePushOut(match),
+                        asksPlayerDecision: true,
+                        enabled: match.canTogglePushOut,
+                        helpText: !widget.discipline.supportsPushOut
+                            ? 'In diesem Modus gibt es keinen Push Out. Der Button bleibt deshalb grau.'
+                            : match.canTogglePushOut
+                                ? 'Push Out ist nach trockenem Break verfuegbar. Danach fragt die App, wer die naechste Aufnahme spielt.'
+                                : 'Push Out ist nur nach einem Dry Break verfuegbar. Ausserhalb dieses Fensters bleibt der Button grau.',
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      actionButton(
+                        label: '${widget.discipline.singleScoreLabel} Win',
                         icon: Icons.emoji_events,
                         accent: colors.accent,
                         onPressed: () => match.winRack(),
@@ -715,7 +901,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         accent: colors.primaryBright,
                         onPressed: () => match.winRack(runOut: true),
                         helpText:
-                            'Komplettes Ausspielen des Racks in einem Zug. Zaehlt auch als Rack-Win.',
+                            'Komplettes Ausspielen des Racks in einem Zug. Zaehlt auch als Rack Win.',
                       ),
                     ],
                   ),
@@ -727,8 +913,10 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         accent: colors.warning,
                         onPressed: () =>
                             match.winRack(breakAndRun: true, runOut: true),
-                        helpText:
-                            'Der Breaker gewinnt das Rack ohne den Tisch noch einmal abzugeben.',
+                        enabled: match.canRecordBreakAndRun,
+                        helpText: match.canRecordBreakAndRun
+                            ? 'Der Breaker gewinnt das Rack ohne den Tisch noch einmal abzugeben.'
+                            : 'Break & Run ist nur sinnvoll, solange der Breaker das Rack noch ununterbrochen kontrolliert. Nach Dry Break, Foul, Turn Switch, Safety oder Ball in Hand bleibt der Button grau.',
                       ),
                       const SizedBox(width: 10),
                       actionButton(
@@ -736,70 +924,10 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                         icon: Icons.auto_awesome,
                         accent: colors.danger,
                         onPressed: () => match.winRack(goldenBreak: true),
-                        helpText:
-                            'Sonderfinish des jeweiligen Modus, etwa Golden Break oder 8 on Break.',
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      actionButton(
-                        label: 'Safety',
-                        icon: Icons.shield_outlined,
-                        onPressed: match.recordSafety,
-                        helpText:
-                            'Defensivstoss ohne Rack-Ende. Gut fuer One Pocket, 8-Ball und kontrollierte Rotationsracks.',
-                      ),
-                      const SizedBox(width: 10),
-                      actionButton(
-                        label: 'Foul',
-                        icon: Icons.warning_amber_rounded,
-                        accent: colors.danger,
-                        onPressed: match.recordFoul,
-                        helpText:
-                            'Trage ein Foul ein. Der Gegner bekommt Ball in Hand und der Zug wechselt automatisch.',
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      actionButton(
-                        label: 'Switch Turn',
-                        icon: Icons.swap_horiz,
-                        onPressed: match.switchTurn,
-                        helpText:
-                            'Manueller Spielerwechsel ohne Foul. Praktisch nach Safety-Duellen oder Korrekturen.',
-                      ),
-                      const SizedBox(width: 10),
-                      actionButton(
-                        label: 'Dry Break',
-                        icon: Icons.hourglass_bottom,
-                        onPressed: match.recordDryBreak,
-                        helpText:
-                            'Der Break brachte keinen gelochten Ball. In 9-Ball und 10-Ball wird damit Push Out vorbereitet.',
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      actionButton(
-                        label: match.ballInHand ? 'Clear BIH' : 'Ball in Hand',
-                        icon: Icons.control_camera,
-                        accent: colors.warning,
-                        onPressed: match.toggleBallInHand,
-                        helpText:
-                            'Ball in Hand ein- oder ausschalten. Nutze das nach Fouls oder manuellen Korrekturen.',
-                      ),
-                      const SizedBox(width: 10),
-                      actionButton(
-                        label: match.pushOutArmed ? 'Push Armed' : 'Push Out',
-                        icon: Icons.assistant_navigation,
-                        onPressed: widget.discipline.supportsPushOut
-                            ? match.togglePushOut
-                            : () {},
-                        helpText: widget.discipline.supportsPushOut
-                            ? 'Push Out fuer 9-Ball und 10-Ball aktivieren oder wieder loesen.'
-                            : 'In diesem Modus gibt es keinen Push Out.',
+                        enabled: match.canRecordSpecialFinish,
+                        helpText: match.canRecordSpecialFinish
+                            ? 'Sonderfinish des jeweiligen Modus, etwa Golden Break oder 8 on Break.'
+                            : 'Dieses Break-Sonderfinish ist nur direkt vom Anstoss des Breakers sinnvoll. Spaeter im Rack bleibt der Button grau.',
                       ),
                     ],
                   ),
@@ -852,7 +980,7 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                           onPressed: showStatsSheet,
                           onLongPress: () => _showInfoDialog(
                             'Stats',
-                            'Zeigt die Live-Statistiken des aktuellen Matches mit Rack-Wins, Safeties, Fouls und Druckwerten.',
+                            'Zeigt die Live-Statistiken des aktuellen Matches mit Rack Wins, Safeties, Fouls und Druckwerten.',
                           ),
                         ),
                       ),

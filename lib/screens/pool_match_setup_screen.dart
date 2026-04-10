@@ -541,10 +541,10 @@ class _PoolMatchSetupScreenState extends State<PoolMatchSetupScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '* Live Rack-Flow mit Breaker, Shooter, Ball-in-Hand und Match-Kontext\n'
-                      '* Schnelle Aktionen fuer Safety, Foul, Dry Break, Push-Out und Rack-Wins\n'
+                      '* Live-Aufnahmefluss mit Breaker, Shooter, Ball-in-Hand und Match-Kontext\n'
+                      '* Schnelle Aktionen fuer Safety, Foul, Dry Break, Push Out und Rack/Game/Set Win\n'
                       '* Undo/Redo und eine laufende Match-Chronik\n'
-                      '* Direkt sichtbare Stats statt Spaeter-Auswertung',
+                      '* Ausgegraute Buttons bedeuten nur: Eine Voraussetzung ist aktuell nicht erfuellt',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colors.textMain.withOpacity(0.92),
                         height: 1.45,

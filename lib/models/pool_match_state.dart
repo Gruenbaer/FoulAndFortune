@@ -57,6 +57,20 @@ extension GameDisciplineMeta on GameDiscipline {
     }
   }
 
+  String get singleScoreLabel {
+    switch (this) {
+      case GameDiscipline.onePocket:
+        return 'Game';
+      case GameDiscipline.cowboy:
+        return 'Set';
+      case GameDiscipline.straightPool:
+      case GameDiscipline.eightBall:
+      case GameDiscipline.nineBall:
+      case GameDiscipline.tenBall:
+        return 'Rack';
+    }
+  }
+
   String get setupHint {
     switch (this) {
       case GameDiscipline.eightBall:
@@ -77,7 +91,7 @@ extension GameDisciplineMeta on GameDiscipline {
   String get shortHomeHint {
     switch (this) {
       case GameDiscipline.eightBall:
-        return 'Gruppen vergeben, Safeties tracken und den Tisch mit klaren Rack-Wins abschliessen.';
+        return 'Gruppen vergeben, Safeties tracken und den Tisch mit klaren Rack Wins abschliessen.';
       case GameDiscipline.nineBall:
         return 'Rotation mit Push-Out, Golden Break und schnellem Rack-Flow fuer klassische Sessions.';
       case GameDiscipline.tenBall:
@@ -96,32 +110,33 @@ extension GameDisciplineMeta on GameDiscipline {
       case GameDiscipline.eightBall:
         return const [
           'Nach dem Break zuerst Gruppen festlegen: Open Table, Solids oder Stripes.',
-          'Rack-Win fuer normale Racks, Runout fuer saubere Ausspiele und 8 on Break fuer den Sonderfall.',
-          'Safety, Foul und Ball in Hand halten den taktischen Ablauf sauber fest.',
+          'Der Pool-Pfad wird live pro Aufnahme gefuehrt: Safety, Foul und Turnwechsel bilden den echten Rack-Verlauf ab.',
+          'Rack Win fuer normale Racks, Runout fuer saubere Ausspiele und 8 on Break fuer den Sonderfall.',
+          'Ausgegraute Buttons bedeuten nur: Eine Voraussetzung fuer diese Aktion ist gerade nicht erfuellt.',
         ];
       case GameDiscipline.nineBall:
         return const [
-          'Nach einem trockenen Break ist Push Out verfuegbar; per Button aktivieren, wenn es angesagt wurde.',
-          'Runout steht fuer regulare Ausspiele, Golden Break fuer die 9 direkt vom Break.',
-          'Foul gibt Ball in Hand an den Gegner, Safety und Turn Switch dokumentieren den Rack-Verlauf.',
+          'Der Pool-Pfad wird live pro Aufnahme gefuehrt: Jede Aktion beschreibt den aktuellen Stoss, nicht nur eine spaete Zusammenfassung.',
+          'Nach einem trockenen Break ist Push Out verfuegbar; danach wird direkt geklaert, wer weiterspielt.',
+          'Runout steht fuer regulaere Ausspiele, Golden Break fuer die 9 direkt vom Break. Ausgegraute Buttons bedeuten fehlende Voraussetzungen.',
         ];
       case GameDiscipline.tenBall:
         return const [
-          'Nutze den gleichen Rotationsfluss wie bei 9-Ball, aber trage nur wirklich angesagte klare Finishes ein.',
-          'Push Out gibt es nach trockenem Break, Ball in Hand und Fouls laufen ueber die Schnellaktionen.',
-          'Breaker im Menue wechseln, wenn das Rack manuell korrigiert werden muss.',
+          'Der Pool-Pfad wird live pro Aufnahme gefuehrt und soll den wirklichen Rack-Ablauf direkt abbilden.',
+          'Push Out gibt es nach trockenem Break; die App fragt anschliessend, wer den naechsten Stoß ausfuehrt.',
+          'Nutze nur die gerade passenden Finishes. Ausgegraute Buttons bedeuten, dass eine Voraussetzung noch fehlt.',
         ];
       case GameDiscipline.onePocket:
         return const [
-          'Rack-Win zaehlt das Spiel, Safeties und Fouls sind die wichtigsten Steuerknopfe im laufenden Duell.',
-          'Breaker laesst sich im Menue umstellen, wenn ihr vor dem Rack anders entscheidet.',
-          'Chronik und Live-Stats helfen bei langen, defensiven Sessions den Faden zu behalten.',
+          'Der Pool-Pfad wird live pro Aufnahme gefuehrt: Safeties, Fouls und Turnwechsel spiegeln den echten Tischverlauf.',
+          'Game Win zaehlt das Spiel, Safeties und Fouls sind die wichtigsten Steuerknopfe im laufenden Duell.',
+          'Ausgegraute Buttons bedeuten nur, dass die passende Voraussetzung in dieser Aufnahme nicht erfuellt ist.',
         ];
       case GameDiscipline.cowboy:
         return const [
-          'Den Modus wie ein Hybrid-Match fuehren: saubere Racks, bewusst gesetzte Safeties und kontrollierte Turn-Wechsel.',
-          'Clean Finish steht fuer den besonderen Abschluss, Rack-Win fuer den regulaeren Punkt.',
-          'Im Menue findest du Regeln, Stats und den Breaker-Wechsel an einer Stelle.',
+          'Der Pool-Pfad wird live pro Aufnahme gefuehrt: jede Aktion soll den aktuellen Tischzustand abbilden.',
+          'Clean Finish steht fuer den besonderen Abschluss, Set Win fuer den regulaeren Punkt.',
+          'Ausgegraute Buttons bedeuten nur, dass eine Voraussetzung gerade nicht passt; Long-Press erklaert den Grund.',
         ];
       case GameDiscipline.straightPool:
         return const [
@@ -137,33 +152,33 @@ extension GameDisciplineMeta on GameDiscipline {
           'Break: Nach einem legalen Break ist der Tisch offen, bis eine Gruppe sauber festgelegt wird.',
           'Gruppen: Solids und Stripes werden im Match-Center dem aktiven Spieler zugewiesen.',
           'Ziel: Erst die eigene Gruppe, dann die 8. 8 on Break kann als Sonderfinish geloggt werden.',
-          'Fouls: Gegner erhaelt Ball in Hand.',
+          'Fouls und Safeties werden live pro Aufnahme erfasst; ausgegraute Buttons bedeuten fehlende Voraussetzungen.',
         ];
       case GameDiscipline.nineBall:
         return const [
           'Rotation: Immer zuerst die niedrigste Kugel anspielen.',
-          'Push Out: Nach einem trockenen oder sonst passenden Erffnungsrack verfuegbar, wenn ihr es nutzt.',
+          'Push Out: Nach einem trockenen Break verfuegbar; die App klaert danach, wer die naechste Aufnahme spielt.',
           'Gewinn: 9 regulär gelocht oder Golden Break direkt vom Break.',
-          'Fouls: Gegner erhaelt Ball in Hand; Dry Break und Safeties separat festhalten.',
+          'Fouls, Safeties und Turnwechsel werden live pro Aufnahme erfasst. Ausgegraute Buttons bedeuten fehlende Voraussetzungen.',
         ];
       case GameDiscipline.tenBall:
         return const [
           'Rotation: Immer zuerst die niedrigste Kugel anspielen.',
           'Kontrolle: 10-Ball wird stricter gespielt; besondere Finishes bewusst nur dann loggen, wenn sie regelgerecht waren.',
-          'Push Out: Nach der Erffnung verfuegbar, wenn euer Regelset das vorsieht.',
-          'Fouls: Gegner erhaelt Ball in Hand.',
+          'Push Out: Nach trockenem Break verfuegbar; die App klaert danach, wer die naechste Aufnahme spielt.',
+          'Fouls, Safeties und Turnwechsel werden live pro Aufnahme erfasst. Ausgegraute Buttons bedeuten fehlende Voraussetzungen.',
         ];
       case GameDiscipline.onePocket:
         return const [
           'Jeder Spieler verteidigt und spielt auf eine eigene Tasche.',
           'Safeties, Fouls und Ball in Hand sind im Match-Center die wichtigsten Match-Events.',
-          'Ein gewonnenes Rack wird als Spiel gezaehlt und ueber Rack-Win abgeschlossen.',
+          'Ein gewonnenes Rack wird als Spiel gezaehlt und ueber Game Win abgeschlossen.',
           'Breaker und Rack-Tempo lassen sich im Menue sauber nachfuehren.',
         ];
       case GameDiscipline.cowboy:
         return const [
           'Cowboy wird hier als flexibler Hybrid-Modus fuer Sessions gefuehrt.',
-          'Normale Gewinne laufen ueber Rack-Win, besondere Abschluesse ueber Clean Finish.',
+          'Normale Gewinne laufen ueber Set Win, besondere Abschluesse ueber Clean Finish.',
           'Safety, Foul, Turn Switch und Chronik dokumentieren den Ablauf so, dass Stats und Historie konsistent bleiben.',
           'Wenn ihr hausinterne Varianten spielt, nutzt das Regelblatt im Menue als Referenz und die Chronik fuer Abweichungen.',
         ];
@@ -299,6 +314,8 @@ class PoolMatchSnapshot {
   final int rackNumber;
   final bool alternatingBreaks;
   final bool ballInHand;
+  final bool openingShotPending;
+  final bool breakAndRunEligible;
   final bool pushOutAvailable;
   final bool pushOutArmed;
   final bool matchOver;
@@ -312,6 +329,8 @@ class PoolMatchSnapshot {
     required this.rackNumber,
     required this.alternatingBreaks,
     required this.ballInHand,
+    required this.openingShotPending,
+    required this.breakAndRunEligible,
     required this.pushOutAvailable,
     required this.pushOutArmed,
     required this.matchOver,
@@ -371,6 +390,8 @@ class PoolMatchState extends ChangeNotifier {
     match.breakerIndex = json['breakerIndex'] as int? ?? 0;
     match.rackNumber = json['rackNumber'] as int? ?? 1;
     match.ballInHand = json['ballInHand'] as bool? ?? false;
+    match.openingShotPending = json['openingShotPending'] as bool? ?? false;
+    match.breakAndRunEligible = json['breakAndRunEligible'] as bool? ?? false;
     match.pushOutAvailable = json['pushOutAvailable'] as bool? ?? false;
     match.pushOutArmed = json['pushOutArmed'] as bool? ?? false;
     match.matchOver = json['matchOver'] as bool? ?? false;
@@ -402,6 +423,8 @@ class PoolMatchState extends ChangeNotifier {
   int breakerIndex = 0;
   int rackNumber = 1;
   bool ballInHand = false;
+  bool openingShotPending = true;
+  bool breakAndRunEligible = true;
   bool pushOutAvailable = false;
   bool pushOutArmed = false;
   bool matchOver = false;
@@ -461,6 +484,30 @@ class PoolMatchState extends ChangeNotifier {
         totalVisits;
   }
 
+  bool get canRecordDryBreak =>
+      !matchOver &&
+      openingShotPending &&
+      activePlayerIndex == breakerIndex &&
+      !ballInHand;
+
+  bool get canTogglePushOut =>
+      !matchOver && discipline.supportsPushOut && pushOutAvailable;
+
+  bool get canRecordBreakAndRun =>
+      !matchOver &&
+      breakAndRunEligible &&
+      activePlayerIndex == breakerIndex &&
+      !ballInHand;
+
+  bool get canRecordSpecialFinish {
+    if (matchOver) return false;
+    final breakOnlyFinish = discipline == GameDiscipline.eightBall ||
+        discipline == GameDiscipline.nineBall ||
+        discipline == GameDiscipline.tenBall;
+    if (!breakOnlyFinish) return true;
+    return openingShotPending && activePlayerIndex == breakerIndex;
+  }
+
   void undo() {
     final snapshot = _history.undo(_snapshot());
     if (snapshot == null) return;
@@ -478,6 +525,8 @@ class PoolMatchState extends ChangeNotifier {
   void switchTurn({String? reason}) {
     _recordMutation(() {
       _incrementVisits(activePlayerIndex);
+      openingShotPending = false;
+      breakAndRunEligible = false;
       activePlayerIndex = 1 - activePlayerIndex;
       pushOutAvailable = false;
       pushOutArmed = false;
@@ -488,12 +537,19 @@ class PoolMatchState extends ChangeNotifier {
 
   void recordSafety() {
     _recordMutation(() {
+      final player = currentPlayer;
       _replacePlayer(
         activePlayerIndex,
-        currentPlayer.copyWith(safeties: currentPlayer.safeties + 1),
+        player.copyWith(safeties: player.safeties + 1),
       );
+      openingShotPending = false;
+      breakAndRunEligible = false;
       pushOutAvailable = false;
-      _prependLog('${currentPlayer.name} played a safety');
+      pushOutArmed = false;
+      _incrementVisits(activePlayerIndex);
+      activePlayerIndex = 1 - activePlayerIndex;
+      _prependLog(
+          '${player.name} played a safety. ${currentPlayer.name} is now at the table');
     });
   }
 
@@ -504,9 +560,12 @@ class PoolMatchState extends ChangeNotifier {
         activePlayerIndex,
         foulingPlayer.copyWith(fouls: foulingPlayer.fouls + 1),
       );
+      openingShotPending = false;
+      breakAndRunEligible = false;
       ballInHand = true;
       pushOutAvailable = false;
       pushOutArmed = false;
+      _incrementVisits(activePlayerIndex);
       activePlayerIndex = 1 - activePlayerIndex;
       _prependLog(
           '${foulingPlayer.name} committed a foul. ${currentPlayer.name} gets ball in hand');
@@ -516,6 +575,10 @@ class PoolMatchState extends ChangeNotifier {
   void toggleBallInHand() {
     _recordMutation(() {
       ballInHand = !ballInHand;
+      openingShotPending = false;
+      if (ballInHand) {
+        breakAndRunEligible = false;
+      }
       _prependLog(ballInHand
           ? '${currentPlayer.name} has ball in hand'
           : 'Ball in hand cleared');
@@ -529,8 +592,9 @@ class PoolMatchState extends ChangeNotifier {
       if (makeActive) {
         activePlayerIndex = index;
       }
+      ballInHand = false;
       pushOutArmed = false;
-      pushOutAvailable = discipline.supportsPushOut;
+      _setOpeningState();
       _prependLog('Breaker set to ${players[index].name}');
     });
   }
@@ -542,6 +606,9 @@ class PoolMatchState extends ChangeNotifier {
         breakerIndex,
         breaker.copyWith(dryBreaks: breaker.dryBreaks + 1),
       );
+      openingShotPending = false;
+      breakAndRunEligible = false;
+      _incrementVisits(breakerIndex);
       pushOutAvailable = discipline.supportsPushOut;
       pushOutArmed = false;
       activePlayerIndex = 1 - breakerIndex;
@@ -549,20 +616,29 @@ class PoolMatchState extends ChangeNotifier {
     });
   }
 
-  void togglePushOut() {
+  void recordPushOut({required bool keepCurrentPlayer}) {
     if (!discipline.supportsPushOut) return;
     _recordMutation(() {
-      pushOutArmed = !pushOutArmed;
-      pushOutAvailable = true;
-      if (pushOutArmed) {
-        _replacePlayer(
-          activePlayerIndex,
-          currentPlayer.copyWith(pushes: currentPlayer.pushes + 1),
-        );
+      final pusherIndex = activePlayerIndex;
+      final pusher = currentPlayer;
+      _replacePlayer(
+        pusherIndex,
+        pusher.copyWith(pushes: pusher.pushes + 1),
+      );
+      openingShotPending = false;
+      breakAndRunEligible = false;
+      ballInHand = false;
+      pushOutAvailable = false;
+      pushOutArmed = false;
+      if (!keepCurrentPlayer) {
+        _incrementVisits(pusherIndex);
+        activePlayerIndex = 1 - pusherIndex;
       }
-      _prependLog(pushOutArmed
-          ? '${currentPlayer.name} calls push out'
-          : 'Push out cleared');
+      _prependLog(
+        keepCurrentPlayer
+            ? '${pusher.name} played a push out and stays at the table'
+            : '${pusher.name} played a push out. ${currentPlayer.name} takes the next shot',
+      );
     });
   }
 
@@ -683,6 +759,8 @@ class PoolMatchState extends ChangeNotifier {
       rackNumber: rackNumber,
       alternatingBreaks: alternatingBreaks,
       ballInHand: ballInHand,
+      openingShotPending: openingShotPending,
+      breakAndRunEligible: breakAndRunEligible,
       pushOutAvailable: pushOutAvailable,
       pushOutArmed: pushOutArmed,
       matchOver: matchOver,
@@ -699,6 +777,8 @@ class PoolMatchState extends ChangeNotifier {
     breakerIndex = snapshot.breakerIndex;
     rackNumber = snapshot.rackNumber;
     ballInHand = snapshot.ballInHand;
+    openingShotPending = snapshot.openingShotPending;
+    breakAndRunEligible = snapshot.breakAndRunEligible;
     pushOutAvailable = snapshot.pushOutAvailable;
     pushOutArmed = snapshot.pushOutArmed;
     matchOver = snapshot.matchOver;
@@ -727,7 +807,9 @@ class PoolMatchState extends ChangeNotifier {
   }
 
   void _setOpeningState() {
-    pushOutAvailable = discipline.supportsPushOut;
+    openingShotPending = true;
+    breakAndRunEligible = true;
+    pushOutAvailable = false;
   }
 
   void _incrementVisits(int index) {
@@ -754,6 +836,8 @@ class PoolMatchState extends ChangeNotifier {
       'breakerIndex': breakerIndex,
       'rackNumber': rackNumber,
       'ballInHand': ballInHand,
+      'openingShotPending': openingShotPending,
+      'breakAndRunEligible': breakAndRunEligible,
       'pushOutAvailable': pushOutAvailable,
       'pushOutArmed': pushOutArmed,
       'matchOver': matchOver,

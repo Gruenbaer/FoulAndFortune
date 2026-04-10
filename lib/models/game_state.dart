@@ -982,8 +982,12 @@ class GameState extends ChangeNotifier {
         if (winResult.winningPlayerIndex >= 0 && winResult.winningPlayerIndex < players.length) {
             final winner = players[winResult.winningPlayerIndex];
             
-            // CRITICAL: First finalize the inning to commit the winning run points
-            _finalizeInning(winner); // Uses current logic to bank points
+            // Only finalize here if the winning inning is still open.
+            // If the turn already ended via _switchPlayer(), the inning was
+            // already committed and finalizing again would append a bogus "0".
+            if (_hasPendingInningState(winner)) {
+              _finalizeInning(winner);
+            }
             
             gameOver = true;
             this.winner = winner;
@@ -998,6 +1002,16 @@ class GameState extends ChangeNotifier {
             notifyListeners();
         }
     }
+  }
+
+  bool _hasPendingInningState(Player player) {
+    return player.inningPoints != 0 ||
+        player.inningHistory.isNotEmpty ||
+        player.inningHasFoul ||
+        player.inningHasThreeFouls ||
+        player.inningBreakFoulCount > 0 ||
+        player.inningHasSafe ||
+        player.inningHasReRack;
   }
 
   void resetGame() {

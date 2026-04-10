@@ -39,7 +39,8 @@ class FakePlayerService extends PlayerService {
 }
 
 class FakeGameHistoryService extends GameHistoryService {
-  FakeGameHistoryService(this.record, {required AppDatabase db}) : super(db: db);
+  FakeGameHistoryService(this.record, {required AppDatabase db})
+      : super(db: db);
 
   final GameRecord? record;
 
@@ -97,6 +98,16 @@ void main() {
           playerNames: const ['Alice', 'Bob'],
         ),
         child: PoolMatchCenterScreen(discipline: discipline),
+      ),
+    );
+  }
+
+  Widget buildCenterHarnessWithMatch(PoolMatchState match) {
+    return MaterialApp(
+      theme: CyberpunkTheme.themeData,
+      home: ChangeNotifierProvider.value(
+        value: match,
+        child: PoolMatchCenterScreen(discipline: match.discipline),
       ),
     );
   }
@@ -216,7 +227,229 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Safety'), findsOneWidget);
-    expect(find.textContaining('Defensivstoss'), findsOneWidget);
+    expect(find.textContaining('abgeschlossene Aufnahme'), findsOneWidget);
+  });
+
+  testWidgets(
+      'disabled push out explains missing prerequisite and does not open dialog',
+      (tester) async {
+    final match = PoolMatchState(
+      discipline: GameDiscipline.nineBall,
+      raceTo: 5,
+      playerNames: const ['Alice', 'Bob'],
+    );
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(buildCenterHarnessWithMatch(match));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('PUSH OUT').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Push Out'), findsNothing);
+    expect(match.pushOutAvailable, isFalse);
+    expect(match.players[0].pushes, 0);
+
+    await tester.longPress(find.text('PUSH OUT').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Push Out'), findsOneWidget);
+    expect(find.textContaining('nur nach einem Dry Break'), findsOneWidget);
+  });
+
+  testWidgets('push out dialog resolves next shooter and updates state',
+      (tester) async {
+    final match = PoolMatchState(
+      discipline: GameDiscipline.nineBall,
+      raceTo: 5,
+      playerNames: const ['Alice', 'Bob'],
+    );
+    match.recordDryBreak();
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(buildCenterHarnessWithMatch(match));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('PUSH OUT').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Push Out'), findsOneWidget);
+    expect(find.text('Gegner uebernimmt'), findsOneWidget);
+    expect(find.text('Push-Spieler bleibt'), findsOneWidget);
+
+    await tester.tap(find.text('Push-Spieler bleibt'));
+    await tester.pumpAndSettle();
+
+    expect(match.players[1].pushes, 1);
+    expect(match.currentPlayer.name, 'Bob');
+    expect(match.pushOutAvailable, isFalse);
+  });
+
+  testWidgets('break and run stays blocked after a foul and explains why',
+      (tester) async {
+    final match = PoolMatchState(
+      discipline: GameDiscipline.nineBall,
+      raceTo: 5,
+      playerNames: const ['Alice', 'Bob'],
+    );
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(buildCenterHarnessWithMatch(match));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('FOUL').first);
+    await tester.pumpAndSettle();
+
+    expect(match.ballInHand, isTrue);
+    expect(match.currentPlayer.name, 'Bob');
+    expect(match.players[0].rackWins, 0);
+
+    await tester.tap(find.text('BREAK & RUN').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[0].rackWins, 0);
+    expect(match.players[1].rackWins, 0);
+
+    await tester.longPress(find.text('BREAK & RUN').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Break & Run'), findsOneWidget);
+    expect(find.textContaining('bleibt der Button grau'), findsOneWidget);
+  });
+
+  testWidgets('eight-ball widget flow tracks groups, safety, foul and rack win',
+      (tester) async {
+    final match = PoolMatchState(
+      discipline: GameDiscipline.eightBall,
+      raceTo: 3,
+      playerNames: const ['Alice', 'Bob'],
+    );
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(buildCenterHarnessWithMatch(match));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Solids'));
+    await tester.pumpAndSettle();
+
+    expect(match.currentPlayer.assignedGroup, TableGroup.solids);
+    expect(match.players[1].assignedGroup, TableGroup.stripes);
+
+    await tester.tap(find.text('SAFETY').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[0].safeties, 1);
+    expect(match.currentPlayer.name, 'Bob');
+
+    await tester.tap(find.text('FOUL').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[1].fouls, 1);
+    expect(match.ballInHand, isTrue);
+    expect(match.currentPlayer.name, 'Alice');
+
+    await tester.tap(find.text('RACK WIN').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[0].rackWins, 1);
+    expect(find.text('1'), findsWidgets);
+    expect(match.rackNumber, 2);
+  });
+
+  testWidgets('nine-ball widget flow handles dry break push-out and runout',
+      (tester) async {
+    final match = PoolMatchState(
+      discipline: GameDiscipline.nineBall,
+      raceTo: 3,
+      playerNames: const ['Alice', 'Bob'],
+    );
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(buildCenterHarnessWithMatch(match));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('DRY BREAK').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[0].dryBreaks, 1);
+    expect(match.currentPlayer.name, 'Bob');
+    expect(match.pushOutAvailable, isTrue);
+
+    await tester.tap(find.text('PUSH OUT').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Gegner uebernimmt'));
+    await tester.pumpAndSettle();
+
+    expect(match.players[1].pushes, 1);
+    expect(match.currentPlayer.name, 'Alice');
+    expect(match.players[1].visits, 1);
+
+    await tester.tap(find.text('RUNOUT').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[0].rackWins, 1);
+    expect(match.players[0].runOuts, 1);
+    expect(match.rackNumber, 2);
+  });
+
+  testWidgets('one-pocket widget flow exposes game win and live stats',
+      (tester) async {
+    final match = PoolMatchState(
+      discipline: GameDiscipline.onePocket,
+      raceTo: 2,
+      playerNames: const ['Alice', 'Bob'],
+    );
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(buildCenterHarnessWithMatch(match));
+    await tester.pumpAndSettle();
+
+    expect(find.text('GAME WIN'), findsOneWidget);
+
+    await tester.tap(find.text('SAFETY').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('FOUL').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('GAME WIN').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[0].rackWins, 1);
+    expect(match.players[0].ballInHandWins, 1);
+
+    await tester.tap(find.text('STATS').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('1-Pocket Live Stats'), findsOneWidget);
+    expect(find.text('Ball-in-Hand Wins'), findsOneWidget);
+    expect(find.text('Visits'), findsOneWidget);
+  });
+
+  testWidgets('cowboy widget flow exposes set win and clean finish',
+      (tester) async {
+    final match = PoolMatchState(
+      discipline: GameDiscipline.cowboy,
+      raceTo: 2,
+      playerNames: const ['Alice', 'Bob'],
+    );
+
+    await useLargeSurface(tester);
+    await tester.pumpWidget(buildCenterHarnessWithMatch(match));
+    await tester.pumpAndSettle();
+
+    expect(find.text('SET WIN'), findsOneWidget);
+    expect(find.text('CLEAN FINISH'), findsOneWidget);
+
+    await tester.tap(find.text('CLEAN FINISH').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[0].rackWins, 1);
+    expect(match.players[0].goldenBreaks, 1);
+
+    await tester.tap(find.text('SET WIN').first);
+    await tester.pumpAndSettle();
+
+    expect(match.players[1].rackWins, 1);
+    expect(match.rackNumber, 3);
   });
 
   testWidgets('setup allows choosing the starting breaker', (tester) async {

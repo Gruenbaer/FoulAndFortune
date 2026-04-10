@@ -4,7 +4,9 @@ import 'package:foulandfortune/models/pool_match_state.dart';
 
 void main() {
   group('PoolMatchState support matrix', () {
-    test('push-out is only enabled for nine-ball and ten-ball', () {
+    test(
+        'push-out is only supported for nine-ball and ten-ball and starts unavailable',
+        () {
       final supported = {
         GameDiscipline.nineBall,
         GameDiscipline.tenBall,
@@ -24,8 +26,9 @@ void main() {
         );
         expect(
           match.pushOutAvailable,
-          supported.contains(discipline),
-          reason: 'Opening state mismatch for ${discipline.name}',
+          false,
+          reason:
+              'Push-out should only become available after a dry break in ${discipline.name}',
         );
       }
     });
@@ -86,7 +89,7 @@ void main() {
       expect(match.actionLog.first, contains('wins'));
     });
 
-    test('foul hands over turn and ball in hand', () {
+    test('foul ends the visit, hands over turn and ball in hand', () {
       final match = PoolMatchState(
         discipline: GameDiscipline.eightBall,
         raceTo: 5,
@@ -98,9 +101,10 @@ void main() {
       expect(match.players[0].fouls, 1);
       expect(match.ballInHand, true);
       expect(match.currentPlayer.name, 'Bob');
+      expect(match.players[0].visits, 1);
     });
 
-    test('dry break arms push-out flow for nine-ball', () {
+    test('dry break unlocks push-out choice for nine-ball', () {
       final match = PoolMatchState(
         discipline: GameDiscipline.nineBall,
         raceTo: 5,
@@ -112,11 +116,13 @@ void main() {
       expect(match.players[0].dryBreaks, 1);
       expect(match.currentPlayer.name, 'Bob');
       expect(match.pushOutAvailable, true);
+      expect(match.players[0].visits, 1);
 
-      match.togglePushOut();
+      match.recordPushOut(keepCurrentPlayer: false);
 
-      expect(match.pushOutArmed, true);
       expect(match.players[1].pushes, 1);
+      expect(match.currentPlayer.name, 'Alice');
+      expect(match.pushOutAvailable, false);
     });
 
     test('match over exposes winner and snapshot metadata', () {
@@ -173,6 +179,7 @@ void main() {
       );
 
       match.recordSafety();
+      match.switchTurn();
       match.winRack(breakAndRun: true, runOut: true);
 
       expect(match.pressureIndexFor(0), greaterThan(0));
@@ -191,6 +198,20 @@ void main() {
       expect(match.breakerIndex, 1);
       expect(match.activePlayerIndex, 1);
       expect(match.actionLog.first, contains('Breaker set to Bob'));
+    });
+
+    test('safety ends the visit and switches to the opponent', () {
+      final match = PoolMatchState(
+        discipline: GameDiscipline.onePocket,
+        raceTo: 3,
+        playerNames: const ['Alice', 'Bob'],
+      );
+
+      match.recordSafety();
+
+      expect(match.players[0].safeties, 1);
+      expect(match.players[0].visits, 1);
+      expect(match.currentPlayer.name, 'Bob');
     });
   });
 }

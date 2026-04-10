@@ -12,7 +12,8 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues({});
 
-  test('PoolMatchService persists active and completed matches with player stats',
+  test(
+      'PoolMatchService persists active and completed matches with player stats',
       () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(() async => db.close());
@@ -68,7 +69,6 @@ void main() {
 
     original.assignTableGroup(TableGroup.solids);
     original.recordSafety();
-    original.switchTurn();
     final restored = PoolMatchState.fromSnapshotJson(original.toSnapshotJson());
 
     expect(restored.discipline, GameDiscipline.eightBall);
