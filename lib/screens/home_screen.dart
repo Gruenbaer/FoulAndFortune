@@ -22,7 +22,10 @@ import '../services/game_history_service.dart';
 import '../widgets/video_logo.dart';
 import '../services/shot_event_service.dart';
 import '../services/player_service.dart';
+import '../services/update_check_service.dart';
 import '../data/app_database.dart'; // For appDatabase global
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,6 +37,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   GameRecord? _activeGame;
   String _version = '';
+  bool _updateDialogVisible = false;
 
   void _showModeInfo(GameDiscipline discipline) {
     final colors = FortuneColors.of(context);
@@ -86,7 +90,64 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _version = 'v${info.version} (${info.buildNumber})';
       });
+      await _checkForAppUpdate(info.version);
     }
+  }
+
+  Future<void> _checkForAppUpdate(String currentVersion) async {
+    final updateService = UpdateCheckService();
+    final update = await updateService.checkForUpdate(currentVersion);
+    if (!mounted || update == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyDismissedVersion = prefs.getString('dismissed_update_version');
+    if (alreadyDismissedVersion == update.latestVersion) return;
+
+    if (_updateDialogVisible) return;
+    _updateDialogVisible = true;
+
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        final colors = FortuneColors.of(dialogContext);
+        return GameAlertDialog(
+          title: 'Update verfügbar',
+          content: Text(
+            'Eine neue Version (${update.latestVersion}) ist verfügbar. '
+            'Bitte aktualisiere die App, um Fehler durch veraltete Versionen zu vermeiden.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: colors.textMain),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await prefs.setString(
+                  'dismissed_update_version',
+                  update.latestVersion,
+                );
+                if (dialogContext.mounted) Navigator.pop(dialogContext);
+              },
+              child: const Text('Später'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final uri = Uri.parse(update.releaseUrl);
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                await prefs.setString(
+                  'dismissed_update_version',
+                  update.latestVersion,
+                );
+                if (dialogContext.mounted) Navigator.pop(dialogContext);
+              },
+              child: const Text('Jetzt updaten'),
+            ),
+          ],
+        );
+      },
+    );
+
+    _updateDialogVisible = false;
   }
 
   Future<void> _checkActiveGame() async {

@@ -699,6 +699,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     void showRulesPopup() {
       Navigator.pop(context); // Close drawer
+      _showRulesDialog();
+    }
+
+    void _showRulesDialog() {
       showZoomDialog(
         context: context,
         builder: (context) => GameAlertDialog(
@@ -714,6 +718,131 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               child: Text(l10n.back),
             ),
           ],
+        ),
+      );
+    }
+
+    Future<void> _start141Tutorial() async {
+      final steps = <({String title, String body})>[
+        (
+          title: '14.1 Kurz-Tutorial (1/6)',
+          body:
+              'In Foul & Fortune gibst du die verbleibenden Kugeln ein, nicht die gelochte Kugel. '
+              'Daraus berechnet die App automatisch die Punkte.',
+        ),
+        (
+          title: '14.1 Kurz-Tutorial (2/6)',
+          body:
+              'Bleibt 1 Kugel übrig, wird Re-Rack ausgelöst. Bei 0 ist es ein Double-Sack. '
+              'Beides setzt den Tisch zurück.',
+        ),
+        (
+          title: '14.1 Kurz-Tutorial (3/6)',
+          body:
+              'Foul und Safe sind Modi für den nächsten Stoß. '
+              'Aktiver Modus wird dann beim Stoß mit ausgewertet.',
+        ),
+        (
+          title: '14.1 Kurz-Tutorial (4/6)',
+          body:
+              'Bei 3 aufeinanderfolgenden reinen Fouls wird automatisch die -16 Strafe angewendet.',
+        ),
+        (
+          title: '14.1 Kurz-Tutorial (5/6)',
+          body:
+              'Undo/Redo korrigiert Eingaben direkt. Nutze das, wenn du dich vertippt hast.',
+        ),
+        (
+          title: '14.1 Kurz-Tutorial (6/6)',
+          body:
+              'Im Hamburger-Menü findest du jederzeit Regeln und dieses Tutorial erneut.',
+        ),
+      ];
+
+      for (int i = 0; i < steps.length; i++) {
+        final step = steps[i];
+        if (!mounted) return;
+        final shouldContinue = await showZoomDialog<bool>(
+          context: context,
+          builder: (dialogContext) => GameAlertDialog(
+            title: step.title,
+            content: Text(step.body),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Beenden'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(i == steps.length - 1 ? 'Fertig' : 'Weiter'),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldContinue != true || i == steps.length - 1) {
+          break;
+        }
+      }
+    }
+
+    void showHelpAndTutorialSheet() {
+      Navigator.pop(context); // Close drawer
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (_) => Container(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          decoration: BoxDecoration(
+            color: colors.backgroundMain,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border.all(color: colors.primary.withOpacity(0.25)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hilfe & Tutorial',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colors.accent,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Nutze das Kurz-Tutorial für die Bedienlogik von 14.1 oder öffne das vollständige Regelwerk.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.textMain,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ThemedButton(
+                  label: '14.1 Kurz-Tutorial starten',
+                  icon: Icons.school_outlined,
+                  iconPosition: ThemedButtonIconPosition.top,
+                  forceSingleLineLabel: true,
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _start141Tutorial();
+                  },
+                ),
+                const SizedBox(height: 10),
+                ThemedButton(
+                  label: l10n.gameRules,
+                  icon: Icons.menu_book_outlined,
+                  iconPosition: ThemedButtonIconPosition.top,
+                  forceSingleLineLabel: true,
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showRulesDialog();
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
@@ -884,6 +1013,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             style: theme.textTheme.bodyLarge
                                 ?.copyWith(color: colors.textMain)),
                         onTap: showGiveUpConfirmation,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.school_outlined,
+                            color: colors.primary),
+                        title: Text('Hilfe & Tutorial',
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: colors.textMain)),
+                        onTap: showHelpAndTutorialSheet,
                       ),
                       ListTile(
                         leading: Icon(Icons.menu_book, color: colors.primary),

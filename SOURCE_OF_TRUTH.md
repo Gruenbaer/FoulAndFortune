@@ -148,8 +148,10 @@ This section defines stable behaviors relied upon by UI, tests, and persistence.
 ## UI Structure
 ### Screens
 - `HomeScreen`: main menu, resume latest active game, entry to all screens.
+  - On startup, checks GitHub latest release and prompts user when a newer app version is available.
 - `NewGameSettingsScreen`: configure new game, players, race, innings.
 - `GameScreen`: primary scoring UI, rack interaction, controls, overlays.
+  - Drawer includes "Hilfe & Tutorial" entry with guided quick tutorial and rules access.
 - `GameHistoryScreen`: list/filters history, resume or inspect games.
 - `DetailsScreen`: match details and score sheet.
 - `PlayersScreen`/`PlayerProfileScreen`: player list and profile management.

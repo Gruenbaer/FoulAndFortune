@@ -4,6 +4,7 @@ import '../models/game_settings.dart';
 import '../models/pool_match_state.dart';
 import '../services/pool_match_service.dart';
 import '../theme/fortune_theme.dart';
+import '../utils/ui_utils.dart';
 import '../widgets/themed_widgets.dart';
 
 class PoolMatchCenterScreen extends StatefulWidget {
@@ -177,6 +178,120 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   color: colors.accent,
                   fontWeight: FontWeight.w800,
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startPoolQuickTutorial(PoolMatchState match) async {
+    final steps = <({String title, String body})>[
+      (
+        title: '${widget.discipline.label} Tutorial (1/4)',
+        body:
+            'Das Match-Center zeigt dir Rack, Score, Breaker und den aktiven Spieler in Echtzeit.',
+      ),
+      (
+        title: '${widget.discipline.label} Tutorial (2/4)',
+        body:
+            'Long-Press auf Aktionsbuttons erklärt deren genaue Bedeutung für den aktuellen Modus.',
+      ),
+      (
+        title: '${widget.discipline.label} Tutorial (3/4)',
+        body:
+            'Nutze Safety, Foul und Ball-in-Hand bewusst — diese Aktionen beeinflussen Flow und Statistik.',
+      ),
+      (
+        title: '${widget.discipline.label} Tutorial (4/4)',
+        body:
+            'Im Hamburger-Menü findest du jederzeit Anleitung & Regelwerk sowie dieses Tutorial erneut.',
+      ),
+    ];
+
+    for (int i = 0; i < steps.length; i++) {
+      final step = steps[i];
+      if (!mounted) return;
+      final shouldContinue = await showZoomDialog<bool>(
+        context: context,
+        builder: (dialogContext) => GameAlertDialog(
+          title: step.title,
+          content: Text(step.body),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Beenden'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(i == steps.length - 1 ? 'Fertig' : 'Weiter'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldContinue != true || i == steps.length - 1) {
+        break;
+      }
+    }
+  }
+
+  void _showHelpAndTutorialSheet(PoolMatchState match) {
+    final colors = FortuneColors.of(context);
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+        decoration: BoxDecoration(
+          color: colors.backgroundMain,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(color: colors.primary.withOpacity(0.25)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hilfe & Tutorial',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: colors.accent,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Starte das Kurz-Tutorial oder öffne die vollständige Anleitung mit Regelwerk.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colors.textMain,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ThemedButton(
+                label: '${widget.discipline.label} Kurz-Tutorial',
+                icon: Icons.school_outlined,
+                iconPosition: ThemedButtonIconPosition.top,
+                forceSingleLineLabel: true,
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _startPoolQuickTutorial(match);
+                },
+              ),
+              const SizedBox(height: 10),
+              ThemedButton(
+                label: 'Anleitung & Regelwerk',
+                icon: Icons.menu_book_outlined,
+                iconPosition: ThemedButtonIconPosition.top,
+                forceSingleLineLabel: true,
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showRuleSheet(match);
+                },
               ),
             ],
           ),
@@ -469,10 +584,10 @@ class _PoolMatchCenterScreenState extends State<PoolMatchCenterScreen> {
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.menu_book_outlined),
-                    title: const Text('Anleitung & Regelwerk'),
+                    title: const Text('Hilfe & Tutorial'),
                     onTap: () {
                       Navigator.pop(context);
-                      _showRuleSheet(match);
+                      _showHelpAndTutorialSheet(match);
                     },
                   ),
                   ListTile(
