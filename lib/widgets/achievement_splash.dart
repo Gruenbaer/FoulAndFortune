@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/achievement.dart';
 import '../models/game_settings.dart';
 import '../theme/fortune_theme.dart';
+import 'achievement_badge.dart';
 
 class AchievementSplash extends StatefulWidget {
   final Achievement achievement;
@@ -143,7 +144,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: FortuneColors.of(context).success.withOpacity(0.6),
+                              color: FortuneColors.of(context).success.withValues(alpha: 0.6),
                               blurRadius: 40,
                               spreadRadius: 8,
                             ),
@@ -158,13 +159,10 @@ class _AchievementSplashState extends State<AchievementSplash>
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // Left Icon
-                                Text(
-                                  '🏆',
-                                  style: TextStyle(
-                                    fontSize: 32,
-                                    color: FortuneColors.of(context).success,
-                                  ),
+                                Icon(
+                                  Icons.emoji_events,
+                                  size: 32,
+                                  color: FortuneColors.of(context).success,
                                 ),
                                 const SizedBox(width: 12),
                                 // Centered Text Stack
@@ -197,22 +195,22 @@ class _AchievementSplashState extends State<AchievementSplash>
                                   ],
                                 ),
                                 const SizedBox(width: 12),
-                                // Right Icon
-                                Text(
-                                  '🏆',
-                                  style: TextStyle(
-                                    fontSize: 32,
-                                    color: FortuneColors.of(context).success,
-                                  ),
+                                Icon(
+                                  Icons.emoji_events,
+                                  size: 32,
+                                  color: FortuneColors.of(context).success,
                                 ),
                               ],
                             ),
                             const SizedBox(height: 24),
                             
-                            // Emoji
-                            Text(
-                              widget.achievement.emoji,
-                              style: const TextStyle(fontSize: 80),
+                            // Use the badge artwork instead of raw emoji text so
+                            // older Android devices do not fall back to broken glyphs.
+                            AchievementBadge(
+                              id: widget.achievement.id,
+                              emoji: widget.achievement.emoji,
+                              isUnlocked: true,
+                              size: 104,
                             ),
                             const SizedBox(height: 16),
                             
@@ -236,7 +234,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                               widget.achievement.description,
                               style: TextStyle(
                                 fontSize: 16,
-                                color: FortuneColors.of(context).textMain.withOpacity(0.8),
+                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.8),
                                 height: 1.4,
                               ),
                               textAlign: TextAlign.center,
@@ -266,7 +264,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                               widget.achievement.howToUnlock,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: FortuneColors.of(context).textMain.withOpacity(0.6),
+                                color: FortuneColors.of(context).textMain.withValues(alpha: 0.6),
                                 fontStyle: FontStyle.italic,
                               ),
                               textAlign: TextAlign.center,
@@ -279,7 +277,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 'Unlocked by: ${widget.achievement.unlockedBy.last}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: FortuneColors.of(context).textMain.withOpacity(0.4),
+                                  color: FortuneColors.of(context).textMain.withValues(alpha: 0.4),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -298,7 +296,7 @@ class _AchievementSplashState extends State<AchievementSplash>
                                 ),
                                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                                 elevation: 8,
-                                shadowColor: FortuneColors.of(context).success.withOpacity(0.5),
+                                shadowColor: FortuneColors.of(context).success.withValues(alpha: 0.5),
                               ),
                               child: const Text(
                                 'OK',

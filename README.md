@@ -106,7 +106,7 @@ Die wichtigsten Abhängigkeiten werden in `pubspec.yaml` verwaltet:
 
 **Neueste Version:** [Latest](https://github.com/Gruenbaer/FoulAndFortune/releases/latest)
 
-📱 Die APK wird pro Release mit Versionsnummer hochgeladen, z. B. `FoulAndFortune-v4.5.12.apk`.
+📱 Die APK wird pro Release mit Versionsnummer hochgeladen, z. B. `FoulAndFortune-v4.5.13.apk`.
 Den aktuellen Download findest Du immer auf der neuesten Release-Seite:
 https://github.com/Gruenbaer/FoulAndFortune/releases/latest
 
