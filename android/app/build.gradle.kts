@@ -15,6 +15,9 @@ if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
+val releaseStoreFile = keystoreProperties.getProperty("storeFile")
+val hasReleaseSigning = keystorePropertiesFile.exists() && !releaseStoreFile.isNullOrBlank()
+
 android {
     namespace = "com.knthlz.foulandfortune"
     compileSdk = flutter.compileSdkVersion
@@ -39,10 +42,10 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
+            if (hasReleaseSigning) {
                 keyAlias = keystoreProperties.getProperty("keyAlias")
                 keyPassword = keystoreProperties.getProperty("keyPassword")
-                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storeFile = rootProject.file(releaseStoreFile)
                 storePassword = keystoreProperties.getProperty("storePassword")
             }
         }
@@ -50,12 +53,10 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                // Fallback to debug signing if key.properties not found
-                signingConfigs.getByName("debug")
+            check(hasReleaseSigning) {
+                "Release signing is required. Missing android/key.properties or storeFile."
             }
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

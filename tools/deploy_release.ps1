@@ -9,6 +9,28 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+$keyPropertiesPath = Join-Path $PSScriptRoot "..\\android\\key.properties"
+if (-not (Test-Path $keyPropertiesPath)) {
+    throw "Missing android\\key.properties. Release builds must use the canonical signing key."
+}
+
+$keyProperties = @{}
+Get-Content $keyPropertiesPath | ForEach-Object {
+    if ($_ -match '^\s*([^#=]+?)\s*=\s*(.*)\s*$') {
+        $keyProperties[$matches[1].Trim()] = $matches[2].Trim()
+    }
+}
+
+$storeFile = $keyProperties["storeFile"]
+if ([string]::IsNullOrWhiteSpace($storeFile)) {
+    throw "android\\key.properties is missing storeFile. Release builds must use the canonical signing key."
+}
+
+$keystorePath = Join-Path $PSScriptRoot "..\\android\\$storeFile"
+if (-not (Test-Path $keystorePath)) {
+    throw "Configured release keystore not found at $keystorePath"
+}
+
 # Define Flutter Path (Using Puro first, fallback to standard Flutter)
 # First try to use Puro
 if (Get-Command "puro" -ErrorAction SilentlyContinue) {
