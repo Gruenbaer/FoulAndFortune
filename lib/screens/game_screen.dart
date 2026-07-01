@@ -1283,15 +1283,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                     child: Padding(
                                       padding: const EdgeInsets.all(
                                           16.0), // Reduced padding
-                                      child: FittedBox(
-                                        fit: BoxFit.contain,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: _buildRackFormation(
-                                              context, gameState),
-                                        ),
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: _buildRackFormation(
+                                                context,
+                                                gameState,
+                                                constraints.biggest,
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                   ),
@@ -1401,16 +1408,24 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     ); // Close NotificationListener
   }
 
-  List<Widget> _buildRackFormation(BuildContext context, GameState gameState) {
-    // Calculate responsive ball size based on available screen space
+  List<Widget> _buildRackFormation(
+    BuildContext context,
+    GameState gameState, [
+    Size? rackArea,
+  ]) {
+    // Calculate responsive ball size based on the actual rack area.
     final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width;
-    final screenHeight = screenSize.height;
+    final rackAreaWidth =
+        rackArea != null && rackArea.width.isFinite ? rackArea.width : null;
+    final rackAreaHeight =
+        rackArea != null && rackArea.height.isFinite ? rackArea.height : null;
 
-    // Account for UI elements: AppBar, Stats, Clock, Controls, Padding
-    // AppBar ~56, Stats ~36, Clock ~32, Controls ~80, Padding ~50
-    final availableHeight = screenHeight - 350;
-    final availableWidth = screenWidth - 32; // 16px padding on each side
+    final availableHeight = ((rackAreaHeight ?? (screenSize.height - 350)) - 40)
+        .clamp(0.0, double.infinity)
+        .toDouble();
+    final availableWidth = (rackAreaWidth ?? (screenSize.width - 32))
+        .clamp(0.0, double.infinity)
+        .toDouble();
 
     // Calculate maximum ball size based on constraints
     // Rack is 5 balls wide
